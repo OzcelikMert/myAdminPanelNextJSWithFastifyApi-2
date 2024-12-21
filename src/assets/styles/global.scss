@@ -1,0 +1,90 @@
+/* You can add global styles to this file, and also import other style files */
+
+/* === Plugin styles === */
+@import '~react-bootstrap-typeahead/css/Typeahead';
+@import '~react-datepicker/dist/react-datepicker.css';
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+
+@import "mixins/variables-colors";
+
+@import "~compass-mixins/lib/compass";
+@import "~compass-mixins/lib/animate";
+@import "~bootstrap/scss/bootstrap";
+@import '~react-toastify/dist/ReactToastify.css';
+
+/* === Icon fonts === */
+@import "~@mdi/font/scss/materialdesignicons";
+@import "~font-awesome/scss/font-awesome";
+
+/* === Template mixins === */
+@import "mixins/variables";
+@import "mixins/fonts";
+@import "mixins/functions";
+@import "mixins/animation";
+@import "mixins/badges";
+@import "mixins/buttons";
+@import "mixins/misc";
+@import "mixins/color-functions";
+@import "mixins/cards";
+@import "mixins/blockqoute";
+@import "mixins/popovers";
+@import "mixins/tooltips";
+@import "mixins/no-ui-slider";
+@import "mixins/background";
+@import "mixins/reset";
+@import "mixins/responsive";
+@import "mixins/utilities";
+@import "plugin-overrides/bootstrap-tabs";
+@import "mixins/typography";
+
+/* === Pages === */
+@import "pages/login";
+@import "pages/home";
+@import "pages/gallery";
+@import "pages/post";
+@import "pages/user";
+@import "pages/settings";
+@import "pages/profile";
+
+/* === Components === */
+/* elements */
+@import "components/elements/spinners/donut";
+@import "components/elements/table/dataTable/index";
+@import "components/elements/table/toggleMenu";
+@import "components/elements/form/input/index";
+@import "components/elements/toast";
+@import "components/elements/form";
+/* theme */
+@import "components/theme/badge/index";
+@import "components/theme/users/profileCard";
+@import "components/theme/contentLanguage/index";
+@import "components/theme/chooseImage/index";
+@import "components/theme/modal";
+/* providers */
+@import "components/tools/lock";
+
+/* === Plugin Overrides === */
+@import "plugin-overrides/bootstrap-checkbox-radio";
+@import "plugin-overrides/bootstrap-tables";
+@import "plugin-overrides/bootstrap-buttons";
+@import "plugin-overrides/bootstrap-cards";
+@import "plugin-overrides/bootstrap-progress";
+@import "plugin-overrides/bootstrap-dropdowns";
+@import "plugin-overrides/date-picker";
+@import "plugin-overrides/full-calendar";
+@import "plugin-overrides/sweetAlert2";
+@import "plugin-overrides/react-bootstrap-modal";
+@import "plugin-overrides/cogoToast";
+@import "plugin-overrides/react-select";
+@import "plugin-overrides/jodit";
+
+/* === Tools === */
+@import "components/tools/navbar";
+@import "components/tools/sidebar";
+@import "components/tools/footer";
+@import "components/tools/layout";
+@import "components/tools/spinner";
+
+/* === Theme Colors === */
+@import "theme/index";

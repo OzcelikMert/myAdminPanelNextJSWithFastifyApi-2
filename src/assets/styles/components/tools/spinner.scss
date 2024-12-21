@@ -1,0 +1,25 @@
+.app-spinner {
+  .spinner-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--theme-content-wrapper-bg);
+  }
+  .spinner-wrapper {
+    top: calc(50% - 25px);
+    left: calc(50% - 30px);
+  }
+}
+
+.page-spinner {
+  .spinner-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--theme-content-wrapper-bg);
+  }
+}

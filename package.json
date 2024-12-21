@@ -1,0 +1,97 @@
+{
+  "name": "my-admin-panel-next-js-with-fastify",
+  "version": "0.1.2",
+  "description": "Admin Panel Next JS With Fastify",
+  "private": true,
+  "author": "Mert ÖZÇELİK",
+  "license": "ISC",
+  "repository": "OzcelikMert/myAdminPanelNextJSWithFastifyApi",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "export": "next build && next export",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix"
+  },
+  "workspaces": [
+    "src"
+  ],
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "axios": "^1.7.7",
+    "bootstrap": "^5.3.3",
+    "chart.js": "^4.4.5",
+    "clone": "^2.1.2",
+    "compass-mixins": "^0.12.12",
+    "font-awesome": "^4.7.0",
+    "i18next": "^23.16.2",
+    "jodit-react": "^4.1.2",
+    "lodash": "^4.17.21",
+    "mini-css-extract-plugin": "^2.9.1",
+    "moment": "^2.30.1",
+    "next": "^14.2.15",
+    "next-absolute-url": "^1.2.2",
+    "react": "^18.3.1",
+    "react-bootstrap": "^2.10.5",
+    "react-bootstrap-typeahead": "^6.3.2",
+    "react-chartjs-2": "^5.2.0",
+    "react-color": "^2.19.3",
+    "react-dark-mode-toggle": "^0.2.0",
+    "react-data-table-component": "^7.6.2",
+    "react-data-table-component-extensions": "^1.6.0",
+    "react-datepicker": "^7.5.0",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^15.0.3",
+    "react-router": "^6.27.0",
+    "react-scripts": "^5.0.1",
+    "react-select": "^5.8.1",
+    "react-svg-worldmap": "2.0.0-alpha.16",
+    "react-toastify": "^10.0.6",
+    "sass": "^1.80.3",
+    "sass-loader": "^16.0.2",
+    "sharp": "^0.33.5",
+    "styled-components": "^6.1.13",
+    "sweetalert2": "^11.14.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@types/clone": "^2.1.4",
+    "@types/jest": "^29.5.13",
+    "@types/lodash": "^4.17.12",
+    "@types/next": "^9.0.0",
+    "@types/node": "^22.7.7",
+    "@types/react": "~18.3.11",
+    "@types/react-datepicker": "^7.0.0",
+    "@types/react-dom": "^18.3.1",
+    "@types/sass": "^1.45.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "prettier": "^3.3.3",
+    "globals": "^15.12.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.14.0"
+  },
+  "overrides": {
+    "typescript": "^5.6.3"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
