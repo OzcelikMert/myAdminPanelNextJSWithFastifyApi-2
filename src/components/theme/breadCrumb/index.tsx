@@ -1,38 +1,32 @@
 import React, { Component } from 'react';
 import Link from 'next/link';
 import { EndPoints } from '@constants/endPoints';
+import { useAppSelector } from '@lib/hooks';
 
-type IPageState = {};
+export default function ComponentThemeBreadCrumb() {
+  const breadCrumbs = useAppSelector((state) => state.breadCrumbState.data);
 
-type IPageProps = {
-  breadCrumbs: string[];
-};
-
-export default class ComponentThemeBreadCrumb extends Component<
-  IPageProps,
-  IPageState
-> {
-  render() {
-    return (
-      <h3 className="page-title">
-        <Link href={EndPoints.DASHBOARD}>
-          <span className="page-title-icon bg-gradient-primary text-white me-2">
-            <i className="mdi mdi-home"></i>
-          </span>
-        </Link>
-        {this.props.breadCrumbs.map((breadCrumbTitle, index) => (
-          <span>
+  return (
+    <h3 className="page-title">
+      <Link href={EndPoints.DASHBOARD}>
+        <span className="page-title-icon bg-gradient-primary text-white me-2">
+          <i className="mdi mdi-home"></i>
+        </span>
+      </Link>
+      {breadCrumbs.map((item, index) => (
+        <span>
+          <Link href={item.url ?? '#'}>
             <label className="badge badge-gradient-dark ms-2">
-              {breadCrumbTitle}
+              {item.title}
             </label>
-            {this.props.breadCrumbs.length != index + 1 ? (
-              <label className="badge badge-gradient-primary ms-2">
-                <i className="mdi mdi-arrow-right"></i>
-              </label>
-            ) : null}
-          </span>
-        ))}
-      </h3>
-    );
-  }
+          </Link>
+          {breadCrumbs.length != index + 1 ? (
+            <label className="badge badge-gradient-primary ms-2">
+              <i className="mdi mdi-arrow-right"></i>
+            </label>
+          ) : null}
+        </span>
+      ))}
+    </h3>
+  );
 }

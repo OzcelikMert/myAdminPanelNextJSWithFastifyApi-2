@@ -1,29 +1,18 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-type IPageState = {};
-
-type IPageProps = {
+type IComponentProps = {
   customClass?: string;
 };
 
-export default class ComponentSpinnerDonut extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <div
-        className={`component-spinner-donut ${this.props.customClass ?? ''}`}
-      >
-        <div className="spinner-bg"></div>
-        <div className="spinner-wrapper">
-          <div className="donut"></div>
-        </div>
+export default function ComponentSpinnerDonut({
+  customClass,
+}: IComponentProps) {
+  return (
+    <div className={`component-spinner-donut ${customClass ?? ''}`}>
+      <div className="spinner-bg"></div>
+      <div className="spinner-wrapper">
+        <div className="donut"></div>
       </div>
-    );
-  }
+    </div>
+  );
 }

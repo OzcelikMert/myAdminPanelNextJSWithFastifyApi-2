@@ -20,11 +20,13 @@ if (typeof window !== 'undefined') {
   ThemeUtil.changeTheme(LocalStorageUtil.getTheme());
 }
 
-function App(props: AppProps) {
+function App({ Component, ...rest }: AppProps) {
   return (
     <ComponentProviderNoSSR>
       <ComponentProviderStoreInit>
-        <ComponentApp {...props} />
+        <ComponentApp statusCode={rest.pageProps.statusCode}>
+          <Component />
+        </ComponentApp>
       </ComponentProviderStoreInit>
     </ComponentProviderNoSSR>
   );

@@ -6,7 +6,6 @@ import { CurrencyId } from '@constants/currencyTypes';
 import { SettingProjectionKeys } from '@constants/settingProjections';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
 import { setCurrencyIdState, setLanguagesState, setMainLangIdState } from '@lib/features/settingSlice';
-import { setCurrentLangIdState } from '@lib/features/pageSlice';
 import { setIsAppLoadingState } from '@lib/features/appSlice';
 import { LanguageCodes, languages } from '@constants/languages';
 import { fetchTranslationState } from '@lib/features/translationSlice';
@@ -35,7 +34,6 @@ export default function ComponentProviderAppInit(  { children } : IComponentProp
       }
       dispatch(setLanguagesState(serviceResult.data));
       dispatch(setMainLangIdState(foundDefaultLanguage._id));
-      dispatch(setCurrentLangIdState(foundDefaultLanguage._id));
     }
   }
 

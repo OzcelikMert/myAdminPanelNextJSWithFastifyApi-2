@@ -1,122 +1,118 @@
-import React, { Component } from 'react';
+import React, { Component, use, useEffect, useState } from 'react';
 import { Collapse } from 'react-bootstrap';
-import { IPagePropCommon } from 'types/pageProps';
 import { ISidebarPath } from 'types/constants/sidebarNavs';
 import clone from 'clone';
 import { sidebarNavs } from '@constants/sidebarNavs';
 import { PermissionUtil } from '@utils/permission.util';
 import { RouteUtil } from '@utils/route.util';
 import { EndPoints } from '@constants/endPoints';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { useRouter } from 'next/router';
+import { selectTranslation } from '@lib/features/translationSlice';
 
-type IPageState = {
-  isMenuOpen: { [key: string]: any };
+type IComponentState = {
+  activeItems: { [key: string]: any };
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  activeItems: {},
+};
 
-class ComponentToolSidebar extends Component<IPageProps, IPageState> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isMenuOpen: {},
-    };
-  }
+export default function ComponentToolSidebar() {
+  const [activeItems, setActiveItems] = useState(initialState.activeItems);
 
-  componentDidMount() {
-    this.onRouteChanged();
-  }
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const t = useAppSelector(selectTranslation);
 
-  onRouteChanged() {
-    this.setState(
-      {
-        isMenuOpen: {},
-      },
-      () => {
-        this.setIsMenuOpen(sidebarNavs);
-      }
-    );
-  }
+  useEffect(() => {
+    onRouteChanged();
+  }, []);
 
-  setIsMenuOpen(sidebarSubPaths: ISidebarPath[], stateKey?: string) {
+  const onRouteChanged = () => {
+    setActiveItems(initialState.activeItems);
+    findActiveItems(sidebarNavs);
+  };
+
+  const findActiveItems = (
+    sidebarSubPaths: ISidebarPath[],
+    stateKey?: string
+  ) => {
     for (const sidebarNav of sidebarSubPaths) {
-      if (this.props.router.asPath.startsWith(sidebarNav.path)) {
-        this.toggleMenuState(sidebarNav.state);
+      if (router.asPath.startsWith(sidebarNav.path)) {
+        toggleItemState(sidebarNav.state);
       }
 
       if (sidebarNav.subPaths)
-        this.setIsMenuOpen(sidebarNav.subPaths, sidebarNav.state);
+        findActiveItems(sidebarNav.subPaths, sidebarNav.state);
     }
-  }
+  };
 
-  toggleMenuState(stateKey?: string) {
+  const toggleItemState = (stateKey?: string) => {
     if (stateKey) {
-      this.setState((state: IPageState) => {
+      setActiveItems((state) => {
         const _state = clone(state);
-        _state.isMenuOpen[stateKey] = !_state.isMenuOpen[stateKey];
+        _state.activeItems[stateKey] = !_state.activeItems[stateKey];
         return _state;
       });
     }
-  }
+  };
 
-  isPathActive(path: string) {
-    return this.props.router.asPath.startsWith(path);
-  }
+  const isPathActive = (path: string) => {
+    return router.asPath.startsWith(path);
+  };
 
-  async navigatePage(path: string) {
+  const navigatePage = async (path: string) => {
     await RouteUtil.change({
-      props: this.props,
+      router: router,
+      dispatch: dispatch,
       path: path || EndPoints.DASHBOARD,
     });
-    this.onRouteChanged();
-  }
+    onRouteChanged();
+  };
 
-  HasChild = (props: ISidebarPath) => {
+  const HasChild = (props: ISidebarPath) => {
     if (
       props.permission &&
-      !PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
-        props.permission
-      )
+      !PermissionUtil.check(sessionAuth!, props.permission)
     )
       return null;
     return (
       <span
-        className={`nav-link ${this.isPathActive(props.path) ? 'active' : ''}`}
+        className={`nav-link ${isPathActive(props.path) ? 'active' : ''}`}
         onClick={() =>
-          this.isPathActive(props.path) ? null : this.navigatePage(props.path)
+          isPathActive(props.path) ? null : navigatePage(props.path)
         }
       >
         <span
-          className={`menu-title text-capitalize ${this.isPathActive(props.path) ? 'active' : ''}`}
+          className={`menu-title text-capitalize ${isPathActive(props.path) ? 'active' : ''}`}
         >
-          {this.props.t(props.title)}
+          {t(props.title)}
         </span>
         <i className={`mdi mdi-${props.icon} menu-icon`}></i>
       </span>
     );
   };
 
-  HasChildren = (props: ISidebarPath) => {
+  const HasChildren = (props: ISidebarPath) => {
     if (
       props.permission &&
-      !PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
-        props.permission
-      )
+      !PermissionUtil.check(sessionAuth!, props.permission)
     )
       return null;
-    const state = props.state ? this.state.isMenuOpen[props.state] : false;
+    const state = props.state ? activeItems[props.state] : false;
     return (
       <span>
         <div
-          className={`nav-link ${state ? 'menu-expanded' : ''} ${this.isPathActive(props.path) ? 'active' : ''}`}
-          onClick={() => this.toggleMenuState(props.state)}
+          className={`nav-link ${state ? 'menu-expanded' : ''} ${isPathActive(props.path) ? 'active' : ''}`}
+          onClick={() => toggleItemState(props.state)}
           data-toggle="collapse"
         >
           <span
-            className={`menu-title text-capitalize ${this.isPathActive(props.path) ? 'active' : ''}`}
+            className={`menu-title text-capitalize ${isPathActive(props.path) ? 'active' : ''}`}
           >
-            {this.props.t(props.title)}
+            {t(props.title)}
           </span>
           <i className="menu-arrow"></i>
           <i className={`mdi mdi-${props.icon} menu-icon`}></i>
@@ -127,9 +123,9 @@ class ComponentToolSidebar extends Component<IPageProps, IPageState> {
               return (
                 <li className="nav-item" key={index}>
                   {item.subPaths ? (
-                    <this.HasChildren key={index} {...item} />
+                    <HasChildren key={index} {...item} />
                   ) : (
-                    <this.HasChild key={index} {...item} />
+                    <HasChild key={index} {...item} />
                   )}
                 </li>
               );
@@ -140,31 +136,21 @@ class ComponentToolSidebar extends Component<IPageProps, IPageState> {
     );
   };
 
-  Item = (props: ISidebarPath) => {
+  const Item = (props: ISidebarPath) => {
     return (
-      <li
-        className={`nav-item ${this.isPathActive(props.path) ? 'active' : ''}`}
-      >
-        {props.subPaths ? (
-          <this.HasChildren {...props} />
-        ) : (
-          <this.HasChild {...props} />
-        )}
+      <li className={`nav-item ${isPathActive(props.path) ? 'active' : ''}`}>
+        {props.subPaths ? <HasChildren {...props} /> : <HasChild {...props} />}
       </li>
     );
   };
 
-  render() {
-    return (
-      <nav className="sidebar sidebar-offcanvas" id="sidebar">
-        <ul className="nav pt-5">
-          {sidebarNavs.map((item, index) => {
-            return <this.Item key={index} {...item} />;
-          })}
-        </ul>
-      </nav>
-    );
-  }
+  return (
+    <nav className="sidebar sidebar-offcanvas" id="sidebar">
+      <ul className="nav pt-5">
+        {sidebarNavs.map((item, index) => {
+          return <Item key={index} {...item} />;
+        })}
+      </ul>
+    </nav>
+  );
 }
-
-export default ComponentToolSidebar;

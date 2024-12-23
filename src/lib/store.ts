@@ -6,6 +6,7 @@ import { settingReducer } from './features/settingSlice';
 import { sessionReducer } from './features/sessionSlice';
 import { translationReducer } from './features/translationSlice';
 import { breadCrumbReducer } from './features/breadCrumbSlice';
+import { routeReducer } from './features/routeSlice';
 
 
 export const makeStore = () => configureStore({
@@ -15,7 +16,8 @@ export const makeStore = () => configureStore({
     settingState: settingReducer,
     sessionState: sessionReducer,
     translationState: translationReducer,
-    breadCrumbState: breadCrumbReducer
+    breadCrumbState: breadCrumbReducer,
+    routeState: routeReducer
   },
   devTools: true,
   middleware: (gDM) => process.env.RUN_TYPE !== "production" ? gDM().concat(logger) : gDM()

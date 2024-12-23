@@ -28,37 +28,68 @@ function setDataWithKeys(
   return data;
 }
 
-export class HandleFormLibrary {
-  static onChangeInput(event: React.ChangeEvent<any>, component: Component) {
-    component.setState((state: any) => {
-      let value: any = null;
-      if (event.target.type === 'checkbox') {
-        value = event.target.checked;
-      } else {
-        if (event.target.type === 'number') {
-          value = Number(event.target.value) || 0;
-        } else {
-          value = event.target.value;
-        }
-      }
-      state = setDataWithKeys(state, event.target.name.split('.'), value);
-      return state;
-    });
-  }
+type IAction =
+  | { type: 'SET_STATE'; value: any }
+  | { type: 'UPDATE_FIELD'; name: string; value: any }
+  | { type: 'UPDATE_SELECT'; name: string; value: any };
 
-  static onChangeSelect(name: any, value: any, component: Component) {
-    const keys = name.split('.');
-    component.setState((state: any) => {
+function formReducer(state: any, action: IAction): any {
+  switch (action.type) {
+    case 'SET_STATE': {
+      const { value } = action;
+      return Object.assign(state, value);
+    }
+    case 'UPDATE_FIELD': {
+      const { name, value } = action;
+      return setDataWithKeys({ ...state }, name.split('.'), value);
+    }
+    case 'UPDATE_SELECT': {
+      const { name, value } = action;
+      let newState = { ...state };
+      const keys = name.split('.');
       if (Array.isArray(value)) {
-        state = setDataWithKeys(state, keys, []);
+        newState = setDataWithKeys(newState, keys, []);
         value.forEach((item) => {
           const data = typeof item.value !== 'undefined' ? item.value : item;
-          state = setDataWithKeys(state, keys, data, true);
+          newState = setDataWithKeys(newState, keys, data, true);
         });
       } else {
-        state = setDataWithKeys(state, keys, value);
+        newState = setDataWithKeys(newState, keys, value);
       }
+      return newState;
+    }
+    default:
       return state;
-    });
   }
+}
+
+export function useFormReducer<T>(initialState: T): {
+  formState: T;
+  setFormState: (state: Partial<T>) => void;
+  onChangeInput: (event: React.ChangeEvent<any>) => void;
+  onChangeSelect: (name: string, value: any) => any;
+} {
+  const [formState, dispatch] = React.useReducer(formReducer, initialState);
+
+  const onChangeInput = (event: React.ChangeEvent<any>) => {
+    const { name, type, value, checked } = event.target;
+    const newValue =
+      type === 'checkbox'
+        ? checked
+        : type === 'number'
+          ? Number(value) || 0
+          : value;
+
+    dispatch({ type: 'UPDATE_FIELD', name, value: newValue });
+  };
+
+  const onChangeSelect = (name: string, value: any) => {
+    dispatch({ type: 'UPDATE_SELECT', name, value });
+  };
+
+  const setFormState = (state: Partial<T>) => {
+    dispatch({ type: 'SET_STATE', value: state });
+  }
+
+  return { formState, setFormState, onChangeInput, onChangeSelect };
 }
