@@ -1,14 +1,11 @@
 import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
 import ComponentToolNavbar from '@components/tools/navbar';
 import ComponentToolSidebar from '@components/tools/sidebar';
 import ComponentToolFooter from '@components/tools/footer';
-import { IGetStateApp, ISetStateApp } from 'types/pages/_app';
 import ComponentThemeBreadCrumb from '@components/theme/breadCrumb';
 import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
 import { AppProps } from 'next/app';
 import ComponentHead from '@components/head';
-import { useTranslation } from 'react-i18next';
 import ComponentProviderAuth from '@components/providers/auth';
 import ComponentProviderAppInit from '@components/providers/appInit';
 import { VariableLibrary } from '@library/variable';

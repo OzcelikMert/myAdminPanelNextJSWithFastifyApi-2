@@ -1,19 +1,15 @@
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setIsSessionAuthCheckedState } from '@lib/features/sessionSlice';
+import { set } from 'lodash';
 import { IRouteChangeParamUtil } from 'types/utils/route.util';
 
 const change = async (params: IRouteChangeParamUtil) => {
-  if (params.props.router.asPath != params.path) {
-    await new Promise((resolve) => {
-      params.props.setStateApp(
-        {
-          isRouteChanged: false,
-          isPageLoading: true,
-        },
-        () => resolve(1)
-      );
-    });
+  if (params.router.asPath != params.path) {
+    params.dispatch(setIsPageLoadingState(true));
+    params.dispatch(setIsSessionAuthCheckedState(false));
   }
 
-  return await params.props.router.push(params.path, params.as ?? params.path, {
+  return await params.router.push(params.path, params.as ?? params.path, {
     shallow: true,
   });
 };

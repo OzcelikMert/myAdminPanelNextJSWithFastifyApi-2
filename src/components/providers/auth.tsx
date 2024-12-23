@@ -1,105 +1,99 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
 import { AuthService } from '@services/auth.service';
 import { ApiErrorCodes } from '@library/api/errorCodes';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { use, useEffect, useState } from 'react';
+import { setIsSessionAuthCheckedState, setSessionAuthState } from '@lib/features/sessionSlice';
+import { useRouter } from 'next/router';
 
-type IPageState = {
+type IComponentState = {
   isAuth: boolean;
   isLoading: boolean;
 };
 
-type IPageProps = {
-  children?: JSX.Element;
-} & IPagePropCommon;
+const initialState: IComponentState = {
+  isAuth: false,
+  isLoading: true,
+};
 
-export default class ComponentProviderAuth extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+type IComponentProps = {
+  children: React.ReactNode;
+};
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isAuth: false,
-      isLoading: true,
-    };
-  }
+export default function ComponentProviderAuth({ children }: IComponentProps) {
+  const dispatch = useAppDispatch();
+  const abortController = new AbortController();
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const isSessionAuthChecked = useAppSelector((state) => state.sessionState.isAuthChecked);
+  const router = useRouter();
 
-  async componentDidMount() {
-    await this.checkSession();
-    this.setState({
-      isLoading: false,
-    });
-  }
+  const [isAuth, setIsAuth] = useState(initialState.isAuth);
+  const [isLoading, setIsLoading] = useState(initialState.isLoading);
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
+  const checkSession = async () => {
+    const serviceResult = await AuthService.getSession(abortController.signal);
 
-  async checkSession() {
-    let isAuth = false;
-
-    const serviceResult = await AuthService.getSession(
-      this.abortController.signal
-    );
     if (
       serviceResult.status &&
       serviceResult.errorCode == ApiErrorCodes.success
     ) {
       if (serviceResult.data) {
-        isAuth = true;
-        if (
-          JSON.stringify(serviceResult.data) !=
-          JSON.stringify(this.props.getStateApp.sessionAuth)
-        ) {
-          await new Promise((resolve) => {
-            this.props.setStateApp(
-              {
-                sessionAuth: serviceResult.data!,
-              },
-              () => resolve(1)
-            );
-          });
+        setIsAuth(true);
+        if (JSON.stringify(serviceResult.data) != JSON.stringify(sessionAuth)) {
+          dispatch(setSessionAuthState(serviceResult.data));
         }
       }
+    } else {
+      setIsAuth(false);
     }
 
-    await new Promise((resolve) => {
-      this.setState(
-        {
-          isAuth: isAuth,
-        },
-        () => {
-          resolve(1);
-        }
-      );
+    dispatch(setIsSessionAuthCheckedState(true));
+  };
+
+  const init = async () => {
+    if(!isLoading){
+      setIsLoading(true);
+    }
+    await checkSession();
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if(!isSessionAuthChecked){
+      init();
+    }
+  }, [isSessionAuthChecked]);
+
+
+
+  if (isLoading || abortController.signal.aborted) {
+    return null;
+  }
+
+  if (!isAuth && ![EndPoints.LOGIN].includes(router.pathname)) {
+    RouteUtil.change({
+      router: router,
+      dispatch: dispatch,
+      path: EndPoints.LOGIN,
     });
+    return null;
   }
 
-  render() {
-    if (this.state.isLoading || this.abortController.signal.aborted) {
-      return null;
-    }
-
-    if (
-      !this.state.isAuth &&
-      ![EndPoints.LOGIN].includes(this.props.router.pathname)
-    ) {
-      RouteUtil.change({ props: this.props, path: EndPoints.LOGIN });
-      return null;
-    }
-
-    if (
-      this.state.isAuth &&
-      [EndPoints.LOGIN].includes(this.props.router.pathname)
-    ) {
-      RouteUtil.change({ props: this.props, path: EndPoints.DASHBOARD });
-      return null;
-    }
-
-    return this.props.children;
+  if (isAuth && [EndPoints.LOGIN].includes(router.pathname)) {
+    RouteUtil.change({
+      router: router,
+      dispatch: dispatch,
+      path: EndPoints.DASHBOARD,
+    });
+    return null;
   }
+
+  return children;
 }

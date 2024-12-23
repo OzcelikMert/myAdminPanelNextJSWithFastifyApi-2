@@ -1,8 +1,8 @@
-import { LanguageId } from '@constants/languages';
+import { LanguageId, LanguageCodes } from '@constants/languages';
 
 export interface ILanguage {
   id: LanguageId;
-  code: string;
+  code: LanguageCodes;
   title: string;
   rank: number;
   image: string;

@@ -1,35 +1,27 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 
-type IPageState = {
+type IComponentState = {
   isDidMount: boolean;
 };
 
-type IPageProps = {
-  children?: any;
+const initialState: IComponentState = {
+  isDidMount: false
 };
 
-export default class ComponentProviderNoSSR extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isDidMount: false,
-    };
-  }
+type IComponentProps = {
+  children: React.ReactNode;
+};
 
-  componentDidMount() {
-    this.setState({
-      isDidMount: true,
-    });
-  }
+export default function ComponentProviderNoSSR( { children } : IComponentProps ) {
+  const [isDidMount, setIsDidMount] = React.useState(initialState.isDidMount);
 
-  render() {
-    return (
-      <div suppressHydrationWarning>
-        {!this.state.isDidMount ? null : this.props.children}
-      </div>
-    );
-  }
+  useEffect(() => {
+    setIsDidMount(true);
+  }, []);
+
+  return (
+    <div suppressHydrationWarning>
+      {isDidMount ? children : null}
+    </div>
+  );
 }

@@ -5,17 +5,22 @@ export enum LanguageId {
   English,
 }
 
+export enum LanguageCodes {
+  Turkish = "tr-tr",
+  EnglishUS = "en-us",
+}
+
 export const languages: Array<ILanguage> = [
   {
     id: LanguageId.English,
-    code: 'en',
+    code: LanguageCodes.EnglishUS,
     title: 'English',
     rank: 1,
-    image: 'gb.webp',
+    image: 'us.webp',
   },
   {
     id: LanguageId.Turkish,
-    code: 'tr',
+    code: LanguageCodes.Turkish,
     title: 'Türkçe',
     rank: 2,
     image: 'tr.webp',

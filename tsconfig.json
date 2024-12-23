@@ -25,7 +25,8 @@
       "@services/*": ["services/*"],
       "@constants/*": ["constants/*"],
       "@library/*": ["library/*"],
-      "@utils/*": ["utils/*"]
+      "@utils/*": ["utils/*"],
+      "@lib/*": ["lib/*"]
     }
   },
   "include": [
