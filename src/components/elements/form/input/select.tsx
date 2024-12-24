@@ -1,33 +1,26 @@
-import React, { Component } from 'react';
 import Select from 'react-select';
 import { StateManagerProps } from 'react-select/dist/declarations/src/useStateManager';
 
-export interface IThemeFormSelectValue {
+export interface IThemeFormSelect {
   label: any;
   value: any;
 }
 
-type IPageState = {} & any;
-
-type IPageProps = {
+type IComponentProps = {
   title?: string;
 } & StateManagerProps;
 
-class ComponentFormSelect extends Component<IPageProps, IPageState> {
-  render() {
-    return (
-      <label className="theme-input static">
-        <span className="label">{this.props.title}</span>
-        <div className="field">
-          <Select
-            className="custom-select"
-            classNamePrefix="custom-select"
-            {...this.props}
-          />
-        </div>
-      </label>
-    );
-  }
+export default function ComponentFormSelect(props: IComponentProps) {
+  return (
+    <label className="theme-input static">
+      <span className="label">{props.title}</span>
+      <div className="field">
+        <Select
+          className="custom-select"
+          classNamePrefix="custom-select"
+          {...props}
+        />
+      </div>
+    </label>
+  );
 }
-
-export default ComponentFormSelect;

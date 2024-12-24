@@ -1,14 +1,7 @@
 import React, { Component } from 'react';
-import ComponentFormSelect from './input/select';
-import ComponentFormTags from './input/tags';
-import ComponentFormType from './input/type';
-import ComponentFormCheckBox from './input/checkbox';
 import ComponentFormLoadingButton from './button/loadingButton';
-import ComponentFieldSet from '../fieldSet';
 
-type IPageState = {};
-
-type IPageProps = {
+type IComponentProps = {
   isActiveSaveButton?: boolean;
   saveButtonText?: string;
   saveButtonLoadingText?: string;
@@ -22,51 +15,30 @@ type IPageProps = {
   enterToSubmit?: true;
 };
 
-class ComponentForm extends Component<IPageProps, IPageState> {
-  constructor(props: IPageProps) {
-    super(props);
-  }
-
-  onKeyDown(event: React.KeyboardEvent<HTMLFormElement>) {
-    if (!this.props.enterToSubmit && event.key === 'Enter')
-      event.preventDefault();
-  }
-
-  render() {
-    return (
-      <form
-        className="theme-form"
-        {...this.props.formAttributes}
-        onKeyDown={(event) => this.onKeyDown(event)}
-      >
-        {this.props.children}
-        <div className="submit-btn-div text-end mb-4">
-          {this.props.isActiveSaveButton ? (
-            !this.props.isSubmitting ? (
-              <button
-                type={'submit'}
-                className={`btn btn-gradient-success btn-save ${this.props.saveButtonClassName ?? ''}`}
-              >
-                {this.props.saveButtonText}
-              </button>
-            ) : (
-              <ComponentFormLoadingButton
-                text={this.props.saveButtonLoadingText}
-              />
-            )
-          ) : null}
-        </div>
-      </form>
-    );
-  }
+export default function ComponentForm(props: IComponentProps) {
+  return (
+    <form
+      className="theme-form"
+      {...props.formAttributes}
+      onKeyDown={(event) => {
+        if (!props.enterToSubmit && event.key === 'Enter') event.preventDefault();
+      }}
+    >
+      {props.children}
+      <div className="submit-btn-div text-end mb-4">
+        {props.isActiveSaveButton ? (
+          !props.isSubmitting ? (
+            <button
+              type={'submit'}
+              className={`btn btn-gradient-success btn-save ${props.saveButtonClassName ?? ''}`}
+            >
+              {props.saveButtonText}
+            </button>
+          ) : (
+            <ComponentFormLoadingButton text={props.saveButtonLoadingText} />
+          )
+        ) : null}
+      </div>
+    </form>
+  );
 }
-
-export {
-  ComponentForm,
-  ComponentFormSelect,
-  ComponentFormTags,
-  ComponentFormType,
-  ComponentFormCheckBox,
-  ComponentFormLoadingButton,
-  ComponentFieldSet,
-};

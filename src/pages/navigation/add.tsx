@@ -14,7 +14,7 @@ import {
   INavigationUpdateWithIdParamService,
 } from 'types/services/navigation.service';
 import { NavigationService } from '@services/navigation.service';
-import { IThemeFormSelectValue } from '@components/elements/form/input/select';
+import { IThemeFormSelect } from '@components/elements/form/input/select';
 import { PermissionUtil } from '@utils/permission.util';
 import { NavigationEndPointPermission } from '@constants/endPointPermissions/navigation.endPoint.permission';
 import { ComponentUtil } from '@utils/component.util';
@@ -24,9 +24,9 @@ import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
 
 type IPageState = {
-  items: IThemeFormSelectValue[];
+  items: IThemeFormSelect[];
   mainTabActiveKey: string;
-  status: IThemeFormSelectValue[];
+  status: IThemeFormSelect[];
   isSubmitting: boolean;
   mainTitle: string;
   formData: INavigationUpdateWithIdParamService;

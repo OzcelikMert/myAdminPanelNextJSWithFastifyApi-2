@@ -4,10 +4,12 @@ import { ISessionAuthModel } from 'types/models/sessionAuth.model';
 import { PostTypeId } from '@constants/postTypes';
 import { PostEndPointPermission } from '@constants/endPointPermissions/post.endPoint.permission';
 import { IEndPointPermission } from 'types/constants/endPoint.permissions';
-import { IPagePropCommon } from 'types/pageProps';
 import { EndPoints } from '@constants/endPoints';
 import ComponentToast from '@components/elements/toast';
 import { RouteUtil } from '@utils/route.util';
+import { NextRouter } from 'next/router';
+import { IAppDispatch } from '@lib/store';
+import { ITranslationFunc } from '@lib/features/translationSlice';
 
 export enum PostPermissionMethod {
   GET,
@@ -123,32 +125,35 @@ const check = (
 };
 
 const checkAndRedirect = (
-  props: IPagePropCommon,
+  router: NextRouter,
+  dispatch: IAppDispatch,
+  t: ITranslationFunc,
+  sessionAuth: ISessionAuthModel | null,
   minPermission: IEndPointPermission,
   redirectPath = EndPoints.DASHBOARD
 ): boolean => {
   let status = true;
 
-  if (props.getStateApp.sessionAuth) {
-    if (!check(props.getStateApp.sessionAuth, minPermission)) {
+  if (sessionAuth) {
+    if (!check(sessionAuth, minPermission)) {
       status = false;
       new ComponentToast({
         type: 'error',
-        title: props.t('error'),
-        content: props.t('noPerm'),
+        title: t('error'),
+        content: t('noPerm'),
         position: 'top-right',
       });
-      RouteUtil.change({ props: props, path: redirectPath });
+      RouteUtil.change({ router, dispatch, path: redirectPath });
     }
   } else {
     status = false;
     new ComponentToast({
       type: 'error',
-      title: props.t('error'),
-      content: props.t('sessionRequired'),
+      title: t('error'),
+      content: t('sessionRequired'),
       position: 'top-right',
     });
-    RouteUtil.change({ props: props, path: EndPoints.LOGIN });
+    RouteUtil.change({ router, dispatch, path: EndPoints.LOGIN });
   }
 
   return status;

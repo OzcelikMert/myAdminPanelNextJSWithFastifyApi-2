@@ -1,4 +1,3 @@
-import React, { Component } from 'react';
 import { Doughnut } from 'react-chartjs-2';
 import {
   ArcElement,
@@ -10,6 +9,7 @@ import {
   Title,
   Tooltip,
 } from 'chart.js';
+import { useState } from 'react';
 
 ChartJS.register(
   LineElement,
@@ -21,11 +21,22 @@ ChartJS.register(
   Tooltip
 );
 
-type IPageState = {
+type IComponentState = {
   options: any;
 };
 
-type IPageProps = {
+const initialState: IComponentState = {
+  options: {
+    responsive: true,
+    animation: {
+      animateScale: true,
+      animateRotate: true,
+    },
+    legend: false,
+  },
+};
+
+type IComponentProps = {
   data: {
     labels: string[];
     datasets: {
@@ -38,24 +49,8 @@ type IPageProps = {
   };
 };
 
-class ComponentChartDonut extends Component<IPageProps, IPageState> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      options: {
-        responsive: true,
-        animation: {
-          animateScale: true,
-          animateRotate: true,
-        },
-        legend: false,
-      },
-    };
-  }
+export default function ComponentChartDonut(props: IComponentProps) {
+  const [options, setOptions] = useState(initialState.options);
 
-  render() {
-    return <Doughnut data={this.props.data} options={this.state.options} />;
-  }
+  return <Doughnut data={props.data} options={options} />;
 }
-
-export default ComponentChartDonut;

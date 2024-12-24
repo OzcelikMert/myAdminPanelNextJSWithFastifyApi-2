@@ -1,13 +1,13 @@
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 
-type IPageProps = {
+type IComponentProps = {
   children: any;
   eventKey: string;
   onClick?: () => void;
 };
 
-export default function ComponentAccordionToggle(props: IPageProps) {
-  const decoratedOnClick = useAccordionButton(props.eventKey, props.onClick);
+export default function ComponentAccordionToggle({ children, eventKey, onClick }: IComponentProps) {
+  const decoratedOnClick = useAccordionButton(eventKey, onClick);
 
-  return <div onClick={decoratedOnClick}>{props.children}</div>;
+  return <div onClick={decoratedOnClick}>{children}</div>;
 }

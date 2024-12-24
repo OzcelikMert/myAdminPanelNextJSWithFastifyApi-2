@@ -1,4 +1,3 @@
-import React, { Component } from 'react';
 import { ChartProps, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -13,6 +12,7 @@ import {
   ChartData,
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
+import { useEffect, useState } from 'react';
 
 ChartJS.register(
   CategoryScale,
@@ -25,96 +25,93 @@ ChartJS.register(
   Legend
 );
 
-type IPageState = {
+type IComponentState = {
   options: ChartProps<'line'>['options'];
   data: ChartData<'line'>;
   isLoading: boolean;
 };
 
-type IPageProps = {
+const initialState: IComponentState = {
+  isLoading: true,
+  data: {
+    labels: [],
+    datasets: [],
+  },
+  options: {
+    responsive: true,
+    elements: {
+      line: {
+        tension: 0.4,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        displayColors: false,
+      },
+    },
+  },
+};
+
+type IComponentProps = {
   labels: string[];
   data: any[];
   toolTipLabel?: string;
 };
 
-export default class ComponentChartArea extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isLoading: true,
-      data: {
-        labels: [],
-        datasets: [],
-      },
-      options: {
-        responsive: true,
-        elements: {
-          line: {
-            tension: 0.4,
-          },
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-          },
-        },
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            displayColors: false,
-          },
-        },
-      },
-    };
-  }
+export default function ComponentChartArea(props: IComponentProps) {
+  const [options, setOptions] = useState<IComponentState['options']>(
+    initialState.options
+  );
+  const [data, setData] = useState<IComponentState['data']>(initialState.data);
+  const [isLoading, setIsLoading] = useState<IComponentState['isLoading']>(
+    initialState.isLoading
+  );
 
-  componentDidMount() {
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = () => {
     const bgColor = 'rgba(28,57,189,0.71)';
     const borderColor = '#1863d3';
     const pointBorderColor = '#6a0e98';
 
-    this.setState(
-      {
-        data: {
-          labels: this.props.labels,
-          datasets: [
-            {
-              fill: true,
-              pointBorderWidth: 7,
-              pointBorderColor: pointBorderColor,
-              label: this.props.toolTipLabel,
-              borderColor: borderColor,
-              backgroundColor: bgColor,
-              hoverBackgroundColor: bgColor,
-              borderWidth: 5,
-              data: this.props.data,
-            },
-          ],
+    setData({
+      labels: props.labels,
+      datasets: [
+        {
+          fill: true,
+          pointBorderWidth: 7,
+          pointBorderColor: pointBorderColor,
+          label: props.toolTipLabel,
+          borderColor: borderColor,
+          backgroundColor: bgColor,
+          hoverBackgroundColor: bgColor,
+          borderWidth: 5,
+          data: props.data,
         },
-      },
-      () => {
-        this.setState({
-          isLoading: false,
-        });
-      }
-    );
-  }
+      ],
+    });
 
-  render() {
-    return this.state.isLoading ? (
-      <Spinner animation="border" />
-    ) : (
-      <Line
-        itemRef="chart"
-        className="chartLegendContainer"
-        data={this.state.data}
-        options={this.state.options}
-      />
-    );
-  }
+    setIsLoading(false);
+  };
+
+  return isLoading ? (
+    <Spinner animation="border" />
+  ) : (
+    <Line
+      itemRef="chart"
+      className="chartLegendContainer"
+      data={data}
+      options={options}
+    />
+  );
 }

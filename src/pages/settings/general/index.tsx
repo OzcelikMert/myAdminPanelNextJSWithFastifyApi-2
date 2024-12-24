@@ -16,7 +16,7 @@ import {
   ISettingUpdateGeneralParamService,
 } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
-import { IThemeFormSelectValue } from '@components/elements/form/input/select';
+import { IThemeFormSelect } from '@components/elements/form/input/select';
 import { IServerInfoGetResultService } from 'types/services/serverInfo.service';
 import { LocalStorageUtil } from '@utils/localStorage.util';
 import { PermissionUtil } from '@utils/permission.util';
@@ -28,7 +28,7 @@ import { UserRoleId } from '@constants/userRoles';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 
 type IPageState = {
-  panelLanguages: IThemeFormSelectValue[];
+  panelLanguages: IThemeFormSelect[];
   isSubmitting: boolean;
   serverInfo: IServerInfoGetResultService;
   formData: ISettingUpdateGeneralParamService & { panelLangId: string };

@@ -14,7 +14,7 @@ import {
   IPostTermGetResultService,
   IPostTermUpdateWithIdParamService,
 } from 'types/services/postTerm.service';
-import { IThemeFormSelectValue } from '@components/elements/form/input/select';
+import { IThemeFormSelect } from '@components/elements/form/input/select';
 import { PostTypeId } from '@constants/postTypes';
 import { PostTermTypeId } from '@constants/postTermTypes';
 import { PermissionUtil, PostPermissionMethod } from '@utils/permission.util';
@@ -27,8 +27,8 @@ import ComponentToolTip from '@components/elements/tooltip';
 
 type IPageState = {
   mainTabActiveKey: string;
-  items: IThemeFormSelectValue[];
-  status: IThemeFormSelectValue[];
+  items: IThemeFormSelect[];
+  status: IThemeFormSelect[];
   isSubmitting: boolean;
   mainTitle: string;
   formData: IPostTermUpdateWithIdParamService;

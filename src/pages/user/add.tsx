@@ -16,7 +16,7 @@ import {
   IUserGetResultService,
   IUserUpdateWithIdParamService,
 } from 'types/services/user.service';
-import { IThemeFormSelectValue } from '@components/elements/form/input/select';
+import { IThemeFormSelect } from '@components/elements/form/input/select';
 import { UserEndPointPermission } from '@constants/endPointPermissions/user.endPoint.permission';
 import { PermissionUtil } from '@utils/permission.util';
 import { ComponentUtil } from '@utils/component.util';
@@ -33,8 +33,8 @@ import { DateMask } from '@library/variable/date';
 
 type IPageState = {
   mainTabActiveKey: string;
-  userRoles: IThemeFormSelectValue[];
-  status: IThemeFormSelectValue[];
+  userRoles: IThemeFormSelect[];
+  status: IThemeFormSelect[];
   permissions: IPermission[];
   permissionGroups: IPermissionGroup[];
   mainTitle: string;

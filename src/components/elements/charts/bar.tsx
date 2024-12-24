@@ -1,4 +1,3 @@
-import React, { Component } from 'react';
 import { Bar, ChartProps } from 'react-chartjs-2';
 import {
   BarElement,
@@ -10,43 +9,48 @@ import {
   Tooltip,
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
-import { IPagePropCommon } from 'types/pageProps';
+import { useEffect, useState } from 'react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
-type IPageState = {
+type IComponentState = {
   options: ChartProps<'bar'>['options'];
   data: ChartData<'bar'>;
   isLoading: boolean;
 };
 
-type IPageProps = {
-  labels: string[];
-  data: any[];
-  t: IPagePropCommon['t'];
+const initialState: IComponentState = {
+  isLoading: true,
+  data: {
+    labels: [],
+    datasets: [],
+  },
+  options: {
+    responsive: true,
+    elements: {
+      point: {
+        radius: 0,
+      },
+    },
+  },
 };
 
-class ComponentChartBar extends Component<IPageProps, IPageState> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isLoading: true,
-      data: {
-        labels: [],
-        datasets: [],
-      },
-      options: {
-        responsive: true,
-        elements: {
-          point: {
-            radius: 0,
-          },
-        },
-      },
-    };
-  }
+type IComponentProps = {
+  labels: string[];
+  data: any[];
+  label: string;
+};
 
-  componentDidMount() {
+export default function ComponentChartBar(props: IComponentProps) {
+  const [options, setOptions] = useState(initialState.options);
+  const [data, setData] = useState(initialState.data);
+  const [isLoading, setIsLoading] = useState(initialState.isLoading);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = () => {
     const ctx = (
       document.createElement('canvas') as HTMLCanvasElement
     ).getContext('2d') as CanvasFillStrokeStyles;
@@ -55,42 +59,30 @@ class ComponentChartBar extends Component<IPageProps, IPageState> {
     gradientBar.addColorStop(0, '#6e3a87');
     gradientBar.addColorStop(1, 'rgba(154, 85, 255, 1)');
 
-    this.setState(
-      {
-        data: {
-          labels: this.props.labels,
-          datasets: [
-            {
-              label: this.props.t('visitors'),
-              borderColor: gradientBar,
-              backgroundColor: gradientBar,
-              hoverBackgroundColor: gradientBar,
-              borderWidth: 1,
-              data: this.props.data,
-            },
-          ],
+    setData({
+      labels: props.labels,
+      datasets: [
+        {
+          label: props.label,
+          borderColor: gradientBar,
+          backgroundColor: gradientBar,
+          hoverBackgroundColor: gradientBar,
+          borderWidth: 1,
+          data: props.data,
         },
-      },
-      () => {
-        this.setState({
-          isLoading: false,
-        });
-      }
-    );
+      ],
+    });
+    setIsLoading(false);
   }
 
-  render() {
-    return this.state.isLoading ? (
-      <Spinner animation="border" />
-    ) : (
-      <Bar
-        itemRef="chart"
-        className="chartLegendContainer"
-        data={this.state.data}
-        options={this.state.options}
-      />
-    );
-  }
+  return isLoading ? (
+    <Spinner animation="border" />
+  ) : (
+    <Bar
+      itemRef="chart"
+      className="chartLegendContainer"
+      data={data}
+      options={options}
+    />
+  );
 }
-
-export default ComponentChartBar;

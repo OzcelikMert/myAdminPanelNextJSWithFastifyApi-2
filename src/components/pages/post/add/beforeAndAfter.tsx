@@ -4,7 +4,7 @@ import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import Image from 'next/image';
 import PagePostAdd, {
   IPageState as PostPageState,
-} from '@pages/post/[postTypeId]/add';
+} from '@pages/post/add';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 

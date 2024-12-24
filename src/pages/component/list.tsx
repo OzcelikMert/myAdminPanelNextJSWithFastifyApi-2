@@ -1,5 +1,3 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import ComponentToast from '@components/elements/toast';
@@ -15,140 +13,154 @@ import ComponentThemeBadgeComponentType from '@components/theme/badge/componentT
 import { ComponentTypeId } from '@constants/componentTypes';
 import { RouteUtil } from '@utils/route.util';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
 
-type IPageState = {
+type IComponentState = {
   searchKey: string;
   items: IComponentGetResultService[];
   showingItems: IComponentGetResultService[];
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  searchKey: '',
+  items: [],
+  showingItems: [],
+};
 
-export default class PageComponentList extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+export default function PageComponentList() {
+  const abortController = new AbortController();
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      searchKey: '',
-      items: [],
-      showingItems: [],
-    };
-  }
+  const [searchKey, setSearchKey] = useState(initialState.searchKey);
+  const [items, setItems] = useState(initialState.items);
+  const [showingItems, setShowingItems] = useState(initialState.showingItems);
 
-  async componentDidMount() {
+  const router = useRouter();
+
+  const dispatch = useAppDispatch();
+
+  const t = useAppSelector(selectTranslation);
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const mainLangId = useAppSelector(state => state.settingState.mainLangId);
+  const languages = useAppSelector(state => state.settingState.languages);
+
+  useEffect(() => {
+    init();
+
+    return () => {
+      abortController.abort();
+    }
+  }, []);
+
+  const init = async () => {
     if (
       PermissionUtil.checkAndRedirect(
-        this.props,
+        router,
+        dispatch,
+        t,
+        sessionAuth,
         ComponentEndPointPermission.GET
       )
     ) {
-      this.setPageTitle();
-      await this.getItems();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+      setPageTitle();
+      await getItems();
+      dispatch(setIsPageLoadingState(false));
     }
   }
 
-  componentWillUnmount() {
-    this.abortController.abort();
+  const setPageTitle = () => {
+    dispatch(setBreadCrumbState([
+      {
+        title: t('components'),
+        url: EndPoints.COMPONENT_WITH.LIST,
+      },
+      {
+        title: t('list'),
+        url: EndPoints.COMPONENT_WITH.LIST,
+      }
+    ]));
   }
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('components'),
-      this.props.t('list'),
-    ]);
-  }
-
-  async getItems() {
+  const getItems = async () => {
     const result = await ComponentService.getMany(
       {
-        langId: this.props.getStateApp.appData.currentLangId,
+        langId: mainLangId,
       },
-      this.abortController.signal
+      abortController.signal
     );
 
     if (result.status && result.data) {
-      this.setState((state: IPageState) => {
-        state.items = result.data!;
-        state.showingItems = result.data!;
-        return state;
-      });
+      setItems(result.data);
+      setShowingItems(result.data);
     }
   }
 
-  async onDelete(_id: string) {
-    const item = this.state.items.findSingle('_id', _id);
+  const onDelete = async (_id: string) => {
+    const item = items.findSingle('_id', _id);
     if (item) {
       const result = await Swal.fire({
-        title: this.props.t('deleteAction'),
-        html: `<b>'${item.title}'</b> ${this.props.t('deleteItemQuestionWithItemName')}`,
-        confirmButtonText: this.props.t('yes'),
-        cancelButtonText: this.props.t('no'),
+        title: t('deleteAction'),
+        html: `<b>'${item.title}'</b> ${t('deleteItemQuestionWithItemName')}`,
+        confirmButtonText: t('yes'),
+        cancelButtonText: t('no'),
         icon: 'question',
         showCancelButton: true,
       });
       if (result.isConfirmed) {
         const loadingToast = new ComponentToast({
-          content: this.props.t('deleting'),
+          content: t('deleting'),
           type: 'loading',
         });
 
         const serviceResult = await ComponentService.deleteMany(
           { _id: [_id] },
-          this.abortController.signal
+          abortController.signal
         );
         loadingToast.hide();
         if (serviceResult.status) {
-          this.setState(
-            (state: IPageState) => {
-              state.items = state.items.filter((item) => _id !== item._id);
-              return state;
-            },
-            () => {
-              this.onSearch(this.state.searchKey);
-              new ComponentToast({
-                type: 'success',
-                title: this.props.t('successful'),
-                content: this.props.t('itemDeleted'),
-              });
-            }
-          );
+          setItems(items.filter((item) => _id !== item._id));
+          onSearch(searchKey);
+          new ComponentToast({
+            type: 'success',
+            title: t('successful'),
+            content: t('itemDeleted'),
+          });
         }
       }
     }
   }
 
-  onSearch(searchKey: string) {
-    this.setState({
-      searchKey: searchKey,
-      showingItems: this.state.items.filter(
+  const onSearch = (searchKey: string) => {
+    setSearchKey(searchKey);
+    setShowingItems(
+      items.filter(
         (item) => (item?.title ?? '').toLowerCase().search(searchKey) > -1
-      ),
-    });
+      )
+    );
   }
 
-  async navigatePage(type: 'edit', itemId = '') {
+  const navigatePage = async (type: 'edit', itemId = '') => {
     const pagePath = EndPoints.COMPONENT_WITH;
     switch (type) {
       case 'edit':
         await RouteUtil.change({
-          props: this.props,
+          router,
+          dispatch,
           path: pagePath.EDIT(itemId),
         });
         break;
     }
   }
 
-  get getTableColumns(): TableColumn<IPageState['showingItems'][0]>[] {
+  const getTableColumns = (): TableColumn<IComponentState['showingItems'][0]>[] => {
     return [
       {
-        name: this.props.t('title'),
+        name: t('title'),
         selector: (row) => row.title,
         cell: (row) => {
           return (
@@ -157,8 +169,8 @@ export default class PageComponentList extends Component<
                 {
                   <ComponentThemeToolTipMissingLanguages
                     itemLanguages={row.elements.map(element => element.alternates ?? []) ?? []}
-                    contentLanguages={this.props.getStateApp.appData.contentLanguages}
-                    t={this.props.t}
+                    contentLanguages={languages}
+                    t={t}
                   />
                 }
                 {row.title}
@@ -169,28 +181,28 @@ export default class PageComponentList extends Component<
         sortable: true,
       },
       PermissionUtil.checkPermissionRoleRank(
-        this.props.getStateApp.sessionAuth!.user.roleId,
+        sessionAuth!.user.roleId,
         UserRoleId.SuperAdmin
       )
         ? {
-            name: this.props.t('key'),
+            name: t('key'),
             selector: (row) => row.key,
             sortable: true,
           }
         : {},
       {
-        name: this.props.t('typeId'),
+        name: t('typeId'),
         sortable: true,
         selector: (row) => row.typeId,
         cell: (row) => (
           <ComponentThemeBadgeComponentType
-            t={this.props.t}
+            t={t}
             typeId={row.typeId || ComponentTypeId.Private}
           />
         ),
       },
       {
-        name: this.props.t('updatedBy'),
+        name: t('updatedBy'),
         sortable: true,
         selector: (row) => new Date(row.updatedAt || '').toLocaleDateString(),
         cell: (row) => (
@@ -201,7 +213,7 @@ export default class PageComponentList extends Component<
         ),
       },
       {
-        name: this.props.t('createdDate'),
+        name: t('createdDate'),
         sortable: true,
         selector: (row) => new Date(row.createdAt || '').toLocaleDateString(),
         sortFunction: (a, b) => ComponentDataTable.dateSort(a, b),
@@ -213,7 +225,7 @@ export default class PageComponentList extends Component<
         ),
       },
       PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
+        sessionAuth!,
         ComponentEndPointPermission.UPDATE
       )
         ? {
@@ -222,7 +234,7 @@ export default class PageComponentList extends Component<
             button: true,
             cell: (row) => (
               <button
-                onClick={() => this.navigatePage('edit', row._id)}
+                onClick={() => navigatePage('edit', row._id)}
                 className="btn btn-gradient-warning"
               >
                 <i className="fa fa-pencil-square-o"></i>
@@ -231,7 +243,7 @@ export default class PageComponentList extends Component<
           }
         : {},
       PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
+        sessionAuth!,
         ComponentEndPointPermission.DELETE
       )
         ? {
@@ -240,7 +252,7 @@ export default class PageComponentList extends Component<
             button: true,
             cell: (row) => (
               <button
-                onClick={() => this.onDelete(row._id)}
+                onClick={() => onDelete(row._id)}
                 className="btn btn-gradient-danger"
               >
                 <i className="mdi mdi-trash-can-outline"></i>
@@ -251,30 +263,28 @@ export default class PageComponentList extends Component<
     ];
   }
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-component">
-        <div className="grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body">
-              <div className="table-post">
-                <ComponentDataTable
-                  columns={this.getTableColumns.filter(
-                    (column) => typeof column.name !== 'undefined'
-                  )}
-                  data={this.state.showingItems}
-                  i18={{
-                    search: this.props.t('search'),
-                    noRecords: this.props.t('noRecords'),
-                  }}
-                  isSearchable={true}
-                  onSearch={(searchKey) => this.onSearch(searchKey)}
-                />
-              </div>
+  return isPageLoading ? null : (
+    <div className="page-component">
+      <div className="grid-margin stretch-card">
+        <div className="card">
+          <div className="card-body">
+            <div className="table-post">
+              <ComponentDataTable
+                columns={getTableColumns().filter(
+                  (column) => typeof column.name !== 'undefined'
+                )}
+                data={showingItems}
+                i18={{
+                  search: t('search'),
+                  noRecords: t('noRecords'),
+                }}
+                isSearchable={true}
+                onSearch={(searchKey) => onSearch(searchKey)}
+              />
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

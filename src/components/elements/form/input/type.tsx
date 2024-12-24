@@ -1,31 +1,30 @@
 import React from 'react';
 
-type IPageProps = {
+type IComponentProps = {
   title?: string;
-  titleElement?: JSX.Element;
+  titleElement?: React.ReactNode;
 } & React.InputHTMLAttributes<HTMLInputElement> &
   React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
-const ComponentFormType = React.forwardRef((props: IPageProps, ref: any) => {
-  let input: JSX.Element;
-  const elementProps = Object.assign({}, props);
-  delete elementProps.titleElement;
+export default function ComponentFormType(props: IComponentProps) {
+  let input:  React.ReactNode;
+
   switch (props.type) {
     case `textarea`:
       input = (
         <textarea
-          {...elementProps}
-          className={`field textarea ${typeof elementProps.className !== 'undefined' ? elementProps.className : ``}`}
+          {...props}
+          className={`field textarea ${typeof props.className !== 'undefined' ? props.className : ``}`}
         >
-          {elementProps.value}
+          {props.value}
         </textarea>
       );
       break;
     default:
       input = (
         <input
-          {...elementProps}
-          className={`field ${typeof elementProps.className !== 'undefined' ? elementProps.className : ``}`}
+          {...props}
+          className={`field ${typeof props.className !== 'undefined' ? props.className : ``}`}
           placeholder=" "
         />
       );
@@ -39,6 +38,4 @@ const ComponentFormType = React.forwardRef((props: IPageProps, ref: any) => {
       </span>
     </label>
   );
-});
-
-export default ComponentFormType;
+};

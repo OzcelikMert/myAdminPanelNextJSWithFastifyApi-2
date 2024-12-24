@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PagePostAdd, {
   IPageState as PostPageState,
-} from '@pages/post/[postTypeId]/add';
+} from '@pages/post/add';
 import { ComponentFormSelect } from '@components/elements/form';
 import { EndPoints } from '@constants/endPoints';
 import { PermissionUtil } from '@utils/permission.util';

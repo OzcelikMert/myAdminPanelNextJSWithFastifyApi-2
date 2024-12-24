@@ -1,27 +1,30 @@
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
 import DataTable, { TableProps } from 'react-data-table-component';
-import {
-  ComponentFormCheckBox,
-  ComponentFormType,
-} from '@components/elements/form';
 import ComponentTableToggleMenu, {
   IThemeToggleMenuItem,
 } from '@components/elements/table/toggleMenu';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
+import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
+import ComponentFormType from '@components/elements/form/input/type';
 
-type IPagePropI18 = {
-  search?: string;
-  noRecords?: string;
-};
-
-type IPageState = {
+type IComponentState = {
   selectedItems: any[];
   clearSelectedRows: boolean;
   searchKey: string;
 };
 
-type IPageProps<T> = {
-  i18?: IPagePropI18;
+const initialState: IComponentState = {
+  selectedItems: [],
+  clearSelectedRows: false,
+  searchKey: '',
+};
+
+type IComponentPropI18 = {
+  search?: string;
+  noRecords?: string;
+};
+
+type IComponentProps<T> = {
   onSelect?: (rows: T[]) => void;
   onSearch?: (searchKey: string) => void;
   isSearchable?: boolean;
@@ -32,123 +35,108 @@ type IPageProps<T> = {
   isActiveToggleMenu?: boolean;
   toggleMenuItems?: IThemeToggleMenuItem[];
   onSubmitToggleMenuItem?: (value: any) => void;
+  i18?: IComponentPropI18;
 } & TableProps<T>;
 
-export default class ComponentDataTable<T> extends Component<
-  IPageProps<T>,
-  IPageState
-> {
-  listPage: number = 0;
-  listPagePerCount: number = 10;
+export default function ComponentDataTable<T>(props: IComponentProps<T>) {
+  const [selectedItems, setSelectedItems] = React.useState<
+    IComponentState['selectedItems']
+  >(props.selectedRows ?? initialState.selectedItems);
+  const [clearSelectedRows, setClearSelectedRows] = React.useState<
+    IComponentState['clearSelectedRows']
+  >(initialState.clearSelectedRows);
+  const [searchKey, setSearchKey] = React.useState<
+    IComponentState['searchKey']
+  >(initialState.searchKey);
 
-  static dateSort(
+  let listPage = 0;
+  let listPagePerCount = 10;
+
+  const dateSort = (
     a: { createdAt?: string | Date },
     b: { createdAt?: string | Date }
-  ) {
+  ) => {
     return new Date(a.createdAt || '').getTime() >
       new Date(b.createdAt || '').getTime()
       ? 1
       : -1;
-  }
+  };
 
-  constructor(props: IPageProps<any>) {
-    super(props);
-    this.state = {
-      clearSelectedRows: false,
-      selectedItems: this.props.selectedRows ?? [],
-      searchKey: '',
-    };
-  }
+  useEffect(() => {
+    setSelectedItems(props.selectedRows ?? []);
+  }, [props.selectedRows]);
 
-  componentDidUpdate(
-    prevProps: Readonly<IPageProps<T>>,
-    prevState: Readonly<IPageState>
-  ) {
-    if (
-      JSON.stringify(prevProps.selectedRows) !==
-      JSON.stringify(this.props.selectedRows)
-    ) {
-      this.setState({
-        selectedItems: this.props.selectedRows ?? [],
-      });
-    }
-  }
-
-  get getItemListForPage() {
-    return this.props.data.slice(
-      this.listPagePerCount * this.listPage,
-      (this.listPage + 1) * this.listPagePerCount
+  const getItemListForPage = () => {
+    return props.data.slice(
+      listPagePerCount * listPage,
+      (listPage + 1) * listPagePerCount
     );
-  }
+  };
 
-  get isCheckedSelectAll() {
-    const items = this.getItemListForPage;
+  const isCheckedSelectAll = () => {
+    const items = getItemListForPage();
     return (
-      this.props.data.length > 0 &&
-      items.every((item) => this.state.selectedItems.includes(item))
+      props.data.length > 0 &&
+      items.every((item) => selectedItems.includes(item))
     );
-  }
+  };
 
-  onSelectAll() {
-    const items = this.getItemListForPage;
+  const onSelectAll = () => {
+    const items = getItemListForPage();
     for (const item of items) {
-      this.onSelect(item, this.isCheckedSelectAll);
+      onSelect(item, isCheckedSelectAll());
     }
-  }
+  };
 
-  onSelect(item: T, remove: boolean = true) {
-    this.setState(
-      (state: IPageState) => {
-        const findIndex = state.selectedItems.indexOfKey('', item);
+  const onSelect = (item: T, remove: boolean = true) => {
+    const findIndex = selectedItems.indexOfKey('', item);
 
-        if (findIndex > -1) {
-          if (remove) state.selectedItems.remove(findIndex);
-        } else {
-          if (this.props.isMultiSelectable === false) {
-            state.selectedItems = [];
-          }
-          state.selectedItems.push(item);
-        }
-
-        return state;
-      },
-      () => {
-        if (this.props.onSelect) this.props.onSelect(this.state.selectedItems);
+    if (findIndex > -1) {
+      if (remove) {
+        setSelectedItems(
+          selectedItems.filter((_, index) => index !== findIndex)
+        );
       }
-    );
-  }
+    } else {
+      if (props.isMultiSelectable === false) {
+        setSelectedItems([]);
+      }
+      setSelectedItems([...selectedItems, item]);
+    }
 
-  getColumns() {
-    let columns = [...this.props.columns];
+    if (props.onSelect) props.onSelect(selectedItems);
+  };
 
-    if (this.props.isActiveToggleMenu) {
+  const getColumns = () => {
+    let columns = [...props.columns];
+
+    if (props.isActiveToggleMenu) {
       if (columns.length > 0) {
         columns[0].name =
-          this.state.selectedItems.length > 0 ? (
+          selectedItems.length > 0 ? (
             <ComponentTableToggleMenu
-              items={this.props.toggleMenuItems ?? []}
+              items={props.toggleMenuItems ?? []}
               onChange={(value) =>
-                this.props.onSubmitToggleMenuItem
-                  ? this.props.onSubmitToggleMenuItem(value)
+                props.onSubmitToggleMenuItem
+                  ? props.onSubmitToggleMenuItem(value)
                   : null
               }
             />
           ) : (
             columns[0].name
           );
-        columns[0].sortable =
-          columns[0].sortable && this.state.selectedItems.length === 0;
+        columns[0].sortable = columns[0].sortable && selectedItems.length === 0;
       }
     }
 
-    if (this.props.isSelectable) {
+    if (props.isSelectable) {
       columns = [
         {
-          name: !this.props.isAllSelectable ? null : (
+          name: !props.isAllSelectable ? null : (
             <div>
               <ComponentFormCheckBox
-                checked={this.isCheckedSelectAll}
-                onChange={(e) => this.onSelectAll()}
+                checked={isCheckedSelectAll()}
+                onChange={(e) => onSelectAll()}
               />
             </div>
           ),
@@ -156,8 +144,8 @@ export default class ComponentDataTable<T> extends Component<
           cell: (row: any) => (
             <div>
               <ComponentFormCheckBox
-                checked={this.state.selectedItems.includes(row)}
-                onChange={(e) => this.onSelect(row)}
+                checked={selectedItems.includes(row)}
+                onChange={(e) => onSelect(row)}
               />
             </div>
           ),
@@ -167,73 +155,63 @@ export default class ComponentDataTable<T> extends Component<
     }
 
     return columns;
-  }
+  };
 
-  onSearch(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState(
-      {
-        searchKey: event.target.value,
-      },
-      () => {
-        if (this.props.onSearch) this.props.onSearch(this.state.searchKey);
-      }
-    );
-  }
+  const onSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKey(event.target.value);
+    if (props.onSearch) props.onSearch(searchKey);
+  };
 
-  render() {
-    return (
-      <div className="theme-table">
-        {this.props.isSearchable ? (
-          <div className="row pt-2 pb-2 m-0">
-            <div className="col-md-8"></div>
-            <div className="col-md-4">
-              <ComponentFormType
-                title={`${this.props.i18?.search ?? 'Search'}`}
-                type="text"
-                value={this.state.searchKey}
-                onChange={(e: any) => this.onSearch(e)}
-              />
-            </div>
+  return (
+    <div className="theme-table">
+      {props.isSearchable ? (
+        <div className="row pt-2 pb-2 m-0">
+          <div className="col-md-8"></div>
+          <div className="col-md-4">
+            <ComponentFormType
+              title={`${props.i18?.search ?? 'Search'}`}
+              type="text"
+              value={searchKey}
+              onChange={(e: any) => onSearch(e)}
+            />
           </div>
-        ) : null}
-        <div className="table-responsive">
-          <DataTable
-            customStyles={{
-              progress: { style: { backgroundColor: 'transparent' } },
-            }}
-            className="theme-data-table"
-            columns={this.getColumns()}
-            data={this.props.data}
-            noHeader
-            fixedHeader
-            defaultSortAsc={false}
-            pagination
-            highlightOnHover
-            onChangePage={(page: number, totalRows: number) => {
-              this.listPage = page - 1;
-              this.setState({
-                clearSelectedRows: !this.state.clearSelectedRows,
-              });
-            }}
-            clearSelectedRows={this.state.clearSelectedRows}
-            noDataComponent={
-              <h5>
-                {this.props.i18?.noRecords ?? 'There are no records to display'}
-                <i className="mdi mdi-emoticon-sad-outline"></i>
-              </h5>
-            }
-            paginationComponentOptions={{
-              noRowsPerPage: true,
-              rangeSeparatorText: '/',
-              rowsPerPageText: '',
-            }}
-            progressComponent={
-              <ComponentSpinnerDonut customClass="component-table-spinner" />
-            }
-            progressPending={this.props.progressPending}
-          />
         </div>
+      ) : null}
+      <div className="table-responsive">
+        <DataTable
+          customStyles={{
+            progress: { style: { backgroundColor: 'transparent' } },
+          }}
+          className="theme-data-table"
+          columns={getColumns()}
+          data={props.data}
+          noHeader
+          fixedHeader
+          defaultSortAsc={false}
+          pagination
+          highlightOnHover
+          onChangePage={(page: number, totalRows: number) => {
+            listPage = page - 1;
+            setClearSelectedRows(!clearSelectedRows);
+          }}
+          clearSelectedRows={clearSelectedRows}
+          noDataComponent={
+            <h5>
+              {props.i18?.noRecords ?? 'There are no records to display'}
+              <i className="mdi mdi-emoticon-sad-outline"></i>
+            </h5>
+          }
+          paginationComponentOptions={{
+            noRowsPerPage: true,
+            rangeSeparatorText: '/',
+            rowsPerPageText: '',
+          }}
+          progressComponent={
+            <ComponentSpinnerDonut customClass="component-table-spinner" />
+          }
+          progressPending={props.progressPending}
+        />
       </div>
-    );
-  }
+    </div>
+  );
 }

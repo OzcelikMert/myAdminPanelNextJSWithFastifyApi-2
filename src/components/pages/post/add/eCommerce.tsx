@@ -16,7 +16,7 @@ import Image from 'next/image';
 import { ProductTypeId } from '@constants/productTypes';
 import PagePostAdd, {
   IPageState as PostPageState,
-} from '@pages/post/[postTypeId]/add';
+} from '@pages/post/add';
 import { AttributeTypeId } from '@constants/attributeTypes';
 import dynamic from 'next/dynamic';
 import ComponentToolTip from '@components/elements/tooltip';

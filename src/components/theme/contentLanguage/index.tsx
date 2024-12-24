@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { ComponentFormSelect } from '@components/elements/form';
 import { IPagePropCommon } from 'types/pageProps';
 import Image from 'next/image';
-import { IThemeFormSelectValue } from '@components/elements/form/input/select';
+import { IThemeFormSelect } from '@components/elements/form/input/select';
 import { PathUtil } from '@utils/path.util';
 import { ILanguageGetResultService } from 'types/services/language.service';
 
@@ -14,7 +14,7 @@ type IPageProps = {
   t: IPagePropCommon['t'];
   languages: IContentLanguage[];
   selectedLanguage?: IContentLanguage;
-  onChange: (item: IThemeFormSelectValue, e: any) => void;
+  onChange: (item: IThemeFormSelect, e: any) => void;
 };
 
 export default class ComponentThemeContentLanguage extends Component<

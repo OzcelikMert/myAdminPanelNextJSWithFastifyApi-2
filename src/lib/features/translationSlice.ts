@@ -13,6 +13,8 @@ export interface ITranslationState {
   resources: { [key: string]: string };
 }
 
+export type ITranslationFunc = (key: ILanguageKeys) => string;
+
 const initialState: ITranslationState = {
   langCode: LanguageCodes.EnglishUS,
   isLoading: true,
