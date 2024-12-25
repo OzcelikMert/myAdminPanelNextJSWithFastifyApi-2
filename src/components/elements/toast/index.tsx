@@ -2,9 +2,9 @@ import { ReactNode } from 'react';
 import { toast, Id, ToastOptions, ToastContent } from 'react-toastify';
 import React from 'react';
 
-type IPageProps = {
+type IComponentProps = {
   type?: 'warning' | 'error' | 'success' | 'info' | 'loading';
-  borderColor?: IPageProps['type'];
+  borderColor?: IComponentProps['type'];
   content: ReactNode | string;
   title?: string;
   position?: ToastOptions['position'];
@@ -15,10 +15,10 @@ export default class ComponentToast {
   private toast: null | Id = null;
   private readonly options: ToastOptions<{}>;
   private readonly content: ToastContent<any>;
-  private props: IPageProps;
+  private props: IComponentProps;
   public isShow: boolean;
 
-  constructor(props: IPageProps) {
+  constructor(props: IComponentProps) {
     this.props = props;
     this.options = {
       position: props.position ?? 'top-right',

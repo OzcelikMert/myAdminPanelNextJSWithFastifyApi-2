@@ -1,14 +1,17 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
+import React from 'react';
 import ComponentThemeChooseImageGallery from './gallery';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 
-type IPageState = {
+type IComponentState = {
   isShowModal: boolean;
 };
 
-type IPageProps = {
+const initialState: IComponentState = {
+  isShowModal: false,
+};
+
+type IComponentProps = {
   isShow?: boolean;
   onHideModal?: () => void;
   onSelected: (images: string[]) => void;
@@ -19,111 +22,86 @@ type IPageProps = {
   reviewImageClassName?: string;
   reviewImageWidth?: number;
   reviewImageHeight?: number;
-  showModalButtonText?: string | JSX.Element;
+  showModalButtonText?: string | React.ReactNode;
   showModalButtonOnClick?: () => void;
   hideShowModalButton?: boolean;
-} & IPagePropCommon;
+};
 
-class ComponentThemeChooseImage extends Component<IPageProps, IPageState> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isShowModal: false,
-    };
-  }
+export default function ComponentThemeChooseImage(props: IComponentProps) {
+  const [isShowModal, setIsShowModal] = React.useState(
+    initialState.isShowModal
+  );
+  const $html = document.querySelector('html');
 
-  onSelected(images: string[]) {
-    this.props.onSelected(images);
-    this.onHide();
-  }
+  const onSelected = (images: string[]) => {
+    props.onSelected(images);
+    onHide();
+  };
 
-  onClickClear() {
-    this.props.onSelected([]);
-  }
+  const onClickClear = () => {
+    props.onSelected([]);
+  };
 
-  onHide() {
-    this.setState(
-      {
-        isShowModal: false,
-      },
-      () => {
-        if (this.props.onHideModal) {
-          this.props.onHideModal();
-        }
-      }
-    );
-    const $html = document.querySelector('html');
+  const onHide = () => {
+    setIsShowModal(false);
+    if (props.onHideModal) {
+      props.onHideModal();
+    }
     if ($html) {
       $html.style.overflow = 'unset';
     }
-  }
+  };
 
-  onClickShow() {
-    this.setState(
-      {
-        isShowModal: true,
-      },
-      () => {
-        if (this.props.showModalButtonOnClick) {
-          this.props.showModalButtonOnClick();
-        }
-      }
-    );
-    const $html = document.querySelector('html');
+  const onClickShow = () => {
+    setIsShowModal(true);
+    if (props.showModalButtonOnClick) {
+      props.showModalButtonOnClick();
+    }
     if ($html) {
       $html.style.overflow = 'hidden';
     }
-  }
+  };
 
-  render() {
-    return (
-      <div className="choose-images d-flex flex-row align-items-center">
-        <ComponentThemeChooseImageGallery
-          {...this.props}
-          isShow={
-            typeof this.props.isShow != 'undefined'
-              ? this.props.isShow
-              : this.state.isShowModal
-          }
-          onSubmit={(images) => this.onSelected(images)}
-          onClose={() => this.onHide()}
+  return (
+    <div className="choose-images d-flex flex-row align-items-center">
+      <ComponentThemeChooseImageGallery
+        isShow={typeof props.isShow != 'undefined' ? props.isShow : isShowModal}
+        onSubmit={(images) => onSelected(images)}
+        onClose={() => onHide()}
+      />
+      {props.isShowReviewImage ? (
+        <Image
+          src={ImageSourceUtil.getUploadedImageSrc(props.reviewImage)}
+          alt="Review Image"
+          className={`review-img img-fluid ${props.reviewImageClassName}`}
+          width={props.reviewImageWidth ?? 150}
+          height={props.reviewImageHeight ?? 150}
         />
-        {this.props.isShowReviewImage ? (
-          <Image
-            src={ImageSourceUtil.getUploadedImageSrc(this.props.reviewImage)}
-            alt="Review Image"
-            className={`review-img img-fluid ${this.props.reviewImageClassName}`}
-            width={this.props.reviewImageWidth ?? 150}
-            height={this.props.reviewImageHeight ?? 150}
-          />
+      ) : null}
+      <div className="buttons">
+        {!props.hideShowModalButton ? (
+          <button
+            type="button"
+            className="btn btn-gradient-warning btn-xs ms-2"
+            onClick={() => onClickShow()}
+          >
+            {props.showModalButtonText ? (
+              <i>{props.showModalButtonText}</i>
+            ) : (
+              <i className="fa fa-pencil-square-o"></i>
+            )}
+          </button>
         ) : null}
-        <div className="buttons">
-          {!this.props.hideShowModalButton ? (
-            <button
-              type="button"
-              className="btn btn-gradient-warning btn-xs ms-2"
-              onClick={() => this.onClickShow()}
-            >
-              {this.props.showModalButtonText ? (
-                <i>{this.props.showModalButtonText}</i>
-              ) : (
-                <i className="fa fa-pencil-square-o"></i>
-              )}
-            </button>
-          ) : null}
-          {this.props.selectedImages && this.props.selectedImages.length > 0 ? (
-            <button
-              type="button"
-              className="btn btn-gradient-danger btn-xs ms-2"
-              onClick={() => this.onClickClear()}
-            >
-              <i className="fa fa-remove"></i>
-            </button>
-          ) : null}
-        </div>
+        {props.selectedImages && props.selectedImages.length > 0 ? (
+          <button
+            type="button"
+            className="btn btn-gradient-danger btn-xs ms-2"
+            onClick={() => onClickClear()}
+          >
+            <i className="fa fa-remove"></i>
+          </button>
+        ) : null}
       </div>
-    );
-  }
+    </div>
+  );
 }
-
-export default ComponentThemeChooseImage;

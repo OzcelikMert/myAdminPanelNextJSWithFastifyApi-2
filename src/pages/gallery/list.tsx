@@ -11,7 +11,7 @@ import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IGalleryGetResultService } from 'types/services/gallery.service';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
 
-type IPageState = {
+type IComponentState = {
   items: IGalleryGetResultService[];
   showingItems: IGalleryGetResultService[];
   selectedItems: string[];
@@ -20,7 +20,7 @@ type IPageState = {
   isListLoading: boolean;
 };
 
-type IPageProps = {
+type IComponentProps = {
   isModal?: boolean;
   isMulti?: boolean;
   onSubmit?: (images: string[]) => void;

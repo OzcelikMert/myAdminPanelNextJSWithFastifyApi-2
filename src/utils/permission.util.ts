@@ -1,6 +1,5 @@
 import { UserRoleId, userRoles } from '@constants/userRoles';
 import { PermissionId } from '@constants/permissions';
-import { ISessionAuthModel } from 'types/models/sessionAuth.model';
 import { PostTypeId } from '@constants/postTypes';
 import { PostEndPointPermission } from '@constants/endPointPermissions/post.endPoint.permission';
 import { IEndPointPermission } from 'types/constants/endPoint.permissions';
@@ -10,6 +9,7 @@ import { RouteUtil } from '@utils/route.util';
 import { NextRouter } from 'next/router';
 import { IAppDispatch } from '@lib/store';
 import { ITranslationFunc } from '@lib/features/translationSlice';
+import { ISessionAuthResultService } from 'types/services/auth.service';
 
 export enum PostPermissionMethod {
   GET,
@@ -107,7 +107,7 @@ const checkPermissionId = (
 };
 
 const check = (
-  sessionAuth: ISessionAuthModel | undefined,
+  sessionAuth: ISessionAuthResultService | undefined,
   minPermission: IEndPointPermission
 ) => {
   return (
@@ -128,7 +128,7 @@ const checkAndRedirect = (
   router: NextRouter,
   dispatch: IAppDispatch,
   t: ITranslationFunc,
-  sessionAuth: ISessionAuthModel | null,
+  sessionAuth: ISessionAuthResultService | null,
   minPermission: IEndPointPermission,
   redirectPath = EndPoints.DASHBOARD
 ): boolean => {

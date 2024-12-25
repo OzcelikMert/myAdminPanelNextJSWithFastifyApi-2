@@ -1,113 +1,106 @@
-import React, { Component } from 'react';
-import { ComponentFormType } from '@components/elements/form';
+import React from 'react';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
-import { IPagePropCommon } from 'types/pageProps';
 import dynamic from 'next/dynamic';
 import { IComponentElementModel } from 'types/models/component.model';
 import { ElementTypeId } from '@constants/elementTypes';
+import ComponentFormType from '@components/elements/form/input/type';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
 
 const ComponentThemeRichTextBox = dynamic(
   () => import('@components/theme/richTextBox'),
   { ssr: false }
 );
 
-type IPageState = {} & { [key: string]: any };
+type IComponentState = {} & { [key: string]: any };
 
-type IPageProps = {
+type IComponentProps = {
   data: Partial<IComponentElementModel>;
   onChange: (key: string, value: any) => void;
-} & IPagePropCommon;
+};
 
-export default class ComponentPageComponentElementTypeInput extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {};
-  }
+export default function ComponentPageComponentElementTypeInput(
+  props: IComponentProps
+) {
+  const t = useAppSelector(selectTranslation);
 
-  TextArea = () => {
+  const TextArea = () => {
     return (
       <ComponentFormType
         type={'textarea'}
-        title={this.props.t('text')}
-        value={this.props.data.contents?.content}
-        onChange={(e) => this.props.onChange('content', e.target.value)}
+        title={t('text')}
+        value={props.data.contents?.content}
+        onChange={(e) => props.onChange('content', e.target.value)}
       />
     );
   };
 
-  RichText = () => {
+  const RichText = () => {
     return (
       <ComponentThemeRichTextBox
-        {...this.props}
-        value={this.props.data.contents?.content ?? ''}
-        onChange={(e) => this.props.onChange('content', e)}
+        value={props.data.contents?.content ?? ''}
+        onChange={(e) => props.onChange('content', e)}
       />
     );
   };
 
-  Image = () => {
+  const Image = () => {
     return (
       <div>
         <ComponentThemeChooseImage
-          {...this.props}
-          onSelected={(images) => this.props.onChange('content', images[0])}
+          onSelected={(images) => props.onChange('content', images[0])}
           isMulti={false}
           isShowReviewImage={true}
-          reviewImage={this.props.data.contents?.content}
+          reviewImage={props.data.contents?.content}
           reviewImageClassName={'post-image'}
         />
       </div>
     );
   };
 
-  Button = () => {
+  const Button = () => {
     return (
       <div className="row">
         <div className="col-md-6">
           <ComponentFormType
             type={'text'}
-            title={this.props.t('text')}
-            value={this.props.data.contents?.content}
-            onChange={(e) => this.props.onChange('content', e.target.value)}
+            title={t('text')}
+            value={props.data.contents?.content}
+            onChange={(e) => props.onChange('content', e.target.value)}
           />
         </div>
         <div className="col-md-6 mt-3 mt-lg-0">
           <ComponentFormType
             type={'text'}
-            title={this.props.t('url')}
-            value={this.props.data.contents?.url || ''}
-            onChange={(e) => this.props.onChange('url', e.target.value)}
+            title={t('url')}
+            value={props.data.contents?.url || ''}
+            onChange={(e) => props.onChange('url', e.target.value)}
           />
         </div>
       </div>
     );
   };
 
-  Text = () => {
+  const Text = () => {
     return (
       <ComponentFormType
         type={'text'}
-        title={this.props.t('text')}
-        value={this.props.data.contents?.content}
-        onChange={(e) => this.props.onChange('content', e.target.value)}
+        title={t('text')}
+        value={props.data.contents?.content}
+        onChange={(e) => props.onChange('content', e.target.value)}
       />
     );
   };
 
-  render() {
-    switch (this.props.data.typeId) {
-      case ElementTypeId.TextArea:
-        return <this.TextArea />;
-      case ElementTypeId.Image:
-        return <this.Image />;
-      case ElementTypeId.Button:
-        return <this.Button />;
-      case ElementTypeId.RichText:
-        return <this.RichText />;
-    }
-    return <this.Text />;
+  switch (props.data.typeId) {
+    case ElementTypeId.TextArea:
+      return <TextArea />;
+    case ElementTypeId.Image:
+      return <Image />;
+    case ElementTypeId.Button:
+      return <Button />;
+    case ElementTypeId.RichText:
+      return <RichText />;
   }
+  return <Text />;
 }

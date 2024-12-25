@@ -1,8 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ISessionAuthModel } from 'types/models/sessionAuth.model';
+import { ISessionAuthResultService } from 'types/services/auth.service';
 
 export interface ISessionState {
-  auth: ISessionAuthModel | null;
+  auth: ISessionAuthResultService | null;
   isAuthChecked: boolean;
 }
 
