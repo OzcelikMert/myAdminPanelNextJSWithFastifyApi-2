@@ -2,7 +2,7 @@ import React from 'react';
 import { AuthService } from '@services/auth.service';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
-import { ComponentForm } from '@components/elements/form';
+import ComponentForm from '@components/elements/form';
 import ThemeInputType from '@components/elements/form/input/type';
 import { useFormReducer } from '@library/react/handles/form';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
@@ -36,7 +36,7 @@ export default function ComponentToolLock() {
   const { formState, onChangeInput, setFormState } =
     useFormReducer<IComponentFormState>(initialFormState);
 
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
@@ -55,8 +55,8 @@ export default function ComponentToolLock() {
         setIsSubmitting(false);
         setIsWrong(false);
         setFormState(initialFormState);
-        dispatch(setSessionAuthState(resultSession.data));
-        dispatch(setIsLockState(false));
+        appDispatch(setSessionAuthState(resultSession.data));
+        appDispatch(setIsLockState(false));
         return;
       }
     }

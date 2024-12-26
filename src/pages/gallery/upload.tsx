@@ -4,9 +4,8 @@ import { GalleryService } from '@services/gallery.service';
 import ComponentToast from '@components/elements/toast';
 import Image from 'next/image';
 import { IGalleryGetResultService } from 'types/services/gallery.service';
-import { useAppSelector } from '@lib/hooks';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
 import { selectTranslation } from '@lib/features/translationSlice';
-import { useDispatch } from 'react-redux';
 import { EndPoints } from '@constants/endPoints';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
@@ -30,7 +29,7 @@ export default function PageGalleryUpload(props: IComponentProps) {
   const [isDragging, setIsDragging] = useState(initialState.isDragging);
   const [uploadingFiles, setUploadingFiles] = useState(initialState.uploadingFiles);
 
-  const dispatch = useDispatch();
+  const appDispatch = useAppDispatch();
   const t = useAppSelector(selectTranslation);
   const sessionAuth = useAppSelector(state => state.sessionState.auth);
   const isPageLoading = useAppSelector(state => state.pageState.isLoading);
@@ -50,12 +49,12 @@ export default function PageGalleryUpload(props: IComponentProps) {
   const init = () => {
     if (!props.isModal) {
       setPageTitle();
-      dispatch(setIsPageLoadingState(false));
+      appDispatch(setIsPageLoadingState(false));
     }
   }
 
   const setPageTitle = () => {
-    dispatch(setBreadCrumbState([
+    appDispatch(setBreadCrumbState([
       {
         title: t('gallery'),
         url: EndPoints.GALLERY_WITH.LIST

@@ -41,7 +41,7 @@ export default function PageComponentList() {
 
   const router = useRouter();
 
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
 
   const t = useAppSelector(selectTranslation);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
@@ -61,7 +61,7 @@ export default function PageComponentList() {
     if (
       PermissionUtil.checkAndRedirect(
         router,
-        dispatch,
+        appDispatch,
         t,
         sessionAuth,
         ComponentEndPointPermission.GET
@@ -69,12 +69,12 @@ export default function PageComponentList() {
     ) {
       setPageTitle();
       await getItems();
-      dispatch(setIsPageLoadingState(false));
+      appDispatch(setIsPageLoadingState(false));
     }
   }
 
   const setPageTitle = () => {
-    dispatch(setBreadCrumbState([
+    appDispatch(setBreadCrumbState([
       {
         title: t('components'),
         url: EndPoints.COMPONENT_WITH.LIST,
@@ -150,7 +150,7 @@ export default function PageComponentList() {
       case 'edit':
         await RouteUtil.change({
           router,
-          dispatch,
+          appDispatch,
           path: pagePath.EDIT(itemId),
         });
         break;

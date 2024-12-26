@@ -22,7 +22,7 @@ export default function ComponentToolSidebar() {
   const [activeItems, setActiveItems] = useState(initialState.activeItems);
 
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
@@ -66,7 +66,7 @@ export default function ComponentToolSidebar() {
   const navigatePage = async (path: string) => {
     await RouteUtil.change({
       router: router,
-      dispatch: dispatch,
+      dispatch: appDispatch,
       path: path || EndPoints.DASHBOARD,
     });
     onRouteChanged();

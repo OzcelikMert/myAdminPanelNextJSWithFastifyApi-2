@@ -24,7 +24,7 @@ export default function ComponentProviderNoSSR({
   children,
   statusCode,
 }: IComponentProps) {
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
   const router = useRouter();
   const appState = useAppSelector((state) => state.appState);
   const breadCrumb = useAppSelector((state) => state.breadCrumbState.data);
@@ -34,8 +34,8 @@ export default function ComponentProviderNoSSR({
   useEffect(() => {
     const handleRouteChange = (url: string) => {
       if (routeState.pathname !== url) {
-        dispatch(setIsPageLoadingState(true));
-        dispatch(
+        appDispatch(setIsPageLoadingState(true));
+        appDispatch(
           setRouteState({
             pathname: router.pathname,
             query: router.query,

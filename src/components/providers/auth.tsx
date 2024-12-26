@@ -22,7 +22,7 @@ type IComponentProps = {
 };
 
 export default function ComponentProviderAuth({ children }: IComponentProps) {
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
   const abortController = new AbortController();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const isSessionAuthChecked = useAppSelector((state) => state.sessionState.isAuthChecked);
@@ -41,14 +41,14 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
       if (serviceResult.data) {
         setIsAuth(true);
         if (JSON.stringify(serviceResult.data) != JSON.stringify(sessionAuth)) {
-          dispatch(setSessionAuthState(serviceResult.data));
+          appDispatch(setSessionAuthState(serviceResult.data));
         }
       }
     } else {
       setIsAuth(false);
     }
 
-    dispatch(setIsSessionAuthCheckedState(true));
+    appDispatch(setIsSessionAuthCheckedState(true));
   };
 
   const init = async () => {
@@ -80,7 +80,7 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
   if (!isAuth && ![EndPoints.LOGIN].includes(router.pathname)) {
     RouteUtil.change({
       router: router,
-      dispatch: dispatch,
+      dispatch: appDispatch,
       path: EndPoints.LOGIN,
     });
     return null;
@@ -89,7 +89,7 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
   if (isAuth && [EndPoints.LOGIN].includes(router.pathname)) {
     RouteUtil.change({
       router: router,
-      dispatch: dispatch,
+      dispatch: appDispatch,
       path: EndPoints.DASHBOARD,
     });
     return null;

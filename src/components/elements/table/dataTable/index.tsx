@@ -1,4 +1,4 @@
-import React, { Component, useEffect } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import DataTable, { TableProps } from 'react-data-table-component';
 import ComponentTableToggleMenu, {
   IThemeToggleMenuItem,
@@ -6,18 +6,7 @@ import ComponentTableToggleMenu, {
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormType from '@components/elements/form/input/type';
-
-type IComponentState = {
-  selectedItems: any[];
-  clearSelectedRows: boolean;
-  searchKey: string;
-};
-
-const initialState: IComponentState = {
-  selectedItems: [],
-  clearSelectedRows: false,
-  searchKey: '',
-};
+import { cloneDeepWith } from 'lodash';
 
 type IComponentPropI18 = {
   search?: string;
@@ -25,46 +14,36 @@ type IComponentPropI18 = {
 };
 
 type IComponentProps<T> = {
-  onSelect?: (rows: T[]) => void;
-  onSearch?: (searchKey: string) => void;
   isSearchable?: boolean;
+  searchableKeys?: string[];
   isSelectable?: boolean;
   isAllSelectable?: boolean;
   isMultiSelectable?: boolean;
-  selectedRows?: T[];
   isActiveToggleMenu?: boolean;
   toggleMenuItems?: IThemeToggleMenuItem[];
-  onSubmitToggleMenuItem?: (value: any) => void;
   i18?: IComponentPropI18;
+  onSubmitToggleMenuItem?: (value: any) => void;
+  onSelect?: (value: T[]) => void;
 } & TableProps<T>;
 
 export default function ComponentDataTable<T>(props: IComponentProps<T>) {
-  const [selectedItems, setSelectedItems] = React.useState<
-    IComponentState['selectedItems']
-  >(props.selectedRows ?? initialState.selectedItems);
-  const [clearSelectedRows, setClearSelectedRows] = React.useState<
-    IComponentState['clearSelectedRows']
-  >(initialState.clearSelectedRows);
-  const [searchKey, setSearchKey] = React.useState<
-    IComponentState['searchKey']
-  >(initialState.searchKey);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    showingItems: props.data
+  });
 
   let listPage = 0;
   let listPagePerCount = 10;
 
-  const dateSort = (
-    a: { createdAt?: string | Date },
-    b: { createdAt?: string | Date }
-  ) => {
-    return new Date(a.createdAt || '').getTime() >
-      new Date(b.createdAt || '').getTime()
-      ? 1
-      : -1;
-  };
-
   useEffect(() => {
-    setSelectedItems(props.selectedRows ?? []);
-  }, [props.selectedRows]);
+    resetTableList();
+  }, [props.data]);
+
+  const resetTableList = () => {
+    dispatch({ type: 'SET_SELECTED_ITEMS', payload: [] });
+    dispatch({ type: 'SET_CLEAR_SELECTED_ROWS', payload: !state.clearSelectedRows });
+    onSearch();
+  }
 
   const getItemListForPage = () => {
     return props.data.slice(
@@ -77,7 +56,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     const items = getItemListForPage();
     return (
       props.data.length > 0 &&
-      items.every((item) => selectedItems.includes(item))
+      items.every((item) => state.selectedItems.includes(item))
     );
   };
 
@@ -89,22 +68,58 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
   };
 
   const onSelect = (item: T, remove: boolean = true) => {
-    const findIndex = selectedItems.indexOfKey('', item);
+    const findIndex = state.selectedItems.indexOfKey('', item);
 
     if (findIndex > -1) {
       if (remove) {
-        setSelectedItems(
-          selectedItems.filter((_, index) => index !== findIndex)
-        );
+        dispatch({type: 'SET_SELECTED_ITEMS', payload: state.selectedItems.filter((_, index) => index !== findIndex)});
       }
     } else {
       if (props.isMultiSelectable === false) {
-        setSelectedItems([]);
+        dispatch({type: 'SET_SELECTED_ITEMS', payload: [item]});
+      }else{
+        dispatch({type: 'SET_SELECTED_ITEMS', payload: [...state.selectedItems, item]});
       }
-      setSelectedItems([...selectedItems, item]);
     }
 
-    if (props.onSelect) props.onSelect(selectedItems);
+    if (props.onSelect) {
+      props.onSelect(state.selectedItems);
+    }
+  };
+
+  const onSearch = (event?: React.ChangeEvent<HTMLInputElement>) => {
+    let searchKey = event ? event.target.value : state.searchKey;
+    dispatch({ type: 'SET_SEARCH_KEY', payload: searchKey });
+    // Find Searched Items for Showing Items
+    let searchedItems = props.data.filter((item: any) => {
+      let isFound = false;
+      // Search by searchableKeys
+      props.searchableKeys?.forEach((searchableKey) => {
+        // Split searchableKey by '.'
+        let keys = searchableKey.split('.');
+        // Clone item
+        let newData = cloneDeepWith(item);
+        // Loop through keys
+        for (let i = 0; i < keys.length; i++) {
+          if (item[keys[i]]) {
+            // Assign new data
+            newData = cloneDeepWith(newData[keys[i]]);
+          }else {
+            newData = null;
+            break;
+          }
+        }
+        if (newData) {
+          // Search newData by searchKey
+          if (newData.toString().toLowerCase().search(searchKey) > -1) {
+            isFound = true;
+          }
+        }
+      });
+      return isFound;
+    });
+    // Set Showing Items
+    dispatch({ type: 'SET_SHOWING_ITEMS', payload: searchedItems});
   };
 
   const getColumns = () => {
@@ -113,7 +128,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     if (props.isActiveToggleMenu) {
       if (columns.length > 0) {
         columns[0].name =
-          selectedItems.length > 0 ? (
+          state.selectedItems.length > 0 ? (
             <ComponentTableToggleMenu
               items={props.toggleMenuItems ?? []}
               onChange={(value) =>
@@ -125,7 +140,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           ) : (
             columns[0].name
           );
-        columns[0].sortable = columns[0].sortable && selectedItems.length === 0;
+        columns[0].sortable = columns[0].sortable && state.selectedItems.length === 0;
       }
     }
 
@@ -144,7 +159,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           cell: (row: any) => (
             <div>
               <ComponentFormCheckBox
-                checked={selectedItems.includes(row)}
+                checked={state.selectedItems.includes(row)}
                 onChange={(e) => onSelect(row)}
               />
             </div>
@@ -157,11 +172,6 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     return columns;
   };
 
-  const onSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchKey(event.target.value);
-    if (props.onSearch) props.onSearch(searchKey);
-  };
-
   return (
     <div className="theme-table">
       {props.isSearchable ? (
@@ -171,7 +181,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
             <ComponentFormType
               title={`${props.i18?.search ?? 'Search'}`}
               type="text"
-              value={searchKey}
+              value={state.searchKey}
               onChange={(e: any) => onSearch(e)}
             />
           </div>
@@ -184,7 +194,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           }}
           className="theme-data-table"
           columns={getColumns()}
-          data={props.data}
+          data={state.showingItems}
           noHeader
           fixedHeader
           defaultSortAsc={false}
@@ -192,9 +202,9 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           highlightOnHover
           onChangePage={(page: number, totalRows: number) => {
             listPage = page - 1;
-            setClearSelectedRows(!clearSelectedRows);
+            dispatch({ type: 'SET_CLEAR_SELECTED_ROWS', payload: !state.clearSelectedRows });
           }}
-          clearSelectedRows={clearSelectedRows}
+          clearSelectedRows={state.clearSelectedRows}
           noDataComponent={
             <h5>
               {props.i18?.noRecords ?? 'There are no records to display'}
@@ -214,4 +224,39 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
       </div>
     </div>
   );
+}
+
+type IComponentState = {
+  selectedItems: any[];
+  clearSelectedRows: boolean;
+  searchKey: string;
+  showingItems: any[];
+};
+
+const initialState: IComponentState = {
+  selectedItems: [],
+  clearSelectedRows: false,
+  searchKey: '',
+  showingItems: []
+};
+
+type IAction =
+  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
+  | { type: 'SET_SEARCH_KEY'; payload: IComponentState['searchKey'] }
+  | { type: 'SET_CLEAR_SELECTED_ROWS'; payload: boolean }
+  | { type: 'SET_SHOWING_ITEMS'; payload: IComponentState['showingItems'] };
+
+function reducer(state: IComponentState, action: IAction): IComponentState { 
+  switch (action.type) {
+    case 'SET_SELECTED_ITEMS':
+      return { ...state, selectedItems: action.payload };
+    case 'SET_SEARCH_KEY':
+      return { ...state, searchKey: action.payload };
+    case 'SET_CLEAR_SELECTED_ROWS':
+      return { ...state, clearSelectedRows: action.payload };
+    case 'SET_SHOWING_ITEMS':
+      return { ...state, showingItems: action.payload };
+    default:
+      return state;
+  }
 }

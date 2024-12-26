@@ -17,7 +17,7 @@ type IComponentProps = {
 };
 
 export default function ComponentProviderAppInit(  { children } : IComponentProps ) {
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
   const isAppLoading = useAppSelector((state) => state.appState.isLoading);
 
   const fetchLanguages = async () => {
@@ -32,8 +32,8 @@ export default function ComponentProviderAppInit(  { children } : IComponentProp
       if (!foundDefaultLanguage) {
         foundDefaultLanguage = serviceResult.data[0];
       }
-      dispatch(setLanguagesState(serviceResult.data));
-      dispatch(setMainLangIdState(foundDefaultLanguage._id));
+      appDispatch(setLanguagesState(serviceResult.data));
+      appDispatch(setMainLangIdState(foundDefaultLanguage._id));
     }
   }
 
@@ -42,20 +42,20 @@ export default function ComponentProviderAppInit(  { children } : IComponentProp
       projection: SettingProjectionKeys.ECommerce,
     });
     if (serviceResult.status && serviceResult.data) {
-      dispatch(setCurrencyIdState(serviceResult.data.eCommerce?.currencyId || CurrencyId.TurkishLira));
+      appDispatch(setCurrencyIdState(serviceResult.data.eCommerce?.currencyId || CurrencyId.TurkishLira));
     }
   }
 
   const dispatchPanelLanguage = async () => {
     let panelLanguage = languages.findSingle("id", LocalStorageUtil.getLanguageId());
-    await dispatch(fetchTranslationState(panelLanguage ? panelLanguage.code : LanguageCodes.EnglishUS));
+    await appDispatch(fetchTranslationState(panelLanguage ? panelLanguage.code : LanguageCodes.EnglishUS));
   }
 
   const init = async () => {
     await fetchLanguages();
     await fetchSettingECommerce();
     await dispatchPanelLanguage();
-    dispatch(setIsAppLoadingState(false));
+    appDispatch(setIsAppLoadingState(false));
   };
 
   useEffect(() => {

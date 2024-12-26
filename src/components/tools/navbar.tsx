@@ -28,7 +28,7 @@ export default function ComponentToolNavbar() {
   const [isDarkTheme, setIsDarkTheme] = useState(initialState.isDarkTheme);
 
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
@@ -52,21 +52,21 @@ export default function ComponentToolNavbar() {
       case 'profile':
         await RouteUtil.change({
           router: router,
-          dispatch: dispatch,
+          dispatch: appDispatch,
           path: EndPoints.SETTINGS_WITH.PROFILE,
         });
         break;
       case 'changePassword':
         await RouteUtil.change({
           router: router,
-          dispatch: dispatch,
+          dispatch: appDispatch,
           path: EndPoints.SETTINGS_WITH.CHANGE_PASSWORD,
         });
         break;
       case 'lock':
         const resultLock = await AuthService.logOut();
         if (resultLock.status) {
-          dispatch(setIsLockState(true));
+          appDispatch(setIsLockState(true));
         }
         break;
       case 'signOut':
@@ -74,10 +74,10 @@ export default function ComponentToolNavbar() {
         if (resultSignOut.status) {
           await RouteUtil.change({
             router: router,
-            dispatch: dispatch,
+            dispatch: appDispatch,
             path: EndPoints.LOGIN,
           });
-          dispatch(setSessionAuthState(null));
+          appDispatch(setSessionAuthState(null));
         }
         break;
     }

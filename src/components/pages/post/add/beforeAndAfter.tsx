@@ -8,13 +8,15 @@ import PagePostAdd, {
 import ComponentFieldSet from '@components/elements/fieldSet';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 
-type IPageState = {
+type IComponentState = {
   mainTabActiveKey: string;
 };
 
-type IPageProps = {
+type IComponentProps = {
   page: PagePostAdd;
 };
+
+
 
 export default class ComponentPagePostAddBeforeAndAfter extends Component<
   IPageProps,

@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
+import React, { useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { GalleryService } from '@services/gallery.service';
 import { TableColumn } from 'react-data-table-component';
@@ -10,14 +9,23 @@ import { GalleryTypeId } from '@constants/galleryTypeId';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IGalleryGetResultService } from 'types/services/gallery.service';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
+import { SortUtil } from '@utils/sort.util';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { EndPoints } from '@constants/endPoints';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
 
 type IComponentState = {
   items: IGalleryGetResultService[];
-  showingItems: IGalleryGetResultService[];
-  selectedItems: string[];
-  selectedItemIndex: number;
-  searchKey: string;
+  selectedItems: IGalleryGetResultService[];
   isListLoading: boolean;
+};
+
+const initialState: IComponentState = {
+  items: [],
+  selectedItems: [],
+  isListLoading: true,
 };
 
 type IComponentProps = {
@@ -26,210 +34,156 @@ type IComponentProps = {
   onSubmit?: (images: string[]) => void;
   uploadedImages?: IGalleryGetResultService[];
   selectedImages?: string[];
-} & IPagePropCommon;
+};
 
-export default class PageGalleryList extends Component<IPageProps, IPageState> {
-  toast: null | ComponentToast = null;
-  listPage: number = 0;
-  listPagePerCount: number = 10;
-  abortController = new AbortController();
+export default function PageGalleryList(props: IComponentProps) {
+  let toast: null | ComponentToast = null;
+  const abortController = new AbortController();
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      items: [],
-      showingItems: [],
-      selectedItems: [],
-      selectedItemIndex: 0,
-      searchKey: '',
-      isListLoading: true,
+  const [items, setItems] = React.useState(initialState.items);
+  const [selectedItems, setSelectedItems] = React.useState(
+    initialState.selectedItems
+  );
+  const [isListLoading, setIsListLoading] = React.useState(
+    initialState.isListLoading
+  );
+
+  const appDispatch = useAppDispatch();
+  const t = useAppSelector(selectTranslation);
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
+      toast?.hide();
     };
-  }
+  }, []);
 
-  async componentDidMount() {
-    await this.getItems();
+  useEffect(() => {
+    if (props.uploadedImages) {
+      setItems(state => state.concat(props.uploadedImages || []));
+    }
+  }, [props.uploadedImages]);
 
-    this.setState({
-      isListLoading: false,
-    });
+  const init = async () => {
+    await getItems();
+    setIsListLoading(false);
 
-    if (!this.props.isModal) {
-      this.setPageTitle();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+    if (!props.isModal) {
+      setPageTitle();
+      appDispatch(setIsPageLoadingState(false));
     }
   }
 
-  componentWillUnmount() {
-    this.abortController.abort();
-    this.toast?.hide();
+  const setPageTitle = () => {
+    appDispatch(setBreadCrumbState([
+      {
+        title: t('gallery'),
+        url: EndPoints.GALLERY_WITH.LIST
+      },
+      {
+        title: t('upload'),
+        url: EndPoints.GALLERY_WITH.UPLOAD
+      }
+    ]));
   }
 
-  componentDidUpdate(
-    prevProps: Readonly<IPageProps>,
-    prevState: Readonly<IPageState>
-  ) {
-    if (
-      this.props.uploadedImages &&
-      JSON.stringify(this.props.uploadedImages) !==
-        JSON.stringify(prevProps.uploadedImages)
-    ) {
-      this.setListSort(
-        this.state.items.concat(this.props.uploadedImages || [])
-      );
-    }
-  }
-
-  setPageTitle() {
-    this.props.setBreadCrumb([this.props.t('gallery'), this.props.t('list')]);
-  }
-
-  async getItems() {
+  const getItems = async () => {
     const serviceResult = await GalleryService.get(
       { typeId: GalleryTypeId.Image },
-      this.abortController.signal
+      abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
-      this.setListSort(serviceResult.data);
+      setItems(serviceResult.data);
     }
   }
 
-  setListSort(items: IGalleryGetResultService[]) {
-    items = items.orderBy('createdAt', 'desc');
-    this.setState(
-      (state: IPageState) => {
-        if (this.props.selectedImages && this.props.selectedImages.length > 0) {
-          state.selectedItems = state.selectedItems.concat(
-            this.props.selectedImages
-          );
-          items.sort((a, b) => {
-            if (this.props.selectedImages?.includes(a.name)) {
-              return -1;
-            } else {
-              return 0;
-            }
-          });
-        }
-        state.items = items;
-        return state;
-      },
-      () => {
-        this.onSearch(this.state.searchKey);
+  const onSelect = (images: IGalleryGetResultService[]) => {
+    setSelectedItems(images);
+    if (images.length > 0) {
+      if (!toast || !toast.isShow) {
+        toast = new ComponentToast({
+          content: props.isModal ? (
+            <button
+              type="button"
+              className="btn btn-gradient-success btn-icon-text w-100"
+              onClick={() => onSubmit()}
+            >
+              <i className="mdi mdi-check btn-icon-prepend"></i>{' '}
+              {t('okay')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-gradient-danger btn-icon-text w-100"
+              onClick={() => onDelete()}
+            >
+              <i className="mdi mdi-trash-can btn-icon-prepend"></i>{' '}
+              {t('delete')}
+            </button>
+          ),
+          borderColor: props.isModal ? 'success' : 'error',
+          position: 'bottom-center',
+        });
       }
-    );
+    } else {
+      toast?.hide();
+    }
   }
 
-  onSelect(images: string[]) {
-    this.setState(
-      {
-        selectedItems: images,
-      },
-      () => {
-        if (this.state.selectedItems.length > 0) {
-          if (!this.toast || !this.toast.isShow) {
-            this.toast = new ComponentToast({
-              content: this.props.isModal ? (
-                <button
-                  type="button"
-                  className="btn btn-gradient-success btn-icon-text w-100"
-                  onClick={() => this.onSubmit()}
-                >
-                  <i className="mdi mdi-check btn-icon-prepend"></i>{' '}
-                  {this.props.t('okay')}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-gradient-danger btn-icon-text w-100"
-                  onClick={() => this.onDelete()}
-                >
-                  <i className="mdi mdi-trash-can btn-icon-prepend"></i>{' '}
-                  {this.props.t('delete')}
-                </button>
-              ),
-              borderColor: this.props.isModal ? 'success' : 'error',
-              position: 'bottom-center',
-            });
-          }
-        } else {
-          this.toast?.hide();
-        }
-      }
-    );
-  }
-
-  async onDelete() {
+  const onDelete = async () => {
     const result = await Swal.fire({
-      title: this.props.t('deleteAction'),
-      html: `${this.props.t('deleteSelectedItemsQuestion')}`,
-      confirmButtonText: this.props.t('yes'),
-      cancelButtonText: this.props.t('no'),
+      title: t('deleteAction'),
+      html: `${t('deleteSelectedItemsQuestion')}`,
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
       icon: 'question',
       showCancelButton: true,
     });
     if (result.isConfirmed) {
-      this.toast?.hide();
+      toast?.hide();
       const loadingToast = new ComponentToast({
-        title: this.props.t('loading'),
-        content: this.props.t('deleting'),
+        title:t('loading'),
+        content: t('deleting'),
         type: 'loading',
       });
 
       const serviceResult = await GalleryService.deleteMany(
-        { _id: this.state.selectedItems },
-        this.abortController.signal
+        { _id: selectedItems.map((item) => item._id) },
+        abortController.signal
       );
       loadingToast.hide();
       if (serviceResult.status) {
-        this.setState(
-          (state: IPageState) => {
-            state.items = state.items.filter(
-              (item) => !state.selectedItems.includes(item._id)
-            );
-            state.selectedItems = [];
-            return state;
-          },
-          () => {
-            this.onSearch(this.state.searchKey);
-            new ComponentToast({
-              title: this.props.t('itemDeleted'),
-              content: this.props.t('itemDeleted'),
-              type: 'success',
-              timeOut: 3,
-            });
-          }
-        );
+        setItems(items.filter((item) => !selectedItems.includes(item)));
+        setSelectedItems([]);
+        new ComponentToast({
+          title: t('itemDeleted'),
+          content: t('itemDeleted'),
+          type: 'success',
+          timeOut: 3,
+        });
       }
     }
   }
 
-  onSubmit() {
-    if (this.props.onSubmit) {
-      const foundSelectedItems = this.state.items.findMulti(
+  const onSubmit = () => {
+    if (props.onSubmit) {
+      const foundSelectedItems = items.findMulti(
         '_id',
-        this.state.selectedItems
+        selectedItems
       );
-      this.toast?.hide();
-      this.props.onSubmit(
+      toast?.hide();
+      props.onSubmit(
         foundSelectedItems.map((selectedItem) => selectedItem.name)
       );
     }
   }
 
-  onSearch(searchKey: string) {
-    this.setState({
-      searchKey: searchKey,
-      showingItems: this.state.items.filter(
-        (item) => item.name.toLowerCase().search(searchKey) > -1
-      ),
-    });
-  }
-
-  get getTableColumns(): TableColumn<IPageState['items'][0]>[] {
+  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
     return [
       {
-        name: this.props.t('image'),
+        name: t('image'),
         width: '105px',
         cell: (row) => (
           <div className="image pt-2 pb-2">
@@ -245,15 +199,15 @@ export default class PageGalleryList extends Component<IPageProps, IPageState> {
         ),
       },
       {
-        name: this.props.t('title'),
+        name: t('title'),
         selector: (row) => row.name,
         sortable: true,
       },
       {
-        name: this.props.t('createdDate'),
+        name: t('createdDate'),
         selector: (row) => new Date(row.createdAt).toLocaleDateString(),
         sortable: true,
-        sortFunction: (a, b) => ComponentDataTable.dateSort(a, b),
+        sortFunction: (a, b) => SortUtil.sortByCreatedAt(a, b),
         cell: (row) => (
           <ComponentTableUpdatedBy
             name={row.authorId.name}
@@ -262,7 +216,7 @@ export default class PageGalleryList extends Component<IPageProps, IPageState> {
         ),
       },
       {
-        name: this.props.t('size'),
+        name: t('size'),
         selector: (row) => `${row.sizeKB.toFixed(1)} KB`,
         sortable: true,
         sortFunction: (a, b) => {
@@ -270,7 +224,7 @@ export default class PageGalleryList extends Component<IPageProps, IPageState> {
         },
       },
       {
-        name: this.props.t('show'),
+        name: t('show'),
         width: '70px',
         button: true,
         cell: (row) => (
@@ -287,34 +241,29 @@ export default class PageGalleryList extends Component<IPageProps, IPageState> {
     ];
   }
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
+    return isPageLoading ? null : (
       <div className="page-gallery">
         <div className="grid-margin stretch-card">
           <div className="card">
             <div className="card-body">
               <ComponentDataTable
-                columns={this.getTableColumns}
-                data={this.state.showingItems}
-                onSelect={(rows) => this.onSelect(rows.map((item) => item._id))}
-                onSearch={(searchKey) => this.onSearch(searchKey)}
-                selectedRows={this.state.items.filter((item) =>
-                  this.state.selectedItems.includes(item._id)
-                )}
+                columns={getTableColumns()}
+                data={items}
+                onSelect={(rows) => onSelect(rows)}
                 i18={{
-                  search: this.props.t('search'),
-                  noRecords: this.props.t('noRecords'),
+                  search: t('search'),
+                  noRecords: t('noRecords'),
                 }}
                 isSelectable={true}
-                isAllSelectable={!(this.props.isModal && !this.props.isMulti)}
-                isMultiSelectable={!(this.props.isModal && !this.props.isMulti)}
+                isAllSelectable={!(props.isModal && !props.isMulti)}
+                isMultiSelectable={!(props.isModal && !props.isMulti)}
                 isSearchable={true}
-                progressPending={this.state.isListLoading}
+                progressPending={isListLoading}
               />
             </div>
           </div>
         </div>
       </div>
     );
-  }
+  
 }
