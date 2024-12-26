@@ -19,7 +19,7 @@ import {
 import ComponentToolTip from '@components/elements/tooltip';
 import dynamic from 'next/dynamic';
 import { ProductTypeId, productTypes } from '@constants/productTypes';
-import { IThemeFormSelect } from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import ComponentPagePostAddECommerce from '@components/pages/post/add/eCommerce';
 import ComponentPagePostAddButton from '@components/pages/post/add/button';
 import ComponentPagePostAddBeforeAndAfter from '@components/pages/post/add/beforeAndAfter';
@@ -49,17 +49,17 @@ const ComponentThemeRichTextBox = dynamic(
 );
 
 export type IPageState = {
-  authors: IThemeFormSelect[];
-  pageTypes: IThemeFormSelect[];
-  attributeTypes: IThemeFormSelect[];
-  productTypes: IThemeFormSelect[];
-  components: IThemeFormSelect[];
+  authors: IThemeFormSelectData[];
+  pageTypes: IThemeFormSelectData[];
+  attributeTypes: IThemeFormSelectData[];
+  productTypes: IThemeFormSelectData[];
+  components: IThemeFormSelectData[];
   mainTabActiveKey: string;
-  categories: IThemeFormSelect[];
-  tags: IThemeFormSelect[];
-  attributes: IThemeFormSelect[];
-  variations: (IThemeFormSelect & { parentId: string })[];
-  status: IThemeFormSelect[];
+  categories: IThemeFormSelectData[];
+  tags: IThemeFormSelectData[];
+  attributes: IThemeFormSelectData[];
+  variations: (IThemeFormSelectData & { parentId: string })[];
+  status: IThemeFormSelectData[];
   isSubmitting: boolean;
   mainTitle: string;
   formData: IPostUpdateWithIdParamService;

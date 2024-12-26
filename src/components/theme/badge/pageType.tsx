@@ -1,31 +1,23 @@
 import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
 import { PageTypeId, pageTypes } from '@constants/pageTypes';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@lib/hooks';
 
-type IPageState = {};
-
-type IPageProps = {
-  t: IPagePropCommon['t'];
+type IComponentProps = {
   typeId: PageTypeId;
   className?: string;
 };
 
-export default class ComponentThemeBadgePageType extends Component<
-  IPageProps,
-  IPageState
-> {
-  render() {
-    return (
-      <label
-        className={`badge badge-gradient-${getPageTypeColor(this.props.typeId)} text-start ${this.props.className ?? ''}`}
-      >
-        {this.props.t(
-          pageTypes.findSingle('id', this.props.typeId)?.langKey ??
-            '[noLangAdd]'
-        )}
-      </label>
-    );
-  }
+export default function ComponentThemeBadgePageType(props: IComponentProps) {
+  const t = useAppSelector(selectTranslation);
+
+  return (
+    <label
+      className={`badge badge-gradient-${getPageTypeColor(props.typeId)} text-start ${props.className ?? ''}`}
+    >
+      {t(pageTypes.findSingle('id', props.typeId)?.langKey ?? '[noLangAdd]')}
+    </label>
+  );
 }
 
 export function getPageTypeColor(typeId: PageTypeId): string {

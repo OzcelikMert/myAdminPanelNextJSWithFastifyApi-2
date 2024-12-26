@@ -7,14 +7,14 @@ import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateECommerceParamService } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
 import { CurrencyId, currencyTypes } from '@constants/currencyTypes';
-import { IThemeFormSelect } from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { SettingProjectionKeys } from '@constants/settingProjections';
 import { PermissionUtil } from '@utils/permission.util';
 import { ECommerceEndPointPermission } from '@constants/endPointPermissions/eCommerce.endPoint.permission';
 import { ISettingECommerceModel } from 'types/models/setting.model';
 
 type IPageState = {
-  currencyTypes: IThemeFormSelect[];
+  currencyTypes: IThemeFormSelectData[];
   isSubmitting: boolean;
   formData: ISettingUpdateECommerceParamService;
   item?: ISettingECommerceModel;

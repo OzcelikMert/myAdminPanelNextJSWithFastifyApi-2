@@ -1,31 +1,25 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
+import React from 'react';
 import { UserRoleId, userRoles } from '@constants/userRoles';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
 
-type IPageState = {};
-
-type IPageProps = {
-  t: IPagePropCommon['t'];
+type IComponentProps = {
   userRoleId: UserRoleId;
   className?: string;
 };
 
-export default class ComponentThemeBadgeUserRole extends Component<
-  IPageProps,
-  IPageState
-> {
-  render() {
-    return (
-      <label
-        className={`badge badge-gradient-${getUserRoleColor(this.props.userRoleId)} text-start ${this.props.className ?? ''}`}
-      >
-        {this.props.t(
-          userRoles.findSingle('id', this.props.userRoleId)?.langKey ??
-            '[noLangAdd]'
-        )}
-      </label>
-    );
-  }
+export default function ComponentThemeBadgeUserRole(props: IComponentProps) {
+  const t = useAppSelector(selectTranslation);
+
+  return (
+    <label
+      className={`badge badge-gradient-${getUserRoleColor(props.userRoleId)} text-start ${props.className ?? ''}`}
+    >
+      {t(
+        userRoles.findSingle('id', props.userRoleId)?.langKey ?? '[noLangAdd]'
+      )}
+    </label>
+  );
 }
 
 export function getUserRoleColor(roleId: UserRoleId): string {

@@ -1,16 +1,16 @@
 import Select from 'react-select';
 import { StateManagerProps } from 'react-select/dist/declarations/src/useStateManager';
 
-export interface IThemeFormSelect {
-  label: any;
-  value: any;
+export interface IThemeFormSelectData<T> {
+  label: string;
+  value: T;
 }
 
-type IComponentProps = {
+type IComponentProps<T> = {
   title?: string;
-} & StateManagerProps;
+} & StateManagerProps<T>;
 
-export default function ComponentFormSelect(props: IComponentProps) {
+export default function ComponentFormSelect<T>(props: IComponentProps<T>) {
   return (
     <label className="theme-input static">
       <span className="label">{props.title}</span>

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import Image from 'next/image';
@@ -7,41 +7,38 @@ import PagePostAdd, {
 } from '@pages/post/add';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import { ImageSourceUtil } from '@utils/imageSource.util';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
 
 type IComponentState = {
   mainTabActiveKey: string;
 };
 
-type IComponentProps = {
-  page: PagePostAdd;
+const initialState: IComponentState = {
+  mainTabActiveKey: 'general',
 };
 
+type IComponentProps = {
 
+};
 
-export default class ComponentPagePostAddBeforeAndAfter extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      mainTabActiveKey: 'general',
-    };
-  }
+export default function ComponentPagePostAddBeforeAndAfter(props: IComponentProps) {
+  const [mainTabActiveKey, setMainTabActiveKey] = useState<IComponentState["mainTabActiveKey"]>(initialState.mainTabActiveKey);
 
-  onChange(data: any, key: any, value: any) {
+  const t = useAppSelector(selectTranslation);
+
+  const onChange = (data: any, key: any, value: any) => {
     this.props.page.setState((state: PostPageState) => {
       data[key] = value;
       return state;
     });
   }
 
-  TabGallery = () => {
+  const TabGallery = () => {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
           <ComponentThemeChooseImage
-            {...this.props.page.props}
             onSelected={(images) =>
               this.props.page.setState((state: PostPageState) => {
                 if (state.formData.beforeAndAfter)
@@ -53,7 +50,7 @@ export default class ComponentPagePostAddBeforeAndAfter extends Component<
             selectedImages={
               this.props.page.state.formData.beforeAndAfter?.images
             }
-            showModalButtonText={this.props.page.props.t('gallery')}
+            showModalButtonText={t('gallery')}
           />
         </div>
         <div className="col-md-12 mb-3">
@@ -134,7 +131,7 @@ export default class ComponentPagePostAddBeforeAndAfter extends Component<
     );
   };
 
-  render() {
+
     return (
       <div className="grid-margin stretch-card">
         <div className="card">
@@ -169,5 +166,5 @@ export default class ComponentPagePostAddBeforeAndAfter extends Component<
         </div>
       </div>
     );
-  }
+  
 }

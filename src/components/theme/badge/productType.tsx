@@ -1,31 +1,23 @@
 import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
 import { ProductTypeId, productTypes } from '@constants/productTypes';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
 
-type IPageState = {};
-
-type IPageProps = {
-  t: IPagePropCommon['t'];
+type IComponentProps = {
   typeId: ProductTypeId;
   className?: string;
 };
 
-export default class ComponentThemeBadgeProductType extends Component<
-  IPageProps,
-  IPageState
-> {
-  render() {
-    return (
-      <label
-        className={`badge badge-gradient-${getProductTypeColor(this.props.typeId)} text-start ${this.props.className ?? ''}`}
-      >
-        {this.props.t(
-          productTypes.findSingle('id', this.props.typeId)?.langKey ??
-            '[noLangAdd]'
-        )}
-      </label>
-    );
-  }
+export default function ComponentThemeBadgeProductType(props: IComponentProps) {
+  const t = useAppSelector(selectTranslation);
+
+  return (
+    <label
+      className={`badge badge-gradient-${getProductTypeColor(props.typeId)} text-start ${props.className ?? ''}`}
+    >
+      {t(productTypes.findSingle('id', props.typeId)?.langKey ?? '[noLangAdd]')}
+    </label>
+  );
 }
 
 export function getProductTypeColor(typeId: ProductTypeId): string {

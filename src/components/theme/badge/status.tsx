@@ -1,41 +1,37 @@
 import React, { Component } from 'react';
 import { status, StatusId } from '@constants/status';
-import { IPagePropCommon } from 'types/pageProps';
 import ComponentToolTip from '@components/elements/tooltip';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
 
-type IPageState = {};
-
-type IPageProps = {
-  t: IPagePropCommon['t'];
+type IComponentProps = {
   statusId: StatusId;
   className?: string;
   date?: string;
 };
 
-export default class ComponentThemeBadgeStatus extends Component<
-  IPageProps,
-  IPageState
-> {
-  render() {
-    const langKey =
-      status.findSingle('id', this.props.statusId)?.langKey ?? '[noLangAdd]';
-    return (
-      <ComponentToolTip
-        message={
-          this.props.statusId == StatusId.Pending && this.props.date
-            ? `${this.props.t('pending')}: ${new Date(this.props.date).toLocaleDateString()}`
-            : this.props.t(langKey)
-        }
+export default function ComponentThemeBadgeStatus(props: IComponentProps) {
+  const t = useAppSelector(selectTranslation);
+
+  const langKey =
+    status.findSingle('id', props.statusId)?.langKey ?? '[noLangAdd]';
+
+  return (
+    <ComponentToolTip
+      message={
+        props.statusId == StatusId.Pending && props.date
+          ? `${t('pending')}: ${new Date(props.date).toLocaleDateString()}`
+          : t(langKey)
+      }
+    >
+      <label
+        className={`badge badge-gradient-${getStatusColor(props.statusId)} text-start ${props.className ?? ''}`}
       >
-        <label
-          className={`badge badge-gradient-${getStatusColor(this.props.statusId)} text-start ${this.props.className ?? ''}`}
-        >
-          <i className={`${getStatusIcon(this.props.statusId)} me-2`}></i>
-          {this.props.t(langKey)}
-        </label>
-      </ComponentToolTip>
-    );
-  }
+        <i className={`${getStatusIcon(props.statusId)} me-2`}></i>
+        {t(langKey)}
+      </label>
+    </ComponentToolTip>
+  );
 }
 
 export function getStatusColor(statusId: number): string {

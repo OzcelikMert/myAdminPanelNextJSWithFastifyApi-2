@@ -14,7 +14,7 @@ import {
 } from 'types/services/language.service';
 import { LanguageService } from '@services/language.service';
 import Image from 'next/image';
-import { IThemeFormSelect } from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { PermissionUtil } from '@utils/permission.util';
 import { LanguageEndPointPermission } from '@constants/endPointPermissions/language.endPoint.permission';
 import { StatusId } from '@constants/status';
@@ -26,8 +26,8 @@ import ComponentToast from '@components/elements/toast';
 
 type IPageState = {
   mainTabActiveKey: string;
-  status: IThemeFormSelect[];
-  flags: IThemeFormSelect[];
+  status: IThemeFormSelectData[];
+  flags: IThemeFormSelectData[];
   isSubmitting: boolean;
   mainTitle: string;
   item?: ILanguageGetResultService;

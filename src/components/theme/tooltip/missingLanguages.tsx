@@ -1,74 +1,78 @@
-import React, { Component } from 'react';
 import { ILanguageGetResultService } from 'types/services/language.service';
 import ComponentToolTip from '@components/elements/tooltip';
-import { IPagePropCommon } from 'types/pageProps';
+import { useEffect, useState } from 'react';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
 
-interface IItemLanguages {
-  langId: string;
-}
-
-type IPageState = {
-  missingLanguages: ILanguageGetResultService[]
+type IComponentState = {
+  missingLanguages: ILanguageGetResultService[];
 };
 
-type IPageProps = {
-  itemLanguages: IItemLanguages[] | IItemLanguages[][];
-  contentLanguages: ILanguageGetResultService[];
-  t: IPagePropCommon['t'];
-  div?: boolean
-  divClass?: string
+type IComponentProps = {
+  itemLanguages: string[] | string[][];
+  div?: boolean;
+  divClass?: string;
 };
 
-export default class ComponentThemeToolTipMissingLanguages extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      missingLanguages: []
-    };
-  }
+export default function ComponentThemeToolTipMissingLanguages(
+  props: IComponentProps
+) {
+  const [missingLanguages, setMissingLanguages] = useState<
+    IComponentState['missingLanguages']
+  >([]);
 
-  componentDidMount() {
-    this.findMissingLanguages();   
-  }
+  const t = useAppSelector(selectTranslation);
+  const languages = useAppSelector((state) => state.settingState.languages);
 
-  findMissingLanguages() {
-    let missingLanguages = this.props.contentLanguages.filter(contentLangugage => 
-      !this.props.itemLanguages.some(itemLanguage => 
-        Array.isArray(itemLanguage) 
-          ? itemLanguage.every( itemLanguageSub => contentLangugage._id == itemLanguageSub.langId)
-          : contentLangugage._id == itemLanguage.langId
-      )
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = () => {
+    setMissingLanguages(findMissingLanguages());
+  };
+
+  const findMissingLanguages = () => {
+    let missingLanguages = languages.filter(
+      (language) =>
+        !props.itemLanguages.some((itemLanguage) =>
+          Array.isArray(itemLanguage)
+            ? itemLanguage.every(
+                (itemLanguage_2) => language._id == itemLanguage_2
+              )
+            : language._id == itemLanguage
+        )
     );
 
-    this.setState({
-      missingLanguages: missingLanguages
-    })
+    return missingLanguages;
+  };
+
+  const Icon = () => {
+    return <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>;
+  };
+
+  if (missingLanguages.length == 0) {
+    return null;
   }
 
-  Icon = () => {
-    return (
-      <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>
-    );
-  }
-
-  render() {
-    if(this.state.missingLanguages.length == 0){
-      return null;
-    }
-
-
-
-    return (
-      <ComponentToolTip message={this.props.t("warningAboutMissingLanguagesWithVariable").replace("{{missingLanguages}}", this.state.missingLanguages.map(missingLanguage => missingLanguage.locale.toUpperCase()).join(", "))}>
-        {
-          this.props.div
-            ? <div className={`${this.props.divClass}`}><this.Icon /></div>
-            : <span><this.Icon />{" "}</span>
-        }
-      </ComponentToolTip>
-    );
-  }
+  return (
+    <ComponentToolTip
+      message={t('warningAboutMissingLanguagesWithVariable').replace(
+        '{{missingLanguages}}',
+        missingLanguages
+          .map((missingLanguage) => missingLanguage.locale.toUpperCase())
+          .join(', ')
+      )}
+    >
+      {props.div ? (
+        <div className={`${props.divClass}`}>
+          <Icon />
+        </div>
+      ) : (
+        <span>
+          <Icon />{' '}
+        </span>
+      )}
+    </ComponentToolTip>
+  );
 }

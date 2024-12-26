@@ -1,7 +1,7 @@
 import React, { Component, FormEvent } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { IThemeFormSelect } from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import {
   IComponentElementGetResultService,
   IComponentGetResultService,
@@ -30,8 +30,8 @@ import ComponentToast from '@components/elements/toast';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 
 type IPageState = {
-  elementTypes: IThemeFormSelect[];
-  componentTypes: IThemeFormSelect[];
+  elementTypes: IThemeFormSelectData[];
+  componentTypes: IThemeFormSelectData[];
   mainTabActiveKey: string;
   isSubmitting: boolean;
   mainTitle: string;

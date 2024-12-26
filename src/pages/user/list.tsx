@@ -3,7 +3,7 @@ import { IPagePropCommon } from 'types/pageProps';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import { IUserGetResultService } from 'types/services/user.service';
-import ComponentThemeUsersProfileCard from '@components/theme/users/profileCard';
+import ComponentThemeUsersProfileCard from '@components/theme/modal/userProfileCard';
 import { UserService } from '@services/user.service';
 import ComponentToast from '@components/elements/toast';
 import ComponentDataTable from '@components/elements/table/dataTable';

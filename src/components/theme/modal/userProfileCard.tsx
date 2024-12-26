@@ -1,8 +1,5 @@
-import React, { Component } from 'react';
 import { Modal } from 'react-bootstrap';
 import { IUserModel } from 'types/models/user.model';
-import { IPagePropCommon } from 'types/pageProps';
-import { ComponentFieldSet } from '../../elements/form';
 import Image from 'next/image';
 import ComponentThemeBadgeStatus from '@components/theme/badge/status';
 import ComponentThemeBadgeUserRole from '@components/theme/badge/userRole';
@@ -13,102 +10,98 @@ import { permissionGroups } from '@constants/permissionGroups';
 import { IPermission } from 'types/constants/permissions';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { PermissionUtil } from '@utils/permission.util';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import ComponentFieldSet from '@components/elements/fieldSet';
 
-type IPageState = {};
-
-type IPageProps = {
+type IComponentProps = {
   isShow: boolean;
   onClose: any;
   userInfo: IUserModel;
-} & IPagePropCommon;
+};
 
-class ComponentThemeUsersProfileCard extends Component<IPageProps, IPageState> {
-  SocialMedia = () => (
+export default function ComponentThemeUsersProfileCard(props: IComponentProps) {
+  const t = useAppSelector(selectTranslation);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+
+  const SocialMedia = () => (
     <ul className="social-link list-unstyled">
       <li>
-        <a href={this.props.userInfo.facebook} target="_blank" rel="noreferrer">
+        <a href={props.userInfo.facebook} target="_blank" rel="noreferrer">
           <i className="mdi mdi-facebook"></i>
         </a>
       </li>
       <li>
-        <a href={this.props.userInfo.twitter} target="_blank" rel="noreferrer">
+        <a href={props.userInfo.twitter} target="_blank" rel="noreferrer">
           <i className="mdi mdi-twitter"></i>
         </a>
       </li>
       <li>
-        <a
-          href={this.props.userInfo.instagram}
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href={props.userInfo.instagram} target="_blank" rel="noreferrer">
           <i className="mdi mdi-instagram"></i>
         </a>
       </li>
     </ul>
   );
 
-  General = () => (
+  const General = () => (
     <div className="general">
-      <h6 className="pb-1 border-bottom fw-bold text-end">
-        {this.props.t('general')}
-      </h6>
+      <h6 className="pb-1 border-bottom fw-bold text-end">{t('general')}</h6>
       <div className="row">
         <div className="col-sm-12 mb-3">
           <span className="fw-bold">
-            {this.props.t('email')}:
+            {t('email')}:
             <h6 className="text-muted d-inline-block ms-1">
-              {this.props.userInfo.email}
+              {props.userInfo.email}
             </h6>
           </span>
         </div>
         <div className="col-sm-12 mb-3">
           <span className="fw-bold">
-            {this.props.t('phone')}:
+            {t('phone')}:
             <h6 className="text-muted d-inline-block ms-1">
-              {this.props.userInfo.phone || '---'}
+              {props.userInfo.phone || '---'}
             </h6>
           </span>
         </div>
         <div className="col-sm-12 mb-3">
           <span className="fw-bold">
-            {this.props.t('role')}:
+            {t('role')}:
             <ComponentThemeBadgeUserRole
-              t={this.props.t}
-              userRoleId={this.props.userInfo.roleId}
+              userRoleId={props.userInfo.roleId}
               className="ms-1"
             />
           </span>
         </div>
         <div className="col-sm-12 mb-3">
           <span className="fw-bold">
-            {this.props.t('status')}:
+            {t('status')}:
             {
               <ComponentThemeBadgeStatus
-                t={this.props.t}
-                statusId={this.props.userInfo.statusId}
+                statusId={props.userInfo.statusId}
                 className="ms-1"
               />
             }
           </span>
         </div>
-        {this.props.userInfo.statusId == StatusId.Banned ? (
+        {props.userInfo.statusId == StatusId.Banned ? (
           <div className="col-sm-12 mb-3">
             <div className="row">
               <div className="col-sm-12 mb-3">
                 <p className="fw-bold">
-                  {this.props.t('banDateEnd')}:
+                  {t('banDateEnd')}:
                   <h6 className="text-muted d-inline-block ms-1">
                     {new Date(
-                      this.props.userInfo.banDateEnd || ''
+                      props.userInfo.banDateEnd || ''
                     ).toLocaleDateString() || ''}
                   </h6>
                 </p>
               </div>
               <div className="col-sm-12 mb-3">
                 <p className="fw-bold">
-                  {this.props.t('banComment')}:
+                  {t('banComment')}:
                   <h6 className="text-muted d-inline-block ms-1">
-                    {this.props.userInfo.banComment || '---'}
+                    {props.userInfo.banComment || '---'}
                   </h6>
                 </p>
               </div>
@@ -117,9 +110,9 @@ class ComponentThemeUsersProfileCard extends Component<IPageProps, IPageState> {
         ) : null}
         <div className="col-sm-12">
           <span className="fw-bold">
-            {this.props.t('comment')}:
+            {t('comment')}:
             <small className="fw-bold ms-1 text-muted">
-              {this.props.userInfo.comment || '---'}
+              {props.userInfo.comment || '---'}
             </small>
           </span>
         </div>
@@ -127,10 +120,10 @@ class ComponentThemeUsersProfileCard extends Component<IPageProps, IPageState> {
     </div>
   );
 
-  Permissions = () => {
+  const Permissions = () => {
     const foundPermissions = permissions.findMulti(
       'id',
-      this.props.userInfo.permissions
+      props.userInfo.permissions
     );
     let foundPermissionGroups = permissionGroups.findMulti(
       'id',
@@ -143,7 +136,7 @@ class ComponentThemeUsersProfileCard extends Component<IPageProps, IPageState> {
 
     const PermissionGroup = (props: IPermissionGroup) => (
       <div className="col-md-12 mt-3">
-        <ComponentFieldSet legend={this.props.t(props.langKey)}>
+        <ComponentFieldSet legend={t(props.langKey)}>
           <div className="row">
             {foundPermissions
               .findMulti('groupId', props.id)
@@ -158,7 +151,7 @@ class ComponentThemeUsersProfileCard extends Component<IPageProps, IPageState> {
     const PermissionItem = (props: IPermission) => (
       <div className="col-3 mt-2">
         <label className="badge badge-outline-info ms-1 mb-1">
-          {this.props.t(props.langKey)}
+          {t(props.langKey)}
         </label>
       </div>
     );
@@ -166,7 +159,7 @@ class ComponentThemeUsersProfileCard extends Component<IPageProps, IPageState> {
     return (
       <div className="permissions">
         <h6 className="pb-1 border-bottom fw-bold text-end">
-          {this.props.t('permissions')}
+          {t('permissions')}
         </h6>
         <div className="row">
           {foundPermissionGroups.orderBy('rank', 'asc').map((group) => (
@@ -177,56 +170,52 @@ class ComponentThemeUsersProfileCard extends Component<IPageProps, IPageState> {
     );
   };
 
-  render() {
-    return (
-      <Modal
-        size="lg"
-        centered
-        show={this.props.isShow}
-        backdrop={true}
-        onHide={this.props.onClose}
-      >
-        <Modal.Body className="m-0 p-0">
-          <div className="card user-card">
-            <div className="row ms-0 me-0 user-card-body">
-              <div className="col-sm-4 user-profile bg-gradient-primary">
-                <h5 className="exit-icon" onClick={this.props.onClose}>
-                  <i className="mdi mdi-close"></i>
-                </h5>
-                <div className="card-block text-center text-light mt-5">
-                  <div className="mb-4">
-                    <Image
-                      src={ImageSourceUtil.getUploadedImageSrc(
-                        this.props.userInfo.image
-                      )}
-                      className="user-img img-fluid"
-                      alt={this.props.userInfo.name}
-                      width={100}
-                      height={100}
-                    />
-                  </div>
-                  <h4 className="fw-bold pt-3">{this.props.userInfo.name}</h4>
-                  <this.SocialMedia />
+  return (
+    <Modal
+      size="lg"
+      centered
+      show={props.isShow}
+      backdrop={true}
+      onHide={props.onClose}
+    >
+      <Modal.Body className="m-0 p-0">
+        <div className="card user-card">
+          <div className="row ms-0 me-0 user-card-body">
+            <div className="col-sm-4 user-profile bg-gradient-primary">
+              <h5 className="exit-icon" onClick={props.onClose}>
+                <i className="mdi mdi-close"></i>
+              </h5>
+              <div className="card-block text-center text-light mt-5">
+                <div className="mb-4">
+                  <Image
+                    src={ImageSourceUtil.getUploadedImageSrc(
+                      props.userInfo.image
+                    )}
+                    className="user-img img-fluid"
+                    alt={props.userInfo.name}
+                    width={100}
+                    height={100}
+                  />
                 </div>
+                <h4 className="fw-bold pt-3">{props.userInfo.name}</h4>
+                <SocialMedia />
               </div>
-              <div className="col-sm-8 position-relative card-profile-title">
-                <div className="p-2">
-                  <this.General />
-                  {PermissionUtil.checkPermissionRoleRank(
-                    this.props.getStateApp.sessionAuth!.user.roleId,
-                    this.props.userInfo.roleId,
-                    true
-                  ) ? (
-                    <this.Permissions />
-                  ) : null}
-                </div>
+            </div>
+            <div className="col-sm-8 position-relative card-profile-title">
+              <div className="p-2">
+                <General />
+                {PermissionUtil.checkPermissionRoleRank(
+                  sessionAuth!.user.roleId,
+                  props.userInfo.roleId,
+                  true
+                ) ? (
+                  <Permissions />
+                ) : null}
               </div>
             </div>
           </div>
-        </Modal.Body>
-      </Modal>
-    );
-  }
+        </div>
+      </Modal.Body>
+    </Modal>
+  );
 }
-
-export default ComponentThemeUsersProfileCard;

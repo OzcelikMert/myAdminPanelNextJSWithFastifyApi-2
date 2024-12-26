@@ -4,12 +4,12 @@ const getApiURL = () => {
   return api;
 };
 
-const getImageURL = () => {
-  return `${getApiURL()}/uploads/images/`;
+const getImageURL = (image?: string) => {
+  return `${getApiURL()}/uploads/images/${image}`;
 };
 
-const getFlagURL = () => {
-  return `${getApiURL()}/uploads/flags/`;
+const getFlagURL = (flag?: string) => {
+  return `${getApiURL()}/uploads/flags/${flag}`;
 };
 
 const createPath = (...paths: (number | string | undefined)[]) => {
