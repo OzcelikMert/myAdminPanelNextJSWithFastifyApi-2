@@ -1,6 +1,4 @@
-import React, { Component } from 'react';
 import dynamic from 'next/dynamic';
-import { IPagePropCommon } from 'types/pageProps';
 import { TableColumn } from 'react-data-table-component';
 import { IPostGetManyResultService } from 'types/services/post.service';
 import { PostService } from '@services/post.service';
@@ -22,154 +20,194 @@ import { PostSortTypeId } from '@constants/postSortTypes';
 import { ISettingGetResultService } from 'types/services/setting.service';
 import { SettingService } from '@services/setting.service';
 import { SettingProjectionKeys } from '@constants/settingProjections';
+import { useEffect, useReducer } from 'react';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { useRouter } from 'next/router';
 
 const WorldMap = dynamic(() => import('react-svg-worldmap'), { ssr: false });
 
-type IPageState = {
+type IComponentState = {
   lastPosts: IPostGetManyResultService[];
-  visitorData: {
-    number: IViewGetNumberResultService;
-    statistics: IViewGetStatisticsResultService;
-  };
+  viewsWithNumber: IViewGetNumberResultService;
+  viewsWithStatistics: IViewGetStatisticsResultService;
   worldMapSize: 'lg' | 'xl' | 'xxl';
-  settings: ISettingGetResultService
+  settings: ISettingGetResultService;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  lastPosts: [],
+  viewsWithNumber: {
+    liveTotal: 0,
+    averageTotal: 0,
+    weeklyTotal: 0,
+  },
+  viewsWithStatistics: {
+    day: [],
+    country: [],
+  },
+  worldMapSize: 'lg',
+  settings: {},
+};
 
-class PageDashboard extends Component<IPageProps, IPageState> {
-  timer: any;
-  abortController = new AbortController();
-
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      lastPosts: [],
-      visitorData: {
-        number: {
-          liveTotal: 0,
-          weeklyTotal: 0,
-          averageTotal: 0,
-        },
-        statistics: {
-          day: [],
-          country: [],
-        },
-      },
-      worldMapSize: 'lg',
-      settings: {}
-    };
-  }
-
-  async componentDidMount() {
-    this.setPageTitle();
-    await this.getViewNumber();
-    await this.getViewStatistics();
-    await this.getSettings();
-    await this.getLastPosts();
-    this.props.setStateApp(
-      {
-        isPageLoading: false,
-      },
-      () => {
-        this.reportTimer();
-      }
-    );
-  }
-
-  componentWillUnmount() {
-    this.abortController.abort();
-    clearInterval(this.timer);
-  }
-
-  setPageTitle() {
-    this.props.setBreadCrumb([this.props.t('dashboard')]);
-  }
-
-  reportTimer() {
-    if (this.timer) {
-      clearInterval(this.timer);
+type IAction =
+  | { type: 'SET_LAST_POSTS'; payload: IComponentState['lastPosts'] }
+  | {
+      type: 'SET_VIEWS_WITH_NUMBER';
+      payload: IComponentState['viewsWithNumber'];
     }
-    this.timer = setInterval(async () => {
-      await this.getViewNumber();
-    }, 10000);
-  }
+  | {
+      type: 'SET_VIEWS_WITH_STATISTICS';
+      payload: IComponentState['viewsWithStatistics'];
+    }
+  | { type: 'SET_WORLD_MAP_SIZE'; payload: IComponentState['worldMapSize'] }
+  | { type: 'SET_SETTINGS'; payload: IComponentState['settings'] };
 
-  async getViewNumber() {
-    const serviceResult = await ViewService.getNumber(
-      this.abortController.signal
+function reducer(state: IComponentState, action: IAction): IComponentState {
+  switch (action.type) {
+    case 'SET_LAST_POSTS':
+      return { ...state, lastPosts: action.payload };
+    case 'SET_VIEWS_WITH_NUMBER':
+      return { ...state, viewsWithNumber: action.payload };
+    case 'SET_VIEWS_WITH_STATISTICS':
+      return { ...state, viewsWithStatistics: action.payload };
+    case 'SET_WORLD_MAP_SIZE':
+      return { ...state, worldMapSize: action.payload };
+    case 'SET_SETTINGS':
+      return { ...state, settings: action.payload };
+    default:
+      return state;
+  }
+}
+
+export default function PageDashboard() {
+  let timer: NodeJS.Timeout | null = null;
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+      abortController.abort();
+    };
+  }, []);
+
+  const init = async () => {
+    setPageTitle();
+    await getViewNumber();
+    await getViewStatistics();
+    await getSettings();
+    await getLastPosts();
+    appDispatch(setIsPageLoadingState(false));
+    reportTimer();
+  };
+
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('dashboard'),
+        },
+      ])
     );
+  };
+
+  const reportTimer = () => {
+    if (timer) {
+      clearInterval(timer);
+    }
+    timer = setInterval(async () => {
+      await getViewNumber();
+    }, 10000);
+  };
+
+  const getViewNumber = async () => {
+    const serviceResult = await ViewService.getNumber(abortController.signal);
 
     if (serviceResult.status && serviceResult.data) {
       if (
-        JSON.stringify(this.state.visitorData.number) !=
+        JSON.stringify(state.viewsWithNumber) !=
         JSON.stringify(serviceResult.data)
       ) {
-        this.setState((state: IPageState) => {
-          state.visitorData.number = serviceResult.data!;
-          return state;
+        dispatch({
+          type: 'SET_VIEWS_WITH_NUMBER',
+          payload: serviceResult.data,
         });
       }
     }
-  }
+  };
 
-  async getViewStatistics() {
+  const getViewStatistics = async () => {
     const serviceResult = await ViewService.getStatistics(
-      this.abortController.signal
+      abortController.signal
     );
 
     if (serviceResult.status && serviceResult.data) {
-      this.setState((state: IPageState) => {
-        state.visitorData.statistics = serviceResult.data!;
-        return state;
+      dispatch({
+        type: 'SET_VIEWS_WITH_STATISTICS',
+        payload: serviceResult.data,
       });
     }
-  }
+  };
 
-  async getSettings() {
+  const getSettings = async () => {
     const serviceResult = await SettingService.get(
       {
-        projection: SettingProjectionKeys.General
+        projection: SettingProjectionKeys.General,
       },
-      this.abortController.signal
+      abortController.signal
     );
 
-    if(serviceResult.status && serviceResult.data){
-      this.setState((state: IPageState) => {
-          state.settings = serviceResult.data!;
-          return state;
+    if (serviceResult.status && serviceResult.data) {
+      dispatch({
+        type: 'SET_SETTINGS',
+        payload: serviceResult.data,
       });
     }
-  }
+  };
 
-  async getLastPosts() {
+  const getLastPosts = async () => {
     const serviceResult = await PostService.getMany(
       {
-        langId: this.props.getStateApp.appData.mainLangId,
+        langId: mainLangId,
         count: 10,
         sortTypeId: PostSortTypeId.Newest,
       },
-      this.abortController.signal
+      abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
-      this.setState({
-        lastPosts: serviceResult.data,
+      dispatch({
+        type: 'SET_LAST_POSTS',
+        payload: serviceResult.data,
       });
     }
-  }
+  };
 
-  setWorldMapSize(size: IPageState['worldMapSize']) {
-    this.setState({
-      worldMapSize: size,
+  const setWorldMapSize = (size: IComponentState['worldMapSize']) => {
+    dispatch({
+      type: 'SET_WORLD_MAP_SIZE',
+      payload: size,
     });
-  }
+  };
 
-  async navigatePostPage(
+  const navigatePostPage = async (
     type: 'termEdit' | 'edit' | 'listPost',
     postTypeId: number,
     itemId = '',
     termTypeId = 0
-  ) {
+  ) => {
     const pagePath = PostUtil.getPagePath(postTypeId);
     let path = '';
     switch (type) {
@@ -183,13 +221,15 @@ class PageDashboard extends Component<IPageProps, IPageState> {
         path = pagePath.LIST;
         break;
     }
-    await RouteUtil.change({ props: this.props, path: path });
-  }
+    await RouteUtil.change({ path, router, appDispatch });
+  };
 
-  get getLastPostTableColumns(): TableColumn<IPageState['lastPosts'][0]>[] {
+  const getLastPostTableColumns = (): TableColumn<
+    IComponentState['lastPosts'][0]
+  >[] => {
     return [
       {
-        name: this.props.t('image'),
+        name: t('image'),
         width: '105px',
         cell: (row) => (
           <div className="image pt-2 pb-2">
@@ -204,37 +244,33 @@ class PageDashboard extends Component<IPageProps, IPageState> {
         ),
       },
       {
-        name: this.props.t('title'),
-        selector: (row) => row.contents?.title || this.props.t('[noLangAdd]'),
+        name: t('title'),
+        selector: (row) => row.contents?.title || t('[noLangAdd]'),
         sortable: true,
       },
       {
-        name: this.props.t('type'),
+        name: t('type'),
         selector: (row) => row.typeId,
         sortable: true,
         cell: (row) => (
           <label
-            onClick={() =>
-              this.navigatePostPage('listPost', row.typeId, row._id)
-            }
+            onClick={() => navigatePostPage('listPost', row.typeId, row._id)}
             className={`badge badge-gradient-primary cursor-pointer`}
           >
-            {this.props.t(
+            {t(
               postTypes.findSingle('id', row.typeId)?.langKey ?? '[noLangAdd]'
             )}
           </label>
         ),
       },
       {
-        name: this.props.t('status'),
+        name: t('status'),
         selector: (row) => row.statusId,
         sortable: true,
-        cell: (row) => (
-          <ComponentThemeBadgeStatus t={this.props.t} statusId={row.statusId} />
-        ),
+        cell: (row) => <ComponentThemeBadgeStatus statusId={row.statusId} />,
       },
       {
-        name: this.props.t('updatedBy'),
+        name: t('updatedBy'),
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
@@ -244,9 +280,9 @@ class PageDashboard extends Component<IPageProps, IPageState> {
         ),
       },
     ];
-  }
+  };
 
-  Reports = () => {
+  const Reports = () => {
     return (
       <div className="col-12 grid-margin">
         <div className="card card-statistics">
@@ -257,11 +293,11 @@ class PageDashboard extends Component<IPageProps, IPageState> {
                   <i className="mdi mdi-account-multiple-outline text-primary ms-0 me-sm-4 icon-lg"></i>
                   <div className="wrapper text-center text-sm-end">
                     <p className="card-text mb-0 text-dark">
-                      {this.props.t('currentVisitors')}
+                      {t('currentVisitors')}
                     </p>
                     <div className="fluid-container">
                       <h3 className="mb-0 font-weight-medium text-dark">
-                        {this.state.visitorData.number.liveTotal}
+                        {state.viewsWithNumber.liveTotal}
                       </h3>
                     </div>
                   </div>
@@ -274,11 +310,11 @@ class PageDashboard extends Component<IPageProps, IPageState> {
                   <i className="mdi mdi-target text-primary ms-0 me-sm-4 icon-lg"></i>
                   <div className="wrapper text-center text-sm-end">
                     <p className="card-text mb-0 text-dark">
-                      {this.props.t('dailyAverageVisitors')}
+                      {t('dailyAverageVisitors')}
                     </p>
                     <div className="fluid-container">
                       <h3 className="mb-0 font-weight-medium text-dark">
-                        {this.state.visitorData.number.averageTotal}
+                        {state.viewsWithNumber.averageTotal}
                       </h3>
                     </div>
                   </div>
@@ -291,11 +327,11 @@ class PageDashboard extends Component<IPageProps, IPageState> {
                   <i className="mdi mdi-calendar-week text-primary ms-0 me-sm-4 icon-lg"></i>
                   <div className="wrapper text-center text-sm-end">
                     <p className="card-text mb-0 text-dark">
-                      {this.props.t('weeklyTotalVisitors')}
+                      {t('weeklyTotalVisitors')}
                     </p>
                     <div className="fluid-container">
                       <h3 className="mb-0 font-weight-medium text-dark">
-                        {this.state.visitorData.number.weeklyTotal}
+                        {state.viewsWithNumber.weeklyTotal}
                       </h3>
                     </div>
                   </div>
@@ -308,16 +344,19 @@ class PageDashboard extends Component<IPageProps, IPageState> {
                   <i className="mdi mdi-google-analytics text-primary ms-0 me-sm-4 icon-lg"></i>
                   <div className="wrapper text-center text-sm-end">
                     <p className="card-text mb-0 text-dark">
-                      {this.props.t('lifeTimeVisitors')}
+                      {t('lifeTimeVisitors')}
                     </p>
                     <div className="fluid-container">
                       <h3 className="mb-0 font-weight-medium text-dark">
                         <a
                           target="_blank"
                           className="text-info fs-6 text-decoration-none"
-                          href={this.state.settings.googleAnalyticURL ?? "javascript:void(0);"}
+                          href={
+                            state.settings.googleAnalyticURL ??
+                            'javascript:void(0);'
+                          }
                         >
-                          {this.props.t('clickToSee')}
+                          {t('clickToSee')}
                         </a>
                       </h3>
                     </div>
@@ -331,7 +370,7 @@ class PageDashboard extends Component<IPageProps, IPageState> {
     );
   };
 
-  ReportTwo = () => {
+  const ReportTwo = () => {
     return (
       <div className="row">
         <div className="col-md-7 grid-margin stretch-card">
@@ -339,18 +378,14 @@ class PageDashboard extends Component<IPageProps, IPageState> {
             <div className="card-body">
               <div className="clearfix mb-4">
                 <h4 className="card-title float-start">
-                  {this.props.t('weeklyVisitorsStatistics')}
+                  {t('weeklyVisitorsStatistics')}
                 </h4>
               </div>
               <div className="chart-container">
                 <ComponentChartArea
-                  toolTipLabel={this.props.t('visitors')}
-                  data={this.state.visitorData.statistics.day.map(
-                    (view) => view.total
-                  )}
-                  labels={this.state.visitorData.statistics.day.map(
-                    (view) => view._id
-                  )}
+                  toolTipLabel={t('visitors')}
+                  data={state.viewsWithStatistics.day.map((view) => view.total)}
+                  labels={state.viewsWithStatistics.day.map((view) => view._id)}
                 />
               </div>
             </div>
@@ -360,17 +395,14 @@ class PageDashboard extends Component<IPageProps, IPageState> {
           <div className="card">
             <div className="card-body overflow-auto">
               <h4 className="card-title">
-                {this.props.t('weeklyVisitorsStatistics')} (
-                {this.props.t('worldMap')})
+                {t('weeklyVisitorsStatistics')} ({t('worldMap')})
               </h4>
               <div className="row d-none d-lg-block">
                 <div className="col-md-12 text-end">
                   <button
                     className="btn btn-gradient-success btn-sm"
                     onClick={() =>
-                      this.setWorldMapSize(
-                        this.state.worldMapSize == 'xl' ? 'xxl' : 'xl'
-                      )
+                      setWorldMapSize(state.worldMapSize == 'xl' ? 'xxl' : 'xl')
                     }
                   >
                     <i className="fa fa-search-plus"></i>
@@ -378,9 +410,7 @@ class PageDashboard extends Component<IPageProps, IPageState> {
                   <button
                     className="btn btn-gradient-danger btn-sm"
                     onClick={() =>
-                      this.setWorldMapSize(
-                        this.state.worldMapSize == 'xxl' ? 'xl' : 'lg'
-                      )
+                      setWorldMapSize(state.worldMapSize == 'xxl' ? 'xl' : 'lg')
                     }
                   >
                     <i className="fa fa-search-minus"></i>
@@ -395,15 +425,13 @@ class PageDashboard extends Component<IPageProps, IPageState> {
                   strokeOpacity={0.4}
                   backgroundColor="var(--theme-bg)"
                   value-suffix="people"
-                  size={this.state.worldMapSize}
-                  data={this.state.visitorData.statistics.country.map(
-                    (view) => ({
-                      country: (
-                        view._id || window.navigator.language.slice(3)
-                      ).toLowerCase(),
-                      value: view.total,
-                    })
-                  )}
+                  size={state.worldMapSize}
+                  data={state.viewsWithStatistics.country.map((view) => ({
+                    country: (
+                      view._id || window.navigator.language.slice(3)
+                    ).toLowerCase(),
+                    value: view.total,
+                  }))}
                 />
               </div>
             </div>
@@ -413,20 +441,20 @@ class PageDashboard extends Component<IPageProps, IPageState> {
     );
   };
 
-  LastPost = () => {
+  const LastPost = () => {
     return (
       <div className="row page-post">
         <div className="col-12 grid-margin">
           <div className="card">
             <div className="card-body">
-              <h4 className="card-title">{this.props.t('lastPosts')}</h4>
+              <h4 className="card-title">{t('lastPosts')}</h4>
               <div className="table-post">
                 <ComponentDataTable
-                  columns={this.getLastPostTableColumns}
-                  data={this.state.lastPosts}
+                  columns={getLastPostTableColumns()}
+                  data={state.lastPosts}
                   i18={{
-                    search: this.props.t('search'),
-                    noRecords: this.props.t('noRecords'),
+                    search: t('search'),
+                    noRecords: t('noRecords'),
                   }}
                 />
               </div>
@@ -437,15 +465,11 @@ class PageDashboard extends Component<IPageProps, IPageState> {
     );
   };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-dashboard">
-        <this.Reports />
-        <this.ReportTwo />
-        <this.LastPost />
-      </div>
-    );
-  }
+  return isPageLoading ? null : (
+    <div className="page-dashboard">
+      <Reports />
+      <ReportTwo />
+      <LastPost />
+    </div>
+  );
 }
-
-export default PageDashboard;
