@@ -226,7 +226,7 @@ export default function PageGalleryUpload(props: IComponentProps) {
                     hidden={true}
                     onChange={(event) => onChangeFile(event)}
                     multiple={true}
-                    name="formData.image[]"
+                    name="image[]"
                     accept=".jpg,.png,.gif,.jpeg"
                   />
                   <div className="icons">

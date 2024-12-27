@@ -147,7 +147,7 @@ export default class ComponentPagePostAddChooseTag extends Component<
           <div className="col-md-10">
             <ComponentFormSelect
               title={this.props.page.props.t('tag')}
-              name="formData.tags"
+              name="tags"
               placeholder={this.props.page.props
                 .t('chooseTag')
                 .toCapitalizeCase()}

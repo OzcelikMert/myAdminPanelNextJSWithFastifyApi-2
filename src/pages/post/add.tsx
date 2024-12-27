@@ -565,7 +565,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
           <div className="col-md-7 mb-3">
             <ComponentFormSelect
               title={this.props.t('status')}
-              name="formData.statusId"
+              name="statusId"
               options={this.state.status}
               value={this.state.status?.findSingle(
                 'value',
@@ -582,7 +582,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
             <ComponentFormType
               title={`${this.props.t('startDate').toCapitalizeCase()}*`}
               type="date"
-              name="formData.dateStart"
+              name="dateStart"
               value={moment(this.state.formData.dateStart).format('YYYY-MM-DD')}
               onChange={(event) => HandleFormLibrary.onChangeInput(event, this)}
             />
@@ -591,7 +591,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('rank')}
-            name="formData.rank"
+            name="rank"
             type="number"
             required={true}
             value={this.state.formData.rank}
@@ -603,7 +603,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
           <div className="col-md-7 mb-3">
             <ComponentFormSelect
               title={this.props.t('pageType')}
-              name="formData.pageTypeId"
+              name="pageTypeId"
               options={this.state.pageTypes}
               value={this.state.pageTypes?.findSingle(
                 'value',
@@ -625,7 +625,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
           <div className="col-md-7 mb-3">
             <ComponentFormSelect
               title={this.props.t('authors')}
-              name="formData.authors"
+              name="authors"
               isMulti
               closeMenuOnSelect={false}
               options={this.state.authors}
@@ -641,7 +641,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormCheckBox
             title={this.props.t('isFixed')}
-            name="formData.isFixed"
+            name="isFixed"
             checked={Boolean(this.state.formData.isFixed)}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
           />
@@ -651,7 +651,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
           <div className="col-md-7">
             <ComponentFormCheckBox
               title={this.props.t('noIndex')}
-              name="formData.isNoIndex"
+              name="isNoIndex"
               checked={Boolean(this.state.formData.isNoIndex)}
               onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
             />
@@ -704,7 +704,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
           <div className="col-md-7 mb-3">
             <ComponentFormType
               title={`${this.props.t('icon')}`}
-              name="formData.contents.icon"
+              name="contents.icon"
               type="text"
               value={this.state.formData.contents.icon}
               onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -737,7 +737,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('title')}*`}
-            name="formData.contents.title"
+            name="contents.title"
             type="text"
             required={true}
             value={this.state.formData.contents.title}
@@ -747,7 +747,7 @@ export default class PagePostAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('shortContent').toCapitalizeCase()}
-            name="formData.contents.shortContent"
+            name="contents.shortContent"
             type="textarea"
             value={this.state.formData.contents.shortContent}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}

@@ -1,12 +1,12 @@
 import Select from 'react-select';
 import { StateManagerProps } from 'react-select/dist/declarations/src/useStateManager';
 
-export interface IThemeFormSelectData<T> {
+export interface IThemeFormSelectData<T = any> {
   label: string;
   value: T;
 }
 
-type IComponentProps<T> = {
+type IComponentProps<T = any> = {
   title?: string;
 } & StateManagerProps<T>;
 

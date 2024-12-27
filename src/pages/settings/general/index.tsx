@@ -180,7 +180,7 @@ export default class PageSettingsGeneral extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('head')}
-            name="formData.head"
+            name="head"
             type="textarea"
             value={this.state.formData.head}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -189,7 +189,7 @@ export default class PageSettingsGeneral extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('script')}
-            name="formData.script"
+            name="script"
             type="textarea"
             value={this.state.formData.script}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -198,7 +198,7 @@ export default class PageSettingsGeneral extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('googleAnalyticURL')}
-            name="formData.googleAnalyticURL"
+            name="googleAnalyticURL"
             type="url"
             value={this.state.formData.googleAnalyticURL}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -214,7 +214,7 @@ export default class PageSettingsGeneral extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('email')}
-            name="formData.contact.email"
+            name="contact.email"
             type="email"
             value={this.state.formData.contact?.email}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -223,7 +223,7 @@ export default class PageSettingsGeneral extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('phone')}
-            name="formData.contact.phone"
+            name="contact.phone"
             type="tel"
             value={this.state.formData.contact?.phone}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -232,7 +232,7 @@ export default class PageSettingsGeneral extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('address')}
-            name="formData.contact.address"
+            name="contact.address"
             type="text"
             value={this.state.formData.contact?.address}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -241,7 +241,7 @@ export default class PageSettingsGeneral extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('addressMap')}
-            name="formData.contact.addressMap"
+            name="contact.addressMap"
             type="text"
             value={this.state.formData.contact?.addressMap}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -308,7 +308,7 @@ export default class PageSettingsGeneral extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.t('adminPanelLanguage').toCapitalizeCase()}
-            name="formData.panelLangId"
+            name="panelLangId"
             isMulti={false}
             isSearchable={false}
             options={this.state.panelLanguages}

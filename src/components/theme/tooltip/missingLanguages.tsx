@@ -8,8 +8,12 @@ type IComponentState = {
   missingLanguages: ILanguageGetResultService[];
 };
 
+type IItemLanguage = {
+  langId: string;
+};
+
 type IComponentProps = {
-  itemLanguages: string[] | string[][];
+  itemLanguages: IItemLanguage[] | IItemLanguage[][];
   div?: boolean;
   divClass?: string;
 };
@@ -38,9 +42,9 @@ export default function ComponentThemeToolTipMissingLanguages(
         !props.itemLanguages.some((itemLanguage) =>
           Array.isArray(itemLanguage)
             ? itemLanguage.every(
-                (itemLanguage_2) => language._id == itemLanguage_2
+                (itemLanguage_2) => language._id == itemLanguage_2.langId
               )
-            : language._id == itemLanguage
+            : language._id == itemLanguage.langId
         )
     );
 

@@ -149,7 +149,7 @@ export default class ComponentPagePostAddChooseCategory extends Component<
           <div className="col-md-10">
             <ComponentFormSelect
               title={this.props.page.props.t('category')}
-              name="formData.categories"
+              name="categories"
               placeholder={this.props.page.props
                 .t('chooseCategory')
                 .toCapitalizeCase()}

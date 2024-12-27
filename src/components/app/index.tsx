@@ -88,28 +88,28 @@ export default function ComponentProviderNoSSR({
         <ComponentSpinnerDonut customClass="app-spinner" />
       ) : null}
       <ComponentProviderAppInit>
-        <div className="container-scroller">
-          {![EndPoints.LOGIN].includes(router.pathname) && appState.isLock ? (
-            <ComponentToolLock />
-          ) : null}
-          <ToastContainer />
-          {!isFullPageLayout ? <ComponentToolNavbar /> : null}
-          <div
-            className={`container-fluid page-body-wrapper ${isFullPageLayout ? 'full-page-wrapper' : ''}`}
-          >
-            {!isFullPageLayout ? <ComponentToolSidebar /> : null}
-            <div className="main-panel">
-              <div className="content-wrapper">
-                {isPageLoading ? (
-                  <ComponentSpinnerDonut customClass="page-spinner" />
-                ) : null}
-                {!isFullPageLayout ? <PageHeader /> : null}
-                <ComponentProviderAuth>{children}</ComponentProviderAuth>
+        <ComponentProviderAuth>
+          <div className="container-scroller">
+            {appState.isLock ? <ComponentToolLock /> : null}
+            <ToastContainer />
+            {!isFullPageLayout ? <ComponentToolNavbar /> : null}
+            <div
+              className={`container-fluid page-body-wrapper ${isFullPageLayout ? 'full-page-wrapper' : ''}`}
+            >
+              {!isFullPageLayout ? <ComponentToolSidebar /> : null}
+              <div className="main-panel">
+                <div className="content-wrapper">
+                  {isPageLoading ? (
+                    <ComponentSpinnerDonut customClass="page-spinner" />
+                  ) : null}
+                  {!isFullPageLayout ? <PageHeader /> : null}
+                  {children}
+                </div>
+                {!isFullPageLayout ? <ComponentToolFooter /> : null}
               </div>
-              {!isFullPageLayout ? <ComponentToolFooter /> : null}
             </div>
           </div>
-        </div>
+        </ComponentProviderAuth>
       </ComponentProviderAppInit>
     </div>
   );

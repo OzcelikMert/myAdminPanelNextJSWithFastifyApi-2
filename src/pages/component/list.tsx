@@ -19,25 +19,20 @@ import { useAppDispatch, useAppSelector } from '@lib/hooks';
 import { selectTranslation } from '@lib/features/translationSlice';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { SortUtil } from '@utils/sort.util';
 
 type IComponentState = {
-  searchKey: string;
   items: IComponentGetResultService[];
-  showingItems: IComponentGetResultService[];
 };
 
 const initialState: IComponentState = {
-  searchKey: '',
   items: [],
-  showingItems: [],
 };
 
 export default function PageComponentList() {
   const abortController = new AbortController();
 
-  const [searchKey, setSearchKey] = useState(initialState.searchKey);
   const [items, setItems] = useState(initialState.items);
-  const [showingItems, setShowingItems] = useState(initialState.showingItems);
 
   const router = useRouter();
 
@@ -46,45 +41,44 @@ export default function PageComponentList() {
   const t = useAppSelector(selectTranslation);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
-  const mainLangId = useAppSelector(state => state.settingState.mainLangId);
-  const languages = useAppSelector(state => state.settingState.languages);
+  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
   useEffect(() => {
     init();
 
     return () => {
       abortController.abort();
-    }
+    };
   }, []);
 
   const init = async () => {
     if (
-      PermissionUtil.checkAndRedirect(
+      PermissionUtil.checkAndRedirect({
         router,
         appDispatch,
         t,
         sessionAuth,
-        ComponentEndPointPermission.GET
-      )
+        minPermission: ComponentEndPointPermission.GET,
+      })
     ) {
       setPageTitle();
       await getItems();
       appDispatch(setIsPageLoadingState(false));
     }
-  }
+  };
 
   const setPageTitle = () => {
-    appDispatch(setBreadCrumbState([
-      {
-        title: t('components'),
-        url: EndPoints.COMPONENT_WITH.LIST,
-      },
-      {
-        title: t('list'),
-        url: EndPoints.COMPONENT_WITH.LIST,
-      }
-    ]));
-  }
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('components')
+        },
+        {
+          title: t('list')
+        },
+      ])
+    );
+  };
 
   const getItems = async () => {
     const result = await ComponentService.getMany(
@@ -96,9 +90,8 @@ export default function PageComponentList() {
 
     if (result.status && result.data) {
       setItems(result.data);
-      setShowingItems(result.data);
     }
-  }
+  };
 
   const onDelete = async (_id: string) => {
     const item = items.findSingle('_id', _id);
@@ -124,7 +117,6 @@ export default function PageComponentList() {
         loadingToast.hide();
         if (serviceResult.status) {
           setItems(items.filter((item) => _id !== item._id));
-          onSearch(searchKey);
           new ComponentToast({
             type: 'success',
             title: t('successful'),
@@ -133,16 +125,7 @@ export default function PageComponentList() {
         }
       }
     }
-  }
-
-  const onSearch = (searchKey: string) => {
-    setSearchKey(searchKey);
-    setShowingItems(
-      items.filter(
-        (item) => (item?.title ?? '').toLowerCase().search(searchKey) > -1
-      )
-    );
-  }
+  };
 
   const navigatePage = async (type: 'edit', itemId = '') => {
     const pagePath = EndPoints.COMPONENT_WITH;
@@ -155,9 +138,9 @@ export default function PageComponentList() {
         });
         break;
     }
-  }
+  };
 
-  const getTableColumns = (): TableColumn<IComponentState['showingItems'][0]>[] => {
+  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
     return [
       {
         name: t('title'),
@@ -168,15 +151,16 @@ export default function PageComponentList() {
               <div className="col-md-12">
                 {
                   <ComponentThemeToolTipMissingLanguages
-                    itemLanguages={row.elements.map(element => element.alternates ?? []) ?? []}
-                    contentLanguages={languages}
-                    t={t}
+                    itemLanguages={
+                      row.elements.map((element) => element.alternates ?? []) ??
+                      []
+                    }
                   />
                 }
                 {row.title}
-                </div>
+              </div>
             </div>
-          )
+          );
         },
         sortable: true,
       },
@@ -196,7 +180,6 @@ export default function PageComponentList() {
         selector: (row) => row.typeId,
         cell: (row) => (
           <ComponentThemeBadgeComponentType
-            t={t}
             typeId={row.typeId || ComponentTypeId.Private}
           />
         ),
@@ -216,7 +199,7 @@ export default function PageComponentList() {
         name: t('createdDate'),
         sortable: true,
         selector: (row) => new Date(row.createdAt || '').toLocaleDateString(),
-        sortFunction: (a, b) => ComponentDataTable.dateSort(a, b),
+        sortFunction: (a, b) => SortUtil.sortByCreatedAt(a, b),
         cell: (row) => (
           <ComponentTableUpdatedBy
             name={row.authorId.name}
@@ -224,10 +207,7 @@ export default function PageComponentList() {
           />
         ),
       },
-      PermissionUtil.check(
-        sessionAuth!,
-        ComponentEndPointPermission.UPDATE
-      )
+      PermissionUtil.check(sessionAuth!, ComponentEndPointPermission.UPDATE)
         ? {
             name: '',
             width: '70px',
@@ -242,10 +222,7 @@ export default function PageComponentList() {
             ),
           }
         : {},
-      PermissionUtil.check(
-        sessionAuth!,
-        ComponentEndPointPermission.DELETE
-      )
+      PermissionUtil.check(sessionAuth!, ComponentEndPointPermission.DELETE)
         ? {
             name: '',
             width: '70px',
@@ -261,7 +238,7 @@ export default function PageComponentList() {
           }
         : {},
     ];
-  }
+  };
 
   return isPageLoading ? null : (
     <div className="page-component">
@@ -273,13 +250,12 @@ export default function PageComponentList() {
                 columns={getTableColumns().filter(
                   (column) => typeof column.name !== 'undefined'
                 )}
-                data={showingItems}
+                data={items}
                 i18={{
                   search: t('search'),
                   noRecords: t('noRecords'),
                 }}
                 isSearchable={true}
-                onSearch={(searchKey) => onSearch(searchKey)}
               />
             </div>
           </div>

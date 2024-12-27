@@ -332,7 +332,7 @@ export default class PagePostTermAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.t('status')}
-            name="formData.statusId"
+            name="statusId"
             options={this.state.status}
             value={this.state.status?.findSingle(
               'value',
@@ -346,7 +346,7 @@ export default class PagePostTermAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('rank')}
-            name="formData.rank"
+            name="rank"
             type="number"
             required={true}
             value={this.state.formData.rank}
@@ -398,7 +398,7 @@ export default class PagePostTermAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('title')}*`}
-            name="formData.contents.title"
+            name="contents.title"
             type="text"
             required={true}
             value={this.state.formData.contents.title}
@@ -408,7 +408,7 @@ export default class PagePostTermAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('shortContent').toCapitalizeCase()}
-            name="formData.contents.shortContent"
+            name="contents.shortContent"
             type="textarea"
             value={this.state.formData.contents.shortContent}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -420,7 +420,7 @@ export default class PagePostTermAdd extends Component<IPageProps, IPageState> {
           <div className="col-md-7 mb-3">
             <ComponentFormSelect
               title={this.getSelectMainInputTitle}
-              name="formData.parentId"
+              name="parentId"
               placeholder={this.props.t('chooseMainCategory')}
               options={this.state.items}
               value={this.state.items.findSingle(

@@ -293,7 +293,7 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
           <ComponentFormCheckBox
             key={index}
             title={self.props.t(props.langKey)}
-            name="formData.permissions"
+            name="permissions"
             checked={self.state.formData.permissions.includes(props.id)}
             onChange={(e) =>
               self.onPermissionSelected(e.target.checked, props.id)
@@ -345,7 +345,7 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.t('role')}
-            name="formData.roleId"
+            name="roleId"
             placeholder={this.props.t('chooseRole')}
             options={this.state.userRoles}
             value={this.state.userRoles?.findSingle(
@@ -361,7 +361,7 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.t('status')}
-            name="formData.statusId"
+            name="statusId"
             options={this.state.status}
             value={this.state.status?.findSingle(
               'value',
@@ -378,7 +378,7 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
               <ComponentFormType
                 title={`${this.props.t('banDateEnd')}*`}
                 type="date"
-                name="formData.banDateEnd"
+                name="banDateEnd"
                 value={moment(this.state.formData.banDateEnd).format(
                   'YYYY-MM-DD'
                 )}
@@ -390,7 +390,7 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
             <div className="mb-3">
               <ComponentFormType
                 title={this.props.t('banComment')}
-                name="formData.banComment"
+                name="banComment"
                 type="textarea"
                 value={this.state.formData.banComment}
                 onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -408,7 +408,7 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('name')}*`}
-            name="formData.name"
+            name="name"
             type="text"
             required={true}
             value={this.state.formData.name}
@@ -418,7 +418,7 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('email')}*`}
-            name="formData.email"
+            name="email"
             type="email"
             required={true}
             autoComplete={'new-password'}
@@ -429,7 +429,7 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('password')}*`}
-            name="formData.password"
+            name="password"
             type="password"
             autoComplete={'new-password'}
             required={VariableLibrary.isEmpty(this.state.formData._id)}

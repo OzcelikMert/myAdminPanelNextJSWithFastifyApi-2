@@ -153,7 +153,7 @@ class PageSettingsSEO extends Component<IPageProps, IPageState> {
                         <ComponentFormType
                           title={this.props.t('websiteTitle')}
                           type="text"
-                          name="formData.seoContents.title"
+                          name="seoContents.title"
                           required={true}
                           maxLength={50}
                           value={this.state.formData.seoContents.title}
@@ -166,7 +166,7 @@ class PageSettingsSEO extends Component<IPageProps, IPageState> {
                         <ComponentFormType
                           title={this.props.t('websiteDescription')}
                           type="textarea"
-                          name="formData.seoContents.content"
+                          name="seoContents.content"
                           required={true}
                           maxLength={120}
                           value={this.state.formData.seoContents.content}
@@ -179,7 +179,7 @@ class PageSettingsSEO extends Component<IPageProps, IPageState> {
                         <ComponentFormTags
                           title={this.props.t('websiteTags')}
                           placeHolder={this.props.t('writeAndPressEnter')}
-                          name="formData.seoContents.tags"
+                          name="seoContents.tags"
                           value={this.state.formData.seoContents.tags ?? []}
                           onChange={(value, name) =>
                             HandleFormLibrary.onChangeSelect(name, value, this)

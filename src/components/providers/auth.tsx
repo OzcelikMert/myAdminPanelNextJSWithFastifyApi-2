@@ -26,6 +26,7 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
   const abortController = new AbortController();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const isSessionAuthChecked = useAppSelector((state) => state.sessionState.isAuthChecked);
+  const isAppLock = useAppSelector((state) => state.appState.isLock);
   const router = useRouter();
 
   const [isAuth, setIsAuth] = useState(initialState.isAuth);
@@ -77,10 +78,10 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
     return null;
   }
 
-  if (!isAuth && ![EndPoints.LOGIN].includes(router.pathname)) {
+  if (!isAuth && !isAppLock && ![EndPoints.LOGIN].includes(router.pathname)) {
     RouteUtil.change({
       router: router,
-      dispatch: appDispatch,
+      appDispatch: appDispatch,
       path: EndPoints.LOGIN,
     });
     return null;
@@ -89,7 +90,7 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
   if (isAuth && [EndPoints.LOGIN].includes(router.pathname)) {
     RouteUtil.change({
       router: router,
-      dispatch: appDispatch,
+      appDispatch: appDispatch,
       path: EndPoints.DASHBOARD,
     });
     return null;

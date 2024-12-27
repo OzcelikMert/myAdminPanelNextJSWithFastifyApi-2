@@ -211,7 +211,7 @@ export default class PageSettingLanguageAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.t('status')}
-            name="formData.statusId"
+            name="statusId"
             options={this.state.status}
             value={this.state.status?.findSingle(
               'value',
@@ -225,7 +225,7 @@ export default class PageSettingLanguageAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('rank')}*`}
-            name="formData.rank"
+            name="rank"
             type="number"
             required={true}
             value={this.state.formData.rank}
@@ -235,7 +235,7 @@ export default class PageSettingLanguageAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormCheckBox
             title={this.props.t('default')}
-            name="formData.isDefault"
+            name="isDefault"
             checked={Boolean(this.state.formData.isDefault)}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
           />
@@ -263,7 +263,7 @@ export default class PageSettingLanguageAdd extends Component<
             <div className="col-11">
               <ComponentFormSelect
                 title={this.props.t('image')}
-                name="formData.image"
+                name="image"
                 options={this.state.flags}
                 value={this.state.flags.findSingle(
                   'value',
@@ -279,7 +279,7 @@ export default class PageSettingLanguageAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('title')}*`}
-            name="formData.title"
+            name="title"
             type="text"
             required={true}
             value={this.state.formData.title}
@@ -289,7 +289,7 @@ export default class PageSettingLanguageAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('shortKey')}*`}
-            name="formData.shortKey"
+            name="shortKey"
             type="text"
             required={true}
             value={this.state.formData.shortKey}
@@ -299,7 +299,7 @@ export default class PageSettingLanguageAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('locale')}*`}
-            name="formData.locale"
+            name="locale"
             type="text"
             required={true}
             value={this.state.formData.locale}

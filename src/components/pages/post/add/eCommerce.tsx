@@ -326,7 +326,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('taxIncludedPrice')}
-                name="formData.eCommerce.pricing.taxIncluded"
+                name="eCommerce.pricing.taxIncluded"
                 type="number"
                 value={
                   this.props.page.state.formData.eCommerce?.pricing?.taxIncluded
@@ -339,7 +339,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('taxExcludedPrice')}
-                name="formData.eCommerce.pricing.taxExcluded"
+                name="eCommerce.pricing.taxExcluded"
                 type="number"
                 value={
                   this.props.page.state.formData.eCommerce?.pricing?.taxExcluded
@@ -352,7 +352,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('taxRate')}
-                name="formData.eCommerce.pricing.taxRate"
+                name="eCommerce.pricing.taxRate"
                 type="number"
                 value={
                   this.props.page.state.formData.eCommerce?.pricing?.taxRate
@@ -365,7 +365,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('comparedPrice')}
-                name="formData.eCommerce.pricing.compared"
+                name="eCommerce.pricing.compared"
                 type="number"
                 value={
                   this.props.page.state.formData.eCommerce?.pricing?.compared
@@ -429,7 +429,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('sku')}
-                name="formData.eCommerce.inventory.sku"
+                name="eCommerce.inventory.sku"
                 type="text"
                 value={this.props.page.state.formData.eCommerce?.inventory?.sku}
                 onChange={(e) =>
@@ -440,7 +440,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('quantity')}
-                name="formData.eCommerce.inventory.quantity"
+                name="eCommerce.inventory.quantity"
                 disabled={
                   !this.props.page.state.formData.eCommerce?.inventory
                     ?.isManageStock || false
@@ -457,7 +457,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-7">
               <ComponentFormCheckBox
                 title={this.props.page.props.t('isManageStock')}
-                name="formData.eCommerce.inventory.isManageStock"
+                name="eCommerce.inventory.isManageStock"
                 checked={Boolean(
                   this.props.page.state.formData.eCommerce?.inventory
                     ?.isManageStock
@@ -481,7 +481,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('width')}
-                name="formData.eCommerce.shipping.width"
+                name="eCommerce.shipping.width"
                 type="text"
                 value={
                   this.props.page.state.formData.eCommerce?.shipping?.width
@@ -494,7 +494,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('height')}
-                name="formData.eCommerce.shipping.height"
+                name="eCommerce.shipping.height"
                 type="text"
                 value={
                   this.props.page.state.formData.eCommerce?.shipping?.height
@@ -507,7 +507,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('depth')}
-                name="formData.eCommerce.shipping.depth"
+                name="eCommerce.shipping.depth"
                 type="text"
                 value={
                   this.props.page.state.formData.eCommerce?.shipping?.depth
@@ -520,7 +520,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('weight')}
-                name="formData.eCommerce.shipping.weight"
+                name="eCommerce.shipping.weight"
                 type="text"
                 value={
                   this.props.page.state.formData.eCommerce?.shipping?.weight
@@ -533,7 +533,7 @@ export default class ComponentPagePostAddECommerce extends Component<
             <div className="col-md-6 mb-3">
               <ComponentFormType
                 title={this.props.page.props.t('shippingPrice')}
-                name="formData.eCommerce.pricing.shipping"
+                name="eCommerce.pricing.shipping"
                 type="number"
                 value={
                   this.props.page.state.formData.eCommerce?.pricing?.shipping
@@ -1176,7 +1176,7 @@ export default class ComponentPagePostAddECommerce extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.page.props.t('productType')}
-            name="formData.eCommerce.typeId"
+            name="eCommerce.typeId"
             options={this.props.page.state.productTypes}
             value={this.props.page.state.productTypes?.findSingle(
               'value',

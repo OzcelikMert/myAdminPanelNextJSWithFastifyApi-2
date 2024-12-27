@@ -10,6 +10,7 @@ import { NextRouter } from 'next/router';
 import { IAppDispatch } from '@lib/store';
 import { ITranslationFunc } from '@lib/features/translationSlice';
 import { ISessionAuthResultService } from 'types/services/auth.service';
+import { IPermissionCheckAndRedirectParamUtil } from 'types/utils/permission.util';
 
 export enum PostPermissionMethod {
   GET,
@@ -125,35 +126,38 @@ const check = (
 };
 
 const checkAndRedirect = (
-  router: NextRouter,
-  dispatch: IAppDispatch,
-  t: ITranslationFunc,
-  sessionAuth: ISessionAuthResultService | null,
-  minPermission: IEndPointPermission,
-  redirectPath = EndPoints.DASHBOARD
+  props: IPermissionCheckAndRedirectParamUtil
 ): boolean => {
   let status = true;
 
-  if (sessionAuth) {
-    if (!check(sessionAuth, minPermission)) {
+  if (props.sessionAuth) {
+    if (!check(props.sessionAuth, props.minPermission)) {
       status = false;
       new ComponentToast({
         type: 'error',
-        title: t('error'),
-        content: t('noPerm'),
+        title: props.t('error'),
+        content: props.t('noPerm'),
         position: 'top-right',
       });
-      RouteUtil.change({ router, dispatch, path: redirectPath });
+      RouteUtil.change({
+        router: props.router,
+        appDispatch: props.appDispatch,
+        path: props.redirectPath ?? EndPoints.DASHBOARD,
+      });
     }
   } else {
     status = false;
     new ComponentToast({
       type: 'error',
-      title: t('error'),
-      content: t('sessionRequired'),
+      title: props.t('error'),
+      content: props.t('sessionRequired'),
       position: 'top-right',
     });
-    RouteUtil.change({ router, dispatch, path: EndPoints.LOGIN });
+    RouteUtil.change({
+      router: props.router,
+      appDispatch: props.appDispatch,
+      path: EndPoints.LOGIN,
+    });
   }
 
   return status;

@@ -128,7 +128,7 @@ class PageLogin extends Component<IPageProps, IPageState> {
             <ThemeInputType
               title={this.props.t('email')}
               type="email"
-              name="formData.email"
+              name="email"
               required={true}
               value={this.state.formData.email}
               onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -138,7 +138,7 @@ class PageLogin extends Component<IPageProps, IPageState> {
             <ThemeInputType
               title={this.props.t('password')}
               type="password"
-              name="formData.password"
+              name="password"
               required={true}
               value={this.state.formData.password}
               onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -146,7 +146,7 @@ class PageLogin extends Component<IPageProps, IPageState> {
           </div>
           <div className="col-md-12 mb-3">
             <ComponentFormCheckBox
-              name="formData.keepMe"
+              name="keepMe"
               title={this.props.t('keepMe')}
               checked={this.state.formData.keepMe}
               onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}

@@ -320,7 +320,7 @@ export default class PageSettingsProfile extends Component<
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
                       title={`${this.props.t('name')}*`}
-                      name="formData.name"
+                      name="name"
                       type="text"
                       required={true}
                       value={this.state.formData.name}
@@ -330,7 +330,7 @@ export default class PageSettingsProfile extends Component<
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
                       title={this.props.t('comment')}
-                      name="formData.comment"
+                      name="comment"
                       type="textarea"
                       value={this.state.formData.comment}
                       onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -339,7 +339,7 @@ export default class PageSettingsProfile extends Component<
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
                       title={`${this.props.t('phone')}`}
-                      name="formData.phone"
+                      name="phone"
                       type="text"
                       value={this.state.formData.phone}
                       onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -348,7 +348,7 @@ export default class PageSettingsProfile extends Component<
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
                       title="Facebook"
-                      name="formData.facebook"
+                      name="facebook"
                       type="url"
                       value={this.state.formData.facebook}
                       onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -357,7 +357,7 @@ export default class PageSettingsProfile extends Component<
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
                       title="Instagram"
-                      name="formData.instagram"
+                      name="instagram"
                       type="url"
                       value={this.state.formData.instagram}
                       onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
@@ -366,7 +366,7 @@ export default class PageSettingsProfile extends Component<
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
                       title="Twitter"
-                      name="formData.twitter"
+                      name="twitter"
                       type="url"
                       value={this.state.formData.twitter}
                       onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}

@@ -1,13 +1,14 @@
-import React, { Component, FormEvent } from 'react';
+import { FormEvent, use, useEffect, useReducer } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import ComponentFormSelect, {
+  IThemeFormSelectData,
+} from '@components/elements/form/input/select';
 import {
   IComponentElementGetResultService,
   IComponentGetResultService,
   IComponentUpdateWithIdParamService,
 } from 'types/services/component.service';
-import { IPagePropCommon } from 'types/pageProps';
 import { IComponentElementModel } from 'types/models/component.model';
 import { PermissionUtil } from '@utils/permission.util';
 import { ComponentEndPointPermission } from '@constants/endPointPermissions/component.endPoint.permission';
@@ -15,293 +16,338 @@ import { ElementTypeId, elementTypes } from '@constants/elementTypes';
 import { ComponentService } from '@services/component.service';
 import { EndPoints } from '@constants/endPoints';
 import { cloneDeepWith } from 'lodash';
-import {
-  ComponentFieldSet,
-  ComponentForm,
-  ComponentFormSelect,
-  ComponentFormType,
-} from '@components/elements/form';
 import { UserRoleId } from '@constants/userRoles';
 import ComponentPageComponentElementTypeInput from '@components/pages/component/add/elementTypeInput';
 import { ComponentTypeId, componentTypes } from '@constants/componentTypes';
-import { HandleFormLibrary } from '@library/react/handles/form';
 import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
+import { useFormReducer } from '@library/react/handles/form';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useRouter } from 'next/router';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import {
+  IBreadCrumbData,
+  setBreadCrumbState,
+} from '@lib/features/breadCrumbSlice';
+import ComponentFieldSet from '@components/elements/fieldSet';
+import ComponentFormType from '@components/elements/form/input/type';
+import ComponentForm from '@components/elements/form';
 
-type IPageState = {
-  elementTypes: IThemeFormSelectData[];
-  componentTypes: IThemeFormSelectData[];
+type IHandleInputChangeParams = {
+  index: number;
+  key: string;
+  value: any;
+  isSelectedItem?: boolean;
+};
+
+type IComponentState = {
+  elementTypes: IThemeFormSelectData<ElementTypeId>[];
+  componentTypes: IThemeFormSelectData<ComponentTypeId>[];
   mainTabActiveKey: string;
   isSubmitting: boolean;
   mainTitle: string;
-  formData: IComponentUpdateWithIdParamService;
-  item?: IComponentGetResultService;
-  selectedData?: IComponentElementModel;
+  langId: string;
+  selectedItem?: IComponentElementModel;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  elementTypes: [],
+  componentTypes: [],
+  mainTabActiveKey: 'general',
+  isSubmitting: false,
+  mainTitle: '',
+  langId: '',
+};
 
-export default class PageComponentAdd extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+type IAction =
+  | { type: 'SET_ELEMENT_TYPES'; payload: IComponentState['elementTypes'] }
+  | { type: 'SET_COMPONENT_TYPES'; payload: IComponentState['componentTypes'] }
+  | {
+      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      payload: IComponentState['mainTabActiveKey'];
+    }
+  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState['isSubmitting'] }
+  | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
+  | { type: 'SET_LANG_ID'; payload: IComponentState['langId'] }
+  | { type: 'SET_SELECTED_ITEM'; payload: IComponentState['selectedItem'] };
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      mainTabActiveKey: PermissionUtil.checkPermissionRoleRank(
-        this.props.getStateApp.sessionAuth!.user.roleId,
-        UserRoleId.SuperAdmin
-      )
-        ? 'general'
-        : 'elements',
-      elementTypes: [],
-      componentTypes: [],
-      isSubmitting: false,
-      mainTitle: '',
-      formData: {
-        _id: (this.props.router.query._id as string) ?? '',
-        elements: [],
-        key: '',
-        title: '',
-        typeId: ComponentTypeId.Private,
-      },
-    };
+function reducer(state: IComponentState, action: IAction): IComponentState {
+  switch (action.type) {
+    case 'SET_ELEMENT_TYPES':
+      return { ...state, elementTypes: action.payload };
+    case 'SET_COMPONENT_TYPES':
+      return { ...state, componentTypes: action.payload };
+    case 'SET_MAIN_TAB_ACTIVE_KEY':
+      return { ...state, mainTabActiveKey: action.payload };
+    case 'SET_IS_SUBMITTING':
+      return { ...state, isSubmitting: action.payload };
+    case 'SET_MAIN_TITLE':
+      return { ...state, mainTitle: action.payload };
+    case 'SET_LANG_ID':
+      return { ...state, langId: action.payload };
+    case 'SET_SELECTED_ITEM':
+      return { ...state, selectedItem: action.payload };
+    default:
+      return state;
   }
+}
 
-  async componentDidMount() {
-    const permission = this.state.formData._id
+type IComponentFormState = IComponentUpdateWithIdParamService;
+
+const initialFormState: IComponentFormState = {
+  _id: '',
+  elements: [],
+  key: '',
+  title: '',
+  typeId: ComponentTypeId.Private,
+};
+
+type IPageQueries = {
+  _id?: string;
+};
+
+export default function PageComponentAdd() {
+  const abortController = new AbortController();
+
+  const appDispatch = useAppDispatch();
+  const t = useAppSelector(selectTranslation);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+
+  const router = useRouter();
+
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    langId: mainLangId,
+    mainTabActiveKey: PermissionUtil.checkPermissionRoleRank(
+      sessionAuth!.user.roleId,
+      UserRoleId.SuperAdmin
+    )
+      ? 'general'
+      : 'elements',
+  });
+  const { formState, setFormState, onChangeInput, onChangeSelect } =
+    useFormReducer<IComponentFormState>({
+      ...initialFormState,
+      _id: (router.query._id as IPageQueries['_id']) ?? '',
+    });
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
+  const init = async () => {
+    const minPermission = formState._id
       ? ComponentEndPointPermission.UPDATE
       : ComponentEndPointPermission.ADD;
-    if (PermissionUtil.checkAndRedirect(this.props, permission)) {
-      this.getElementTypes();
-      this.getComponentTypes();
-      if (this.state.formData._id) {
-        await this.getItem();
+    if (
+      PermissionUtil.checkAndRedirect({
+        appDispatch,
+        minPermission,
+        router,
+        sessionAuth,
+        t,
+      })
+    ) {
+      getElementTypes();
+      getComponentTypes();
+      if (formState._id) {
+        await getItem();
       }
-      this.setPageTitle();
-      this.props.setStateApp({
-        isPageLoading: false,
+      setPageTitle();
+      appDispatch(setIsPageLoadingState(false));
+    }
+  };
+
+  const changeLanguage = async (langId: string) => {
+    appDispatch(setIsPageLoadingState(true));
+    await getItem(langId);
+    appDispatch(setIsPageLoadingState(false));
+  };
+
+  const setPageTitle = () => {
+    const titles: IBreadCrumbData[] = [
+      {
+        title: t('components'),
+        url: EndPoints.COMPONENT_WITH.LIST,
+      },
+      {
+        title: t(formState._id ? 'edit' : 'add'),
+      },
+    ];
+    if (formState._id) {
+      titles.push({
+        title: state.mainTitle,
       });
     }
-  }
+    appDispatch(setBreadCrumbState(titles));
+  };
 
-  async componentDidUpdate(prevProps: IPagePropCommon) {
-    if (
-      prevProps.getStateApp.appData.currentLangId !=
-      this.props.getStateApp.appData.currentLangId
-    ) {
-      this.props.setStateApp(
-        {
-          isPageLoading: true,
-        },
-        async () => {
-          await this.getItem();
-          this.props.setStateApp({
-            isPageLoading: false,
-          });
-        }
-      );
-    }
-  }
-
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
-
-  setPageTitle() {
-    const titles: string[] = [
-      this.props.t('components'),
-      this.props.t(this.state.formData._id ? 'edit' : 'add'),
-    ];
-    if (this.state.formData._id) {
-      titles.push(this.state.mainTitle);
-    }
-    this.props.setBreadCrumb(titles);
-  }
-
-  getComponentTypes() {
-    this.setState((state: IPageState) => {
-      state.componentTypes = componentTypes.map((type) => ({
-        label: this.props.t(type.langKey),
+  const getComponentTypes = () => {
+    dispatch({
+      type: 'SET_COMPONENT_TYPES',
+      payload: componentTypes.map((type) => ({
+        label: t(type.langKey),
         value: type.id,
-      }));
-      return state;
+      })),
     });
-  }
+  };
 
-  getElementTypes() {
-    this.setState((state: IPageState) => {
-      state.elementTypes = elementTypes.map((type) => ({
-        label: this.props.t(type.langKey),
+  const getElementTypes = () => {
+    dispatch({
+      type: 'SET_ELEMENT_TYPES',
+      payload: elementTypes.map((type) => ({
+        label: t(type.langKey),
         value: type.id,
-      }));
-      return state;
+      })),
     });
-  }
+  };
 
-  async getItem() {
+  const getItem = async (langId?: string) => {
     const serviceResult = await ComponentService.getWithId(
       {
-        _id: this.state.formData._id,
-        langId: this.props.getStateApp.appData.currentLangId,
+        _id: formState._id!,
+        langId: langId ?? mainLangId,
       },
-      this.abortController.signal
+      abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const item = serviceResult.data;
-      await new Promise((resolve) => {
-        this.setState(
-          (state: IPageState) => {
-            state.item = item;
-            state.formData = {
-              ...state.formData,
-              ...item,
-              elements: item.elements.map((element) => ({
-                ...element,
-                contents: {
-                  ...element.contents,
-                  langId: this.props.getStateApp.appData.currentLangId,
-                },
-              })),
-            };
-
-            if (
-              this.props.getStateApp.appData.currentLangId ==
-              this.props.getStateApp.appData.mainLangId
-            ) {
-              state.mainTitle = state.formData.title || '';
-            }
-
-            return state;
+      setFormState({
+        ...item,
+        elements: item.elements.map((element) => ({
+          ...element,
+          contents: {
+            ...element.contents,
+            langId: langId ?? mainLangId,
           },
-          () => resolve(1)
-        );
+        })),
       });
-    } else {
-      await this.navigatePage();
-    }
-  }
 
-  async navigatePage() {
-    const path = EndPoints.COMPONENT_WITH.LIST;
-    await RouteUtil.change({ props: this.props, path: path });
-  }
-
-  async onSubmit(event: FormEvent) {
-    event.preventDefault();
-    this.setState(
-      {
-        isSubmitting: true,
-      },
-      async () => {
-        const params = this.state.formData;
-
-        const serviceResult = await (params._id
-          ? ComponentService.updateWithId(params, this.abortController.signal)
-          : ComponentService.add(params, this.abortController.signal));
-
-        this.setState({
-          isSubmitting: false,
-        });
-
-        if (serviceResult.status) {
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: `${this.props.t(this.state.formData._id ? 'itemEdited' : 'itemAdded')}!`,
-          });
-          if (!this.state.formData._id) {
-            await this.navigatePage();
-          }
-        }
+      if (langId == mainLangId) {
+        dispatch({ type: 'SET_MAIN_TITLE', payload: item.title });
       }
-    );
-  }
+    } else {
+      await navigatePage();
+    }
+  };
 
-  onInputChange(data: any, key: string, value: any) {
-    this.setState((state: IPageState) => {
-      data[key] = value;
-      return state;
-    });
-  }
+  const navigatePage = async () => {
+    const path = EndPoints.COMPONENT_WITH.LIST;
+    await RouteUtil.change({ appDispatch, path, router });
+  };
 
-  onCreateElement() {
+  const onSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
+    const params = formState;
+    const serviceResult = await (params._id
+      ? ComponentService.updateWithId(params, abortController.signal)
+      : ComponentService.add(params, abortController.signal));
+
+    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
+
+    if (serviceResult.status) {
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,
+      });
+      if (!params._id) {
+        await navigatePage();
+      }
+    }
+  };
+
+  const handleInputChange = (params: IHandleInputChangeParams) => {
+    if (params.isSelectedItem) {
+      let newSelectedItem = state.selectedItem as any;
+      newSelectedItem[params.key] = params.value;
+      dispatch({ type: 'SET_SELECTED_ITEM', payload: newSelectedItem });
+    } else {
+      let newElements = formState.elements as any;
+      newElements[params.index][params.key] = params.value;
+      setFormState({
+        elements: newElements,
+      });
+    }
+  };
+
+  const onCreateElement = () => {
     const _id = String.createId();
-    this.setState(
-      (state: IPageState) => {
-        state.formData.elements = [
-          ...state.formData.elements,
-          {
-            _id: _id,
-            title: '',
-            rank: state.formData.elements.length + 1,
-            typeId: ElementTypeId.Text,
-            key: '',
-            contents: {
-              langId: this.props.getStateApp.appData.currentLangId,
-            },
+    setFormState({
+      elements: [
+        ...formState.elements,
+        {
+          _id: _id,
+          title: '',
+          rank: formState.elements.length + 1,
+          typeId: ElementTypeId.Text,
+          key: '',
+          contents: {
+            langId: mainLangId,
           },
-        ];
-        return state;
-      },
-      () => this.onEdit(this.state.formData.elements.indexOfKey('_id', _id))
-    );
-  }
-
-  onAccept(index: number) {
-    this.setState((state: IPageState) => {
-      state.formData.elements[index] = state.selectedData!;
-      state.selectedData = undefined;
-      return state;
+        },
+      ],
     });
-  }
+    onEdit(formState.elements.indexOfKey('_id', _id));
+  };
 
-  onEdit(index: number) {
-    this.setState((state: IPageState) => {
-      state.selectedData = cloneDeepWith(this.state.formData.elements[index]);
-      return state;
+  const onAccept = (index: number) => {
+    let newElements = formState.elements;
+    newElements[index] = state.selectedItem!;
+    setFormState({
+      elements: newElements,
     });
-  }
+    onCancelEdit();
+  };
 
-  onCancelEdit() {
-    this.setState((state: IPageState) => {
-      state.selectedData = undefined;
-      return state;
+  const onEdit = (index: number) => {
+    dispatch({
+      type: 'SET_SELECTED_ITEM',
+      payload: cloneDeepWith(formState.elements[index]),
     });
-  }
+  };
 
-  async onDelete(index: number) {
+  const onCancelEdit = () => {
+    dispatch({ type: 'SET_SELECTED_ITEM', payload: undefined });
+  };
+
+  const onDelete = async (index: number) => {
     const result = await Swal.fire({
-      title: this.props.t('deleteAction'),
-      html: `<b>'${this.state.formData.elements[index].key}'</b> ${this.props.t('deleteItemQuestionWithItemName')}`,
-      confirmButtonText: this.props.t('yes'),
-      cancelButtonText: this.props.t('no'),
+      title: t('deleteAction'),
+      html: `<b>'${formState.elements[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
       icon: 'question',
       showCancelButton: true,
     });
 
     if (result.isConfirmed) {
-      this.setState((state: IPageState) => {
-        state.formData.elements.splice(index, 1);
-        return state;
+      const newElements = formState.elements;
+      newElements.splice(index, 1);
+      setFormState({
+        elements: newElements,
       });
     }
-  }
+  };
 
-  Header = () => {
+  const Header = () => {
     return (
       <div className="col-md-3">
         <div className="row">
           <div className="col-6">
             <button
               className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
-              onClick={() => this.navigatePage()}
+              onClick={() => navigatePage()}
             >
-              <i className="mdi mdi-arrow-left"></i>{' '}
-              {this.props.t('returnBack')}
+              <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
             </button>
           </div>
         </div>
@@ -309,27 +355,27 @@ export default class PageComponentAdd extends Component<
     );
   };
 
-  ComponentElement = (
-    props: IComponentElementGetResultService,
+  const ComponentElement = (
+    elementProps: IComponentElementGetResultService,
     index: number
   ) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
         <ComponentFieldSet
-          legend={`${props.title} ${PermissionUtil.checkPermissionRoleRank(this.props.getStateApp.sessionAuth!.user.roleId, UserRoleId.SuperAdmin) ? `(#${props.key})` : ''}`}
+          legend={`${elementProps.title} ${PermissionUtil.checkPermissionRoleRank(sessionAuth!.user.roleId, UserRoleId.SuperAdmin) ? `(#${elementProps.key})` : ''}`}
           legendElement={
             PermissionUtil.checkPermissionRoleRank(
-              this.props.getStateApp.sessionAuth!.user.roleId,
+              sessionAuth!.user.roleId,
               UserRoleId.SuperAdmin
             ) ? (
               <span>
                 <i
                   className="mdi mdi-pencil-box text-warning fs-1 cursor-pointer ms-2"
-                  onClick={() => this.onEdit(index)}
+                  onClick={() => onEdit(index)}
                 ></i>
                 <i
                   className="mdi mdi-minus-box text-danger fs-1 cursor-pointer ms-2"
-                  onClick={() => this.onDelete(index)}
+                  onClick={() => onDelete(index)}
                 ></i>
               </span>
             ) : undefined
@@ -338,20 +384,15 @@ export default class PageComponentAdd extends Component<
           <div className="row">
             <div className="col-md">
               <ComponentPageComponentElementTypeInput
-                {...this.props}
-                data={props}
+                data={elementProps}
                 onChange={(key, value) =>
-                  this.onInputChange(props.contents, key, value)
+                  handleInputChange({ index, key, value })
                 }
               />
             </div>
             {
               <ComponentThemeToolTipMissingLanguages
-                itemLanguages={props.alternates ?? []}
-                contentLanguages={
-                  this.props.getStateApp.appData.contentLanguages
-                }
-                t={this.props.t}
+                itemLanguages={elementProps.alternates ?? []}
                 div={true}
                 divClass="col-md-1"
               />
@@ -362,56 +403,76 @@ export default class PageComponentAdd extends Component<
     );
   };
 
-  ComponentElementEdit = (
-    props: IComponentElementGetResultService,
+  const ComponentElementEdit = (
+    elementProps: IComponentElementGetResultService,
     index: number
   ) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
-        <ComponentFieldSet legend={this.props.t('newElement')}>
+        <ComponentFieldSet legend={t('newElement')}>
           <div className="row mt-3">
             <div className="col-md-12">
               <ComponentFormType
-                title={`${this.props.t('title')}*`}
-                placeholder={this.props.t('title')}
+                title={`${t('title')}*`}
+                placeholder={t('title')}
                 type="text"
-                value={props.title}
+                value={elementProps.title}
                 onChange={(e) =>
-                  this.onInputChange(props, 'title', e.target.value)
+                  handleInputChange({
+                    index,
+                    key: 'title',
+                    value: e.target.value,
+                    isSelectedItem: true,
+                  })
                 }
               />
             </div>
             <div className="col-md-12 mt-3">
               <ComponentFormType
-                title={`${this.props.t('key')}*`}
+                title={`${t('key')}*`}
                 type="text"
-                value={props.key}
+                value={elementProps.key}
                 onChange={(e) =>
-                  this.onInputChange(props, 'key', e.target.value)
+                  handleInputChange({
+                    index,
+                    key: 'key',
+                    value: e.target.value,
+                    isSelectedItem: true,
+                  })
                 }
               />
             </div>
             <div className="col-md-12 mt-3">
               <ComponentFormSelect
-                title={this.props.t('typeId')}
-                placeholder={this.props.t('typeId')}
-                options={this.state.elementTypes}
-                value={this.state.elementTypes.filter(
-                  (item) => item.value == props.typeId
+                title={t('typeId')}
+                placeholder={t('typeId')}
+                options={state.elementTypes}
+                value={state.elementTypes.filter(
+                  (item) => item.value == elementProps.typeId
                 )}
                 onChange={(item: any, e) =>
-                  this.onInputChange(props, 'typeId', item.value)
+                  handleInputChange({
+                    index,
+                    key: 'typeId',
+                    value: item.value,
+                    isSelectedItem: true,
+                  })
                 }
               />
             </div>
             <div className="col-md-12 mt-3">
               <ComponentFormType
-                title={`${this.props.t('rank')}*`}
+                title={`${t('rank')}*`}
                 type="number"
                 required={true}
-                value={props.rank}
+                value={elementProps.rank}
                 onChange={(e) =>
-                  this.onInputChange(props, 'rank', Number(e.target.value) || 0)
+                  handleInputChange({
+                    index,
+                    key: 'rank',
+                    value: Number(e.target.value) || 0,
+                    isSelectedItem: true,
+                  })
                 }
               />
             </div>
@@ -421,18 +482,18 @@ export default class PageComponentAdd extends Component<
                   <button
                     type="button"
                     className="btn btn-gradient-success btn-lg"
-                    onClick={() => this.onAccept(index)}
+                    onClick={() => onAccept(index)}
                   >
-                    {this.props.t('okay')}
+                    {t('okay')}
                   </button>
                 </div>
                 <div className="col-md-6 text-end">
                   <button
                     type="button"
                     className="btn btn-gradient-dark btn-lg"
-                    onClick={() => this.onCancelEdit()}
+                    onClick={() => onCancelEdit()}
                   >
-                    {this.props.t('cancel')}
+                    {t('cancel')}
                   </button>
                 </div>
               </div>
@@ -443,34 +504,33 @@ export default class PageComponentAdd extends Component<
     );
   };
 
-  TabElements = () => {
+  const TabElements = () => {
     return (
       <div className="row mb-3">
         <div className="col-md-7">
           <div className="row">
-            {this.state.formData.elements
+            {formState.elements
               ?.orderBy('rank', 'asc')
               .map((item, index) =>
-                this.state.selectedData &&
-                this.state.selectedData._id == item._id
-                  ? this.ComponentElementEdit(this.state.selectedData, index)
-                  : this.ComponentElement(item, index)
+                state.selectedItem && state.selectedItem._id == item._id
+                  ? ComponentElementEdit(state.selectedItem, index)
+                  : ComponentElement(item, index)
               )}
           </div>
         </div>
         {PermissionUtil.checkPermissionRoleRank(
-          this.props.getStateApp.sessionAuth!.user.roleId,
+          sessionAuth!.user.roleId,
           UserRoleId.SuperAdmin
         ) ? (
           <div
-            className={`col-md-7 text-start ${this.state.formData.elements.length > 0 ? 'mt-4' : ''}`}
+            className={`col-md-7 text-start ${formState.elements.length > 0 ? 'mt-4' : ''}`}
           >
             <button
               type={'button'}
               className="btn btn-gradient-success btn-lg"
-              onClick={() => this.onCreateElement()}
+              onClick={() => onCreateElement()}
             >
-              + {this.props.t('addNew')}
+              + {t('addNew')}
             </button>
           </div>
         ) : null}
@@ -478,101 +538,90 @@ export default class PageComponentAdd extends Component<
     );
   };
 
-  TabGeneral = () => {
+  const TabGeneral = () => {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={`${this.props.t('title')}*`}
-            name="formData.title"
+            title={`${t('title')}*`}
+            name="title"
             type="text"
             required={true}
-            value={this.state.formData.title}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.title}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={`${this.props.t('key')}*`}
-            name="formData.key"
+            title={`${t('key')}*`}
+            name="key"
             type="text"
             required={true}
-            value={this.state.formData.key}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.key}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
         <div className="col-md-7 mt-3">
           <ComponentFormSelect
-            title={`${this.props.t('typeId')}*`}
-            name="formData.typeId"
-            placeholder={this.props.t('typeId')}
-            options={this.state.componentTypes}
-            value={this.state.componentTypes.findSingle(
-              'value',
-              this.state.formData.typeId
-            )}
-            onChange={(item: any, e) =>
-              HandleFormLibrary.onChangeSelect(e.name, item.value, this)
-            }
+            title={`${t('typeId')}*`}
+            placeholder={t('typeId')}
+            options={state.componentTypes}
+            value={state.componentTypes.findSingle('value', formState.typeId)}
+            onChange={(item: any, e) => onChangeSelect('typeId', item.value)}
           />
         </div>
       </div>
     );
   };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-post">
-        <div className="row mb-3">
-          <this.Header />
-        </div>
-        <div className="row">
-          <div className="col-md-12">
-            <ComponentForm
-              isActiveSaveButton={true}
-              saveButtonText={this.props.t('save')}
-              saveButtonLoadingText={this.props.t('loading')}
-              isSubmitting={this.state.isSubmitting}
-              formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
-            >
-              <div className="grid-margin stretch-card">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="theme-tabs">
-                      <Tabs
-                        onSelect={(key: any) =>
-                          this.setState({ mainTabActiveKey: key })
-                        }
-                        activeKey={this.state.mainTabActiveKey}
-                        className="mb-5"
-                        transition={false}
-                      >
-                        {PermissionUtil.checkPermissionRoleRank(
-                          this.props.getStateApp.sessionAuth!.user.roleId,
-                          UserRoleId.SuperAdmin
-                        ) ? (
-                          <Tab
-                            eventKey="general"
-                            title={this.props.t('general')}
-                          >
-                            <this.TabGeneral />
-                          </Tab>
-                        ) : null}
-                        <Tab
-                          eventKey="elements"
-                          title={this.props.t('elements')}
-                        >
-                          <this.TabElements />
+  return isPageLoading ? null : (
+    <div className="page-post">
+      <div className="row mb-3">
+        <Header />
+      </div>
+      <div className="row">
+        <div className="col-md-12">
+          <ComponentForm
+            isActiveSaveButton={true}
+            saveButtonText={t('save')}
+            saveButtonLoadingText={t('loading')}
+            isSubmitting={state.isSubmitting}
+            formAttributes={{ onSubmit: (event) => onSubmit(event) }}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
+                  <div className="theme-tabs">
+                    <Tabs
+                      onSelect={(key: any) =>
+                        dispatch({
+                          type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                          payload: key,
+                        })
+                      }
+                      activeKey={state.mainTabActiveKey}
+                      className="mb-5"
+                      transition={false}
+                    >
+                      {PermissionUtil.checkPermissionRoleRank(
+                        sessionAuth!.user.roleId,
+                        UserRoleId.SuperAdmin
+                      ) ? (
+                        <Tab eventKey="general" title={t('general')}>
+                          <TabGeneral />
                         </Tab>
-                      </Tabs>
-                    </div>
+                      ) : null}
+                      <Tab eventKey="elements" title={t('elements')}>
+                        <TabElements />
+                      </Tab>
+                    </Tabs>
                   </div>
                 </div>
               </div>
-            </ComponentForm>
-          </div>
+            </div>
+          </ComponentForm>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

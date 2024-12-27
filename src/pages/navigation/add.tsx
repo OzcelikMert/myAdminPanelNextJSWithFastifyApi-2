@@ -253,7 +253,7 @@ export default class PageNavigationAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.t('status')}
-            name="formData.statusId"
+            name="statusId"
             options={this.state.status}
             value={this.state.status?.findSingle(
               'value',
@@ -267,7 +267,7 @@ export default class PageNavigationAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={this.props.t('rank')}
-            name="formData.rank"
+            name="rank"
             type="number"
             required={true}
             value={this.state.formData.rank}
@@ -277,7 +277,7 @@ export default class PageNavigationAdd extends Component<
         <div className="col-md-7">
           <ComponentFormCheckBox
             title={this.props.t('primary')}
-            name="formData.isPrimary"
+            name="isPrimary"
             checked={Boolean(this.state.formData.isPrimary)}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
           />
@@ -285,7 +285,7 @@ export default class PageNavigationAdd extends Component<
         <div className="col-md-7">
           <ComponentFormCheckBox
             title={this.props.t('secondary')}
-            name="formData.isSecondary"
+            name="isSecondary"
             checked={Boolean(this.state.formData.isSecondary)}
             onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
           />
@@ -300,7 +300,7 @@ export default class PageNavigationAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('title')}*`}
-            name="formData.contents.title"
+            name="contents.title"
             type="text"
             required={true}
             value={this.state.formData.contents.title}
@@ -310,7 +310,7 @@ export default class PageNavigationAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormType
             title={`${this.props.t('url')}*`}
-            name="formData.contents.url"
+            name="contents.url"
             type="text"
             required={true}
             value={this.state.formData.contents.url}
@@ -320,7 +320,7 @@ export default class PageNavigationAdd extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.t('main')}
-            name="formData.parentId"
+            name="parentId"
             placeholder={this.props.t('chooseMain')}
             options={this.state.items}
             value={this.state.items.findSingle(

@@ -66,7 +66,7 @@ export default function ComponentToolSidebar() {
   const navigatePage = async (path: string) => {
     await RouteUtil.change({
       router: router,
-      dispatch: appDispatch,
+      dispaappDispatchtch: appDispatch,
       path: path || EndPoints.DASHBOARD,
     });
     onRouteChanged();

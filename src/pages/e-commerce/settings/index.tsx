@@ -135,7 +135,7 @@ export default class PageECommerceSettings extends Component<
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
             title={this.props.t('currencyType')}
-            name="formData.eCommerce.currencyId"
+            name="eCommerce.currencyId"
             isMulti={false}
             isSearchable={false}
             options={this.state.currencyTypes}
