@@ -1,11 +1,5 @@
-import React, { Component } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import ThemeInputType from '@components/elements/form/input/type';
-import { IPagePropCommon } from 'types/pageProps';
-import {
-  ComponentForm,
-  ComponentFormCheckBox,
-} from '@components/elements/form';
-import { HandleFormLibrary } from '@library/react/handles/form';
 import { AuthService } from '@services/auth.service';
 import { IUserGetResultService } from 'types/services/user.service';
 import Image from 'next/image';
@@ -13,183 +7,208 @@ import { EndPoints } from '@constants/endPoints';
 import { StatusId } from '@constants/status';
 import { RouteUtil } from '@utils/route.util';
 import { LocalStorageUtil } from '@utils/localStorage.util';
+import { useFormReducer } from '@library/react/handles/form';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { setSessionAuthState } from '@lib/features/sessionSlice';
+import { useRouter } from 'next/router';
+import ComponentForm from '@components/elements/form';
+import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 
-type IPageState = {
+type IComponentState = {
   isSubmitting: boolean;
   isWrong: boolean;
   user?: IUserGetResultService;
-  formData: {
-    email: string;
-    password: string;
-    keepMe: boolean;
-  };
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  isSubmitting: false,
+  isWrong: false,
+};
 
-class PageLogin extends Component<IPageProps, IPageState> {
-  abortController = new AbortController();
+type IAction =
+  | { type: 'SET_IS_SUBMITTING'; payload: boolean }
+  | { type: 'SET_IS_WRONG'; payload: boolean }
+  | { type: 'SET_USER'; payload: IUserGetResultService };
 
-  constructor(prop: any) {
-    super(prop);
-    this.state = {
-      isWrong: false,
-      isSubmitting: false,
-      formData: {
-        email: LocalStorageUtil.getKeepMeEmail(),
-        password: '',
-        keepMe: LocalStorageUtil.getKeepMeEmail().length > 0,
-      },
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_IS_SUBMITTING':
+      return {
+        ...state,
+        isSubmitting: action.payload,
+      };
+    case 'SET_IS_WRONG':
+      return {
+        ...state,
+        isWrong: action.payload,
+      };
+    case 'SET_USER':
+      return {
+        ...state,
+        user: action.payload,
+      };
+    default:
+      return state;
+  }
+};
+
+type IComponentFormState = {
+  email: string;
+  password: string;
+  keepMe: boolean;
+};
+
+const initialFormState: IComponentFormState = {
+  email: '',
+  password: '',
+  keepMe: false,
+};
+
+export default function PageLogin() {
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { formState, onChangeInput } = useFormReducer<IComponentFormState>({
+    ...initialFormState,
+    email: LocalStorageUtil.getKeepMeEmail(),
+    keepMe: LocalStorageUtil.getKeepMeEmail().length > 0,
+  });
+
+  useEffect(() => {
+    init();
+
+    return () => {
+      abortController.abort();
     };
-  }
+  }, []);
 
-  componentDidMount() {
-    this.setPageTitle();
-    this.props.setStateApp({
-      isPageLoading: false,
-    });
-  }
+  const init = async () => {
+    setPageTitle();
+    appDispatch(setIsPageLoadingState(false));
+  };
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
+  const setPageTitle = () => {
+    appDispatch(setBreadCrumbState([{ title: t('login') }]));
+  };
 
-  setPageTitle() {
-    this.props.setBreadCrumb([this.props.t('login')]);
-  }
-
-  onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    this.setState(
-      {
-        isWrong: false,
-        isSubmitting: true,
-      },
-      async () => {
-        const serviceResult = await AuthService.login(
-          this.state.formData,
-          this.abortController.signal
-        );
-        if (serviceResult.data) {
-          if (serviceResult.status) {
-            const resultSession = await AuthService.getSession(
-              this.abortController.signal
-            );
-            if (resultSession.status && resultSession.data) {
-              this.props.setStateApp(
-                {
-                  sessionAuth: resultSession.data,
-                },
-                () => {
-                  if (this.state.formData.keepMe) {
-                    LocalStorageUtil.setKeepMeEmail(this.state.formData.email);
-                  } else if (LocalStorageUtil.getKeepMeEmail().length > 0) {
-                    LocalStorageUtil.setKeepMeEmail('');
-                  }
-                  RouteUtil.change({
-                    props: this.props,
-                    path: EndPoints.DASHBOARD,
-                  });
-                }
-              );
-            }
-          } else {
-            if (serviceResult.data._id) {
-              this.setState({
-                user: serviceResult.data,
-              });
-            } else {
-              this.setState({
-                isWrong: true,
-              });
-            }
-          }
-        } else {
-          this.setState({
-            isWrong: true,
-          });
-        }
-        this.setState({
-          isSubmitting: false,
-        });
-      }
-    );
-  }
+    dispatch({ type: 'SET_IS_WRONG', payload: false });
+    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
 
-  LoginForm = () => {
+    const serviceResult = await AuthService.login(
+      formState,
+      abortController.signal
+    );
+
+    if (serviceResult.data) {
+      if (serviceResult.status) {
+        const resultSession = await AuthService.getSession(
+          abortController.signal
+        );
+
+        if (resultSession.status && resultSession.data) {
+          appDispatch(setSessionAuthState(resultSession.data));
+          if (formState.keepMe) {
+            LocalStorageUtil.setKeepMeEmail(formState.email);
+          } else if (LocalStorageUtil.getKeepMeEmail().length > 0) {
+            LocalStorageUtil.setKeepMeEmail('');
+          }
+          RouteUtil.change({ appDispatch, router, path: EndPoints.DASHBOARD });
+        }
+      } else {
+        if (serviceResult.data._id) {
+          dispatch({ type: 'SET_USER', payload: serviceResult.data });
+        } else {
+          dispatch({ type: 'SET_IS_WRONG', payload: true });
+        }
+      }
+    } else {
+      dispatch({ type: 'SET_IS_WRONG', payload: true });
+    }
+    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
+  };
+
+  const LoginForm = () => {
     return (
       <ComponentForm
-        isSubmitting={this.state.isSubmitting}
-        formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
+        isSubmitting={state.isSubmitting}
+        formAttributes={{ onSubmit: (event) => onSubmit(event) }}
         enterToSubmit={true}
       >
         <div className="row">
           <div className="col-md-12 mb-3">
             <ThemeInputType
-              title={this.props.t('email')}
+              title={t('email')}
               type="email"
               name="email"
               required={true}
-              value={this.state.formData.email}
-              onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+              value={formState.email}
+              onChange={(e) => onChangeInput(e)}
             />
           </div>
           <div className="col-md-12 mb-3">
             <ThemeInputType
-              title={this.props.t('password')}
+              title={t('password')}
               type="password"
               name="password"
               required={true}
-              value={this.state.formData.password}
-              onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+              value={formState.password}
+              onChange={(e) => onChangeInput(e)}
             />
           </div>
           <div className="col-md-12 mb-3">
             <ComponentFormCheckBox
               name="keepMe"
-              title={this.props.t('keepMe')}
-              checked={this.state.formData.keepMe}
-              onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+              title={t('keepMe')}
+              checked={formState.keepMe}
+              onChange={(e) => onChangeInput(e)}
             />
           </div>
           <div className="col-md-12">
-            {this.state.isWrong ? (
-              <p className="fw-bold text-danger">
-                {this.props.t('wrongEmailOrPassword')}
-              </p>
+            {state.isWrong ? (
+              <p className="fw-bold text-danger">{t('wrongEmailOrPassword')}</p>
             ) : null}
-            {this.state.user?.statusId == StatusId.Banned ? (
+            {state.user?.statusId == StatusId.Banned ? (
               <div>
                 <p className="fw-bold text-danger">
-                  {this.props.t('yourAccountIsBanned')}
+                  {t('yourAccountIsBanned')}
                 </p>
                 <p className="fw-bold text-danger">
-                  {this.props.t('banDateEnd')}:
+                  {t('banDateEnd')}:
                   <span className="text-muted ms-1">
                     {new Date(
-                      this.state.user?.banDateEnd || ''
+                      state.user?.banDateEnd || ''
                     ).toLocaleDateString()}
                   </span>
                 </p>
                 <p className="fw-bold text-danger">
-                  {this.props.t('banComment')}:
+                  {t('banComment')}:
                   <span className="text-muted ms-1">
-                    {this.state.user?.banComment}
+                    {state.user?.banComment}
                   </span>
                 </p>
               </div>
             ) : null}
-            {this.state.user?.statusId == StatusId.Pending ? (
+            {state.user?.statusId == StatusId.Pending ? (
               <div>
                 <p className="fw-bold text-danger">
-                  {this.props.t('yourAccountIsPending')}
+                  {t('yourAccountIsPending')}
                 </p>
               </div>
             ) : null}
-            {this.state.user?.statusId == StatusId.Disabled ? (
+            {state.user?.statusId == StatusId.Disabled ? (
               <div>
                 <p className="fw-bold text-danger">
-                  {this.props.t('yourAccountIsDisabled')}
+                  {t('yourAccountIsDisabled')}
                 </p>
               </div>
             ) : null}
@@ -198,9 +217,9 @@ class PageLogin extends Component<IPageProps, IPageState> {
             <button
               type="submit"
               className="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn w-100"
-              disabled={this.state.isSubmitting}
+              disabled={state.isSubmitting}
             >
-              {this.props.t('login')}
+              {t('login')}
             </button>
           </div>
         </div>
@@ -208,33 +227,29 @@ class PageLogin extends Component<IPageProps, IPageState> {
     );
   };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-login">
-        <div className="d-flex align-items-stretch auth-img-bg h-100">
-          <div className="row flex-grow">
-            <div className="col-lg-6 d-flex align-items-center justify-content-center login-half-form">
-              <div className="auth-form-transparent text-left p-3">
-                <h4 className="text-center">{this.props.t('loginPanel')}</h4>
-                <this.LoginForm />
-              </div>
+  return isPageLoading ? null : (
+    <div className="page-login">
+      <div className="d-flex align-items-stretch auth-img-bg h-100">
+        <div className="row flex-grow">
+          <div className="col-lg-6 d-flex align-items-center justify-content-center login-half-form">
+            <div className="auth-form-transparent text-left p-3">
+              <h4 className="text-center">{t('loginPanel')}</h4>
+              <LoginForm />
             </div>
-            <div className="col-lg-6 login-half-bg d-flex flex-row">
-              <div className="brand-logo">
-                <Image
-                  src="/images/ozcelikLogo.png"
-                  alt="Özçelik Software"
-                  width={150}
-                  height={100}
-                  className="img-fluid"
-                />
-              </div>
+          </div>
+          <div className="col-lg-6 login-half-bg d-flex flex-row">
+            <div className="brand-logo">
+              <Image
+                src="/images/ozcelikLogo.png"
+                alt="Özçelik Software"
+                width={150}
+                height={100}
+                className="img-fluid"
+              />
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
-
-export default PageLogin;
