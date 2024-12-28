@@ -134,7 +134,6 @@ export default function PageSettingLanguageAdd() {
 
   const setPageTitle = () => {
     const breadCrumbs: IBreadCrumbData[] = [
-      { title: t('settings'), url: EndPoints.SETTINGS_WITH.GENERAL },
       { title: t('languages'), url: EndPoints.LANGUAGE_WITH.LIST },
       { title: t(formState._id ? 'edit' : 'add') },
     ];

@@ -207,7 +207,7 @@ export default function PageGalleryList(props: IComponentProps) {
         name: t('createdDate'),
         selector: (row) => new Date(row.createdAt).toLocaleDateString(),
         sortable: true,
-        sortFunction: (a, b) => SortUtil.sortByCreatedAt(a, b),
+        sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
         cell: (row) => (
           <ComponentTableUpdatedBy
             name={row.authorId.name}

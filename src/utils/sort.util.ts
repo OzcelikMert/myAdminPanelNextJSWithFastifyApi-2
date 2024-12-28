@@ -1,13 +1,13 @@
-const sortByCreatedAt = (
-  a: { createdAt?: string | Date },
-  b: { createdAt?: string | Date }
+const sortByDate = (
+  a?: string | Date,
+  b?: string | Date
 ) => {
-  return new Date(a.createdAt || '').getTime() >
-    new Date(b.createdAt || '').getTime()
+  return new Date(a || '').getTime() >
+    new Date(b || '').getTime()
     ? 1
     : -1;
 };
 
 export const SortUtil = {
-  sortByCreatedAt: sortByCreatedAt,
+  sortByDate: sortByDate,
 };

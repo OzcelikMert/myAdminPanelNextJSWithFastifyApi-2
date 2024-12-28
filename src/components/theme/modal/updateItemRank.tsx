@@ -27,7 +27,7 @@ type IComponentProps = {
   rank?: number;
   title?: string;
   onHide: () => void;
-  onSubmit: (rank: number) => Promise<boolean | undefined>;
+  onSubmit: (rank: number) => Promise<boolean | void>;
 };
 
 export default function ComponentThemeModalUpdateItemRank(

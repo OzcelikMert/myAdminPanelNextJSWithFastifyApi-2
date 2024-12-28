@@ -199,7 +199,7 @@ export default function PageComponentList() {
         name: t('createdDate'),
         sortable: true,
         selector: (row) => new Date(row.createdAt || '').toLocaleDateString(),
-        sortFunction: (a, b) => SortUtil.sortByCreatedAt(a, b),
+        sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
         cell: (row) => (
           <ComponentTableUpdatedBy
             name={row.authorId.name}

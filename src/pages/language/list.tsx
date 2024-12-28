@@ -1,5 +1,3 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
 import { TableColumn } from 'react-data-table-component';
 import ComponentDataTable from '@components/elements/table/dataTable';
 import { ILanguageGetResultService } from 'types/services/language.service';
@@ -13,136 +11,131 @@ import { LanguageEndPointPermission } from '@constants/endPointPermissions/langu
 import { EndPoints } from '@constants/endPoints';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { RouteUtil } from '@utils/route.util';
+import { use, useEffect, useReducer } from 'react';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useRouter } from 'next/router';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { SortUtil } from '@utils/sort.util';
 
-type IPageState = {
-  searchKey: string;
+type IComponentState = {
   items: ILanguageGetResultService[];
-  showingItems: ILanguageGetResultService[];
   selectedItemId: string;
   isShowModalUpdateRank: boolean;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  items: [],
+  selectedItemId: '',
+  isShowModalUpdateRank: false,
+};
 
-export default class PageSettingLanguageList extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+type IAction =
+  | { type: 'SET_ITEMS'; payload: ILanguageGetResultService[] }
+  | { type: 'SET_SELECTED_ITEM_ID'; payload: string }
+  | { type: 'SET_IS_SHOW_MODAL_UPDATE_RANK'; payload: boolean };
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      searchKey: '',
-      items: [],
-      showingItems: [],
-      selectedItemId: '',
-      isShowModalUpdateRank: false,
-    };
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_ITEMS':
+      return { ...state, items: action.payload };
+    case 'SET_SELECTED_ITEM_ID':
+      return { ...state, selectedItemId: action.payload };
+    case 'SET_IS_SHOW_MODAL_UPDATE_RANK':
+      return { ...state, isShowModalUpdateRank: action.payload };
+    default:
+      return state;
   }
+};
 
-  async componentDidMount() {
+export default function PageSettingLanguageList() {
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const init = async () => {
     if (
-      PermissionUtil.checkAndRedirect(
-        this.props,
-        LanguageEndPointPermission.GET
-      )
+      PermissionUtil.checkAndRedirect({
+        router,
+        sessionAuth,
+        t,
+        appDispatch,
+        minPermission: LanguageEndPointPermission.GET,
+      })
     ) {
-      this.setPageTitle();
-      await this.getItems();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+      setPageTitle();
+      await getItems();
+      appDispatch(setIsPageLoadingState(false));
     }
-  }
+  };
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
+    };
+  }, []);
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('settings'),
-      this.props.t('languages'),
-      this.props.t('list'),
-    ]);
-  }
-
-  async getItems() {
-    const result = await LanguageService.getMany(
-      {},
-      this.abortController.signal
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([{ title: t('languages') }, { title: t('list') }])
     );
+  };
+
+  const getItems = async () => {
+    const result = await LanguageService.getMany({}, abortController.signal);
 
     if (result.status && result.data) {
-      this.setState((state: IPageState) => {
-        state.items = result.data!;
-        state.showingItems = result.data!;
-        return state;
-      });
+      dispatch({ type: 'SET_ITEMS', payload: result.data });
     }
-  }
+  };
 
-  async onChangeRank(rank: number) {
+  const onChangeRank = async (rank: number) => {
     const serviceResult = await LanguageService.updateRankWithId(
       {
-        _id: this.state.selectedItemId,
+        _id: state.selectedItemId,
         rank: rank,
       },
-      this.abortController.signal
+      abortController.signal
     );
 
     if (serviceResult.status) {
-      this.setState(
-        (state: IPageState) => {
-          const item = this.state.items.findSingle(
-            '_id',
-            this.state.selectedItemId
-          );
-          if (item) {
-            item.rank = rank;
-          }
-          return state;
-        },
-        () => {
-          this.onSearch(this.state.searchKey);
-          const item = this.state.items.findSingle(
-            '_id',
-            this.state.selectedItemId
-          );
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: `'${item?.title}' ${this.props.t('itemEdited')}`,
-            timeOut: 3,
-          });
-        }
-      );
+      let newItems = state.items;
+      let newItem = newItems.findSingle('_id', state.selectedItemId);
+      if (newItem) {
+        newItem.rank = rank;
+      }
+      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: `'${newItem?.title}' ${t('itemEdited')}`,
+        timeOut: 3,
+      });
+      return true;
     }
-  }
+  };
 
-  onSearch(searchKey: string) {
-    this.setState({
-      searchKey: searchKey,
-      showingItems: this.state.items.filter(
-        (item) => (item.title ?? '').toLowerCase().search(searchKey) > -1
-      ),
-    });
-  }
-
-  navigatePage(type: 'edit', itemId = '') {
-    const pagePath = EndPoints.LANGUAGE_WITH;
+  const navigatePage = (type: 'edit', itemId = '') => {
+    const path = EndPoints.LANGUAGE_WITH;
     switch (type) {
       case 'edit':
-        RouteUtil.change({ props: this.props, path: pagePath.EDIT(itemId) });
+        RouteUtil.change({ appDispatch, router, path: path.EDIT(itemId) });
         break;
     }
-  }
+  };
 
-  get getTableColumns(): TableColumn<IPageState['showingItems'][0]>[] {
+  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
     return [
       {
-        name: this.props.t('image'),
+        name: t('image'),
         width: '105px',
         cell: (row) => (
           <div className="image mt-2 mb-2">
@@ -157,7 +150,7 @@ export default class PageSettingLanguageList extends Component<
         ),
       },
       {
-        name: this.props.t('title'),
+        name: t('title'),
         selector: (row) => row.title,
         cell: (row) => (
           <div className="row w-100">
@@ -170,30 +163,29 @@ export default class PageSettingLanguageList extends Component<
         sortable: true,
       },
       {
-        name: this.props.t('status'),
+        name: t('status'),
         sortable: true,
         selector: (row) => row.statusId,
-        cell: (row) => (
-          <ComponentThemeBadgeStatus t={this.props.t} statusId={row.statusId} />
-        ),
+        cell: (row) => <ComponentThemeBadgeStatus statusId={row.statusId} />,
       },
       {
-        name: this.props.t('rank'),
+        name: t('rank'),
         sortable: true,
         selector: (row) => row.rank ?? 0,
         cell: (row) => {
           return PermissionUtil.check(
-            this.props.getStateApp.sessionAuth!,
+            sessionAuth!,
             LanguageEndPointPermission.UPDATE
           ) ? (
             <span
               className="cursor-pointer"
-              onClick={() =>
-                this.setState({
-                  selectedItemId: row._id,
-                  isShowModalUpdateRank: true,
-                })
-              }
+              onClick={() => {
+                dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: row._id });
+                dispatch({
+                  type: 'SET_IS_SHOW_MODAL_UPDATE_RANK',
+                  payload: true,
+                });
+              }}
             >
               {row.rank ?? 0} <i className="fa fa-pencil-square-o"></i>
             </span>
@@ -203,7 +195,7 @@ export default class PageSettingLanguageList extends Component<
         },
       },
       {
-        name: this.props.t('default'),
+        name: t('default'),
         cell: (row) => {
           return row.isDefault ? (
             <span className="text-success fs-5">
@@ -217,22 +209,19 @@ export default class PageSettingLanguageList extends Component<
         },
       },
       {
-        name: this.props.t('createdDate'),
+        name: t('createdDate'),
         sortable: true,
         selector: (row) => new Date(row.createdAt || '').toLocaleDateString(),
-        sortFunction: (a, b) => ComponentDataTable.dateSort(a, b),
+        sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
       },
-      PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
-        LanguageEndPointPermission.UPDATE
-      )
+      PermissionUtil.check(sessionAuth!, LanguageEndPointPermission.UPDATE)
         ? {
             name: '',
             width: '70px',
             button: true,
             cell: (row) => (
               <button
-                onClick={() => this.navigatePage('edit', row._id)}
+                onClick={() => navigatePage('edit', row._id)}
                 className="btn btn-gradient-warning"
               >
                 <i className="fa fa-pencil-square-o"></i>
@@ -241,41 +230,40 @@ export default class PageSettingLanguageList extends Component<
           }
         : {},
     ];
-  }
+  };
 
-  render() {
-    const item = this.state.items.findSingle('_id', this.state.selectedItemId);
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-post">
-        <ComponentThemeModalUpdateItemRank
-          t={this.props.t}
-          isShow={this.state.isShowModalUpdateRank}
-          onHide={() => this.setState({ isShowModalUpdateRank: false })}
-          onSubmit={(rank) => this.onChangeRank(rank)}
-          rank={item?.rank}
-          title={item?.title}
-        />
-        <div className="grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body">
-              <div className="table-post">
-                <ComponentDataTable
-                  columns={this.getTableColumns.filter(
-                    (column) => typeof column.name !== 'undefined'
-                  )}
-                  data={this.state.showingItems}
-                  onSearch={(searchKey) => this.onSearch(searchKey)}
-                  i18={{
-                    search: this.props.t('search'),
-                    noRecords: this.props.t('noRecords'),
-                  }}
-                  isSearchable={true}
-                />
-              </div>
+  const item = state.items.findSingle('_id', state.selectedItemId);
+
+  return isPageLoading ? null : (
+    <div className="page-post">
+      <ComponentThemeModalUpdateItemRank
+        isShow={state.isShowModalUpdateRank}
+        onHide={() =>
+          dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: false })
+        }
+        onSubmit={(rank) => onChangeRank(rank)}
+        rank={item?.rank}
+        title={item?.title}
+      />
+      <div className="grid-margin stretch-card">
+        <div className="card">
+          <div className="card-body">
+            <div className="table-post">
+              <ComponentDataTable
+                columns={getTableColumns().filter(
+                  (column) => typeof column.name !== 'undefined'
+                )}
+                data={state.items}
+                i18={{
+                  search: t('search'),
+                  noRecords: t('noRecords'),
+                }}
+                isSearchable={true}
+              />
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
