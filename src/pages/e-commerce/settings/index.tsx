@@ -34,10 +34,10 @@ const initialState: IComponentState = {
 };
 
 type IAction =
-  | { type: 'SET_CURRENCY_TYPES'; payload: IThemeFormSelectData[] }
-  | { type: 'SET_IS_SUBMITTING'; payload: boolean }
-  | { type: 'SET_ITEM'; payload: ISettingECommerceModel }
-  | { type: 'SET_MAIN_TAB_ACTIVE_KEY'; payload: string };
+  | { type: 'SET_CURRENCY_TYPES'; payload: IComponentState["currencyTypes"] }
+  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState["isSubmitting"] }
+  | { type: 'SET_ITEM'; payload: IComponentState["item"] }
+  | { type: 'SET_MAIN_TAB_ACTIVE_KEY'; payload: IComponentState["mainTabActiveKey"] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {

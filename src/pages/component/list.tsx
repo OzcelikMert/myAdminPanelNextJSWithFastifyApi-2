@@ -251,6 +251,7 @@ export default function PageComponentList() {
                   (column) => typeof column.name !== 'undefined'
                 )}
                 data={items}
+                searchableKeys={['title']}
                 i18={{
                   search: t('search'),
                   noRecords: t('noRecords'),

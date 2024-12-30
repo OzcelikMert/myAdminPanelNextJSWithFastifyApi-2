@@ -1,35 +1,79 @@
 import React, { useEffect, useReducer } from 'react';
 import DataTable, { TableProps } from 'react-data-table-component';
 import ComponentTableToggleMenu, {
-  IThemeToggleMenuItem,
+  IComponentTableToggleMenuItem,
 } from '@components/elements/table/toggleMenu';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormType from '@components/elements/form/input/type';
 import { cloneDeepWith } from 'lodash';
+import ComponentTableFilterButton, {
+  IComponentTableFilterButton,
+} from '../filterButton';
+
+type IComponentState = {
+  selectedItems: any[];
+  clearSelectedRows: boolean;
+  searchKey: string;
+  showingItems: any[];
+  activeFilterButtonIndex?: number;
+};
+
+const initialState: IComponentState = {
+  selectedItems: [],
+  clearSelectedRows: false,
+  searchKey: '',
+  showingItems: [],
+};
+
+type IAction =
+  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
+  | { type: 'SET_SEARCH_KEY'; payload: IComponentState['searchKey'] }
+  | { type: 'SET_CLEAR_SELECTED_ROWS'; payload: boolean }
+  | { type: 'SET_ACTIVE_FILTER_BUTTON_INDEX'; payload: IComponentState['activeFilterButtonIndex'] }
+  | { type: 'SET_SHOWING_ITEMS'; payload: IComponentState['showingItems'] };
+
+function reducer(state: IComponentState, action: IAction): IComponentState {
+  switch (action.type) {
+    case 'SET_SELECTED_ITEMS':
+      return { ...state, selectedItems: action.payload };
+    case 'SET_ACTIVE_FILTER_BUTTON_INDEX':
+      return { ...state, activeFilterButtonIndex: action.payload };
+    case 'SET_SEARCH_KEY':
+      return { ...state, searchKey: action.payload };
+    case 'SET_CLEAR_SELECTED_ROWS':
+      return { ...state, clearSelectedRows: action.payload };
+    case 'SET_SHOWING_ITEMS':
+      return { ...state, showingItems: action.payload };
+    default:
+      return state;
+  }
+}
 
 type IComponentPropI18 = {
   search?: string;
   noRecords?: string;
 };
 
-type IComponentProps<T> = {
+type IComponentProps<T = any> = {
   isSearchable?: boolean;
   searchableKeys?: string[];
   isSelectable?: boolean;
   isAllSelectable?: boolean;
   isMultiSelectable?: boolean;
   isActiveToggleMenu?: boolean;
-  toggleMenuItems?: IThemeToggleMenuItem[];
+  toggleMenuItems?: IComponentTableToggleMenuItem[];
+  filterButtons?: IComponentTableFilterButton[];
   i18?: IComponentPropI18;
-  onSubmitToggleMenuItem?: (value: any) => void;
+  onClickToggleMenuItem?: (value: any) => void;
   onSelect?: (value: T[]) => void;
+  onClickFilterButton?: (button: IComponentTableFilterButton) => void;
 } & TableProps<T>;
 
 export default function ComponentDataTable<T>(props: IComponentProps<T>) {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
-    showingItems: props.data
+    showingItems: props.data,
   });
 
   let listPage = 0;
@@ -41,9 +85,12 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
 
   const resetTableList = () => {
     dispatch({ type: 'SET_SELECTED_ITEMS', payload: [] });
-    dispatch({ type: 'SET_CLEAR_SELECTED_ROWS', payload: !state.clearSelectedRows });
+    dispatch({
+      type: 'SET_CLEAR_SELECTED_ROWS',
+      payload: !state.clearSelectedRows,
+    });
     onSearch();
-  }
+  };
 
   const getItemListForPage = () => {
     return props.data.slice(
@@ -72,13 +119,21 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
 
     if (findIndex > -1) {
       if (remove) {
-        dispatch({type: 'SET_SELECTED_ITEMS', payload: state.selectedItems.filter((_, index) => index !== findIndex)});
+        dispatch({
+          type: 'SET_SELECTED_ITEMS',
+          payload: state.selectedItems.filter(
+            (_, index) => index !== findIndex
+          ),
+        });
       }
     } else {
       if (props.isMultiSelectable === false) {
-        dispatch({type: 'SET_SELECTED_ITEMS', payload: [item]});
-      }else{
-        dispatch({type: 'SET_SELECTED_ITEMS', payload: [...state.selectedItems, item]});
+        dispatch({ type: 'SET_SELECTED_ITEMS', payload: [item] });
+      } else {
+        dispatch({
+          type: 'SET_SELECTED_ITEMS',
+          payload: [...state.selectedItems, item],
+        });
       }
     }
 
@@ -104,7 +159,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           if (item[keys[i]]) {
             // Assign new data
             newData = cloneDeepWith(newData[keys[i]]);
-          }else {
+          } else {
             newData = null;
             break;
           }
@@ -119,11 +174,25 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
       return isFound;
     });
     // Set Showing Items
-    dispatch({ type: 'SET_SHOWING_ITEMS', payload: searchedItems});
+    dispatch({ type: 'SET_SHOWING_ITEMS', payload: searchedItems });
   };
 
+  const onFilter = (item: IComponentTableFilterButton, index: number) => {
+    let filteredItems = item.onFilter(props.data);
+    dispatch({ type: 'SET_SHOWING_ITEMS', payload: filteredItems });
+    dispatch({ type: 'SET_ACTIVE_FILTER_BUTTON_INDEX', payload: index });
+    resetTableList();
+    if(props.onClickFilterButton){
+      props.onClickFilterButton(item);
+    }
+  }
+
   const getColumns = () => {
-    let columns = [...props.columns];
+    let columns = [
+      ...props.columns.filter(
+        (column) => typeof column.name !== 'undefined' || column.name !== null
+      ),
+    ];
 
     if (props.isActiveToggleMenu) {
       if (columns.length > 0) {
@@ -132,15 +201,16 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
             <ComponentTableToggleMenu
               items={props.toggleMenuItems ?? []}
               onChange={(value) =>
-                props.onSubmitToggleMenuItem
-                  ? props.onSubmitToggleMenuItem(value)
+                props.onClickToggleMenuItem
+                  ? props.onClickToggleMenuItem(value)
                   : null
               }
             />
           ) : (
             columns[0].name
           );
-        columns[0].sortable = columns[0].sortable && state.selectedItems.length === 0;
+        columns[0].sortable =
+          columns[0].sortable && state.selectedItems.length === 0;
       }
     }
 
@@ -187,6 +257,23 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           </div>
         </div>
       ) : null}
+      {props.filterButtons ? (
+        <div className="row pt-2 pb-2 m-0">
+          <div className="col-md-3"></div>
+          <div className="col-md-9 text-end">
+            <div className="btn-group" role="group">
+              {props.filterButtons.map((item, index) => (
+                <ComponentTableFilterButton
+                  key={`filter-button-${index}`}
+                  item={item}
+                  onClick={() => onFilter(item, index)}
+                  isActive={state.activeFilterButtonIndex === index}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
       <div className="table-responsive">
         <DataTable
           customStyles={{
@@ -202,7 +289,10 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           highlightOnHover
           onChangePage={(page: number, totalRows: number) => {
             listPage = page - 1;
-            dispatch({ type: 'SET_CLEAR_SELECTED_ROWS', payload: !state.clearSelectedRows });
+            dispatch({
+              type: 'SET_CLEAR_SELECTED_ROWS',
+              payload: !state.clearSelectedRows,
+            });
           }}
           clearSelectedRows={state.clearSelectedRows}
           noDataComponent={
@@ -224,39 +314,4 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
       </div>
     </div>
   );
-}
-
-type IComponentState = {
-  selectedItems: any[];
-  clearSelectedRows: boolean;
-  searchKey: string;
-  showingItems: any[];
-};
-
-const initialState: IComponentState = {
-  selectedItems: [],
-  clearSelectedRows: false,
-  searchKey: '',
-  showingItems: []
-};
-
-type IAction =
-  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
-  | { type: 'SET_SEARCH_KEY'; payload: IComponentState['searchKey'] }
-  | { type: 'SET_CLEAR_SELECTED_ROWS'; payload: boolean }
-  | { type: 'SET_SHOWING_ITEMS'; payload: IComponentState['showingItems'] };
-
-function reducer(state: IComponentState, action: IAction): IComponentState { 
-  switch (action.type) {
-    case 'SET_SELECTED_ITEMS':
-      return { ...state, selectedItems: action.payload };
-    case 'SET_SEARCH_KEY':
-      return { ...state, searchKey: action.payload };
-    case 'SET_CLEAR_SELECTED_ROWS':
-      return { ...state, clearSelectedRows: action.payload };
-    case 'SET_SHOWING_ITEMS':
-      return { ...state, showingItems: action.payload };
-    default:
-      return state;
-  }
 }

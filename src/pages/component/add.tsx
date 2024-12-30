@@ -129,11 +129,8 @@ export default function PageComponentAdd() {
       ? 'general'
       : 'elements',
   });
-  const { formState, setFormState, onChangeInput, onChangeSelect } =
-    useFormReducer<IComponentFormState>({
-      ...initialFormState,
-      _id: (router.query._id as IPageQueries['_id']) ?? '',
-    });
+  const { formState, setFormState, onChangeInput, onChangeSelect } = useFormReducer(initialFormState);
+  const queries = router.query as IPageQueries;
 
   useEffect(() => {
     init();
@@ -143,7 +140,7 @@ export default function PageComponentAdd() {
   }, []);
 
   const init = async () => {
-    const minPermission = formState._id
+    const minPermission = queries._id
       ? ComponentEndPointPermission.UPDATE
       : ComponentEndPointPermission.ADD;
     if (
@@ -157,7 +154,7 @@ export default function PageComponentAdd() {
     ) {
       getElementTypes();
       getComponentTypes();
-      if (formState._id) {
+      if (queries._id) {
         await getItem();
       }
       setPageTitle();
@@ -178,10 +175,10 @@ export default function PageComponentAdd() {
         url: EndPoints.COMPONENT_WITH.LIST,
       },
       {
-        title: t(formState._id ? 'edit' : 'add'),
+        title: t(queries._id ? 'edit' : 'add'),
       },
     ];
-    if (formState._id) {
+    if (queries._id) {
       titles.push({
         title: state.mainTitle,
       });
@@ -210,31 +207,33 @@ export default function PageComponentAdd() {
   };
 
   const getItem = async (langId?: string) => {
-    const serviceResult = await ComponentService.getWithId(
-      {
-        _id: formState._id!,
-        langId: langId ?? mainLangId,
-      },
-      abortController.signal
-    );
-    if (serviceResult.status && serviceResult.data) {
-      const item = serviceResult.data;
-      setFormState({
-        ...item,
-        elements: item.elements.map((element) => ({
-          ...element,
-          contents: {
-            ...element.contents,
-            langId: langId ?? mainLangId,
-          },
-        })),
-      });
-
-      if (langId == mainLangId) {
-        dispatch({ type: 'SET_MAIN_TITLE', payload: item.title });
+    if(queries._id){
+      const serviceResult = await ComponentService.getWithId(
+        {
+          _id: queries._id,
+          langId: langId ?? mainLangId,
+        },
+        abortController.signal
+      );
+      if (serviceResult.status && serviceResult.data) {
+        const item = serviceResult.data;
+        setFormState({
+          ...item,
+          elements: item.elements.map((element) => ({
+            ...element,
+            contents: {
+              ...element.contents,
+              langId: langId ?? mainLangId,
+            },
+          })),
+        });
+  
+        if (!langId) {
+          dispatch({ type: 'SET_MAIN_TITLE', payload: item.title });
+        }
+      } else {
+        await navigatePage();
       }
-    } else {
-      await navigatePage();
     }
   };
 

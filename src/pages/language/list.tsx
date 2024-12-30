@@ -32,9 +32,9 @@ const initialState: IComponentState = {
 };
 
 type IAction =
-  | { type: 'SET_ITEMS'; payload: ILanguageGetResultService[] }
-  | { type: 'SET_SELECTED_ITEM_ID'; payload: string }
-  | { type: 'SET_IS_SHOW_MODAL_UPDATE_RANK'; payload: boolean };
+  | { type: 'SET_ITEMS'; payload: IComponentState["items"] }
+  | { type: 'SET_SELECTED_ITEM_ID'; payload: IComponentState["selectedItemId"] }
+  | { type: 'SET_IS_SHOW_MODAL_UPDATE_RANK'; payload: IComponentState["isShowModalUpdateRank"] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
@@ -232,7 +232,7 @@ export default function PageSettingLanguageList() {
     ];
   };
 
-  const item = state.items.findSingle('_id', state.selectedItemId);
+  const selectedItem = state.items.findSingle('_id', state.selectedItemId);
 
   return isPageLoading ? null : (
     <div className="page-post">
@@ -242,8 +242,8 @@ export default function PageSettingLanguageList() {
           dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: false })
         }
         onSubmit={(rank) => onChangeRank(rank)}
-        rank={item?.rank}
-        title={item?.title}
+        rank={selectedItem?.rank}
+        title={selectedItem?.title}
       />
       <div className="grid-margin stretch-card">
         <div className="card">
@@ -254,6 +254,7 @@ export default function PageSettingLanguageList() {
                   (column) => typeof column.name !== 'undefined'
                 )}
                 data={state.items}
+                searchableKeys={['title']}
                 i18={{
                   search: t('search'),
                   noRecords: t('noRecords'),

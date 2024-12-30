@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dropdown } from 'react-bootstrap';
 
-export interface IThemeToggleMenuItem {
+export interface IComponentTableToggleMenuItem {
   label: any;
   value: any;
   className?: string;
@@ -9,7 +9,7 @@ export interface IThemeToggleMenuItem {
 }
 
 type IComponentProps = {
-  items: IThemeToggleMenuItem[];
+  items: IComponentTableToggleMenuItem[];
   onChange: (value: any) => void;
   label?: string | any;
 };

@@ -29,22 +29,22 @@ function setDataWithKeys(
 }
 
 type IAction =
-  | { type: 'SET_STATE'; value: any }
-  | { type: 'UPDATE_FIELD'; name: string; value: any }
-  | { type: 'UPDATE_SELECT'; name: string; value: any };
+  | { type: 'SET_STATE'; payload: { value: any } }
+  | { type: 'UPDATE_FIELD'; payload: { name: string; value: any } }
+  | { type: 'UPDATE_SELECT'; payload: { name: string; value: any } };
 
 function formReducer(state: any, action: IAction): any {
   switch (action.type) {
     case 'SET_STATE': {
-      const { value } = action;
+      const { value } = action.payload;
       return Object.assign(state, value);
     }
     case 'UPDATE_FIELD': {
-      const { name, value } = action;
+      const { name, value } = action.payload;
       return setDataWithKeys({ ...state }, name.split('.'), value);
     }
     case 'UPDATE_SELECT': {
-      const { name, value } = action;
+      const { name, value } = action.payload;
       let newState = { ...state };
       const keys = name.split('.');
       if (Array.isArray(value)) {
@@ -80,15 +80,15 @@ export function useFormReducer<T>(initialState: T): {
           ? Number(value) || 0
           : value;
 
-    dispatch({ type: 'UPDATE_FIELD', name, value: newValue });
+    dispatch({ type: 'UPDATE_FIELD', payload: { name, value: newValue} });
   };
 
   const onChangeSelect = (name: string, value: any) => {
-    dispatch({ type: 'UPDATE_SELECT', name, value });
+    dispatch({ type: 'UPDATE_SELECT', payload: { name, value } });
   };
 
   const setFormState = (state: Partial<T>) => {
-    dispatch({ type: 'SET_STATE', value: state });
+    dispatch({ type: 'SET_STATE', payload: { value: state } });
   }
 
   return { formState, setFormState, onChangeInput, onChangeSelect };

@@ -255,6 +255,7 @@ export default function PageGalleryList(props: IComponentProps) {
                   noRecords: t('noRecords'),
                 }}
                 isSelectable={true}
+                searchableKeys={['name']}
                 isAllSelectable={!(props.isModal && !props.isMulti)}
                 isMultiSelectable={!(props.isModal && !props.isMulti)}
                 isSearchable={true}

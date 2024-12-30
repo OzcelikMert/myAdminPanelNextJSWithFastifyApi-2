@@ -47,27 +47,27 @@ const initialState: IComponentState = {
 };
 
 type IAction =
-  | { type: 'SET_STATUS'; status: IThemeFormSelectData[] }
-  | { type: 'SET_FLAGS'; flags: IThemeFormSelectData[] }
-  | { type: 'SET_IS_SUBMITTING'; isSubmitting: boolean }
-  | { type: 'SET_MAIN_TAB_ACTIVE_KEY'; mainTabActiveKey: string }
-  | { type: 'SET_MAIN_TITLE'; mainTitle: string }
-  | { type: 'SET_ITEM'; item: ILanguageGetResultService };
+  | { type: 'SET_STATUS'; payload: IComponentState["status"] }
+  | { type: 'SET_FLAGS'; payload: IComponentState["flags"] }
+  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState["isSubmitting"] }
+  | { type: 'SET_MAIN_TAB_ACTIVE_KEY'; payload: IComponentState["mainTabActiveKey"] }
+  | { type: 'SET_MAIN_TITLE'; payload: IComponentState["mainTitle"] }
+  | { type: 'SET_ITEM'; payload: IComponentState["item"] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
     case 'SET_STATUS':
-      return { ...state, status: action.status };
+      return { ...state, status: action.payload };
     case 'SET_FLAGS':
-      return { ...state, flags: action.flags };
+      return { ...state, flags: action.payload };
     case 'SET_IS_SUBMITTING':
-      return { ...state, isSubmitting: action.isSubmitting };
+      return { ...state, isSubmitting: action.payload };
     case 'SET_MAIN_TAB_ACTIVE_KEY':
-      return { ...state, mainTabActiveKey: action.mainTabActiveKey };
+      return { ...state, mainTabActiveKey: action.payload };
     case 'SET_MAIN_TITLE':
-      return { ...state, mainTitle: action.mainTitle };
+      return { ...state, mainTitle: action.payload };
     case 'SET_ITEM':
-      return { ...state, item: action.item };
+      return { ...state, item: action.payload };
     default:
       return state;
   }
@@ -86,6 +86,10 @@ const initialFormState: IComponentFormState = {
   isDefault: false,
 };
 
+type IPageQueries = {
+  _id?: string;
+};
+
 export default function PageSettingLanguageAdd() {
   const abortController = new AbortController();
 
@@ -96,14 +100,11 @@ export default function PageSettingLanguageAdd() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput, onChangeSelect } =
-    useFormReducer<IComponentFormState>({
-      ...initialFormState,
-      _id: (router.query._id as string) ?? '',
-    });
+  const { formState, setFormState, onChangeInput, onChangeSelect } = useFormReducer(initialFormState,);
+  const queries = router.query as IPageQueries;
 
   const init = async () => {
-    const minPermission = formState._id
+    const minPermission = queries._id
       ? LanguageEndPointPermission.UPDATE
       : LanguageEndPointPermission.ADD;
     if (
@@ -117,7 +118,7 @@ export default function PageSettingLanguageAdd() {
     ) {
       await getFlags();
       getStatus();
-      if (formState._id) {
+      if (queries._id) {
         await getItem();
       }
       setPageTitle();
@@ -135,9 +136,9 @@ export default function PageSettingLanguageAdd() {
   const setPageTitle = () => {
     const breadCrumbs: IBreadCrumbData[] = [
       { title: t('languages'), url: EndPoints.LANGUAGE_WITH.LIST },
-      { title: t(formState._id ? 'edit' : 'add') },
+      { title: t(queries._id ? 'edit' : 'add') },
     ];
-    if (formState._id) {
+    if (queries._id) {
       breadCrumbs.push({ title: state.mainTitle });
     }
     appDispatch(setBreadCrumbState(breadCrumbs));
@@ -146,7 +147,7 @@ export default function PageSettingLanguageAdd() {
   const getStatus = () => {
     dispatch({
       type: 'SET_STATUS',
-      status: ComponentUtil.getStatusForSelect(
+      payload: ComponentUtil.getStatusForSelect(
         [StatusId.Active, StatusId.Disabled],
         t
       ),
@@ -161,7 +162,7 @@ export default function PageSettingLanguageAdd() {
     if (serviceResult.status && serviceResult.data) {
       dispatch({
         type: 'SET_FLAGS',
-        flags: serviceResult.data.map((item) => ({
+        payload: serviceResult.data.map((item) => ({
           value: item,
           label: item.split('.')[0].toUpperCase(),
         })),
@@ -170,17 +171,19 @@ export default function PageSettingLanguageAdd() {
   };
 
   const getItem = async () => {
-    const serviceResult = await LanguageService.getWithId(
-      { _id: formState._id },
-      abortController.signal
-    );
-    if (serviceResult.status && serviceResult.data) {
-      const item = serviceResult.data;
-      dispatch({ type: 'SET_ITEM', item });
-      setFormState(item);
-      dispatch({ type: 'SET_MAIN_TITLE', mainTitle: item.title });
-    } else {
-      await navigatePage();
+    if(queries._id) {
+      const serviceResult = await LanguageService.getWithId(
+        { _id: queries._id },
+        abortController.signal
+      );
+      if (serviceResult.status && serviceResult.data) {
+        const item = serviceResult.data;
+        dispatch({ type: 'SET_ITEM', payload: item });
+        setFormState(item);
+        dispatch({ type: 'SET_MAIN_TITLE', payload: item.title });
+      } else {
+        await navigatePage();
+      }
     }
   };
 
@@ -194,17 +197,17 @@ export default function PageSettingLanguageAdd() {
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    dispatch({ type: 'SET_IS_SUBMITTING', isSubmitting: true });
+    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
     const params = { ...formState };
     const serviceResult = await (params._id
       ? LanguageService.updateWithId(params, abortController.signal)
       : LanguageService.add(params, abortController.signal));
-    dispatch({ type: 'SET_IS_SUBMITTING', isSubmitting: false });
+    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
     if (serviceResult.status) {
       new ComponentToast({
         type: 'success',
         title: t('successful'),
-        content: `${t(formState._id ? 'itemEdited' : 'itemAdded')}!`,
+        content: `${t(queries._id ? 'itemEdited' : 'itemAdded')}!`,
       });
       await navigatePage(true);
     }
@@ -340,7 +343,7 @@ export default function PageSettingLanguageAdd() {
                     onSelect={(key: any) =>
                       dispatch({
                         type: 'SET_MAIN_TAB_ACTIVE_KEY',
-                        mainTabActiveKey: key,
+                        payload: key,
                       })
                     }
                     activeKey={state.mainTabActiveKey}

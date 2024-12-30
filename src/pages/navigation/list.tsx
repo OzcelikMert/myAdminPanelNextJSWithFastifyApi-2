@@ -1,12 +1,11 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
+import { useEffect, useReducer } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import ComponentToast from '@components/elements/toast';
 import ComponentDataTable from '@components/elements/table/dataTable';
 import { INavigationGetResultService } from 'types/services/navigation.service';
 import { NavigationService } from '@services/navigation.service';
-import { IThemeToggleMenuItem } from '@components/elements/table/toggleMenu';
+import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import ComponentThemeBadgeStatus, {
   getStatusIcon,
 } from '@components/theme/badge/status';
@@ -18,127 +17,144 @@ import { status, StatusId } from '@constants/status';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
+import { SortUtil } from '@utils/sort.util';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
 
-type IPageState = {
-  searchKey: string;
+type IComponentState = {
   items: INavigationGetResultService[];
-  showingItems: INavigationGetResultService[];
   selectedItems: INavigationGetResultService[];
-  listMode: 'list' | 'deleted';
   selectedItemId: string;
   isShowModalUpdateRank: boolean;
+  listMode?: 'list' | 'deleted';
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  items: [],
+  selectedItems: [],
+  selectedItemId: '',
+  isShowModalUpdateRank: false,
+  listMode: 'list',
+};
 
-export default class PageNavigationList extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+type IAction = 
+  | { type: 'SET_ITEMS', payload: IComponentState['items'] }
+  | { type: 'SET_SELECTED_ITEMS', payload: IComponentState['selectedItems'] }
+  | { type: 'SET_SELECTED_ITEM_ID', payload: IComponentState['selectedItemId'] }
+  | { type: 'SET_LIST_MODE', payload: IComponentState['listMode'] }
+  | { type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: IComponentState['isShowModalUpdateRank'] };
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      searchKey: '',
-      selectedItems: [],
-      listMode: 'list',
-      items: [],
-      showingItems: [],
-      selectedItemId: '',
-      isShowModalUpdateRank: false,
-    };
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_ITEMS':
+      return { ...state, items: action.payload };
+    case 'SET_SELECTED_ITEMS':
+      return { ...state, selectedItems: action.payload };
+    case 'SET_SELECTED_ITEM_ID':
+      return { ...state, selectedItemId: action.payload };
+    case 'SET_IS_SHOW_MODAL_UPDATE_RANK':
+      return { ...state, isShowModalUpdateRank: action.payload };
+    case 'SET_LIST_MODE':
+      return { ...state, listMode: action.payload };
+    default:
+      return state;
   }
+}
 
-  async componentDidMount() {
+export default function PageNavigationList() {
+  const abortController = new AbortController();
+
+   const router = useRouter();
+    const t = useAppSelector(selectTranslation);
+    const appDispatch = useAppDispatch();
+    const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+    const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+    const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
+    }
+  }, []);
+
+  const init = async () => {
     if (
-      PermissionUtil.checkAndRedirect(
-        this.props,
-        NavigationEndPointPermission.GET
-      )
+      PermissionUtil.checkAndRedirect({
+        appDispatch,
+        router,
+        sessionAuth,
+        t,
+        minPermission: NavigationEndPointPermission.GET
+  })
     ) {
-      this.setPageTitle();
-      await this.getItems();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+      setPageTitle();
+      await getItems();
+      appDispatch(setIsPageLoadingState(false));
     }
   }
 
-  componentWillUnmount() {
-    this.abortController.abort();
+  const setPageTitle = () => {
+    appDispatch(setBreadCrumbState([
+      { title: t('navigations') },
+      { title: t('list') },
+    ]));
   }
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('navigations'),
-      this.props.t('list'),
-    ]);
-  }
-
-  async getItems() {
+  const getItems = async () => {
     const result = await NavigationService.getMany(
       {
-        langId: this.props.getStateApp.appData.currentLangId,
+        langId: mainLangId,
       },
-      this.abortController.signal
+      abortController.signal
     );
 
     if (result.status && result.data) {
-      this.setState((state: IPageState) => {
-        state.items = result.data!;
-        state.showingItems = result.data!.filter(
-          (item) => item.statusId !== StatusId.Deleted
-        );
-        return state;
-      });
+      dispatch({ type: 'SET_ITEMS', payload: result.data });
     }
   }
 
-  onChangeStatus = async (statusId: number) => {
-    const selectedItemId = this.state.selectedItems.map((item) => item._id);
-    if (statusId === StatusId.Deleted && this.state.listMode === 'deleted') {
+  const onChangeStatus = async (statusId: number) => {
+    const selectedItemId = state.selectedItems.map((item) => item._id);
+    if (statusId === StatusId.Deleted && state.listMode === 'deleted') {
       const result = await Swal.fire({
-        title: this.props.t('deleteAction'),
-        text: this.props.t('deleteSelectedItemsQuestion'),
-        confirmButtonText: this.props.t('yes'),
-        cancelButtonText: this.props.t('no'),
+        title: t('deleteAction'),
+        text: t('deleteSelectedItemsQuestion'),
+        confirmButtonText: t('yes'),
+        cancelButtonText: t('no'),
         icon: 'question',
         showCancelButton: true,
       });
       if (result.isConfirmed) {
         const loadingToast = new ComponentToast({
-          content: this.props.t('deleting'),
+          content: t('deleting'),
           type: 'loading',
         });
 
         const serviceResult = await NavigationService.deleteMany(
           { _id: selectedItemId },
-          this.abortController.signal
+          abortController.signal
         );
         loadingToast.hide();
         if (serviceResult.status) {
-          this.setState(
-            (state: IPageState) => {
-              state.items = state.items.filter(
-                (item) => !selectedItemId.includes(item._id)
-              );
-              return state;
-            },
-            () => {
-              new ComponentToast({
-                type: 'success',
-                title: this.props.t('successful'),
-                content: this.props.t('itemDeleted'),
-              });
-              this.onChangeListMode(this.state.listMode);
-            }
-          );
+          const newItems = state.items.filter((item) => !selectedItemId.includes(item._id))
+          dispatch({ type: "SET_ITEMS", payload: newItems });
+          new ComponentToast({
+            type: 'success',
+            title: t('successful'),
+            content: t('itemDeleted'),
+          });
         }
       }
     } else {
       const loadingToast = new ComponentToast({
-        content: this.props.t('updating'),
+        content: t('updating'),
         type: 'loading',
       });
       const serviceResult = await NavigationService.updateStatusMany(
@@ -146,151 +162,116 @@ export default class PageNavigationList extends Component<
           _id: selectedItemId,
           statusId: statusId,
         },
-        this.abortController.signal
+        abortController.signal
       );
       loadingToast.hide();
       if (serviceResult.status) {
-        this.setState(
-          (state: IPageState) => {
-            state.items.map((item) => {
-              if (selectedItemId.includes(item._id)) {
-                item.statusId = statusId;
-              }
-            });
-            return state;
-          },
-          () => {
-            new ComponentToast({
-              type: 'success',
-              title: this.props.t('successful'),
-              content: this.props.t('statusUpdated'),
-            });
-            this.onChangeListMode(this.state.listMode);
+        const newItems = state.items.map((item) => {
+          if (selectedItemId.includes(item._id)) {
+            item.statusId = statusId;
           }
-        );
+          return item;
+        });
+        dispatch({ type: "SET_ITEMS", payload: newItems });
+        new ComponentToast({
+          type: 'success',
+          title: t('successful'),
+          content: t('statusUpdated'),
+        });
       }
     }
   };
 
-  async onChangeRank(rank: number) {
+  const onChangeRank = async (rank: number) => {
     const serviceResult = await NavigationService.updateRankWithId(
       {
-        _id: this.state.selectedItemId,
+        _id: state.selectedItemId,
         rank: rank,
       },
-      this.abortController.signal
+      abortController.signal
     );
 
     if (serviceResult.status) {
-      this.setState(
-        (state: IPageState) => {
-          const item = this.state.items.findSingle(
-            '_id',
-            this.state.selectedItemId
-          );
-          if (item) {
-            item.rank = rank;
-          }
-          return state;
-        },
-        () => {
-          this.onChangeListMode(this.state.listMode);
-          const item = this.state.items.findSingle(
-            '_id',
-            this.state.selectedItemId
-          );
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: `'${item?.contents?.title}' ${this.props.t('itemEdited')}`,
-            timeOut: 3,
-          });
-        }
-      );
+      let newItems = state.items;
+      let newItem = newItems.findSingle('_id', state.selectedItemId);
+      if (newItem) {
+        newItem.rank = rank;
+      }
+      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: `'${newItem?.contents?.title}' ${t('itemEdited')}`,
+        timeOut: 3,
+      });
+      return true;
     }
   }
 
-  onSelect(selectedRows: IPageState['showingItems']) {
-    this.setState((state: IPageState) => {
-      state.selectedItems = selectedRows;
-      return state;
-    });
+  const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
+    dispatch({ type: 'SET_LIST_MODE', payload: item.key });
   }
 
-  onSearch(searchKey: string) {
-    this.setState({
-      searchKey: searchKey,
-      showingItems: this.state.showingItems.filter(
-        (item) =>
-          (item.contents?.title ?? '').toLowerCase().search(searchKey) > -1
-      ),
-    });
+  const onSelect = (selectedRows: IComponentState['items']) =>{
+    dispatch({ type: 'SET_SELECTED_ITEMS', payload: selectedRows });
   }
 
-  onChangeListMode(mode: IPageState['listMode']) {
-    this.setState(
-      (state: IPageState) => {
-        state.listMode = mode;
-        state.showingItems = [];
-        state.selectedItems = [];
-        if (mode === 'list') {
-          state.showingItems = state.items.findMulti(
-            'statusId',
-            StatusId.Deleted,
-            false
-          );
-        } else {
-          state.showingItems = state.items.findMulti(
-            'statusId',
-            StatusId.Deleted
-          );
-        }
-        return state;
-      },
-      () => this.onSearch(this.state.searchKey)
-    );
-  }
-
-  navigatePage(type: 'edit', itemId = '') {
-    const pagePath = EndPoints.NAVIGATION_WITH;
+  const navigatePage = (type: 'edit', itemId = '') => {
+    const path = EndPoints.NAVIGATION_WITH;
     switch (type) {
       case 'edit':
-        RouteUtil.change({ props: this.props, path: pagePath.EDIT(itemId) });
+        RouteUtil.change({ appDispatch, router, path: path.EDIT(itemId) });
         break;
     }
   }
 
-  onClickUpdateRank(itemId: string) {
-    this.setState({ selectedItemId: itemId, isShowModalUpdateRank: true });
+  const onClickUpdateRank = (itemId: string) => {
+    dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: itemId });
+    dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: true });
   }
 
-  get getToggleMenuItems(): IThemeToggleMenuItem[] {
+  const getToggleMenuItems = (): IComponentTableToggleMenuItem[] => {
     return status
       .findMulti('id', [StatusId.Active, StatusId.InProgress, StatusId.Deleted])
       .map((item) => ({
-        label: this.props.t(item.langKey),
+        label: t(item.langKey),
         value: item.id,
         icon: getStatusIcon(item.id),
       }));
   }
 
-  get getTableColumns(): TableColumn<IPageState['showingItems'][0]>[] {
+  const getFilterButtons = (): IComponentTableFilterButton[] => {
     return [
       {
-        name: this.props.t('title'),
-        selector: (row) => row.contents?.title || this.props.t('[noLangAdd]'),
+        title: `${t('list')} (${state.items.findMulti('statusId', StatusId.Deleted, false).length})`,
+        className: 'btn-gradient-success',
+        icon: 'mdi mdi-view-list',
+        onFilter: (items) => items,
+      },
+      {
+        title: `${t('trash')} (${state.items.findMulti('statusId', StatusId.Deleted).length})`,
+        className: 'btn-gradient-danger',
+        icon: 'mdi mdi-delete',
+        onFilter: (items) => items.findMulti('statusId', StatusId.Deleted),
+      },
+    ]
+  }
+
+  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+    return [
+      {
+        name: t('title'),
+        selector: (row) => row.contents?.title || t('[noLangAdd]'),
         cell: (row) => (
           <div className="row w-100">
             <div className="col-md-12">
               {
                 <ComponentThemeToolTipMissingLanguages
                   itemLanguages={row.alternates ?? []}
-                  contentLanguages={this.props.getStateApp.appData.contentLanguages}
-                  t={this.props.t}
                 />
               }
               {row.parentId ? <span className="pe-3">-</span> : null}
-              {row.contents?.title || this.props.t('[noLangAdd]')}
+              {row.contents?.title || t('[noLangAdd]')}
             </div>
           </div>
         ),
@@ -298,22 +279,22 @@ export default class PageNavigationList extends Component<
         sortable: true,
       },
       {
-        name: this.props.t('main'),
+        name: t('main'),
         selector: (row) =>
           row.parentId
-            ? row.parentId.contents?.title || this.props.t('[noLangAdd]')
-            : this.props.t('notSelected'),
+            ? row.parentId.contents?.title || t('[noLangAdd]')
+            : t('notSelected'),
         sortable: true,
       },
       {
-        name: this.props.t('status'),
+        name: t('status'),
         sortable: true,
         cell: (row) => (
-          <ComponentThemeBadgeStatus t={this.props.t} statusId={row.statusId} />
+          <ComponentThemeBadgeStatus statusId={row.statusId} />
         ),
       },
       {
-        name: this.props.t('updatedBy'),
+        name: t('updatedBy'),
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
@@ -323,17 +304,17 @@ export default class PageNavigationList extends Component<
         ),
       },
       {
-        name: this.props.t('rank'),
+        name: t('rank'),
         sortable: true,
         selector: (row) => row.rank ?? 0,
         cell: (row) => {
           return PermissionUtil.check(
-            this.props.getStateApp.sessionAuth!,
+            sessionAuth!,
             NavigationEndPointPermission.UPDATE
           ) ? (
             <span
               className="cursor-pointer"
-              onClick={() => this.onClickUpdateRank(row._id)}
+              onClick={() => onClickUpdateRank(row._id)}
             >
               {row.rank ?? 0} <i className="fa fa-pencil-square-o"></i>
             </span>
@@ -343,10 +324,10 @@ export default class PageNavigationList extends Component<
         },
       },
       {
-        name: this.props.t('createdDate'),
+        name: t('createdDate'),
         sortable: true,
         selector: (row) => new Date(row.createdAt || '').toLocaleDateString(),
-        sortFunction: (a, b) => ComponentDataTable.dateSort(a, b),
+        sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
         cell: (row) => (
           <ComponentTableUpdatedBy
             name={row.authorId.name}
@@ -355,7 +336,7 @@ export default class PageNavigationList extends Component<
         ),
       },
       PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
+        sessionAuth!,
         NavigationEndPointPermission.UPDATE
       )
         ? {
@@ -364,7 +345,7 @@ export default class PageNavigationList extends Component<
             button: true,
             cell: (row) => (
               <button
-                onClick={() => this.navigatePage('edit', row._id)}
+                onClick={() => navigatePage('edit', row._id)}
                 className="btn btn-gradient-warning"
               >
                 <i className="fa fa-pencil-square-o"></i>
@@ -375,87 +356,47 @@ export default class PageNavigationList extends Component<
     ];
   }
 
-  render() {
-    const item = this.state.items.findSingle('_id', this.state.selectedItemId);
-    return this.props.getStateApp.isPageLoading ? null : (
+
+    const selectedItem = state.items.findSingle('_id', state.selectedItemId);
+
+    return isPageLoading ? null : (
       <div className="page-navigation">
         <ComponentThemeModalUpdateItemRank
-          t={this.props.t}
-          isShow={this.state.isShowModalUpdateRank}
-          onHide={() => this.setState({ isShowModalUpdateRank: false })}
-          onSubmit={(rank) => this.onChangeRank(rank)}
-          rank={item?.rank}
-          title={item?.contents?.title}
+          isShow={state.isShowModalUpdateRank}
+          onHide={() => dispatch({ type: "SET_IS_SHOW_MODAL_UPDATE_RANK", payload: false })}
+          onSubmit={(rank) => onChangeRank(rank)}
+          rank={selectedItem?.rank}
+          title={selectedItem?.contents?.title}
         />
-        <div className="row mb-3">
-          <div className="col-md-3"></div>
-          <div className="col-md-9 text-end">
-            {PermissionUtil.check(
-              this.props.getStateApp.sessionAuth!,
-              NavigationEndPointPermission.DELETE
-            ) ? (
-              this.state.listMode === 'list' ? (
-                <button
-                  className="btn btn-gradient-danger btn-lg list-mode-btn"
-                  onClick={() => this.onChangeListMode('deleted')}
-                >
-                  <i className="mdi mdi-delete"></i> {this.props.t('trash')} (
-                  {
-                    this.state.items.findMulti('statusId', StatusId.Deleted)
-                      .length
-                  }
-                  )
-                </button>
-              ) : (
-                <button
-                  className="btn btn-gradient-success btn-lg list-mode-btn"
-                  onClick={() => this.onChangeListMode('list')}
-                >
-                  <i className="mdi mdi-view-list"></i> {this.props.t('list')} (
-                  {
-                    this.state.items.findMulti(
-                      'statusId',
-                      StatusId.Deleted,
-                      false
-                    ).length
-                  }
-                  )
-                </button>
-              )
-            ) : null}
-          </div>
-        </div>
         <div className="grid-margin stretch-card">
           <div className="card">
             <div className="card-body">
               <div className="table-post">
                 <ComponentDataTable
-                  columns={this.getTableColumns.filter(
-                    (column) => typeof column.name !== 'undefined'
-                  )}
-                  data={this.state.showingItems}
-                  onSelect={(rows) => this.onSelect(rows)}
-                  onSearch={(searchKey) => this.onSearch(searchKey)}
-                  selectedRows={this.state.selectedItems}
+                  columns={getTableColumns()}
+                  data={state.items}
+                  onSelect={(rows) => onSelect(rows)}
                   i18={{
-                    search: this.props.t('search'),
-                    noRecords: this.props.t('noRecords'),
+                    search: t('search'),
+                    noRecords: t('noRecords'),
                   }}
                   isSelectable={
                     PermissionUtil.check(
-                      this.props.getStateApp.sessionAuth!,
+                      sessionAuth!,
                       NavigationEndPointPermission.UPDATE
                     ) ||
                     PermissionUtil.check(
-                      this.props.getStateApp.sessionAuth!,
+                      sessionAuth!,
                       NavigationEndPointPermission.DELETE
                     )
                   }
                   isAllSelectable={true}
                   isSearchable={true}
                   isActiveToggleMenu={true}
-                  toggleMenuItems={this.getToggleMenuItems}
-                  onSubmitToggleMenuItem={(value) => this.onChangeStatus(value)}
+                  toggleMenuItems={getToggleMenuItems()}
+                  onClickToggleMenuItem={(value) => onChangeStatus(value)}
+                  filterButtons={getFilterButtons()}
+                  onClickFilterButton={(item) => onClickTableFilterButton(item)}
                 />
               </div>
             </div>
@@ -463,5 +404,5 @@ export default class PageNavigationList extends Component<
         </div>
       </div>
     );
-  }
+  
 }

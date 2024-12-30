@@ -29,9 +29,9 @@ const initialState: IComponentState = {
 };
 
 type IAction =
-  | { type: 'SET_IS_SUBMITTING'; payload: boolean }
-  | { type: 'SET_IS_WRONG'; payload: boolean }
-  | { type: 'SET_USER'; payload: IUserGetResultService };
+  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState["isSubmitting"] }
+  | { type: 'SET_IS_WRONG'; payload: IComponentState["isWrong"] }
+  | { type: 'SET_USER'; payload: IComponentState["user"] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
