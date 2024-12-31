@@ -173,6 +173,7 @@ export default function PageECommerceSettings() {
           <ComponentFormSelect
             title={t('currencyType')}
             isMulti={false}
+            name='eCommerce.currencyId'
             isSearchable={false}
             options={state.currencyTypes}
             value={state.currencyTypes.findSingle(
@@ -180,7 +181,7 @@ export default function PageECommerceSettings() {
               formState.eCommerce.currencyId
             )}
             onChange={(item: any, e) =>
-              onChangeSelect('eCommerce.currencyId', item.value)
+              onChangeSelect(e.name, item.value)
             }
           />
         </div>

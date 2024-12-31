@@ -1,10 +1,5 @@
-import React, { Component } from 'react';
-import {
-  ComponentFormCheckBox,
-  ComponentFormSelect,
-  ComponentFormType,
-} from '@components/elements/form';
-import { HandleFormLibrary } from '@library/react/handles/form';
+import { ActionDispatch, useEffect, useReducer } from 'react';
+import { IUseFormReducer } from '@library/react/handles/form';
 import {
   IPostECommerceAttributeModel,
   IPostECommerceVariationModel,
@@ -14,8 +9,10 @@ import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import Image from 'next/image';
 import { ProductTypeId } from '@constants/productTypes';
-import PagePostAdd, {
-  IPageState as PostPageState,
+import {
+  IPostAddAction,
+  IPostAddComponentFormState,
+  IPostAddComponentState,
 } from '@pages/post/add';
 import { AttributeTypeId } from '@constants/attributeTypes';
 import dynamic from 'next/dynamic';
@@ -23,6 +20,11 @@ import ComponentToolTip from '@components/elements/tooltip';
 import Swal from 'sweetalert2';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { StatusId } from '@constants/status';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
+import ComponentFormSelect from '@components/elements/form/input/select';
 
 const ComponentThemeRichTextBox = dynamic(
   () => import('@components/theme/richTextBox'),
@@ -32,347 +34,400 @@ const ComponentThemeRichTextBox = dynamic(
   }
 );
 
-type IPageState = {
+type IComponentState = {
   mainTabActiveKey: string;
   variationTabActiveKey: string;
   attributeAccordionToggleKey: string;
   variationAccordionToggleKey: string;
 };
 
-type IPageProps = {
-  page: PagePostAdd;
+const initialState: IComponentState = {
+  mainTabActiveKey: 'options',
+  variationTabActiveKey: 'general',
+  attributeAccordionToggleKey: '',
+  variationAccordionToggleKey: '',
 };
 
-export default class ComponentPagePostAddECommerce extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      mainTabActiveKey: 'options',
-      variationTabActiveKey: 'general',
-      attributeAccordionToggleKey: '',
-      variationAccordionToggleKey: '',
+type IAction =
+  | {
+      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      payload: IComponentState['mainTabActiveKey'];
+    }
+  | {
+      type: 'SET_VARIATION_TAB_ACTIVE_KEY';
+      payload: IComponentState['variationTabActiveKey'];
+    }
+  | {
+      type: 'SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY';
+      payload: IComponentState['attributeAccordionToggleKey'];
+    }
+  | {
+      type: 'SET_VARIATION_ACCORDION_TOGGLE_KEY';
+      payload: IComponentState['variationAccordionToggleKey'];
     };
-  }
 
-  componentDidMount() {
-    this.findDefaultVariation();
-    this.findSameVariation();
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_MAIN_TAB_ACTIVE_KEY':
+      return { ...state, mainTabActiveKey: action.payload };
+    case 'SET_VARIATION_TAB_ACTIVE_KEY':
+      return { ...state, variationTabActiveKey: action.payload };
+    case 'SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY':
+      return { ...state, attributeAccordionToggleKey: action.payload };
+    case 'SET_VARIATION_ACCORDION_TOGGLE_KEY':
+      return { ...state, variationAccordionToggleKey: action.payload };
+    default:
+      return state;
   }
+};
 
-  findSameVariation() {
-    this.props.page.setState((state: PostPageState) => {
-      if (typeof state.formData.eCommerce !== 'undefined') {
-        state.formData.eCommerce.variations =
-          state.formData.eCommerce.variations?.map((variation) => {
-            const dataFilter = JSON.stringify(
-              variation.selectedVariations.map((selectedVariation) => ({
+type IComponentProps = {
+  state: IPostAddComponentState;
+  dispatch: ActionDispatch<[action: IPostAddAction]>;
+  formState: IPostAddComponentFormState;
+  setFormState: IUseFormReducer<IPostAddComponentFormState>['setFormState'];
+  onChangeInput: IUseFormReducer<IPostAddComponentFormState>['onChangeInput'];
+  onChangeSelect: IUseFormReducer<IPostAddComponentFormState>['onChangeSelect'];
+};
+
+export default function ComponentPagePostAddECommerce(props: IComponentProps) {
+  const t = useAppSelector(selectTranslation);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    init();
+  }, []);
+
+  const init = () => {
+    findDefaultVariation();
+    findSameVariation();
+  };
+
+  const findSameVariation = () => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce) {
+      eCommerce.variations = eCommerce.variations?.map((variation) => {
+        const dataFilter = JSON.stringify(
+          variation.selectedVariations.map((selectedVariation) => ({
+            variationId: selectedVariation.variationId,
+            attributeId: selectedVariation.attributeId,
+          }))
+        );
+        variation.isWarningForIsThereOther = eCommerce?.variations?.some(
+          (variation_) =>
+            variation_._id != variation._id &&
+            JSON.stringify(
+              variation_.selectedVariations.map((selectedVariation) => ({
                 variationId: selectedVariation.variationId,
                 attributeId: selectedVariation.attributeId,
               }))
-            );
-            variation.isWarningForIsThereOther =
-              state.formData.eCommerce?.variations?.some(
-                (variation_) =>
-                  variation_._id != variation._id &&
-                  JSON.stringify(
-                    variation_.selectedVariations.map((selectedVariation) => ({
-                      variationId: selectedVariation.variationId,
-                      attributeId: selectedVariation.attributeId,
-                    }))
-                  ) == dataFilter
-              );
-            return variation;
-          });
-      }
-      return state;
-    });
-  }
-
-  findDefaultVariation() {
-    this.props.page.setState((state: PostPageState) => {
-      if (typeof state.formData.eCommerce !== 'undefined') {
-        const dataFilter = JSON.stringify(
-          state.formData.eCommerce.variationDefaults?.map(
-            (variationDefault) => ({
-              variationId: variationDefault.variationId,
-              attributeId: variationDefault.attributeId,
-            })
-          )
+            ) == dataFilter
         );
+        return variation;
+      });
+      props.setFormState({
+        eCommerce,
+      });
+    }
+  };
 
-        state.formData.eCommerce.variations =
-          state.formData.eCommerce.variations?.map((variation) => {
-            variation.isDefault =
-              JSON.stringify(
-                variation.selectedVariations.map((selectedVariation) => ({
-                  variationId: selectedVariation.variationId,
-                  attributeId: selectedVariation.attributeId,
-                }))
-              ) == dataFilter;
-            return variation;
-          });
-      }
-      return state;
-    });
-  }
+  const findDefaultVariation = () => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce) {
+      const dataFilter = JSON.stringify(
+        eCommerce.variationDefaults?.map((variationDefault) => ({
+          variationId: variationDefault.variationId,
+          attributeId: variationDefault.attributeId,
+        }))
+      );
 
-  onChange(data: any, key: any, value: any) {
-    this.props.page.setState((state: PostPageState) => {
-      data[key] = value;
-      return state;
-    });
-  }
+      eCommerce.variations = eCommerce.variations?.map((variation) => {
+        variation.isDefault =
+          JSON.stringify(
+            variation.selectedVariations.map((selectedVariation) => ({
+              variationId: selectedVariation.variationId,
+              attributeId: selectedVariation.attributeId,
+            }))
+          ) == dataFilter;
+        return variation;
+      });
+      props.setFormState({
+        eCommerce,
+      });
+    }
+  };
 
-  onAddNewAttribute() {
+  const onChangeVariationItemContent = (index: number, content: string) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce && eCommerce.variations) {
+      let variation = eCommerce.variations[index];
+      variation.itemId.contents.content = content;
+      props.setFormState({
+        eCommerce,
+      });
+    }
+  };
+
+  const onSelectVariationItemImage = (index: number, image: string) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce && eCommerce.variations) {
+      let variation = eCommerce.variations[index];
+      variation.itemId.contents.image = image;
+      props.setFormState({
+        eCommerce,
+      });
+    }
+  };
+
+  const onSelectVariationItemImages = (index: number, images: string[]) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce && eCommerce.variations) {
+      let variation = eCommerce.variations[index];
+      variation.itemId.eCommerce.images = images;
+      props.setFormState({
+        eCommerce,
+      });
+    }
+  };
+
+  const onAddNewAttribute = () => {
     const _id = String.createId();
-    this.props.page.setState((state: PostPageState) => {
-      if (typeof state.formData.eCommerce !== 'undefined') {
-        if (typeof state.formData.eCommerce.attributes === 'undefined')
-          state.formData.eCommerce.attributes = [];
-        state.formData.eCommerce.attributes.push({
-          _id: _id,
-          attributeId: '',
-          typeId: AttributeTypeId.Text,
-          variations: [],
-        });
-      }
-      return state;
-    });
-    this.setState({
-      attributeAccordionToggleKey: _id,
-    });
-  }
 
-  onChangeAttributeVariations(
-    attribute: IPostECommerceAttributeModel<string>,
-    values: PostPageState['variations']
-  ) {
-    this.props.page.setState((state: PostPageState) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce) {
+      if (typeof eCommerce.attributes === 'undefined')
+        eCommerce.attributes = [];
+      eCommerce.attributes.push({
+        _id: _id,
+        attributeId: '',
+        typeId: AttributeTypeId.Text,
+        variations: [],
+      });
+
+      props.setFormState({
+        eCommerce,
+      });
+
+      dispatch({ type: 'SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY', payload: _id });
+    }
+  };
+
+  const onChangeAttributeVariations = (
+    index: number,
+    values: IPostAddComponentState['variations']
+  ) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce && eCommerce.attributes) {
+      let attribute = eCommerce.attributes[index];
       attribute.variations = values.map((value) => value.value);
-      return state;
-    });
-  }
+      props.setFormState({
+        eCommerce,
+      });
+    }
+  };
 
-  onDeleteAttribute(index: number) {
-    this.props.page.setState((state: PostPageState) => {
-      if (typeof state.formData.eCommerce !== 'undefined') {
-        state.formData.eCommerce.attributes?.remove(index);
-      }
-      return state;
-    });
-  }
+  const onDeleteAttribute = (index: number) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce) {
+      eCommerce.attributes?.remove(index);
+      props.setFormState({
+        eCommerce,
+      });
+    }
+  };
 
-  onChangeAttribute(
-    attribute: IPostECommerceAttributeModel,
-    attributeId: string
-  ) {
-    if (attribute.attributeId == attributeId) return false;
-    this.props.page.setState((state: PostPageState) => {
+  const onChangeAttribute = (index: number, attributeId: string) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce && eCommerce.attributes) {
+      let attribute = eCommerce.attributes[index];
+      if (attribute.attributeId == attributeId) return false;
       attribute.attributeId = attributeId;
       attribute.variations = [];
-      return state;
-    });
-  }
+      props.setFormState({
+        eCommerce,
+      });
+    }
+  };
 
-  onAddNewVariation() {
+  const onAddNewVariation = () => {
     const _id = String.createId();
-    this.props.page.setState((state: PostPageState) => {
-      if (typeof state.formData.eCommerce !== 'undefined') {
-        if (typeof state.formData.eCommerce.variations === 'undefined')
-          state.formData.eCommerce.variations = [];
-        state.formData.eCommerce.variations.push({
-          _id: _id,
-          selectedVariations: [],
-          rank: state.formData.eCommerce.variations.length ?? 0,
-          itemId: {
-            _id: String.createId(),
-            statusId: StatusId.Active,
-            contents: {
-              title: '',
-              langId: state.formData.contents.langId,
+
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce) {
+      if (typeof eCommerce.variations === 'undefined')
+        eCommerce.variations = [];
+      eCommerce.variations.push({
+        _id: _id,
+        selectedVariations: [],
+        rank: eCommerce.variations.length ?? 0,
+        itemId: {
+          _id: String.createId(),
+          statusId: StatusId.Active,
+          contents: {
+            title: '',
+            langId: props.formState.contents.langId,
+          },
+          eCommerce: {
+            images: [],
+            pricing: {
+              taxIncluded: 0,
+              compared: 0,
+              shipping: 0,
+              taxExcluded: 0,
+              taxRate: 0,
             },
-            eCommerce: {
-              images: [],
-              pricing: {
-                taxIncluded: 0,
-                compared: 0,
-                shipping: 0,
-                taxExcluded: 0,
-                taxRate: 0,
-              },
-              shipping: {
-                width: '',
-                height: '',
-                depth: '',
-                weight: '',
-              },
-              inventory: {
-                sku: '',
-                quantity: 0,
-                isManageStock: false,
-              },
+            shipping: {
+              width: '',
+              height: '',
+              depth: '',
+              weight: '',
+            },
+            inventory: {
+              sku: '',
+              quantity: 0,
+              isManageStock: false,
             },
           },
-        });
-      }
-      return state;
-    });
-    this.setState({
-      variationAccordionToggleKey: _id,
-    });
-  }
+        },
+      });
 
-  async onDeleteVariation(index: number) {
+      props.setFormState({
+        eCommerce,
+      });
+
+      dispatch({ type: 'SET_VARIATION_ACCORDION_TOGGLE_KEY', payload: _id });
+    }
+  };
+
+  const onDeleteVariation = async (index: number) => {
     const result = await Swal.fire({
-      title: this.props.page.props.t('deleteAction'),
-      html: `${this.props.page.props.t('deleteSelectedItemsQuestion')}`,
-      confirmButtonText: this.props.page.props.t('yes'),
-      cancelButtonText: this.props.page.props.t('no'),
+      title: t('deleteAction'),
+      html: `${t('deleteSelectedItemsQuestion')}`,
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
       icon: 'question',
       showCancelButton: true,
     });
 
     if (result.isConfirmed) {
-      this.props.page.setState((state: PostPageState) => {
-        if (typeof state.formData.eCommerce !== 'undefined') {
-          state.formData.eCommerce.variations?.remove(index);
-        }
-        return state;
-      });
+      let eCommerce = props.formState.eCommerce;
+      if (eCommerce && eCommerce.variations) {
+        eCommerce.variations.remove(index);
+        props.setFormState({
+          eCommerce,
+        });
+      }
     }
-  }
+  };
 
-  onChangeVariationAttribute(
-    data: IPostECommerceVariationModel<string>,
+  const onChangeVariationAttribute = (
+    index: number,
     attributeId: string,
     value: string
-  ) {
-    this.props.page.setState(
-      (state: PostPageState) => {
-        if (typeof state.formData.eCommerce !== 'undefined') {
-          const findIndex = data.selectedVariations.indexOfKey(
-            'attributeId',
-            attributeId
-          );
-          if (findIndex > -1) {
-            data.selectedVariations[findIndex].variationId = value;
-          } else {
-            data.selectedVariations.push({
-              attributeId: attributeId,
-              variationId: value,
-            });
-          }
-        }
-        return state;
-      },
-      () => {
-        this.findSameVariation();
-        this.findDefaultVariation();
+  ) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce && eCommerce.variations) {
+      let variation = eCommerce.variations[index];
+      const findIndex = variation.selectedVariations.indexOfKey(
+        'attributeId',
+        attributeId
+      );
+      if (findIndex > -1) {
+        variation.selectedVariations[findIndex].variationId = value;
+      } else {
+        variation.selectedVariations.push({
+          attributeId: attributeId,
+          variationId: value,
+        });
       }
-    );
-  }
+      props.setFormState({
+        eCommerce,
+      });
 
-  onChangeVariationDefault(attributeId: string, value: string) {
-    this.props.page.setState(
-      (state: PostPageState) => {
-        if (typeof state.formData.eCommerce !== 'undefined') {
-          if (typeof state.formData.eCommerce.variationDefaults == 'undefined')
-            state.formData.eCommerce.variationDefaults = [];
-          const findIndex =
-            state.formData.eCommerce.variationDefaults.indexOfKey(
-              'attributeId',
-              attributeId
-            );
-          if (findIndex > -1) {
-            state.formData.eCommerce.variationDefaults[findIndex].variationId =
-              value;
-          } else {
-            state.formData.eCommerce.variationDefaults.push({
-              attributeId: attributeId,
-              variationId: value,
-            });
-          }
-        }
-        return state;
-      },
-      () => {
-        this.findDefaultVariation();
+      findSameVariation();
+      findDefaultVariation();
+    }
+  };
+
+  const onChangeVariationDefault = (attributeId: string, value: string) => {
+    let eCommerce = props.formState.eCommerce;
+    if (eCommerce && eCommerce.variations) {
+      if (typeof eCommerce.variationDefaults == 'undefined')
+        eCommerce.variationDefaults = [];
+      const findIndex = eCommerce.variationDefaults.indexOfKey(
+        'attributeId',
+        attributeId
+      );
+      if (findIndex > -1) {
+        eCommerce.variationDefaults[findIndex].variationId = value;
+      } else {
+        eCommerce.variationDefaults.push({
+          attributeId: attributeId,
+          variationId: value,
+        });
       }
-    );
-  }
+      props.setFormState({
+        eCommerce,
+      });
 
-  onClickAttributeAccordionToggle(_id: string) {
-    this.setState({
-      attributeAccordionToggleKey:
-        _id == this.state.attributeAccordionToggleKey ? '' : _id,
+      findDefaultVariation();
+    }
+  };
+
+  const onClickAttributeAccordionToggle = (_id: string) => {
+    dispatch({
+      type: 'SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY',
+      payload: _id == state.attributeAccordionToggleKey ? '' : _id,
     });
-  }
+  };
 
-  onClickVariationAccordionToggle(_id: string) {
-    this.setState({
-      variationAccordionToggleKey:
-        _id == this.state.variationAccordionToggleKey ? '' : _id,
+  const onClickVariationAccordionToggle = (_id: string) => {
+    dispatch({
+      type: 'SET_VARIATION_ACCORDION_TOGGLE_KEY',
+      payload: _id == state.variationAccordionToggleKey ? '' : _id,
     });
-  }
+  };
 
-  TabPricing = () => {
+  const TabPricing = () => {
     return (
       <div className="row">
         <div className="col-md-7">
           <div className="row">
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('taxIncludedPrice')}
+                title={t('taxIncludedPrice')}
                 name="eCommerce.pricing.taxIncluded"
                 type="number"
-                value={
-                  this.props.page.state.formData.eCommerce?.pricing?.taxIncluded
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.pricing?.taxIncluded}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('taxExcludedPrice')}
+                title={t('taxExcludedPrice')}
                 name="eCommerce.pricing.taxExcluded"
                 type="number"
-                value={
-                  this.props.page.state.formData.eCommerce?.pricing?.taxExcluded
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.pricing?.taxExcluded}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('taxRate')}
+                title={t('taxRate')}
                 name="eCommerce.pricing.taxRate"
                 type="number"
-                value={
-                  this.props.page.state.formData.eCommerce?.pricing?.taxRate
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.pricing?.taxRate}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('comparedPrice')}
+                title={t('comparedPrice')}
                 name="eCommerce.pricing.compared"
                 type="number"
-                value={
-                  this.props.page.state.formData.eCommerce?.pricing?.compared
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.pricing?.compared}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
           </div>
@@ -381,28 +436,27 @@ export default class ComponentPagePostAddECommerce extends Component<
     );
   };
 
-  TabGallery = () => {
+  const TabGallery = () => {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
           <ComponentThemeChooseImage
-            {...this.props.page.props}
             onSelected={(images) =>
-              this.props.page.setState((state: PostPageState) => {
-                if (typeof state.formData.eCommerce !== 'undefined') {
-                  state.formData.eCommerce.images = images;
-                }
-                return state;
+              props.setFormState({
+                eCommerce: {
+                  ...props.formState.eCommerce!,
+                  images,
+                },
               })
             }
             isMulti={true}
-            selectedImages={this.props.page.state.formData.eCommerce?.images}
-            showModalButtonText={this.props.page.props.t('selectImages')}
+            selectedImages={props.formState.eCommerce?.images}
+            showModalButtonText={t('selectImages')}
           />
         </div>
         <div className="col-md-12 mb-3">
           <div className="row">
-            {this.props.page.state.formData.eCommerce?.images?.map((image) => (
+            {props.formState.eCommerce?.images?.map((image) => (
               <div className="col-md-3 mb-3">
                 <Image
                   src={ImageSourceUtil.getUploadedImageSrc(image)}
@@ -421,50 +475,40 @@ export default class ComponentPagePostAddECommerce extends Component<
     );
   };
 
-  TabInventory = () => {
+  const TabInventory = () => {
     return (
       <div className="row">
         <div className="col-md-7">
           <div className="row">
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('sku')}
+                title={t('sku')}
                 name="eCommerce.inventory.sku"
                 type="text"
-                value={this.props.page.state.formData.eCommerce?.inventory?.sku}
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.inventory?.sku}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('quantity')}
+                title={t('quantity')}
                 name="eCommerce.inventory.quantity"
                 disabled={
-                  !this.props.page.state.formData.eCommerce?.inventory
-                    ?.isManageStock || false
+                  !props.formState.eCommerce?.inventory?.isManageStock || false
                 }
                 type="number"
-                value={
-                  this.props.page.state.formData.eCommerce?.inventory?.quantity
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.inventory?.quantity}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-7">
               <ComponentFormCheckBox
-                title={this.props.page.props.t('isManageStock')}
+                title={t('isManageStock')}
                 name="eCommerce.inventory.isManageStock"
                 checked={Boolean(
-                  this.props.page.state.formData.eCommerce?.inventory
-                    ?.isManageStock
+                  props.formState.eCommerce?.inventory?.isManageStock
                 )}
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
           </div>
@@ -473,74 +517,54 @@ export default class ComponentPagePostAddECommerce extends Component<
     );
   };
 
-  TabShipping = () => {
+  const TabShipping = () => {
     return (
       <div className="row">
         <div className="col-md-7">
           <div className="row">
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('width')}
+                title={t('width')}
                 name="eCommerce.shipping.width"
                 type="text"
-                value={
-                  this.props.page.state.formData.eCommerce?.shipping?.width
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.shipping?.width}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('height')}
+                title={t('height')}
                 name="eCommerce.shipping.height"
                 type="text"
-                value={
-                  this.props.page.state.formData.eCommerce?.shipping?.height
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.shipping?.height}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('depth')}
+                title={t('depth')}
                 name="eCommerce.shipping.depth"
                 type="text"
-                value={
-                  this.props.page.state.formData.eCommerce?.shipping?.depth
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.shipping?.depth}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('weight')}
+                title={t('weight')}
                 name="eCommerce.shipping.weight"
                 type="text"
-                value={
-                  this.props.page.state.formData.eCommerce?.shipping?.weight
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.shipping?.weight}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormType
-                title={this.props.page.props.t('shippingPrice')}
+                title={t('shippingPrice')}
                 name="eCommerce.pricing.shipping"
                 type="number"
-                value={
-                  this.props.page.state.formData.eCommerce?.pricing?.shipping
-                }
-                onChange={(e) =>
-                  HandleFormLibrary.onChangeInput(e, this.props.page)
-                }
+                value={props.formState.eCommerce?.pricing?.shipping}
+                onChange={(e) => props.onChangeInput(e)}
               />
             </div>
           </div>
@@ -549,620 +573,500 @@ export default class ComponentPagePostAddECommerce extends Component<
     );
   };
 
-  TabAttributes = () => {
-    const Attribute = (
-      attribute: IPostECommerceAttributeModel,
-      index: number
-    ) => {
-      return (
-        <Card>
-          <Card.Header>
-            <div className="row">
-              <div className="col-9">
-                <div className="row">
-                  <div className="col-md-6 mt-2 mt-md-0">
-                    <ComponentFormSelect
-                      title={this.props.page.props.t('attribute')}
-                      options={this.props.page.state.attributes}
-                      value={this.props.page.state.attributes.findSingle(
-                        'value',
-                        attribute.attributeId
-                      )}
-                      onChange={(item: any, e) =>
-                        this.onChangeAttribute(attribute, item.value)
-                      }
-                    />
-                  </div>
-                  <div className="col-md-6 mt-2 mt-md-0">
-                    <ComponentFormSelect
-                      title={this.props.page.props.t('type')}
-                      options={this.props.page.state.attributeTypes}
-                      value={this.props.page.state.attributeTypes?.findSingle(
-                        'value',
-                        attribute.typeId
-                      )}
-                      onChange={(item: any, e) =>
-                        this.onChange(attribute, 'typeId', item.value)
-                      }
-                    />
+  const Variation = (
+    variation: IPostECommerceVariationModel,
+    index: number
+  ) => {
+    return (
+      <Card key={variation._id ?? index}>
+        <Card.Header>
+          <div className="row">
+            <div className="col-9">
+              <div className="row">
+                <div className="col-md-1 text-start pt-1 mt-5 m-md-auto">
+                  <div className="fs-4 cursor-pointer">
+                    <i className="mdi mdi-menu"></i>
                   </div>
                 </div>
+                {props.formState.eCommerce?.attributes?.map((attribute) => (
+                  <div className="col-md mt-3">
+                    <ComponentFormSelect
+                      title={
+                        props.state.attributes.findSingle(
+                          'value',
+                          attribute.attributeId
+                        )?.label
+                      }
+                      options={props.state.variations.findMulti(
+                        'value',
+                        attribute.variations
+                      )}
+                      value={props.state.variations.findSingle(
+                        'value',
+                        variation.selectedVariations.findSingle(
+                          'attributeId',
+                          attribute.attributeId
+                        )?.variationId
+                      )}
+                      onChange={(item: any, e) =>
+                        onChangeVariationAttribute(
+                          index,
+                          attribute.attributeId,
+                          item.value
+                        )
+                      }
+                    />
+                  </div>
+                ))}
               </div>
-              <div className="col-3 m-auto">
-                <div className="row">
-                  <div className="col-md-6 text-center text-md-end">
+            </div>
+            <div className="col-3 m-auto">
+              <div className="row">
+                <div className="col-md text-center text-md-end m-md-auto">
+                  {variation.isDefault ? (
+                    <ComponentToolTip message={t('default')}>
+                      <label className="badge badge-gradient-success px-4 py-2">
+                        <i className="mdi mdi-check"></i>
+                      </label>
+                    </ComponentToolTip>
+                  ) : (
                     <button
                       type="button"
                       className="btn btn-gradient-danger btn-lg"
-                      onClick={() => this.onDeleteAttribute(index)}
+                      onClick={() => onDeleteVariation(index)}
                     >
                       <i className="mdi mdi-trash-can"></i>
                     </button>
-                  </div>
-                  <div className="col-md-6 text-center pt-1 mt-5 m-md-auto">
-                    <ComponentAccordionToggle
-                      eventKey={attribute._id || ''}
-                      onClick={() =>
-                        this.onClickAttributeAccordionToggle(
-                          attribute._id ?? ''
-                        )
-                      }
-                    >
-                      <div className="fs-4 cursor-pointer">
-                        <i
-                          className={`mdi mdi-chevron-${this.state.attributeAccordionToggleKey == attribute._id ? 'up' : 'down'}`}
-                        ></i>
+                  )}
+                </div>
+                {variation.isWarningForIsThereOther ? (
+                  <div className="col-md text-center pt-1 mt-5 m-md-auto">
+                    <ComponentToolTip message={t('sameVariationErrorMessage')}>
+                      <div className="fs-4 cursor-pointer text-warning">
+                        <i className="mdi mdi-alert-circle"></i>
                       </div>
-                    </ComponentAccordionToggle>
+                    </ComponentToolTip>
                   </div>
+                ) : null}
+                <div className="col-md text-center pt-1 mt-5 m-md-auto">
+                  <ComponentAccordionToggle
+                    eventKey={variation._id || ''}
+                    onClick={() =>
+                      onClickVariationAccordionToggle(variation._id ?? '')
+                    }
+                  >
+                    <div className="fs-4 cursor-pointer">
+                      <i
+                        className={`mdi mdi-chevron-${state.variationAccordionToggleKey == variation._id ? 'up' : 'down'}`}
+                      ></i>
+                    </div>
+                  </ComponentAccordionToggle>
                 </div>
               </div>
             </div>
-          </Card.Header>
-          <Accordion.Collapse
-            eventKey={attribute._id || ''}
-            in={this.state.attributeAccordionToggleKey == attribute._id}
-          >
-            <Card.Body>
+          </div>
+        </Card.Header>
+        <Accordion.Collapse
+          eventKey={variation._id || ''}
+          in={state.variationAccordionToggleKey == variation._id}
+        >
+          <Card.Body>
+            <Tabs
+              onSelect={(key: any) =>
+                dispatch({
+                  type: 'SET_VARIATION_TAB_ACTIVE_KEY',
+                  payload: key,
+                })
+              }
+              activeKey={state.variationTabActiveKey}
+              className="mb-5"
+              transition={false}
+            >
+              <Tab eventKey="general" title={t('general')}>
+                <div className="row mb-4">
+                  <div className="col-md-7 mb-3">
+                    <ComponentThemeChooseImage
+                      onSelected={(images) =>
+                        onSelectVariationItemImage(index, images[0])
+                      }
+                      isMulti={false}
+                      selectedImages={
+                        variation.itemId.contents &&
+                        variation.itemId.contents.image
+                          ? [variation.itemId.contents.image]
+                          : undefined
+                      }
+                      isShowReviewImage={true}
+                      reviewImage={variation.itemId.contents?.image}
+                      reviewImageClassName={'post-image'}
+                    />
+                  </div>
+                  <div className="col-md-12 mb-3">
+                    <ComponentFormType
+                      title={t('title')}
+                      name={`eCommerce.variations.${index}.itemId.contents.title`}
+                      type="text"
+                      value={variation.itemId.contents.title}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-12 mb-3">
+                    <ComponentFormType
+                      title={t('shortContent').toCapitalizeCase()}
+                      type="textarea"
+                      name={`eCommerce.variations.${index}.itemId.contents.shortContent`}
+                      value={variation.itemId.contents?.shortContent}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                </div>
+              </Tab>
+              <Tab eventKey="content" title={t('content')}>
+                <div className="row mb-4">
+                  <div className="col-md-12 mb-3">
+                    {state.variationTabActiveKey === 'content' ? (
+                      <ComponentThemeRichTextBox
+                        value={variation.itemId.contents?.content || ''}
+                        onChange={(newContent) =>
+                          onChangeVariationItemContent(index, newContent)
+                        }
+                      />
+                    ) : (
+                      ''
+                    )}
+                  </div>
+                </div>
+              </Tab>
+              <Tab eventKey="gallery" title={t('gallery')}>
+                <div className="row mb-4">
+                  <div className="col-md-7 mb-3">
+                    <ComponentThemeChooseImage
+                      onSelected={(images) =>
+                        onSelectVariationItemImages(index, images)
+                      }
+                      isMulti={true}
+                      selectedImages={variation.itemId.eCommerce.images}
+                      showModalButtonText={t('gallery')}
+                    />
+                  </div>
+                  <div className="col-md-12 mb-3">
+                    <div className="row">
+                      {variation.itemId.eCommerce.images.map((image) => (
+                        <div className="col-md-3 mb-3">
+                          <Image
+                            src={ImageSourceUtil.getUploadedImageSrc(image)}
+                            alt="Empty Image"
+                            className="post-image img-fluid"
+                            width={100}
+                            height={100}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </Tab>
+              <Tab eventKey="pricing" title={t('pricing')}>
+                <div className="row mb-4">
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('taxIncludedPrice')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.taxIncluded`}
+                      type="number"
+                      value={variation.itemId.eCommerce.pricing?.taxIncluded}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('taxExcludedPrice')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.taxExcluded`}
+                      type="number"
+                      value={variation.itemId.eCommerce.pricing?.taxExcluded}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('taxRate')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.taxRate`}
+                      type="number"
+                      value={variation.itemId.eCommerce.pricing?.taxRate}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('comparedPrice')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.compared`}
+                      type="number"
+                      value={variation.itemId.eCommerce.pricing?.compared}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                </div>
+              </Tab>
+              <Tab eventKey="inventory" title={t('inventory')}>
+                <div className="row mb-4">
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('sku')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.inventory.sku`}
+                      type="text"
+                      value={variation.itemId.eCommerce.inventory?.sku}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      disabled={
+                        !variation.itemId.eCommerce.inventory?.isManageStock ||
+                        false
+                      }
+                      title={t('quantity')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.inventory.quantity`}
+                      type="number"
+                      value={variation.itemId.eCommerce.inventory?.quantity}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-7 mb-3">
+                    <ComponentFormCheckBox
+                      title={t('isManageStock')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.inventory.isManageStock`}
+                      checked={Boolean(
+                        variation.itemId.eCommerce.inventory?.isManageStock
+                      )}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                </div>
+              </Tab>
+              <Tab eventKey="shipping" title={t('shipping')}>
+                <div className="row mb-4">
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('width')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.shipping.width`}
+                      type="text"
+                      value={variation.itemId.eCommerce.shipping?.width}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('height')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.shipping.height`}
+                      type="text"
+                      value={variation.itemId.eCommerce.shipping?.height}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('depth')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.shipping.depth`}
+                      type="text"
+                      value={variation.itemId.eCommerce.shipping?.depth}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('weight')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.shipping.weight`}
+                      type="text"
+                      value={variation.itemId.eCommerce.shipping?.weight}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                  <div className="col-md-6 mb-3">
+                    <ComponentFormType
+                      title={t('shippingPrice')}
+                      name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.shipping`}
+                      type="number"
+                      value={variation.itemId.eCommerce.pricing?.shipping}
+                      onChange={(e) => props.onChangeInput(e)}
+                    />
+                  </div>
+                </div>
+              </Tab>
+            </Tabs>
+          </Card.Body>
+        </Accordion.Collapse>
+      </Card>
+    );
+  };
+
+  const Attribute = (
+    attribute: IPostECommerceAttributeModel,
+    index: number
+  ) => {
+    return (
+      <Card>
+        <Card.Header>
+          <div className="row">
+            <div className="col-9">
               <div className="row">
-                <div className="col-md-12">
+                <div className="col-md-6 mt-2 mt-md-0">
                   <ComponentFormSelect
-                    title={this.props.page.props.t('variations')}
-                    isMulti
-                    closeMenuOnSelect={false}
-                    options={this.props.page.state.variations.findMulti(
-                      'parentId',
+                    title={t('attribute')}
+                    options={props.state.attributes}
+                    value={props.state.attributes.findSingle(
+                      'value',
                       attribute.attributeId
                     )}
-                    value={this.props.page.state.variations.findMulti(
+                    onChange={(item: any, e) =>
+                      onChangeAttribute(index, item.value)
+                    }
+                  />
+                </div>
+                <div className="col-md-6 mt-2 mt-md-0">
+                  <ComponentFormSelect
+                    title={t('type')}
+                    name={`eCommerce.attributes.${index}.typeId`}
+                    options={props.state.attributeTypes}
+                    value={props.state.attributeTypes?.findSingle(
                       'value',
-                      attribute.variations
+                      attribute.typeId
                     )}
                     onChange={(item: any, e) =>
-                      this.onChangeAttributeVariations(attribute, item)
+                      props.onChangeSelect(e.name, item.value)
                     }
                   />
                 </div>
               </div>
-            </Card.Body>
-          </Accordion.Collapse>
-        </Card>
-      );
-    };
+            </div>
+            <div className="col-3 m-auto">
+              <div className="row">
+                <div className="col-md-6 text-center text-md-end">
+                  <button
+                    type="button"
+                    className="btn btn-gradient-danger btn-lg"
+                    onClick={() => onDeleteAttribute(index)}
+                  >
+                    <i className="mdi mdi-trash-can"></i>
+                  </button>
+                </div>
+                <div className="col-md-6 text-center pt-1 mt-5 m-md-auto">
+                  <ComponentAccordionToggle
+                    eventKey={attribute._id || ''}
+                    onClick={() =>
+                      onClickAttributeAccordionToggle(attribute._id ?? '')
+                    }
+                  >
+                    <div className="fs-4 cursor-pointer">
+                      <i
+                        className={`mdi mdi-chevron-${state.attributeAccordionToggleKey == attribute._id ? 'up' : 'down'}`}
+                      ></i>
+                    </div>
+                  </ComponentAccordionToggle>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card.Header>
+        <Accordion.Collapse
+          eventKey={attribute._id || ''}
+          in={state.attributeAccordionToggleKey == attribute._id}
+        >
+          <Card.Body>
+            <div className="row">
+              <div className="col-md-12">
+                <ComponentFormSelect
+                  title={t('variations')}
+                  isMulti
+                  closeMenuOnSelect={false}
+                  options={props.state.variations.findMulti(
+                    'parentId',
+                    attribute.attributeId
+                  )}
+                  value={props.state.variations.findMulti(
+                    'value',
+                    attribute.variations
+                  )}
+                  onChange={(item: any, e) =>
+                    onChangeAttributeVariations(index, item)
+                  }
+                />
+              </div>
+            </div>
+          </Card.Body>
+        </Accordion.Collapse>
+      </Card>
+    );
+  };
 
+  const TabAttributes = () => {
     return (
       <div className="row mb-3">
         <div className="col-md-7">
           <button
             type={'button'}
             className="btn btn-gradient-success btn-lg"
-            onClick={() => this.onAddNewAttribute()}
+            onClick={() => onAddNewAttribute()}
           >
-            + {this.props.page.props.t('addNew')}
+            + {t('addNew')}
           </button>
         </div>
         <div className="col-md-7 mt-2">
           <Accordion flush>
-            {this.props.page.state.formData.eCommerce?.attributes?.map(
-              (option, index) => {
-                return Attribute(option, index);
-              }
-            )}
+            {props.formState.eCommerce?.attributes?.map((option, index) => {
+              return Attribute(option, index);
+            })}
           </Accordion>
         </div>
       </div>
     );
   };
 
-  TabVariations = () => {
-    const Variation = (
-      variation: IPostECommerceVariationModel,
-      index: number
-    ) => {
-      return (
-        <Card key={variation._id ?? index}>
-          <Card.Header>
-            <div className="row">
-              <div className="col-9">
-                <div className="row">
-                  <div className="col-md-1 text-start pt-1 mt-5 m-md-auto">
-                    <div className="fs-4 cursor-pointer">
-                      <i className="mdi mdi-menu"></i>
-                    </div>
-                  </div>
-                  {this.props.page.state.formData.eCommerce?.attributes?.map(
-                    (attribute) => (
-                      <div className="col-md mt-3">
-                        <ComponentFormSelect
-                          title={
-                            this.props.page.state.attributes.findSingle(
-                              'value',
-                              attribute.attributeId
-                            )?.label
-                          }
-                          options={this.props.page.state.variations.findMulti(
-                            'value',
-                            attribute.variations
-                          )}
-                          value={this.props.page.state.variations.findSingle(
-                            'value',
-                            variation.selectedVariations.findSingle(
-                              'attributeId',
-                              attribute.attributeId
-                            )?.variationId
-                          )}
-                          onChange={(item: any, e) =>
-                            this.onChangeVariationAttribute(
-                              variation,
-                              attribute.attributeId,
-                              item.value
-                            )
-                          }
-                        />
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-              <div className="col-3 m-auto">
-                <div className="row">
-                  <div className="col-md text-center text-md-end m-md-auto">
-                    {variation.isDefault ? (
-                      <ComponentToolTip
-                        message={this.props.page.props.t('default')}
-                      >
-                        <label className="badge badge-gradient-success px-4 py-2">
-                          <i className="mdi mdi-check"></i>
-                        </label>
-                      </ComponentToolTip>
-                    ) : (
-                      <button
-                        type="button"
-                        className="btn btn-gradient-danger btn-lg"
-                        onClick={() => this.onDeleteVariation(index)}
-                      >
-                        <i className="mdi mdi-trash-can"></i>
-                      </button>
-                    )}
-                  </div>
-                  {variation.isWarningForIsThereOther ? (
-                    <div className="col-md text-center pt-1 mt-5 m-md-auto">
-                      <ComponentToolTip
-                        message={this.props.page.props.t(
-                          'sameVariationErrorMessage'
-                        )}
-                      >
-                        <div className="fs-4 cursor-pointer text-warning">
-                          <i className="mdi mdi-alert-circle"></i>
-                        </div>
-                      </ComponentToolTip>
-                    </div>
-                  ) : null}
-                  <div className="col-md text-center pt-1 mt-5 m-md-auto">
-                    <ComponentAccordionToggle
-                      eventKey={variation._id || ''}
-                      onClick={() =>
-                        this.onClickVariationAccordionToggle(
-                          variation._id ?? ''
-                        )
-                      }
-                    >
-                      <div className="fs-4 cursor-pointer">
-                        <i
-                          className={`mdi mdi-chevron-${this.state.variationAccordionToggleKey == variation._id ? 'up' : 'down'}`}
-                        ></i>
-                      </div>
-                    </ComponentAccordionToggle>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </Card.Header>
-          <Accordion.Collapse
-            eventKey={variation._id || ''}
-            in={this.state.variationAccordionToggleKey == variation._id}
-          >
-            <Card.Body>
-              <Tabs
-                onSelect={(key: any) =>
-                  this.setState({ variationTabActiveKey: key })
-                }
-                activeKey={this.state.variationTabActiveKey}
-                className="mb-5"
-                transition={false}
-              >
-                <Tab
-                  eventKey="general"
-                  title={this.props.page.props.t('general')}
-                >
-                  <div className="row mb-4">
-                    <div className="col-md-7 mb-3">
-                      <ComponentThemeChooseImage
-                        {...this.props.page.props}
-                        onSelected={(images) =>
-                          this.props.page.setState((state: PostPageState) => {
-                            if (variation.itemId.contents) {
-                              variation.itemId.contents.image = images[0];
-                            }
-                            return state;
-                          })
-                        }
-                        isMulti={false}
-                        selectedImages={
-                          variation.itemId.contents &&
-                          variation.itemId.contents.image
-                            ? [variation.itemId.contents.image]
-                            : undefined
-                        }
-                        isShowReviewImage={true}
-                        reviewImage={variation.itemId.contents?.image}
-                        reviewImageClassName={'post-image'}
-                      />
-                    </div>
-                    <div className="col-md-12 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('title')}
-                        type="text"
-                        value={variation.itemId.contents.title}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.contents,
-                            'title',
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-12 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props
-                          .t('shortContent')
-                          .toCapitalizeCase()}
-                        type="textarea"
-                        value={variation.itemId.contents?.shortContent}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.contents,
-                            'shortContent',
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </Tab>
-                <Tab
-                  eventKey="content"
-                  title={this.props.page.props.t('content')}
-                >
-                  <div className="row mb-4">
-                    <div className="col-md-12 mb-3">
-                      {this.state.variationTabActiveKey === 'content' ? (
-                        <ComponentThemeRichTextBox
-                          value={variation.itemId.contents?.content || ''}
-                          onChange={(newContent) =>
-                            this.onChange(
-                              variation.itemId.contents,
-                              'content',
-                              newContent
-                            )
-                          }
-                          {...this.props.page.props}
-                        />
-                      ) : (
-                        ''
-                      )}
-                    </div>
-                  </div>
-                </Tab>
-                <Tab
-                  eventKey="gallery"
-                  title={this.props.page.props.t('gallery')}
-                >
-                  <div className="row mb-4">
-                    <div className="col-md-7 mb-3">
-                      <ComponentThemeChooseImage
-                        {...this.props.page.props}
-                        onSelected={(images) =>
-                          this.props.page.setState((state: PostPageState) => {
-                            variation.itemId.eCommerce.images = images;
-                            return state;
-                          })
-                        }
-                        isMulti={true}
-                        selectedImages={variation.itemId.eCommerce.images}
-                        showModalButtonText={this.props.page.props.t('gallery')}
-                      />
-                    </div>
-                    <div className="col-md-12 mb-3">
-                      <div className="row">
-                        {variation.itemId.eCommerce.images.map((image) => (
-                          <div className="col-md-3 mb-3">
-                            <Image
-                              src={ImageSourceUtil.getUploadedImageSrc(image)}
-                              alt="Empty Image"
-                              className="post-image img-fluid"
-                              width={100}
-                              height={100}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </Tab>
-                <Tab
-                  eventKey="pricing"
-                  title={this.props.page.props.t('pricing')}
-                >
-                  <div className="row mb-4">
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('taxIncludedPrice')}
-                        type="number"
-                        value={variation.itemId.eCommerce.pricing?.taxIncluded}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.pricing,
-                            'taxIncluded',
-                            Number(e.target.value) || 0
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('taxExcludedPrice')}
-                        type="number"
-                        value={variation.itemId.eCommerce.pricing?.taxExcluded}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.pricing,
-                            'taxExcluded',
-                            Number(e.target.value) || 0
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('taxRate')}
-                        type="number"
-                        value={variation.itemId.eCommerce.pricing?.taxRate}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.pricing,
-                            'taxRate',
-                            Number(e.target.value) || 0
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('comparedPrice')}
-                        type="number"
-                        value={variation.itemId.eCommerce.pricing?.compared}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.pricing,
-                            'compared',
-                            Number(e.target.value) || 0
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </Tab>
-                <Tab
-                  eventKey="inventory"
-                  title={this.props.page.props.t('inventory')}
-                >
-                  <div className="row mb-4">
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('sku')}
-                        type="text"
-                        value={variation.itemId.eCommerce.inventory?.sku}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.inventory,
-                            'sku',
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        disabled={
-                          !variation.itemId.eCommerce.inventory
-                            ?.isManageStock || false
-                        }
-                        title={this.props.page.props.t('quantity')}
-                        type="number"
-                        value={variation.itemId.eCommerce.inventory?.quantity}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.inventory,
-                            'quantity',
-                            Number(e.target.value ?? 0)
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-7 mb-3">
-                      <ComponentFormCheckBox
-                        title={this.props.page.props.t('isManageStock')}
-                        checked={Boolean(
-                          variation.itemId.eCommerce.inventory?.isManageStock
-                        )}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.inventory,
-                            'isManageStock',
-                            e.target.checked
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </Tab>
-                <Tab
-                  eventKey="shipping"
-                  title={this.props.page.props.t('shipping')}
-                >
-                  <div className="row mb-4">
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('width')}
-                        type="text"
-                        value={variation.itemId.eCommerce.shipping?.width}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.shipping,
-                            'width',
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('height')}
-                        type="text"
-                        value={variation.itemId.eCommerce.shipping?.height}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.shipping,
-                            'height',
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('depth')}
-                        type="text"
-                        value={variation.itemId.eCommerce.shipping?.depth}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.shipping,
-                            'depth',
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('weight')}
-                        type="text"
-                        value={variation.itemId.eCommerce.shipping?.weight}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.shipping,
-                            'weight',
-                            e.target.value
-                          )
-                        }
-                      />
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <ComponentFormType
-                        title={this.props.page.props.t('shippingPrice')}
-                        type="number"
-                        value={variation.itemId.eCommerce.pricing?.shipping}
-                        onChange={(e) =>
-                          this.onChange(
-                            variation.itemId.eCommerce.pricing,
-                            'shipping',
-                            Number(e.target.value ?? 0)
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </Tab>
-              </Tabs>
-            </Card.Body>
-          </Accordion.Collapse>
-        </Card>
-      );
-    };
-
+  const TabVariations = () => {
     return (
       <div className="row mb-3">
         <div className="col-md-7">
-          <h4>{this.props.page.props.t('default')}</h4>
+          <h4>{t('default')}</h4>
           <div className="row">
-            {this.props.page.state.formData.eCommerce?.attributes?.map(
-              (attribute) => (
-                <div className="col-md-4 mt-3">
-                  <ComponentFormSelect
-                    title={
-                      this.props.page.state.attributes.findSingle(
-                        'value',
-                        attribute.attributeId
-                      )?.label
-                    }
-                    options={this.props.page.state.variations.findMulti(
+            {props.formState.eCommerce?.attributes?.map((attribute) => (
+              <div className="col-md-4 mt-3">
+                <ComponentFormSelect
+                  title={
+                    props.state.attributes.findSingle(
                       'value',
-                      attribute.variations
-                    )}
-                    value={this.props.page.state.variations.findSingle(
-                      'value',
-                      this.props.page.state.formData.eCommerce?.variationDefaults?.findSingle(
-                        'attributeId',
-                        attribute.attributeId
-                      )?.variationId
-                    )}
-                    onChange={(item: any, e) =>
-                      this.onChangeVariationDefault(
-                        attribute.attributeId,
-                        item.value
-                      )
-                    }
-                  />
-                </div>
-              )
-            )}
+                      attribute.attributeId
+                    )?.label
+                  }
+                  options={props.state.variations.findMulti(
+                    'value',
+                    attribute.variations
+                  )}
+                  value={props.state.variations.findSingle(
+                    'value',
+                    props.formState.eCommerce?.variationDefaults?.findSingle(
+                      'attributeId',
+                      attribute.attributeId
+                    )?.variationId
+                  )}
+                  onChange={(item: any, e) =>
+                    onChangeVariationDefault(attribute.attributeId, item.value)
+                  }
+                />
+              </div>
+            ))}
           </div>
         </div>
         <div className="col-md-7 mt-3">
           <button
             type={'button'}
             className="btn btn-gradient-success btn-lg"
-            onClick={() => this.onAddNewVariation()}
+            onClick={() => onAddNewVariation()}
           >
-            + {this.props.page.props.t('addNew')}
+            + {t('addNew')}
           </button>
         </div>
         <div className="col-md-7 mt-3">
           <Accordion flush>
-            {this.props.page.state.formData.eCommerce?.variations?.map(
-              (variation, index) => Variation(variation, index)
+            {props.formState.eCommerce?.variations?.map((variation, index) =>
+              Variation(variation, index)
             )}
           </Accordion>
         </div>
@@ -1170,24 +1074,20 @@ export default class ComponentPagePostAddECommerce extends Component<
     );
   };
 
-  TabOptions = () => {
+  const TabOptions = () => {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
-            title={this.props.page.props.t('productType')}
+            title={t('productType')}
             name="eCommerce.typeId"
-            options={this.props.page.state.productTypes}
-            value={this.props.page.state.productTypes?.findSingle(
+            options={props.state.productTypes}
+            value={props.state.productTypes?.findSingle(
               'value',
-              this.props.page.state.formData.eCommerce?.typeId || ''
+              props.formState.eCommerce?.typeId || ''
             )}
             onChange={(item: any, e) =>
-              HandleFormLibrary.onChangeSelect(
-                e.name,
-                item.value,
-                this.props.page
-              )
+              props.onChangeSelect(e.name, item.value)
             }
           />
         </div>
@@ -1195,82 +1095,59 @@ export default class ComponentPagePostAddECommerce extends Component<
     );
   };
 
-  render() {
-    return (
-      <div className="grid-margin stretch-card">
-        <div className="card">
-          <div className="card-body">
-            <div className="theme-tabs">
-              <Tabs
-                onSelect={(key: any) =>
-                  this.setState({ mainTabActiveKey: key })
-                }
-                activeKey={this.state.mainTabActiveKey}
-                className="mb-5"
-                transition={false}
-              >
-                <Tab
-                  eventKey="options"
-                  title={this.props.page.props.t('options')}
-                >
-                  <this.TabOptions />
+  return (
+    <div className="grid-margin stretch-card">
+      <div className="card">
+        <div className="card-body">
+          <div className="theme-tabs">
+            <Tabs
+              onSelect={(key: any) =>
+                dispatch({ type: 'SET_MAIN_TAB_ACTIVE_KEY', payload: key })
+              }
+              activeKey={state.mainTabActiveKey}
+              className="mb-5"
+              transition={false}
+            >
+              <Tab eventKey="options" title={t('options')}>
+                <TabOptions />
+              </Tab>
+              {props.formState.eCommerce?.typeId ==
+              ProductTypeId.SimpleProduct ? (
+                <Tab eventKey="gallery" title={t('gallery')}>
+                  <TabGallery />
                 </Tab>
-                {this.props.page.state.formData.eCommerce?.typeId ==
-                ProductTypeId.SimpleProduct ? (
-                  <Tab
-                    eventKey="gallery"
-                    title={this.props.page.props.t('gallery')}
-                  >
-                    <this.TabGallery />
-                  </Tab>
-                ) : null}
-                {this.props.page.state.formData.eCommerce?.typeId ==
-                ProductTypeId.SimpleProduct ? (
-                  <Tab
-                    eventKey="pricing"
-                    title={this.props.page.props.t('pricing')}
-                  >
-                    <this.TabPricing />
-                  </Tab>
-                ) : null}
-                {this.props.page.state.formData.eCommerce?.typeId ==
-                ProductTypeId.SimpleProduct ? (
-                  <Tab
-                    eventKey="inventory"
-                    title={this.props.page.props.t('inventory')}
-                  >
-                    <this.TabInventory />
-                  </Tab>
-                ) : null}
-                {this.props.page.state.formData.eCommerce?.typeId ==
-                ProductTypeId.SimpleProduct ? (
-                  <Tab
-                    eventKey="shipping"
-                    title={this.props.page.props.t('shipping')}
-                  >
-                    <this.TabShipping />
-                  </Tab>
-                ) : null}
-                <Tab
-                  eventKey="attributes"
-                  title={this.props.page.props.t('attributes')}
-                >
-                  <this.TabAttributes />
+              ) : null}
+              {props.formState.eCommerce?.typeId ==
+              ProductTypeId.SimpleProduct ? (
+                <Tab eventKey="pricing" title={t('pricing')}>
+                  <TabPricing />
                 </Tab>
-                {this.props.page.state.formData.eCommerce?.typeId ==
-                ProductTypeId.VariableProduct ? (
-                  <Tab
-                    eventKey="variations"
-                    title={this.props.page.props.t('variations')}
-                  >
-                    <this.TabVariations />
-                  </Tab>
-                ) : null}
-              </Tabs>
-            </div>
+              ) : null}
+              {props.formState.eCommerce?.typeId ==
+              ProductTypeId.SimpleProduct ? (
+                <Tab eventKey="inventory" title={t('inventory')}>
+                  <TabInventory />
+                </Tab>
+              ) : null}
+              {props.formState.eCommerce?.typeId ==
+              ProductTypeId.SimpleProduct ? (
+                <Tab eventKey="shipping" title={t('shipping')}>
+                  <TabShipping />
+                </Tab>
+              ) : null}
+              <Tab eventKey="attributes" title={t('attributes')}>
+                <TabAttributes />
+              </Tab>
+              {props.formState.eCommerce?.typeId ==
+              ProductTypeId.VariableProduct ? (
+                <Tab eventKey="variations" title={t('variations')}>
+                  <TabVariations />
+                </Tab>
+              ) : null}
+            </Tabs>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

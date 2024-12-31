@@ -65,7 +65,7 @@ type IAction =
   | { type: 'SET_WORLD_MAP_SIZE'; payload: IComponentState['worldMapSize'] }
   | { type: 'SET_SETTINGS'; payload: IComponentState['settings'] };
 
-function reducer(state: IComponentState, action: IAction): IComponentState {
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
     case 'SET_LAST_POSTS':
       return { ...state, lastPosts: action.payload };

@@ -4,6 +4,7 @@ import { postTermTypes } from '@constants/postTermTypes';
 import { EndPoints } from '@constants/endPoints';
 import { PathUtil } from '@utils/path.util';
 import { PostEndPoint } from '@constants/endPoints/post.endPoint';
+import { IBreadCrumbData } from '@lib/features/breadCrumbSlice';
 
 const getPagePath = (postTypeId: PostTypeId) => {
   let pagePath = '';
@@ -26,28 +27,39 @@ const getPagePath = (postTypeId: PostTypeId) => {
 };
 
 const getPageTitles = (params: IPostGetPageTitleParamUtil) => {
-  let titles: string[] = [
-    params.t(
-      postTypes.findSingle('id', params.postTypeId)?.langKey ?? '[noLangAdd]'
-    ),
+  let titles: IBreadCrumbData[] = [
+    {
+      title:
+        postTypes.findSingle('id', params.postTypeId)?.langKey ?? '[noLangAdd]',
+      url: getPagePath(params.postTypeId).LIST,
+    },
   ];
 
   if (params.termTypeId) {
-    titles = [
-      ...titles,
-      params.t(
+    titles.push({
+      title:
         postTermTypes.findSingle('id', params.termTypeId)?.langKey ??
-          '[noLangAdd]'
-      ),
-    ];
+        '[noLangAdd]',
+      url: getPagePath(params.postTypeId).TERM_WITH(params.termTypeId).LIST,
+    });
   }
 
   if (params.postTypeId == PostTypeId.Product) {
-    titles = [params.t('eCommerce'), ...titles];
+    titles = [
+      {
+        title: params.t('eCommerce'),
+      },
+      ...titles,
+    ];
   } else if (
     ![PostTypeId.Page, PostTypeId.Product].includes(params.postTypeId)
   ) {
-    titles = [params.t('themeContents'), ...titles];
+    titles = [
+      {
+        title: params.t('themeContents'),
+      },
+      ...titles,
+    ];
   }
 
   return titles;

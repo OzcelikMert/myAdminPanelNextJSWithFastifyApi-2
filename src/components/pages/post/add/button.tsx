@@ -1,65 +1,78 @@
-import React, { Component } from 'react';
-import PagePostAdd, {
-  IPageState as PostPageState,
-} from '@pages/post/add';
+import ComponentFieldSet from '@components/elements/fieldSet';
+import ComponentFormType from '@components/elements/form/input/type';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@lib/hooks';
+import { IUseFormReducer } from '@library/react/handles/form';
 import {
-  ComponentFieldSet,
-  ComponentFormType,
-} from '@components/elements/form';
+  IPostAddAction,
+  IPostAddComponentFormState,
+  IPostAddComponentState,
+} from '@pages/post/add';
+import { ActionDispatch } from 'react';
 import { IPostContentButtonModel } from 'types/models/post.model';
 
-type IPageState = {};
-
-type IPageProps = {
-  page: PagePostAdd;
+type IComponentProps = {
+  state: IPostAddComponentState;
+  dispatch: ActionDispatch<[action: IPostAddAction]>;
+  formState: IPostAddComponentFormState;
+  setFormState: IUseFormReducer<IPostAddComponentFormState>['setFormState'];
 };
 
-export default class ComponentPagePostAddButton extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {};
-  }
+export default function ComponentPagePostAddButton(props: IComponentProps) {
+  const t = useAppSelector(selectTranslation);
 
-  onChange(key: keyof IPostContentButtonModel, value: string, index: number) {
-    this.props.page.setState((state: PostPageState) => {
-      if (state.formData.contents.buttons)
-        state.formData.contents.buttons[index][key] = value;
-      return state;
+  const onChange = (
+    key: keyof IPostContentButtonModel,
+    value: string,
+    index: number
+  ) => {
+    let buttons = props.formState.contents.buttons ?? [];
+    buttons[index][key] = value;
+    props.setFormState({
+      contents: {
+        ...props.formState.contents,
+        buttons,
+      },
     });
-  }
+  };
 
-  onAddNew() {
-    this.props.page.setState((state: PostPageState) => {
-      if (typeof state.formData.contents.buttons === 'undefined')
-        state.formData.contents.buttons = [];
-      state.formData.contents.buttons.push({
-        title: '',
-        url: '',
-      });
-      return state;
+  const onAddNew = () => {
+    let buttons = props.formState.contents.buttons ?? [];
+    buttons.push({
+      title: '',
+      url: '',
     });
-  }
-
-  onDelete(index: number) {
-    this.props.page.setState((state: PostPageState) => {
-      if (state.formData.contents.buttons)
-        state.formData.contents.buttons.remove(index);
-      return state;
+    props.setFormState({
+      contents: {
+        ...props.formState.contents,
+        buttons,
+      },
     });
-  }
+  };
 
-  Button = (props: { propButton: IPostContentButtonModel; index: number }) => {
+  const onDelete = (index: number) => {
+    let buttons = props.formState.contents.buttons ?? [];
+    buttons.remove(index);
+    props.setFormState({
+      contents: {
+        ...props.formState.contents,
+        buttons,
+      },
+    });
+  };
+
+  const Button = (props: {
+    propButton: IPostContentButtonModel;
+    index: number;
+  }) => {
     return (
       <div className="col-md-12 mt-4">
         <ComponentFieldSet
-          legend={`${this.props.page.props.t('button')}#${props.index + 1}`}
+          legend={`${t('button')}#${props.index + 1}`}
           legendElement={
             <i
               className="mdi mdi-trash-can text-danger fs-3 cursor-pointer"
-              onClick={() => this.onDelete(props.index)}
+              onClick={() => onDelete(props.index)}
             ></i>
           }
         >
@@ -67,21 +80,17 @@ export default class ComponentPagePostAddButton extends Component<
             <div className="col-md-6">
               <ComponentFormType
                 type={'text'}
-                title={this.props.page.props.t('title')}
+                title={t('title')}
                 value={props.propButton.title}
-                onChange={(e) =>
-                  this.onChange('title', e.target.value, props.index)
-                }
+                onChange={(e) => onChange('title', e.target.value, props.index)}
               />
             </div>
             <div className="col-md-6 mt-3 mt-lg-0">
               <ComponentFormType
                 type={'text'}
-                title={this.props.page.props.t('url')}
+                title={t('url')}
                 value={props.propButton.url}
-                onChange={(e) =>
-                  this.onChange('url', e.target.value, props.index)
-                }
+                onChange={(e) => onChange('url', e.target.value, props.index)}
               />
             </div>
           </div>
@@ -90,37 +99,33 @@ export default class ComponentPagePostAddButton extends Component<
     );
   };
 
-  render() {
-    return (
-      <div className="grid-margin stretch-card">
-        <div className="card">
-          <div className="card-header text-center pt-3">
-            <h4>{this.props.page.props.t('buttons')}</h4>
-          </div>
-          <div className="card-body">
-            <div className="row mb-3">
-              <div className="col-md-7">
-                <button
-                  type={'button'}
-                  className="btn btn-gradient-success btn-lg"
-                  onClick={() => this.onAddNew()}
-                >
-                  + {this.props.page.props.t('newButton')}
-                </button>
-              </div>
-              <div className="col-md-7 mt-2">
-                <div className="row">
-                  {this.props.page.state.formData.contents.buttons?.map(
-                    (button, index) => {
-                      return <this.Button propButton={button} index={index} />;
-                    }
-                  )}
-                </div>
+  return (
+    <div className="grid-margin stretch-card">
+      <div className="card">
+        <div className="card-header text-center pt-3">
+          <h4>{t('buttons')}</h4>
+        </div>
+        <div className="card-body">
+          <div className="row mb-3">
+            <div className="col-md-7">
+              <button
+                type={'button'}
+                className="btn btn-gradient-success btn-lg"
+                onClick={() => onAddNew()}
+              >
+                + {t('newButton')}
+              </button>
+            </div>
+            <div className="col-md-7 mt-2">
+              <div className="row">
+                {props.formState.contents.buttons?.map((button, index) => {
+                  return <Button propButton={button} index={index} />;
+                })}
               </div>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

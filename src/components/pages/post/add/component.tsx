@@ -1,71 +1,64 @@
-import React, { Component } from 'react';
-import PagePostAdd, {
-  IPageState as PostPageState,
-} from '@pages/post/add';
-import { ComponentFormSelect } from '@components/elements/form';
+import React, { ActionDispatch, Component } from 'react';
 import { EndPoints } from '@constants/endPoints';
 import { PermissionUtil } from '@utils/permission.util';
 import { ComponentEndPointPermission } from '@constants/endPointPermissions/component.endPoint.permission';
+import {
+  IPostAddAction,
+  IPostAddComponentFormState,
+  IPostAddComponentState,
+} from '@pages/post/add';
+import { IUseFormReducer } from '@library/react/handles/form';
+import ComponentFormSelect from '@components/elements/form/input/select';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
 
-type IPageState = {};
-
-type IPageProps = {
-  page: PagePostAdd;
+type IComponentProps = {
+  state: IPostAddComponentState;
+  dispatch: ActionDispatch<[action: IPostAddAction]>;
+  formState: IPostAddComponentFormState;
+  setFormState: IUseFormReducer<IPostAddComponentFormState>['setFormState'];
 };
 
-export default class ComponentPagePostAddComponent extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {};
-  }
+export default function ComponentPagePostAddComponent(props: IComponentProps) {
+  const t = useAppSelector(selectTranslation);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
-  onChangeSelect(value: string, index: number) {
-    this.props.page.setState((state: PostPageState) => {
-      if (state.formData.components) state.formData.components[index] = value;
-      return state;
+  const onChangeSelect = (value: string, index: number) => {
+    let components = props.formState.components ?? [];
+    components[index] = value;
+    props.setFormState({
+      components,
     });
-  }
+  };
 
-  onAddNew() {
-    this.props.page.setState((state: PostPageState) => {
-      if (typeof state.formData.components === 'undefined')
-        state.formData.components = [];
-      state.formData.components.push('');
-      return state;
+  const onAddNew = () => {
+    let components = props.formState.components ?? [];
+    components.push('');
+    props.setFormState({
+      components,
     });
-  }
+  };
 
-  onDelete(index: number) {
-    this.props.page.setState((state: PostPageState) => {
-      if (state.formData.components) state.formData.components.remove(index);
-      return state;
+  const onDelete = (index: number) => {
+    let components = props.formState.components ?? [];
+    components.remove(index);
+    props.setFormState({
+      components,
     });
-  }
+  };
 
-  onEdit(index: number) {
-    this.props.page.setState((state: PostPageState) => {
-      if (state.formData.components) state.formData.components.remove(index);
-      return state;
-    });
-  }
-
-  Component = (_id: string, index: number) => {
+  const Component = (_id: string, index: number) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
         <div className="row">
           <div className="col-md-9">
             <ComponentFormSelect
-              title={this.props.page.props.t('component')}
-              options={this.props.page.state.components}
-              value={this.props.page.state.components?.filter(
+              title={t('component')}
+              options={props.state.components}
+              value={props.state.components?.filter(
                 (item) => item.value == _id
               )}
-              onChange={(item: any, e) =>
-                this.onChangeSelect(item.value, index)
-              }
+              onChange={(item: any, e) => onChangeSelect(item.value, index)}
             />
           </div>
           <div className="col-md-3 mt-2">
@@ -73,7 +66,7 @@ export default class ComponentPagePostAddComponent extends Component<
               <div className="col-6">
                 {_id &&
                 PermissionUtil.check(
-                  this.props.page.props.getStateApp.sessionAuth!,
+                  sessionAuth!,
                   ComponentEndPointPermission.UPDATE
                 ) ? (
                   <a
@@ -90,7 +83,7 @@ export default class ComponentPagePostAddComponent extends Component<
                 <button
                   type="button"
                   className="btn btn-gradient-danger btn-lg"
-                  onClick={(event) => this.onDelete(index)}
+                  onClick={(event) => onDelete(index)}
                 >
                   <i className="mdi mdi-trash-can"></i>
                 </button>
@@ -102,39 +95,35 @@ export default class ComponentPagePostAddComponent extends Component<
     );
   };
 
-  render() {
-    return (
-      <div className="grid-margin stretch-card">
-        <div className="card">
-          <div className="card-header text-center pt-3">
-            <h4>{this.props.page.props.t('components')}</h4>
-          </div>
-          <div className="card-body">
-            <div className="row">
-              <div className="col-md-7 mt-2">
-                <div className="row">
-                  {this.props.page.state.formData.components?.map(
-                    (componentId, index) => {
-                      return this.Component(componentId, index);
-                    }
-                  )}
-                  <div
-                    className={`col-md-7 text-start ${(this.props.page.state.formData.components?.length ?? 0) > 0 ? 'mt-4' : ''}`}
+  return (
+    <div className="grid-margin stretch-card">
+      <div className="card">
+        <div className="card-header text-center pt-3">
+          <h4>{t('components')}</h4>
+        </div>
+        <div className="card-body">
+          <div className="row">
+            <div className="col-md-7 mt-2">
+              <div className="row">
+                {props.formState.components?.map((componentId, index) => {
+                  return Component(componentId, index);
+                })}
+                <div
+                  className={`col-md-7 text-start ${(props.formState.components?.length ?? 0) > 0 ? 'mt-4' : ''}`}
+                >
+                  <button
+                    type={'button'}
+                    className="btn btn-gradient-success btn-lg"
+                    onClick={() => onAddNew()}
                   >
-                    <button
-                      type={'button'}
-                      className="btn btn-gradient-success btn-lg"
-                      onClick={() => this.onAddNew()}
-                    >
-                      + {this.props.page.props.t('addNew')}
-                    </button>
-                  </div>
+                    + {t('addNew')}
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

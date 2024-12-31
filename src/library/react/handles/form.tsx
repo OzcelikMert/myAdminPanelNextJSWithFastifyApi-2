@@ -1,5 +1,12 @@
 import React, { Component } from 'react';
 
+export type IUseFormReducer<T = any> = {
+  formState: T;
+  setFormState: (state: Partial<T>) => void;
+  onChangeInput: (event: React.ChangeEvent<any>) => void;
+  onChangeSelect: (name: string | undefined, value: any) => any;
+};
+
 function setDataWithKeys(
   data: any,
   keys: string[],
@@ -63,33 +70,32 @@ function formReducer(state: any, action: IAction): any {
   }
 }
 
-export function useFormReducer<T>(initialState: T): {
-  formState: T;
-  setFormState: (state: Partial<T>) => void;
-  onChangeInput: (event: React.ChangeEvent<any>) => void;
-  onChangeSelect: (name: string, value: any) => any;
-} {
+export function useFormReducer<T>(initialState: T): IUseFormReducer<T> {
   const [formState, dispatch] = React.useReducer(formReducer, initialState);
 
   const onChangeInput = (event: React.ChangeEvent<any>) => {
     const { name, type, value, checked } = event.target;
-    const newValue =
-      type === 'checkbox'
-        ? checked
-        : type === 'number'
-          ? Number(value) || 0
-          : value;
+    if (name) {
+      const newValue =
+        type === 'checkbox'
+          ? checked
+          : type === 'number'
+            ? Number(value) || 0
+            : value;
 
-    dispatch({ type: 'UPDATE_FIELD', payload: { name, value: newValue} });
+      dispatch({ type: 'UPDATE_FIELD', payload: { name, value: newValue } });
+    }
   };
 
-  const onChangeSelect = (name: string, value: any) => {
-    dispatch({ type: 'UPDATE_SELECT', payload: { name, value } });
+  const onChangeSelect = (name: string | undefined, value: any) => {
+    if (name) {
+      dispatch({ type: 'UPDATE_SELECT', payload: { name, value } });
+    }
   };
 
   const setFormState = (state: Partial<T>) => {
     dispatch({ type: 'SET_STATE', payload: { value: state } });
-  }
+  };
 
   return { formState, setFormState, onChangeInput, onChangeSelect };
 }

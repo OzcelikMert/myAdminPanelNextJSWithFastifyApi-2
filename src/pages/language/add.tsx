@@ -47,12 +47,15 @@ const initialState: IComponentState = {
 };
 
 type IAction =
-  | { type: 'SET_STATUS'; payload: IComponentState["status"] }
-  | { type: 'SET_FLAGS'; payload: IComponentState["flags"] }
-  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState["isSubmitting"] }
-  | { type: 'SET_MAIN_TAB_ACTIVE_KEY'; payload: IComponentState["mainTabActiveKey"] }
-  | { type: 'SET_MAIN_TITLE'; payload: IComponentState["mainTitle"] }
-  | { type: 'SET_ITEM'; payload: IComponentState["item"] };
+  | { type: 'SET_STATUS'; payload: IComponentState['status'] }
+  | { type: 'SET_FLAGS'; payload: IComponentState['flags'] }
+  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState['isSubmitting'] }
+  | {
+      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      payload: IComponentState['mainTabActiveKey'];
+    }
+  | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
+  | { type: 'SET_ITEM'; payload: IComponentState['item'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
@@ -99,12 +102,17 @@ export default function PageSettingLanguageAdd() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput, onChangeSelect } = useFormReducer(initialFormState,);
   const queries = router.query as IPageQueries;
 
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { formState, setFormState, onChangeInput, onChangeSelect } =
+    useFormReducer<IComponentFormState>({
+      ...initialFormState,
+      _id: queries._id ?? '',
+    });
+
   const init = async () => {
-    const minPermission = queries._id
+    const minPermission = formState._id
       ? LanguageEndPointPermission.UPDATE
       : LanguageEndPointPermission.ADD;
     if (
@@ -118,7 +126,7 @@ export default function PageSettingLanguageAdd() {
     ) {
       await getFlags();
       getStatus();
-      if (queries._id) {
+      if (formState._id) {
         await getItem();
       }
       setPageTitle();
@@ -136,9 +144,9 @@ export default function PageSettingLanguageAdd() {
   const setPageTitle = () => {
     const breadCrumbs: IBreadCrumbData[] = [
       { title: t('languages'), url: EndPoints.LANGUAGE_WITH.LIST },
-      { title: t(queries._id ? 'edit' : 'add') },
+      { title: t(formState._id ? 'edit' : 'add') },
     ];
-    if (queries._id) {
+    if (formState._id) {
       breadCrumbs.push({ title: state.mainTitle });
     }
     appDispatch(setBreadCrumbState(breadCrumbs));
@@ -171,9 +179,9 @@ export default function PageSettingLanguageAdd() {
   };
 
   const getItem = async () => {
-    if(queries._id) {
+    if (formState._id) {
       const serviceResult = await LanguageService.getWithId(
-        { _id: queries._id },
+        { _id: formState._id },
         abortController.signal
       );
       if (serviceResult.status && serviceResult.data) {
@@ -198,8 +206,8 @@ export default function PageSettingLanguageAdd() {
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
     dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
-    const params = { ...formState };
-    const serviceResult = await (params._id
+    const params = formState;
+    const serviceResult = await (formState._id
       ? LanguageService.updateWithId(params, abortController.signal)
       : LanguageService.add(params, abortController.signal));
     dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
@@ -207,7 +215,7 @@ export default function PageSettingLanguageAdd() {
       new ComponentToast({
         type: 'success',
         title: t('successful'),
-        content: `${t(queries._id ? 'itemEdited' : 'itemAdded')}!`,
+        content: `${t(formState._id ? 'itemEdited' : 'itemAdded')}!`,
       });
       await navigatePage(true);
     }
@@ -237,8 +245,9 @@ export default function PageSettingLanguageAdd() {
           <ComponentFormSelect
             title={t('status')}
             options={state.status}
+            name="statusId"
             value={state.status?.findSingle('value', formState.statusId)}
-            onChange={(item: any, e) => onChangeSelect('statusId', item.value)}
+            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
           />
         </div>
         <div className="col-md-7 mb-3">
@@ -283,7 +292,7 @@ export default function PageSettingLanguageAdd() {
                 name="image"
                 options={state.flags}
                 value={state.flags.findSingle('value', formState.image || '')}
-                onChange={(item: any, e) => onChangeSelect('image', item.value)}
+                onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
               />
             </div>
           </div>

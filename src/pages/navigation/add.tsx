@@ -123,13 +123,17 @@ export default function PageNavigationAdd() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput, onChangeSelect } =
-    useFormReducer(initialFormState);
   const queries = router.query as IPageQueries;
 
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { formState, setFormState, onChangeInput, onChangeSelect } =
+    useFormReducer<IComponentFormState>({
+      ...initialFormState,
+      _id: queries._id || '',
+    });
+
   const init = async () => {
-    const minPermission = queries._id
+    const minPermission = formState._id
       ? NavigationEndPointPermission.UPDATE
       : NavigationEndPointPermission.ADD;
     if (
@@ -143,7 +147,7 @@ export default function PageNavigationAdd() {
     ) {
       await getItems();
       getStatus();
-      if (queries._id) {
+      if (formState._id) {
         await getItem();
       }
       setPageTitle();
@@ -172,10 +176,10 @@ export default function PageNavigationAdd() {
         url: EndPoints.NAVIGATION_WITH.LIST,
       },
       {
-        title: t(queries._id ? 'edit' : 'add'),
+        title: t(formState._id ? 'edit' : 'add'),
       },
     ];
-    if (queries._id) {
+    if (formState._id) {
       titles.push({ title: state.mainTitle });
     }
     appDispatch(setBreadCrumbState(titles));
@@ -189,7 +193,6 @@ export default function PageNavigationAdd() {
         t
       ),
     });
-    setFormState({ statusId: StatusId.Active });
   };
 
   const getItems = async () => {
@@ -201,27 +204,29 @@ export default function PageNavigationAdd() {
       abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
-      let items: IComponentState['items'] = [
+      let newItems: IComponentState['items'] = [
         { value: '', label: t('notSelected') },
       ];
       for (const item of serviceResult.data) {
-        if (queries._id && item._id === queries._id) continue;
-        items.push({
+        if (item._id === formState._id) continue;
+        newItems.push({
           value: item._id,
           label: item.contents?.title || t('[noLangAdd]'),
         });
       }
-      setFormState({ rank: items.length });
-      dispatch({ type: 'SET_ITEMS', payload: items });
+      setFormState({ rank: newItems.length });
+      dispatch({ type: 'SET_ITEMS', payload: newItems });
     }
   };
 
   const getItem = async (langId?: string) => {
-    if (queries._id) {
+    if (formState._id) {
+      langId = langId || mainLangId;
+
       const serviceResult = await NavigationService.getWithId(
         {
-          _id: queries._id,
-          langId: langId || mainLangId,
+          _id: formState._id,
+          langId: langId,
         },
         abortController.signal
       );
@@ -229,12 +234,14 @@ export default function PageNavigationAdd() {
         const item = serviceResult.data;
         dispatch({ type: 'SET_ITEM', payload: item });
         setFormState({
+          ...item,
           parentId: item.parentId?._id || '',
           contents: {
-            langId: langId || mainLangId,
+            ...item.contents,
+            langId: langId,
           },
         });
-        if (!langId) {
+        if (langId == mainLangId) {
           dispatch({
             type: 'SET_MAIN_TITLE',
             payload: item.contents?.title || '',
@@ -255,7 +262,7 @@ export default function PageNavigationAdd() {
     event.preventDefault();
     dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
     const params = formState;
-    const serviceResult = await (queries._id
+    const serviceResult = await (formState._id
       ? NavigationService.updateWithId(params, abortController.signal)
       : NavigationService.add(params, abortController.signal));
     dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
@@ -263,9 +270,9 @@ export default function PageNavigationAdd() {
       new ComponentToast({
         type: 'success',
         title: t('successful'),
-        content: `${t(queries._id ? 'itemEdited' : 'itemAdded')}!`,
+        content: `${t(formState._id ? 'itemEdited' : 'itemAdded')}!`,
       });
-      if (!queries._id) {
+      if (!formState._id) {
         await navigatePage();
       }
     }
@@ -297,7 +304,7 @@ export default function PageNavigationAdd() {
             name="statusId"
             options={state.status}
             value={state.status?.findSingle('value', formState.statusId)}
-            onChange={(item: any, e) => onChangeSelect('statusId', item.value)}
+            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
           />
         </div>
         <div className="col-md-7 mb-3">
@@ -360,7 +367,7 @@ export default function PageNavigationAdd() {
             placeholder={t('chooseMain')}
             options={state.items}
             value={state.items.findSingle('value', formState.parentId || '')}
-            onChange={(item: any, e) => onChangeSelect('parentId', item.value)}
+            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
           />
         </div>
       </div>

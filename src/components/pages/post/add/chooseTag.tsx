@@ -1,100 +1,101 @@
-import React, { Component } from 'react';
-import PagePostAdd from '@pages/post/add';
-import {
-  ComponentFormLoadingButton,
-  ComponentFormSelect,
-  ComponentFormType,
-} from '@components/elements/form';
-import { HandleFormLibrary } from '@library/react/handles/form';
+import { ActionDispatch, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import { PostTermService } from '@services/postTerm.service';
 import { PostTermTypeId } from '@constants/postTermTypes';
 import { StatusId } from '@constants/status';
 import ComponentToast from '@components/elements/toast';
+import {
+  IPostAddAction,
+  IPostAddComponentFormState,
+  IPostAddComponentState,
+} from '@pages/post/add';
+import { IUseFormReducer, useFormReducer } from '@library/react/handles/form';
+import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
+import ComponentFormSelect from '@components/elements/form/input/select';
 
-type IPageState = {
+type IComponentState = {
   isShowModal: boolean;
-  newItemTitle: string;
   isSubmitting: boolean;
 };
 
-type IPageProps = {
-  page: PagePostAdd;
+const initialState: IComponentState = {
+  isShowModal: false,
+  isSubmitting: false,
 };
 
-export default class ComponentPagePostAddChooseTag extends Component<
-  IPageProps,
-  IPageState
-> {
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isShowModal: false,
-      newItemTitle: '',
-      isSubmitting: false,
-    };
-  }
+type IComponentFormState = {
+  title: string;
+};
 
-  async onAddNew() {
-    this.setState(
-      {
-        isSubmitting: !this.state.isSubmitting,
+const initialFormState: IComponentFormState = {
+  title: '',
+};
+
+type IComponentProps = {
+  state: IPostAddComponentState;
+  dispatch: ActionDispatch<[action: IPostAddAction]>;
+  formState: IPostAddComponentFormState;
+  setFormState: IUseFormReducer<IPostAddComponentFormState>['setFormState'];
+  onChangeSelect: IUseFormReducer<IPostAddComponentFormState>['onChangeSelect'];
+};
+
+export default function ComponentPagePostAddChooseTag(props: IComponentProps) {
+  const abortController = new AbortController();
+
+  const t = useAppSelector(selectTranslation);
+
+  const [isShowModal, setIsShowModal] = useState(initialState.isShowModal);
+  const [isSubmitting, setIsSubmitting] = useState(initialState.isSubmitting);
+
+  const { formState, setFormState, onChangeInput, onChangeSelect } =
+    useFormReducer<IComponentFormState>(initialFormState);
+
+  const onAddNew = async () => {
+    setIsSubmitting(true);
+
+    const serviceResult = await PostTermService.add({
+      typeId: PostTermTypeId.Tag,
+      postTypeId: props.formState.typeId,
+      statusId: StatusId.Active,
+      rank: 0,
+      contents: {
+        langId: props.formState.contents.langId,
+        title: formState.title,
       },
-      async () => {
-        const serviceResult = await PostTermService.add({
-          typeId: PostTermTypeId.Tag,
-          postTypeId: this.props.page.state.formData.typeId,
-          statusId: StatusId.Active,
-          rank: 0,
-          contents: {
-            langId: this.props.page.state.formData.contents.langId,
-            title: this.state.newItemTitle,
+    });
+
+    if (serviceResult.status && serviceResult.data) {
+      props.dispatch({
+        type: 'SET_TAGS',
+        payload: [
+          {
+            value: serviceResult.data._id,
+            label: formState.title,
           },
-        });
+          ...props.state.tags,
+        ],
+      });
+      setFormState({ title: '' });
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: `'${formState.title}' ${t('itemAdded')}`,
+        timeOut: 3,
+      });
+    }
+  };
 
-        if (serviceResult.status && serviceResult.data) {
-          this.props.page.setState(
-            {
-              tags: [
-                {
-                  value: serviceResult.data._id,
-                  label: this.state.newItemTitle,
-                },
-                ...this.props.page.state.tags,
-              ],
-            },
-            () => {
-              this.setState({
-                newItemTitle: '',
-              });
-              new ComponentToast({
-                type: 'success',
-                title: this.props.page.props.t('successful'),
-                content: `'${this.state.newItemTitle}' ${this.props.page.props.t('itemAdded')}`,
-                timeOut: 3,
-              });
-            }
-          );
-        }
-
-        this.setState({ isSubmitting: false });
-      }
-    );
-  }
-
-  Modal = () => {
+  const MainModal = () => {
     return (
-      <Modal
-        className="form-modal"
-        size="lg"
-        centered
-        show={this.state.isShowModal}
-      >
+      <Modal className="form-modal" size="lg" centered show={isShowModal}>
         <Modal.Header className="border-bottom-0">
           <div className="w-100 text-end">
             <button
               className="btn btn-gradient-dark"
-              onClick={() => this.setState({ isShowModal: false })}
+              onClick={() => setIsShowModal(false)}
             >
               <i className="fa fa-close"></i>
             </button>
@@ -103,31 +104,28 @@ export default class ComponentPagePostAddChooseTag extends Component<
         <Modal.Body className="m-0 p-0">
           <div className="card">
             <div className="card-body">
-              <h4 className="text-center">{this.props.page.props.t('tag')}</h4>
+              <h4 className="text-center">{t('tag')}</h4>
               <div className="row mt-4">
                 <div className="col-md-12">
                   <ComponentFormType
-                    title={`${this.props.page.props.t('title')}*`}
+                    title={`${t('title')}*`}
                     name="newItemTitle"
                     type="text"
                     required={true}
-                    value={this.state.newItemTitle}
-                    onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+                    value={formState.title}
+                    onChange={(e) => onChangeInput(e)}
                   />
                 </div>
                 <div className="col-md-12 mt-4 text-end submit">
-                  {this.state.isSubmitting ? (
-                    <ComponentFormLoadingButton
-                      text={this.props.page.props.t('loading')}
-                    />
+                  {isSubmitting ? (
+                    <ComponentFormLoadingButton text={t('loading')} />
                   ) : (
                     <button
                       type={'button'}
                       className="btn btn-gradient-success"
-                      onClick={() => this.onAddNew()}
+                      onClick={() => onAddNew()}
                     >
-                      <i className="mdi mdi-plus"></i>{' '}
-                      {this.props.page.props.t('add')}
+                      <i className="mdi mdi-plus"></i> {t('add')}
                     </button>
                   )}
                 </div>
@@ -139,41 +137,34 @@ export default class ComponentPagePostAddChooseTag extends Component<
     );
   };
 
-  render() {
-    return (
-      <div>
-        <this.Modal />
-        <div className="row">
-          <div className="col-md-10">
-            <ComponentFormSelect
-              title={this.props.page.props.t('tag')}
-              name="tags"
-              placeholder={this.props.page.props
-                .t('chooseTag')
-                .toCapitalizeCase()}
-              isMulti
-              closeMenuOnSelect={false}
-              options={this.props.page.state.tags}
-              value={this.props.page.state.tags?.filter((item) =>
-                this.props.page.state.formData.tags?.includes(item.value)
-              )}
-              onChange={(item: any, e) =>
-                HandleFormLibrary.onChangeSelect(e.name, item, this.props.page)
-              }
-            />
-          </div>
-          <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">
-            <button
-              type={'button'}
-              className="btn btn-gradient-success btn-lg"
-              onClick={() => this.setState({ isShowModal: true })}
-            >
-              <i className="mdi mdi-plus"></i>{' '}
-              {this.props.page.props.t('addNew')}
-            </button>
-          </div>
+  return (
+    <div>
+      <Modal />
+      <div className="row">
+        <div className="col-md-10">
+          <ComponentFormSelect
+            title={t('tag')}
+            name="tags"
+            placeholder={t('chooseTag').toCapitalizeCase()}
+            isMulti
+            closeMenuOnSelect={false}
+            options={props.state.tags}
+            value={props.state.tags?.filter((item) =>
+              props.formState.tags?.includes(item.value)
+            )}
+            onChange={(item: any, e) => props.onChangeSelect(e.name, item)}
+          />
+        </div>
+        <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">
+          <button
+            type={'button'}
+            className="btn btn-gradient-success btn-lg"
+            onClick={() => setIsShowModal(true)}
+          >
+            <i className="mdi mdi-plus"></i> {t('addNew')}
+          </button>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

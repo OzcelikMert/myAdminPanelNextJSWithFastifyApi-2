@@ -73,7 +73,7 @@ type IAction =
   | { type: 'SET_LANG_ID'; payload: IComponentState['langId'] }
   | { type: 'SET_SELECTED_ITEM'; payload: IComponentState['selectedItem'] };
 
-function reducer(state: IComponentState, action: IAction): IComponentState {
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
     case 'SET_ELEMENT_TYPES':
       return { ...state, elementTypes: action.payload };
@@ -111,13 +111,14 @@ type IPageQueries = {
 export default function PageComponentAdd() {
   const abortController = new AbortController();
 
+  const router = useRouter();
   const appDispatch = useAppDispatch();
   const t = useAppSelector(selectTranslation);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
-  const router = useRouter();
+  const queries = router.query as IPageQueries;
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
@@ -129,8 +130,11 @@ export default function PageComponentAdd() {
       ? 'general'
       : 'elements',
   });
-  const { formState, setFormState, onChangeInput, onChangeSelect } = useFormReducer(initialFormState);
-  const queries = router.query as IPageQueries;
+  const { formState, setFormState, onChangeInput, onChangeSelect } =
+    useFormReducer<IComponentFormState>({
+      ...initialFormState,
+      _id: queries._id ?? '',
+    });
 
   useEffect(() => {
     init();
@@ -140,7 +144,7 @@ export default function PageComponentAdd() {
   }, []);
 
   const init = async () => {
-    const minPermission = queries._id
+    const minPermission = formState._id
       ? ComponentEndPointPermission.UPDATE
       : ComponentEndPointPermission.ADD;
     if (
@@ -154,7 +158,7 @@ export default function PageComponentAdd() {
     ) {
       getElementTypes();
       getComponentTypes();
-      if (queries._id) {
+      if (formState._id) {
         await getItem();
       }
       setPageTitle();
@@ -175,10 +179,10 @@ export default function PageComponentAdd() {
         url: EndPoints.COMPONENT_WITH.LIST,
       },
       {
-        title: t(queries._id ? 'edit' : 'add'),
+        title: t(formState._id ? 'edit' : 'add'),
       },
     ];
-    if (queries._id) {
+    if (formState._id) {
       titles.push({
         title: state.mainTitle,
       });
@@ -207,11 +211,12 @@ export default function PageComponentAdd() {
   };
 
   const getItem = async (langId?: string) => {
-    if(queries._id){
+    langId = langId || mainLangId;
+    if (formState._id) {
       const serviceResult = await ComponentService.getWithId(
         {
-          _id: queries._id,
-          langId: langId ?? mainLangId,
+          _id: formState._id,
+          langId: langId,
         },
         abortController.signal
       );
@@ -223,12 +228,12 @@ export default function PageComponentAdd() {
             ...element,
             contents: {
               ...element.contents,
-              langId: langId ?? mainLangId,
+              langId: langId,
             },
           })),
         });
-  
-        if (!langId) {
+
+        if (langId == mainLangId) {
           dispatch({ type: 'SET_MAIN_TITLE', payload: item.title });
         }
       } else {
@@ -563,10 +568,11 @@ export default function PageComponentAdd() {
         <div className="col-md-7 mt-3">
           <ComponentFormSelect
             title={`${t('typeId')}*`}
+            name='typeId'
             placeholder={t('typeId')}
             options={state.componentTypes}
             value={state.componentTypes.findSingle('value', formState.typeId)}
-            onChange={(item: any, e) => onChangeSelect('typeId', item.value)}
+            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
           />
         </div>
       </div>

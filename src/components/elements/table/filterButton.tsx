@@ -1,14 +1,14 @@
 import React from 'react';
 
-export interface IComponentTableFilterButton<T = any> {
+export interface IComponentTableFilterButton<T = any[]> {
   title?: string;
   icon?: string | React.ReactNode;
   className?: string;
-  onFilter: (items: T[]) => T[];
+  onFilter: (items: T) => T;
   key?: any
 }
 
-type IComponentProps<T = any> = {
+type IComponentProps<T = any[]> = {
   item: IComponentTableFilterButton<T>;
   onClick: () => void;
   isActive?: boolean;

@@ -1,7 +1,5 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
+import React, { useEffect, useReducer } from 'react';
 import { TableColumn } from 'react-data-table-component';
-import { IThemeToggleMenuItem } from '@components/elements/table/toggleMenu';
 import Swal from 'sweetalert2';
 import { PostService } from '@services/post.service';
 import { IPostGetManyResultService } from 'types/services/post.service';
@@ -28,275 +26,259 @@ import { RouteUtil } from '@utils/route.util';
 import { UserRoleId } from '@constants/userRoles';
 import ComponentToolTip from '@components/elements/tooltip';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import {
+  IBreadCrumbData,
+  setBreadCrumbState,
+} from '@lib/features/breadCrumbSlice';
+import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
+import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
+import { SortUtil } from '@utils/sort.util';
 
-type IPageState = {
+type IComponentState = {
   typeId: PostTypeId;
-  searchKey: string;
   items: IPostGetManyResultService[];
-  showingItems: IPageState['items'];
-  selectedItems: IPageState['items'];
-  listMode: 'list' | 'deleted';
+  selectedItems: IPostGetManyResultService[];
   selectedItemId: string;
   isShowModalUpdateRank: boolean;
+  listMode: 'list' | 'deleted';
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  typeId: PostTypeId.Blog,
+  items: [],
+  selectedItems: [],
+  selectedItemId: '',
+  isShowModalUpdateRank: false,
+  listMode: 'list',
+};
 
-export default class PagePostList extends Component<IPageProps, IPageState> {
-  abortController = new AbortController();
+type IAction =
+  | { type: 'SET_TYPE_ID'; payload: IComponentState['typeId'] }
+  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
+  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
+  | { type: 'SET_SELECTED_ITEM_ID'; payload: IComponentState['selectedItemId'] }
+  | {
+      type: 'SET_IS_SHOW_MODAL_UPDATE_RANK';
+      payload: IComponentState['isShowModalUpdateRank'];
+    }
+  | { type: 'SET_LIST_MODE'; payload: IComponentState['listMode'] };
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      typeId: Number(this.props.router.query.postTypeId ?? 1),
-      searchKey: '',
-      selectedItems: [],
-      listMode: 'list',
-      items: [],
-      showingItems: [],
-      selectedItemId: '',
-      isShowModalUpdateRank: false,
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_TYPE_ID':
+      return { ...state, typeId: action.payload };
+    case 'SET_ITEMS':
+      return { ...state, items: action.payload };
+    case 'SET_SELECTED_ITEMS':
+      return { ...state, selectedItems: action.payload };
+    case 'SET_SELECTED_ITEM_ID':
+      return { ...state, selectedItemId: action.payload };
+    case 'SET_IS_SHOW_MODAL_UPDATE_RANK':
+      return { ...state, isShowModalUpdateRank: action.payload };
+    case 'SET_LIST_MODE':
+      return { ...state, listMode: action.payload };
+    default:
+      return state;
+  }
+};
+
+type IPageQueries = {
+  _id?: string;
+  postTypeId?: PostTypeId;
+};
+
+export default function PagePostList() {
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
+  const currencyId = useAppSelector((state) => state.settingState.currencyId);
+
+  let queries = router.query as IPageQueries;
+
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    typeId: Number(queries.postTypeId ?? PostTypeId.Blog),
+  });
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
     };
-  }
+  }, []);
 
-  async componentDidMount() {
+  useEffect(() => {
+    queries = router.query as IPageQueries;
+    dispatch({ type: 'SET_TYPE_ID', payload: Number(queries.postTypeId) });
+    init();
+  }, [router.query]);
+
+  const init = async () => {
+    const minPermission = PermissionUtil.getPostPermission(
+      state.typeId,
+      PostPermissionMethod.GET
+    );
     if (
-      PermissionUtil.checkAndRedirect(
-        this.props,
-        PermissionUtil.getPostPermission(
-          this.state.typeId,
-          PostPermissionMethod.GET
-        )
-      )
+      PermissionUtil.checkAndRedirect({
+        appDispatch,
+        minPermission,
+        router,
+        sessionAuth,
+        t,
+      })
     ) {
-      this.setPageTitle();
-      await this.getItems();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+      setPageTitle();
+      await getItems();
+      appDispatch(setIsPageLoadingState(false));
     }
-  }
+  };
 
-  async componentDidUpdate(prevProps: Readonly<IPageProps>) {
-    const typeId = Number(this.props.router.query.postTypeId ?? 1);
-    if (typeId !== this.state.typeId) {
-      this.setState(
-        {
-          typeId: typeId,
-        },
-        async () => {
-          await this.getItems();
-          this.props.setStateApp({
-            isPageLoading: false,
-          });
-        }
-      );
-    }
-  }
+  const setPageTitle = () => {
+    const titles: IBreadCrumbData[] = PostUtil.getPageTitles({
+      t: t,
+      postTypeId: state.typeId,
+    });
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
+    titles.push({
+      title: t('list'),
+    });
 
-  setPageTitle() {
-    const titles: string[] = [
-      ...PostUtil.getPageTitles({
-        t: this.props.t,
-        postTypeId: this.state.typeId,
-      }),
-      this.props.t('list'),
-    ];
-    this.props.setBreadCrumb(titles);
-  }
+    appDispatch(setBreadCrumbState(titles));
+  };
 
-  async getItems() {
+  const getItems = async () => {
     const result = await PostService.getMany(
       {
-        typeId: [this.state.typeId],
-        langId: this.props.getStateApp.appData.currentLangId,
+        typeId: [state.typeId],
+        langId: mainLangId,
       },
-      this.abortController.signal
+      abortController.signal
     );
 
     if (result.status && result.data) {
-      this.setState((state: IPageState) => {
-        state.items = result.data!;
-        state.showingItems = result.data!.filter(
-          (item) => item.statusId !== StatusId.Deleted
-        );
-        return state;
-      });
+      dispatch({ type: 'SET_ITEMS', payload: result.data });
     }
-  }
+  };
 
-  onChangeStatus = async (statusId: number) => {
-    const selectedItemId = this.state.selectedItems.map((item) => item._id);
-    if (statusId === StatusId.Deleted && this.state.listMode === 'deleted') {
+  const onChangeStatus = async (statusId: number) => {
+    const selectedItemId = state.selectedItems.map((item) => item._id);
+    if (statusId === StatusId.Deleted && state.listMode === 'deleted') {
       const result = await Swal.fire({
-        title: this.props.t('deleteAction'),
-        text: this.props.t('deleteSelectedItemsQuestion'),
-        confirmButtonText: this.props.t('yes'),
-        cancelButtonText: this.props.t('no'),
+        title: t('deleteAction'),
+        text: t('deleteSelectedItemsQuestion'),
+        confirmButtonText: t('yes'),
+        cancelButtonText: t('no'),
         icon: 'question',
         showCancelButton: true,
       });
       if (result.isConfirmed) {
         const loadingToast = new ComponentToast({
-          content: this.props.t('deleting'),
+          content: t('deleting'),
           type: 'loading',
         });
 
         const serviceResult = await PostService.deleteMany(
           {
             _id: selectedItemId,
-            typeId: this.state.typeId,
+            typeId: state.typeId,
           },
-          this.abortController.signal
+          abortController.signal
         );
         loadingToast.hide();
         if (serviceResult.status) {
-          this.setState(
-            (state: IPageState) => {
-              state.items = state.items.filter(
-                (item) => !selectedItemId.includes(item._id)
-              );
-              return state;
-            },
-            () => {
-              new ComponentToast({
-                type: 'success',
-                title: this.props.t('successful'),
-                content: this.props.t('itemDeleted'),
-              });
-              this.onChangeListMode(this.state.listMode);
-            }
+          const newItems = state.items.filter(
+            (item) => !selectedItemId.includes(item._id)
           );
+          dispatch({ type: 'SET_ITEMS', payload: newItems });
+          new ComponentToast({
+            type: 'success',
+            title: t('successful'),
+            content: t('itemDeleted'),
+          });
         }
       }
     } else {
       const loadingToast = new ComponentToast({
-        content: this.props.t('updating'),
+        content: t('updating'),
         type: 'loading',
       });
 
       const serviceResult = await PostService.updateStatusMany(
         {
           _id: selectedItemId,
-          typeId: this.state.typeId,
+          typeId: state.typeId,
           statusId: statusId,
         },
-        this.abortController.signal
+        abortController.signal
       );
       loadingToast.hide();
       if (serviceResult.status) {
-        this.setState(
-          (state: IPageState) => {
-            state.items.map((item, index) => {
-              if (selectedItemId.includes(item._id)) {
-                item.statusId = statusId;
-              }
-            });
-            return state;
-          },
-          () => {
-            new ComponentToast({
-              type: 'success',
-              title: this.props.t('successful'),
-              content: this.props.t('statusUpdated'),
-            });
-            this.onChangeListMode(this.state.listMode);
+        const newItems = state.items.map((item) => {
+          if (selectedItemId.includes(item._id)) {
+            item.statusId = statusId;
           }
-        );
+          return item;
+        });
+        dispatch({ type: 'SET_ITEMS', payload: newItems });
+        new ComponentToast({
+          type: 'success',
+          title: t('successful'),
+          content: t('statusUpdated'),
+        });
       }
     }
   };
 
-  async onChangeRank(rank: number) {
+  const onChangeRank = async (rank: number) => {
     const serviceResult = await PostService.updateRankWithId(
       {
-        _id: this.state.selectedItemId,
-        typeId: this.state.typeId,
+        _id: state.selectedItemId,
+        typeId: state.typeId,
         rank: rank,
       },
-      this.abortController.signal
+      abortController.signal
     );
 
     if (serviceResult.status) {
-      this.setState(
-        (state: IPageState) => {
-          const item = this.state.items.findSingle(
-            '_id',
-            this.state.selectedItemId
-          );
-          if (item) {
-            item.rank = rank;
-          }
-          return state;
-        },
-        () => {
-          this.onChangeListMode(this.state.listMode);
-          const item = this.state.items.findSingle(
-            '_id',
-            this.state.selectedItemId
-          );
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: `'${item?.contents?.title}' ${this.props.t('itemEdited')}`,
-            timeOut: 3,
-          });
-        }
-      );
+      let newItems = state.items;
+      let newItem = newItems.findSingle('_id', state.selectedItemId);
+      if (newItem) {
+        newItem.rank = rank;
+      }
+      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: `'${newItem?.contents?.title}' ${t('itemEdited')}`,
+        timeOut: 3,
+      });
+      return true;
     }
-  }
+  };
 
-  onSelect(selectedRows: IPageState['showingItems']) {
-    this.setState((state: IPageState) => {
-      state.selectedItems = selectedRows;
-      return state;
-    });
-  }
+  const onSelect = (selectedRows: IComponentState['items']) => {
+    dispatch({ type: 'SET_SELECTED_ITEMS', payload: selectedRows });
+  };
 
-  onSearch(searchKey: string) {
-    this.setState({
-      searchKey: searchKey,
-      showingItems: this.state.showingItems.filter(
-        (item) =>
-          (item.contents?.title ?? '').toLowerCase().search(searchKey) > -1
-      ),
-    });
-  }
+  const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
+    dispatch({ type: 'SET_LIST_MODE', payload: item.key });
+  };
 
-  onChangeListMode(mode: IPageState['listMode']) {
-    this.setState(
-      (state: IPageState) => {
-        state.listMode = mode;
-        state.showingItems = [];
-        state.selectedItems = [];
-        if (mode === 'list') {
-          state.showingItems = state.items.findMulti(
-            'statusId',
-            StatusId.Deleted,
-            false
-          );
-        } else {
-          state.showingItems = state.items.findMulti(
-            'statusId',
-            StatusId.Deleted
-          );
-        }
-        return state;
-      },
-      () => this.onSearch(this.state.searchKey)
-    );
-  }
-
-  navigatePage(
+  const navigatePage = (
     type: 'termEdit' | 'edit' | 'termList',
     itemId = '',
     termTypeId = 0
-  ) {
-    const postTypeId = this.state.typeId;
+  ) => {
+    const postTypeId = state.typeId;
     const pagePath = PostUtil.getPagePath(postTypeId);
     let path = '';
     switch (type) {
@@ -310,27 +292,48 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
         path = pagePath.TERM_WITH(termTypeId).LIST;
         break;
     }
-    RouteUtil.change({ props: this.props, path: path });
-  }
+    RouteUtil.change({ appDispatch, router, path });
+  };
 
-  onClickUpdateRank(itemId: string) {
-    this.setState({ selectedItemId: itemId, isShowModalUpdateRank: true });
-  }
+  const onClickUpdateRank = (itemId: string) => {
+    dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: itemId });
+    dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: true });
+  };
 
-  get getToggleMenuItems(): IThemeToggleMenuItem[] {
+  const getToggleMenuItems = (): IComponentTableToggleMenuItem[] => {
     return status
       .findMulti('id', [StatusId.Active, StatusId.InProgress, StatusId.Deleted])
       .map((item) => ({
-        label: this.props.t(item.langKey),
+        label: t(item.langKey),
         value: item.id,
         icon: getStatusIcon(item.id),
       }));
-  }
+  };
 
-  get getTableColumns(): TableColumn<IPageState['showingItems'][0]>[] {
+  const getTableFilterButtons = (): IComponentTableFilterButton<
+    IComponentState['items']
+  >[] => {
     return [
       {
-        name: this.props.t('image'),
+        title: `${t('list')} (${state.items.findMulti('statusId', StatusId.Deleted, false).length})`,
+        className: 'btn-gradient-success',
+        icon: 'mdi mdi-view-list',
+        onFilter: (items) =>
+          items.findMulti('statusId', StatusId.Deleted, false),
+      },
+      {
+        title: `${t('trash')} (${state.items.findMulti('statusId', StatusId.Deleted).length})`,
+        className: 'btn-gradient-danger',
+        icon: 'mdi mdi-delete',
+        onFilter: (items) => items.findMulti('statusId', StatusId.Deleted),
+      },
+    ];
+  };
+
+  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+    return [
+      {
+        name: t('image'),
         width: '105px',
         cell: (row) => {
           return row.contents &&
@@ -351,19 +354,17 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
         },
       },
       {
-        name: this.props.t('title'),
-        selector: (row) => row.contents?.title || this.props.t('[noLangAdd]'),
+        name: t('title'),
+        selector: (row) => row.contents?.title || t('[noLangAdd]'),
         cell: (row) => (
           <div className="row w-100">
             <div className="col-md-8">
               {
                 <ComponentThemeToolTipMissingLanguages
                   itemLanguages={row.alternates ?? []}
-                  contentLanguages={this.props.getStateApp.appData.contentLanguages}
-                  t={this.props.t}
                 />
               }
-              {row.contents?.title || this.props.t('[noLangAdd]')}
+              {row.contents?.title || t('[noLangAdd]')}
             </div>
             <div className="col-md-4">
               {row.isFixed ? (
@@ -380,9 +381,9 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
         PostTypeId.Portfolio,
         PostTypeId.Product,
         PostTypeId.BeforeAndAfter,
-      ].includes(this.state.typeId)
+      ].includes(state.typeId)
         ? {
-            name: this.props.t('category'),
+            name: t('category'),
             width: '250px',
             cell: (row) =>
               row.categories && row.categories.length > 0 ? (
@@ -391,36 +392,35 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
                     typeof item != 'undefined' ? (
                       <label
                         onClick={() =>
-                          this.navigatePage('termEdit', item._id, item.typeId)
+                          navigatePage('termEdit', item._id, item.typeId)
                         }
                         className={`badge badge-gradient-success m-1 cursor-pointer`}
                       >
-                        {item.contents?.title || this.props.t('[noLangAdd]')}
+                        {item.contents?.title || t('[noLangAdd]')}
                       </label>
                     ) : null
                   )}
                 </div>
               ) : (
-                this.props.t('notSelected')
+                t('notSelected')
               ),
           }
         : {},
-      [PostTypeId.Product].includes(this.state.typeId)
+      [PostTypeId.Product].includes(state.typeId)
         ? {
-            name: this.props.t('productType'),
+            name: t('productType'),
             selector: (row) => row.eCommerce?.typeId || 0,
             sortable: true,
             cell: (row) => (
               <ComponentThemeBadgeProductType
-                t={this.props.t}
                 typeId={row.eCommerce?.typeId || ProductTypeId.SimpleProduct}
               />
             ),
           }
         : {},
-      [PostTypeId.Product].includes(this.state.typeId)
+      [PostTypeId.Product].includes(state.typeId)
         ? {
-            name: this.props.t('price'),
+            name: t('price'),
             selector: (row) => ProductUtil.getPricingDefault(row).taxIncluded,
             sortable: true,
             cell: (row) => {
@@ -428,11 +428,7 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
                 <div>
                   <span>{ProductUtil.getPricingDefault(row).taxIncluded}</span>
                   <span className="ms-1">
-                    {
-                      ProductUtil.getCurrencyType(
-                        this.props.getStateApp.appData.currencyId
-                      )?.icon
-                    }
+                    {ProductUtil.getCurrencyType(currencyId)?.icon}
                   </span>
                 </div>
               );
@@ -445,18 +441,18 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
         PostTypeId.Portfolio,
         PostTypeId.BeforeAndAfter,
         PostTypeId.Product,
-      ].includes(this.state.typeId)
+      ].includes(state.typeId)
         ? {
-            name: this.props.t('views'),
+            name: t('views'),
             selector: (row) => row.views || 0,
             sortable: true,
           }
         : {},
-      [PostTypeId.Page].includes(this.state.typeId)
+      [PostTypeId.Page].includes(state.typeId)
         ? {
-            name: this.props.t('pageType'),
+            name: t('pageType'),
             selector: (row) =>
-              this.props.t(
+              t(
                 pageTypes.findSingle(
                   'id',
                   row.pageTypeId ? row.pageTypeId : PageTypeId.Default
@@ -465,25 +461,23 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
             sortable: true,
             cell: (row) => (
               <ComponentThemeBadgePageType
-                t={this.props.t}
                 typeId={row.pageTypeId || PageTypeId.Default}
               />
             ),
           }
         : {},
       {
-        name: this.props.t('status'),
+        name: t('status'),
         sortable: true,
         cell: (row) => (
           <ComponentThemeBadgeStatus
-            t={this.props.t}
             statusId={row.statusId}
             date={row.dateStart}
           />
         ),
       },
       {
-        name: this.props.t('updatedBy'),
+        name: t('updatedBy'),
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
@@ -493,26 +487,26 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
         ),
       },
       {
-        name: this.props.t('rank'),
+        name: t('rank'),
         sortable: true,
         selector: (row) => row.rank ?? 0,
         cell: (row) => {
           return (row.typeId == PostTypeId.Page &&
             PermissionUtil.checkPermissionRoleRank(
-              this.props.getStateApp.sessionAuth!.user.roleId,
+              sessionAuth!.user.roleId,
               UserRoleId.SuperAdmin
             )) ||
             (row.typeId != PostTypeId.Page &&
               PermissionUtil.check(
-                this.props.getStateApp.sessionAuth!,
+                sessionAuth!,
                 PermissionUtil.getPostPermission(
-                  this.state.typeId,
+                  state.typeId,
                   PostPermissionMethod.UPDATE
                 )
               )) ? (
             <span
               className="cursor-pointer"
-              onClick={() => this.onClickUpdateRank(row._id)}
+              onClick={() => onClickUpdateRank(row._id)}
             >
               {row.rank ?? 0} <i className="fa fa-pencil-square-o"></i>
             </span>
@@ -522,10 +516,10 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
         },
       },
       {
-        name: this.props.t('createdDate'),
+        name: t('createdDate'),
         sortable: true,
         selector: (row) => new Date(row.createdAt || '').toLocaleDateString(),
-        sortFunction: (a, b) => ComponentDataTable.dateSort(a, b),
+        sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
         cell: (row) => (
           <ComponentTableUpdatedBy
             name={row.authorId.name}
@@ -534,9 +528,9 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
         ),
       },
       PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
+        sessionAuth!,
         PermissionUtil.getPostPermission(
-          this.state.typeId,
+          state.typeId,
           PostPermissionMethod.UPDATE
         )
       )
@@ -546,7 +540,7 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
             button: true,
             cell: (row) => (
               <button
-                onClick={() => this.navigatePage('edit', row._id)}
+                onClick={() => navigatePage('edit', row._id)}
                 className="btn btn-gradient-warning"
               >
                 <i className="fa fa-pencil-square-o"></i>
@@ -555,177 +549,125 @@ export default class PagePostList extends Component<IPageProps, IPageState> {
           }
         : {},
     ];
-  }
+  };
 
-  render() {
-    const isUserSuperAdmin = PermissionUtil.checkPermissionRoleRank(
-      this.props.getStateApp.sessionAuth!.user.roleId,
-      UserRoleId.SuperAdmin
-    );
-    const item = this.state.items.findSingle('_id', this.state.selectedItemId);
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-post">
-        <ComponentThemeModalUpdateItemRank
-          t={this.props.t}
-          isShow={this.state.isShowModalUpdateRank}
-          onHide={() => this.setState({ isShowModalUpdateRank: false })}
-          onSubmit={(rank) => this.onChangeRank(rank)}
-          rank={item?.rank}
-          title={item?.contents?.title}
-        />
-        <div className="row mb-3">
-          <div className="col-md-8">
-            <div className="row">
-              <div className="col-md-6 mb-3 mb-md-0">
-                <div className="row">
-                  {[
-                    PostTypeId.Blog,
-                    PostTypeId.Portfolio,
-                    PostTypeId.Product,
-                  ].includes(this.state.typeId) ? (
-                    <div className="col-6">
-                      <button
-                        className="btn btn-gradient-success btn-lg w-100"
-                        onClick={() =>
-                          this.navigatePage(
-                            'termList',
-                            '',
-                            PostTermTypeId.Category
-                          )
-                        }
-                      >
-                        <i className="fa fa-pencil-square-o"></i>{' '}
-                        {this.props.t('editCategories').toCapitalizeCase()}
-                      </button>
-                    </div>
-                  ) : null}
-                  {[
-                    PostTypeId.Blog,
-                    PostTypeId.Portfolio,
-                    PostTypeId.Page,
-                    PostTypeId.Product,
-                  ].includes(this.state.typeId) ? (
-                    <div className="col-6">
-                      <button
-                        className="btn btn-gradient-info btn-edit-tag btn-lg w-100"
-                        onClick={() =>
-                          this.navigatePage('termList', '', PostTermTypeId.Tag)
-                        }
-                      >
-                        <i className="fa fa-pencil-square-o"></i>{' '}
-                        {this.props.t('editTags').toCapitalizeCase()}
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
+  const isUserSuperAdmin = PermissionUtil.checkPermissionRoleRank(
+    sessionAuth!.user.roleId,
+    UserRoleId.SuperAdmin
+  );
+  const item = state.items.findSingle('_id', state.selectedItemId);
+  return isPageLoading ? null : (
+    <div className="page-post">
+      <ComponentThemeModalUpdateItemRank
+        isShow={state.isShowModalUpdateRank}
+        onHide={() =>
+          dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: false })
+        }
+        onSubmit={(rank) => onChangeRank(rank)}
+        rank={item?.rank}
+        title={item?.contents?.title}
+      />
+      <div className="row mb-3">
+        <div className="col-md-8">
+          <div className="row">
+            <div className="col-md-6 mb-3 mb-md-0">
+              <div className="row">
+                {[
+                  PostTypeId.Blog,
+                  PostTypeId.Portfolio,
+                  PostTypeId.Product,
+                ].includes(state.typeId) ? (
+                  <div className="col-6">
+                    <button
+                      className="btn btn-gradient-success btn-lg w-100"
+                      onClick={() =>
+                        navigatePage('termList', '', PostTermTypeId.Category)
+                      }
+                    >
+                      <i className="fa fa-pencil-square-o"></i>{' '}
+                      {t('editCategories').toCapitalizeCase()}
+                    </button>
+                  </div>
+                ) : null}
+                {[
+                  PostTypeId.Blog,
+                  PostTypeId.Portfolio,
+                  PostTypeId.Page,
+                  PostTypeId.Product,
+                ].includes(state.typeId) ? (
+                  <div className="col-6">
+                    <button
+                      className="btn btn-gradient-info btn-edit-tag btn-lg w-100"
+                      onClick={() =>
+                        navigatePage('termList', '', PostTermTypeId.Tag)
+                      }
+                    >
+                      <i className="fa fa-pencil-square-o"></i>{' '}
+                      {t('editTags').toCapitalizeCase()}
+                    </button>
+                  </div>
+                ) : null}
               </div>
-              <div className="col-md-6 mb-3 mb-md-0">
-                <div className="row">
-                  {[PostTypeId.Product].includes(this.state.typeId) ? (
-                    <div className="col-6">
-                      <button
-                        className="btn btn-gradient-primary btn-edit-tag btn-lg w-100"
-                        onClick={() =>
-                          this.navigatePage(
-                            'termList',
-                            '',
-                            PostTermTypeId.Attributes
-                          )
-                        }
-                      >
-                        <i className="fa fa-pencil-square-o"></i>{' '}
-                        {this.props.t('editAttribute').toCapitalizeCase()}
-                      </button>
-                    </div>
-                  ) : null}
-                  {[PostTypeId.Product].includes(this.state.typeId) ? (
-                    <div className="col-6">
-                      <button
-                        className="btn btn-gradient-warning btn-edit-tag btn-lg w-100"
-                        onClick={() =>
-                          this.navigatePage(
-                            'termList',
-                            '',
-                            PostTermTypeId.Variations
-                          )
-                        }
-                      >
-                        <i className="fa fa-pencil-square-o"></i>{' '}
-                        {this.props.t('editVariation').toCapitalizeCase()}
-                      </button>
-                    </div>
-                  ) : null}
-                </div>
+            </div>
+            <div className="col-md-6 mb-3 mb-md-0">
+              <div className="row">
+                {[PostTypeId.Product].includes(state.typeId) ? (
+                  <div className="col-6">
+                    <button
+                      className="btn btn-gradient-primary btn-edit-tag btn-lg w-100"
+                      onClick={() =>
+                        navigatePage('termList', '', PostTermTypeId.Attributes)
+                      }
+                    >
+                      <i className="fa fa-pencil-square-o"></i>{' '}
+                      {t('editAttribute').toCapitalizeCase()}
+                    </button>
+                  </div>
+                ) : null}
+                {[PostTypeId.Product].includes(state.typeId) ? (
+                  <div className="col-6">
+                    <button
+                      className="btn btn-gradient-warning btn-edit-tag btn-lg w-100"
+                      onClick={() =>
+                        navigatePage('termList', '', PostTermTypeId.Variations)
+                      }
+                    >
+                      <i className="fa fa-pencil-square-o"></i>{' '}
+                      {t('editVariation').toCapitalizeCase()}
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
-          <div className="col-md-4 text-end">
-            {PermissionUtil.check(
-              this.props.getStateApp.sessionAuth!,
-              PermissionUtil.getPostPermission(
-                this.state.typeId,
-                PostPermissionMethod.DELETE
-              )
-            ) ? (
-              this.state.listMode === 'list' ? (
-                <button
-                  className="btn btn-gradient-danger btn-lg list-mode-btn"
-                  onClick={() => this.onChangeListMode('deleted')}
-                >
-                  <i className="mdi mdi-delete"></i> {this.props.t('trash')} (
-                  {
-                    this.state.items.findMulti('statusId', StatusId.Deleted)
-                      .length
-                  }
-                  )
-                </button>
-              ) : (
-                <button
-                  className="btn btn-gradient-success btn-lg list-mode-btn"
-                  onClick={() => this.onChangeListMode('list')}
-                >
-                  <i className="mdi mdi-view-list"></i> {this.props.t('list')} (
-                  {
-                    this.state.items.findMulti(
-                      'statusId',
-                      StatusId.Deleted,
-                      false
-                    ).length
-                  }
-                  )
-                </button>
-              )
-            ) : null}
-          </div>
         </div>
-        <div className="grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body">
-              <div className="table-post">
-                <ComponentDataTable
-                  columns={this.getTableColumns.filter(
-                    (column) => typeof column.name !== 'undefined'
-                  )}
-                  data={this.state.showingItems}
-                  onSelect={(rows) => this.onSelect(rows)}
-                  onSearch={(searchKey) => this.onSearch(searchKey)}
-                  selectedRows={this.state.selectedItems}
-                  i18={{
-                    search: this.props.t('search'),
-                    noRecords: this.props.t('noRecords'),
-                  }}
-                  isSelectable={isUserSuperAdmin}
-                  isAllSelectable={true}
-                  isSearchable={true}
-                  isActiveToggleMenu={true}
-                  toggleMenuItems={this.getToggleMenuItems}
-                  onSubmitToggleMenuItem={(value) => this.onChangeStatus(value)}
-                />
-              </div>
+        <div className="col-md-4 text-end"></div>
+      </div>
+      <div className="grid-margin stretch-card">
+        <div className="card">
+          <div className="card-body">
+            <div className="table-post">
+              <ComponentDataTable
+                columns={getTableColumns()}
+                data={state.items}
+                onSelect={(rows) => onSelect(rows)}
+                i18={{
+                  search: t('search'),
+                  noRecords: t('noRecords'),
+                }}
+                isSelectable={isUserSuperAdmin}
+                isAllSelectable={true}
+                isSearchable={true}
+                isActiveToggleMenu={true}
+                toggleMenuItems={getToggleMenuItems()}
+                onClickToggleMenuItem={(value) => onChangeStatus(value)}
+                filterButtons={getTableFilterButtons()}
+                onClickFilterButton={(item) => onClickTableFilterButton(item)}
+              />
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

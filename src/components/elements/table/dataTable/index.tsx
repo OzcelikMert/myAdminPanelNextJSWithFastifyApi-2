@@ -33,7 +33,7 @@ type IAction =
   | { type: 'SET_ACTIVE_FILTER_BUTTON_INDEX'; payload: IComponentState['activeFilterButtonIndex'] }
   | { type: 'SET_SHOWING_ITEMS'; payload: IComponentState['showingItems'] };
 
-function reducer(state: IComponentState, action: IAction): IComponentState {
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
     case 'SET_SELECTED_ITEMS':
       return { ...state, selectedItems: action.payload };
