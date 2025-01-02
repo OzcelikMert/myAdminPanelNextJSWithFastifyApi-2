@@ -452,8 +452,8 @@ export default class PageUserAdd extends Component<IPageProps, IPageState> {
           <div className="col-md-12">
             <ComponentForm
               isActiveSaveButton={true}
-              saveButtonText={this.props.t('save')}
-              saveButtonLoadingText={this.props.t('loading')}
+              submitButtonText={this.props.t('save')}
+              submitButtonSubmittingText={this.props.t('loading')}
               isSubmitting={this.state.isSubmitting}
               formAttributes={{
                 onSubmit: (event) => this.onSubmit(event),

@@ -1,11 +1,3 @@
-import React, { Component } from 'react';
-import {
-  ComponentForm,
-  ComponentFormTags,
-  ComponentFormType,
-} from '@components/elements/form';
-import { IPagePropCommon } from 'types/pageProps';
-import { HandleFormLibrary } from '@library/react/handles/form';
 import { SettingService } from '@services/setting.service';
 import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateSEOParamService } from 'types/services/setting.service';
@@ -13,189 +5,187 @@ import { PermissionUtil } from '@utils/permission.util';
 import { SettingsEndPointPermission } from '@constants/endPointPermissions/settings.endPoint.permission';
 import { SettingProjectionKeys } from '@constants/settingProjections';
 import { ISettingSeoContentModel } from 'types/models/setting.model';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useEffect, useState } from 'react';
+import { useFormReducer } from '@library/react/handles/form';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { EndPoints } from '@constants/endPoints';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import ComponentForm from '@components/elements/form';
+import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormTags from '@components/elements/form/input/tags';
 
-type IPageState = {
-  isSubmitting: boolean;
-  formData: ISettingUpdateSEOParamService;
+type IComponentState = {
+  langId: string;
   item?: ISettingSeoContentModel;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  langId: '',
+  item: undefined,
+};
 
-class PageSettingsSEO extends Component<IPageProps, IPageState> {
-  abortController = new AbortController();
+type IComponentFormState = ISettingUpdateSEOParamService;
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isSubmitting: false,
-      formData: {
-        seoContents: {
-          langId: this.props.getStateApp.appData.mainLangId,
-          title: '',
-          content: '',
-          tags: [],
-        },
-      },
+const initialFormState: IComponentFormState = {
+  seoContents: {
+    langId: '',
+    title: '',
+    content: '',
+    tags: [],
+  },
+};
+
+export default function PageSettingsSEO() {
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
+
+  const [item, setItem] = useState(initialState.item);
+  const [langId, setLangId] = useState(mainLangId);
+  const { formState, setFormState, onChangeInput, onChangeSelect } =
+    useFormReducer<IComponentFormState>(initialFormState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
     };
-  }
+  }, []);
 
-  async componentDidMount() {
+  const init = async () => {
     if (
-      PermissionUtil.checkAndRedirect(
-        this.props,
-        SettingsEndPointPermission.UPDATE_SEO
-      )
+      PermissionUtil.checkAndRedirect({
+        router,
+        sessionAuth,
+        appDispatch,
+        t,
+        minPermission: SettingsEndPointPermission.UPDATE_SEO,
+      })
     ) {
-      this.setPageTitle();
-      await this.getSeo();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+      setPageTitle();
+      await getSeo();
+      appDispatch(setIsPageLoadingState(false));
     }
-  }
+  };
 
-  async componentDidUpdate(prevProps: Readonly<IPageProps>) {
-    if (
-      prevProps.getStateApp.appData.currentLangId !=
-      this.props.getStateApp.appData.currentLangId
-    ) {
-      this.props.setStateApp(
+  const changeLanguage = async (langId: string) => {
+    appDispatch(setIsPageLoadingState(true));
+    await getSeo(langId);
+    appDispatch(setIsPageLoadingState(false));
+  };
+
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
         {
-          isPageLoading: true,
+          title: t('settings'),
+          url: EndPoints.SETTINGS_WITH.GENERAL,
         },
-        async () => {
-          await this.getSeo();
-          this.props.setStateApp({
-            isPageLoading: false,
-          });
-        }
-      );
-    }
-  }
+        {
+          title: t('seo'),
+        },
+      ])
+    );
+  };
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
-
-  setPageTitle() {
-    this.props.setBreadCrumb([this.props.t('settings'), this.props.t('seo')]);
-  }
-
-  async getSeo() {
+  const getSeo = async (_langId?: string) => {
+    _langId = _langId ?? langId;
     const serviceResult = await SettingService.get(
       {
-        langId: this.props.getStateApp.appData.currentLangId,
+        langId: _langId,
         projection: SettingProjectionKeys.SEO,
       },
-      this.abortController.signal
+      abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
-      this.setState((state: IPageState) => {
-        state.item = setting.seoContents;
-        state.formData = {
-          seoContents: {
-            ...state.formData.seoContents,
-            ...setting.seoContents,
-            langId: this.props.getStateApp.appData.currentLangId,
-          },
-        };
-        return state;
+      setItem(setting.seoContents);
+      setFormState({
+        seoContents: {
+          ...formState.seoContents,
+          ...setting.seoContents,
+          langId: _langId,
+        },
       });
     }
-  }
+  };
 
-  onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    let params = formState;
 
-    this.setState(
-      {
-        isSubmitting: true,
-      },
-      async () => {
-        const serviceResult = await SettingService.updateSeo(
-          this.state.formData,
-          this.abortController.signal
-        );
-        if (serviceResult.status) {
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: this.props.t('seoUpdated'),
-          });
-        }
-        this.setState((state: IPageState) => {
-          state.isSubmitting = false;
-          return state;
-        });
-      }
+    const serviceResult = await SettingService.updateSeo(
+      params,
+      abortController.signal
     );
-  }
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-settings">
-        <div className="row">
-          <div className="col-md-12">
-            <ComponentForm
-              isActiveSaveButton={true}
-              saveButtonText={this.props.t('save')}
-              saveButtonLoadingText={this.props.t('loading')}
-              isSubmitting={this.state.isSubmitting}
-              formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
-            >
-              <div className="grid-margin stretch-card">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-md-7 mb-3">
-                        <ComponentFormType
-                          title={this.props.t('websiteTitle')}
-                          type="text"
-                          name="seoContents.title"
-                          required={true}
-                          maxLength={50}
-                          value={this.state.formData.seoContents.title}
-                          onChange={(event) =>
-                            HandleFormLibrary.onChangeInput(event, this)
-                          }
-                        />
-                      </div>
-                      <div className="col-md-7 mb-3">
-                        <ComponentFormType
-                          title={this.props.t('websiteDescription')}
-                          type="textarea"
-                          name="seoContents.content"
-                          required={true}
-                          maxLength={120}
-                          value={this.state.formData.seoContents.content}
-                          onChange={(event) =>
-                            HandleFormLibrary.onChangeInput(event, this)
-                          }
-                        />
-                      </div>
-                      <div className="col-md-7">
-                        <ComponentFormTags
-                          title={this.props.t('websiteTags')}
-                          placeHolder={this.props.t('writeAndPressEnter')}
-                          name="seoContents.tags"
-                          value={this.state.formData.seoContents.tags ?? []}
-                          onChange={(value, name) =>
-                            HandleFormLibrary.onChangeSelect(name, value, this)
-                          }
-                        />
-                      </div>
+    if (serviceResult.status) {
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: t('seoUpdated'),
+      });
+    }
+  };
+
+  return isPageLoading ? null : (
+    <div className="page-settings">
+      <div className="row">
+        <div className="col-md-12">
+          <ComponentForm
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-md-7 mb-3">
+                      <ComponentFormType
+                        title={t('websiteTitle')}
+                        type="text"
+                        name="seoContents.title"
+                        required={true}
+                        maxLength={50}
+                        value={formState.seoContents.title}
+                        onChange={(event) => onChangeInput(event)}
+                      />
+                    </div>
+                    <div className="col-md-7 mb-3">
+                      <ComponentFormType
+                        title={t('websiteDescription')}
+                        type="textarea"
+                        name="seoContents.content"
+                        required={true}
+                        maxLength={120}
+                        value={formState.seoContents.content}
+                        onChange={(event) => onChangeInput(event)}
+                      />
+                    </div>
+                    <div className="col-md-7">
+                      <ComponentFormTags
+                        title={t('websiteTags')}
+                        placeHolder={t('writeAndPressEnter')}
+                        name="seoContents.tags"
+                        value={formState.seoContents.tags ?? []}
+                        onChange={(value, name) => onChangeSelect(name, value)}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-            </ComponentForm>
-          </div>
+            </div>
+          </ComponentForm>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
-
-export default PageSettingsSEO;

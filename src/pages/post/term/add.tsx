@@ -34,7 +34,6 @@ type IComponentState = {
   mainTabActiveKey: string;
   items: IThemeFormSelectData<string>[];
   status: IThemeFormSelectData[];
-  isSubmitting: boolean;
   mainTitle: string;
   langId: string;
   item?: IPostTermGetResultService;
@@ -44,7 +43,6 @@ const initialState: IComponentState = {
   mainTabActiveKey: 'general',
   items: [],
   status: [],
-  isSubmitting: false,
   mainTitle: '',
   langId: '',
 };
@@ -56,7 +54,6 @@ type IAction =
     }
   | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
   | { type: 'SET_STATUS'; payload: IComponentState['status'] }
-  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState['isSubmitting'] }
   | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
   | { type: 'SET_LANG_ID'; payload: IComponentState['langId'] }
   | { type: 'SET_ITEM'; payload: IComponentState['item'] };
@@ -69,8 +66,6 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return { ...state, items: action.payload };
     case 'SET_STATUS':
       return { ...state, status: action.payload };
-    case 'SET_IS_SUBMITTING':
-      return { ...state, isSubmitting: action.payload };
     case 'SET_MAIN_TITLE':
       return { ...state, mainTitle: action.payload };
     case 'SET_LANG_ID':
@@ -80,7 +75,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
     default:
       return state;
   }
-}
+};
 
 type IComponentFormState = IPostTermUpdateWithIdParamService;
 
@@ -287,16 +282,10 @@ export default function PagePostTermAdd(props: IComponentProps) {
   };
 
   const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
-
     const params = formState;
     const serviceResult = await (formState._id
       ? PostTermService.updateWithId(params, abortController.signal)
       : PostTermService.add(params, abortController.signal));
-
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
 
     if (serviceResult.status) {
       if (formState.typeId == PostTermTypeId.Category) {
@@ -463,11 +452,9 @@ export default function PagePostTermAdd(props: IComponentProps) {
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
-            isActiveSaveButton={true}
-            saveButtonText={t('save')}
-            saveButtonLoadingText={t('loading')}
-            isSubmitting={state.isSubmitting}
-            formAttributes={{ onSubmit: (event) => onSubmit(event) }}
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

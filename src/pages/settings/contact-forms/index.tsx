@@ -1,10 +1,3 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
-import {
-  ComponentFieldSet,
-  ComponentForm,
-  ComponentFormType,
-} from '@components/elements/form';
 import { SettingService } from '@services/setting.service';
 import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateContactFormParamService } from 'types/services/setting.service';
@@ -15,187 +8,194 @@ import { PermissionUtil } from '@utils/permission.util';
 import { SettingsEndPointPermission } from '@constants/endPointPermissions/settings.endPoint.permission';
 import { cloneDeepWith } from 'lodash';
 import Swal from 'sweetalert2';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useEffect, useState } from 'react';
+import { useFormReducer } from '@library/react/handles/form';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { EndPoints } from '@constants/endPoints';
+import ComponentFieldSet from '@components/elements/fieldSet';
+import ComponentFormType from '@components/elements/form/input/type';
+import ComponentForm from '@components/elements/form';
 
-type IPageState = {
-  isSubmitting: boolean;
-  formData: ISettingUpdateContactFormParamService;
-  items?: ISettingContactFormModel[];
-  selectedData?: ISettingContactFormModel;
+type IComponentState = {
+  items: ISettingContactFormModel[];
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  items: [],
+};
 
-class PageSettingsContactForms extends Component<IPageProps, IPageState> {
-  abortController = new AbortController();
+type IComponentSelectedItemFormState = ISettingContactFormModel | undefined;
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isSubmitting: false,
-      formData: {
-        contactForms: [],
-      },
+const initialSelectedItemFormState: IComponentSelectedItemFormState = undefined;
+
+type IComponentFormState = ISettingUpdateContactFormParamService;
+
+const initialFormState: IComponentFormState = {
+  contactForms: [],
+};
+
+export default function PageSettingsContactForms() {
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
+
+  const [items, setItems] = useState(initialState.items);
+  const selectedItemFormReducer = useFormReducer(initialSelectedItemFormState);
+  const formReducer = useFormReducer(initialFormState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
     };
-  }
+  }, []);
 
-  async componentDidMount() {
+  const init = async () => {
     if (
-      PermissionUtil.checkAndRedirect(
-        this.props,
-        SettingsEndPointPermission.UPDATE_CONTACT_FORM
-      )
+      PermissionUtil.checkAndRedirect({
+        appDispatch,
+        sessionAuth,
+        t,
+        router,
+        minPermission: SettingsEndPointPermission.UPDATE_CONTACT_FORM,
+      })
     ) {
-      this.setPageTitle();
-      await this.getSettings();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+      setPageTitle();
+      await getSettings();
+      appDispatch(setIsPageLoadingState(false));
     }
-  }
+  };
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('settings'),
+          url: EndPoints.SETTINGS_WITH.GENERAL,
+        },
+        {
+          title: t('contactForms'),
+        },
+      ])
+    );
+  };
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('settings'),
-      this.props.t('contactForms'),
-    ]);
-  }
-
-  async getSettings() {
+  const getSettings = async () => {
     const serviceResult = await SettingService.get(
       { projection: SettingProjectionKeys.ContactForm },
-      this.abortController.signal
+      abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
-      this.setState((state: IPageState) => {
-        state.items = setting.contactForms;
-        state.formData = {
-          contactForms: setting.contactForms ?? [],
-        };
-        return state;
+      const contactForms = setting.contactForms ?? [];
+      setItems(contactForms);
+      formReducer.setFormState({ contactForms });
+    }
+  };
+
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    let params = formReducer.formState;
+    const serviceResult = await SettingService.updateContactForm(
+      params,
+      abortController.signal
+    );
+    if (serviceResult.status) {
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: t('settingsUpdated'),
       });
     }
-  }
+  };
 
-  onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    this.setState(
-      {
-        isSubmitting: true,
-      },
-      async () => {
-        const serviceResult = await SettingService.updateContactForm(
-          this.state.formData,
-          this.abortController.signal
-        );
-        if (serviceResult.status) {
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: this.props.t('settingsUpdated'),
-          });
-        }
+  const onCreate = () => {
+    let _id = String.createId();
+    let newContactForms = formReducer.formState.contactForms;
+    newContactForms.push({
+      _id: _id,
+      title: '',
+      key: '',
+      port: 465,
+      host: '',
+      targetEmail: '',
+      name: '',
+      password: '',
+      email: '',
+      hasSSL: true,
+    });
 
-        this.setState({ isSubmitting: false });
-      }
+    formReducer.setFormState({
+      contactForms: newContactForms,
+    });
+
+    onEdit(newContactForms.length - 1);
+  };
+
+  const onAccept = (index: number) => {
+    let newContactForms = formReducer.formState.contactForms;
+    newContactForms[index] = selectedItemFormReducer.formState!;
+    formReducer.setFormState({
+      contactForms: newContactForms,
+    });
+    selectedItemFormReducer.setFormState(undefined);
+  };
+
+  const onEdit = (index: number) => {
+    selectedItemFormReducer.setFormState(
+      cloneDeepWith(formReducer.formState.contactForms[index])
     );
-  }
+  };
 
-  onInputChange(data: any, key: string, value: any) {
-    this.setState((state: IPageState) => {
-      data[key] = value;
-      return state;
-    });
-  }
+  const onCancelEdit = () => {
+    selectedItemFormReducer.setFormState(undefined);
+  };
 
-  onCreate() {
-    this.setState(
-      (state: IPageState) => {
-        state.formData.contactForms = [
-          ...state.formData.contactForms,
-          {
-            _id: String.createId(),
-            title: '',
-            key: '',
-            port: 465,
-            host: '',
-            targetEmail: '',
-            name: '',
-            password: '',
-            email: '',
-            hasSSL: true,
-          },
-        ];
-        return state;
-      },
-      () => this.onEdit(this.state.formData.contactForms.length - 1)
-    );
-  }
-
-  onAccept(index: number) {
-    this.setState((state: IPageState) => {
-      state.formData.contactForms[index] = state.selectedData!;
-      state.selectedData = undefined;
-      return state;
-    });
-  }
-
-  onEdit(index: number) {
-    this.setState((state: IPageState) => {
-      state.selectedData = cloneDeepWith(
-        this.state.formData.contactForms[index]
-      );
-      return state;
-    });
-  }
-
-  onCancelEdit() {
-    this.setState((state: IPageState) => {
-      state.selectedData = undefined;
-      return state;
-    });
-  }
-
-  async onDelete(index: number) {
+  const onDelete = async (index: number) => {
     const result = await Swal.fire({
-      title: this.props.t('deleteAction'),
-      html: `<b>'${this.state.formData.contactForms[index].key}'</b> ${this.props.t('deleteItemQuestionWithItemName')}`,
-      confirmButtonText: this.props.t('yes'),
-      cancelButtonText: this.props.t('no'),
+      title: t('deleteAction'),
+      html: `<b>'${formReducer.formState.contactForms[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
       icon: 'question',
       showCancelButton: true,
     });
 
     if (result.isConfirmed) {
-      this.setState((state: IPageState) => {
-        state.formData.contactForms.splice(index, 1);
-        return state;
+      let newContactForms = formReducer.formState.contactForms;
+      newContactForms.splice(index, 1);
+      formReducer.setFormState({
+        contactForms: newContactForms,
       });
     }
-  }
+  };
 
-  ContactForm = (props: ISettingContactFormModel, index: number) => {
+  const ContactForm = (props: ISettingContactFormModel, index: number) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
         <ComponentFieldSet
           legend={`${props.title} (#${props.key})`}
           legendElement={
             PermissionUtil.checkPermissionRoleRank(
-              this.props.getStateApp.sessionAuth!.user.roleId,
+              sessionAuth!.user.roleId,
               UserRoleId.SuperAdmin
             ) ? (
               <span>
                 <i
                   className="mdi mdi-pencil-box text-warning fs-1 cursor-pointer ms-2"
-                  onClick={() => this.onEdit(index)}
+                  onClick={() => onEdit(index)}
                 ></i>
                 <i
                   className="mdi mdi-minus-box text-danger fs-1 cursor-pointer ms-2"
-                  onClick={() => this.onDelete(index)}
+                  onClick={() => onDelete(index)}
                 ></i>
               </span>
             ) : undefined
@@ -205,80 +205,69 @@ class PageSettingsContactForms extends Component<IPageProps, IPageState> {
             <div className="col-md-12 mt-4">
               <ComponentFormType
                 type="text"
-                title={this.props.t('name')}
+                name={`contactForms.${index}.name`}
+                title={t('name')}
                 value={props.name}
-                onChange={(e) =>
-                  this.onInputChange(props, 'name', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-4">
               <ComponentFormType
                 type="email"
-                title={this.props.t('targetEmail')}
+                name={`contactForms.${index}.targetEmail`}
+                title={t('targetEmail')}
                 value={props.targetEmail}
-                onChange={(e) =>
-                  this.onInputChange(props, 'targetEmail', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-4">
               <ComponentFormType
                 type="email"
-                title={this.props.t('email')}
+                name={`contactForms.${index}.email`}
+                title={t('email')}
                 value={props.email}
-                onChange={(e) =>
-                  this.onInputChange(props, 'email', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-4">
               <ComponentFormType
                 type="password"
-                title={this.props.t('password')}
+                name={`contactForms.${index}.password`}
+                title={t('password')}
                 value={props.password}
-                onChange={(e) =>
-                  this.onInputChange(props, 'password', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-4">
               <ComponentFormType
                 type="text"
-                title={this.props.t('host')}
+                name={`contactForms.${index}.host`}
+                title={t('host')}
                 value={props.host}
-                onChange={(e) =>
-                  this.onInputChange(props, 'host', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-4">
               <ComponentFormType
                 type="number"
-                title={this.props.t('port')}
+                name={`contactForms.${index}.port`}
+                title={t('port')}
                 value={props.port}
-                onChange={(e) =>
-                  this.onInputChange(props, 'port', Number(e.target.value))
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-7 mt-4">
               <div className="form-switch">
                 <input
+                  name={`contactForms.${index}.hasSSL`}
                   checked={props.hasSSL}
                   className="form-check-input"
                   type="checkbox"
                   id="hasSSL"
-                  onChange={(e) =>
-                    this.onInputChange(
-                      props,
-                      'hasSSL',
-                      Boolean(e.target.checked)
-                    )
-                  }
+                  onChange={(e) => formReducer.onChangeInput(e)}
                 />
                 <label className="form-check-label ms-2" htmlFor="hasSSL">
-                  {this.props.t('hasSSL')}
+                  {t('hasSSL')}
                 </label>
               </div>
             </div>
@@ -288,31 +277,29 @@ class PageSettingsContactForms extends Component<IPageProps, IPageState> {
     );
   };
 
-  ContactFormEdit = (props: ISettingContactFormModel, index: number) => {
+  const ContactFormEdit = (props: ISettingContactFormModel, index: number) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
-        <ComponentFieldSet legend={this.props.t('newContactForm')}>
+        <ComponentFieldSet legend={t('newContactForm')}>
           <div className="row mt-3">
             <div className="col-md-12">
               <ComponentFormType
-                title={`${this.props.t('title')}*`}
+                title={`${t('title')}*`}
+                name="title"
                 type="text"
                 required={true}
                 value={props.title}
-                onChange={(e) =>
-                  this.onInputChange(props, 'title', e.target.value)
-                }
+                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-4">
               <ComponentFormType
-                title={`${this.props.t('key')}*`}
+                title={`${t('key')}*`}
+                name="key"
                 type="text"
                 required={true}
                 value={props.key}
-                onChange={(e) =>
-                  this.onInputChange(props, 'key', e.target.value)
-                }
+                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-3">
@@ -321,18 +308,18 @@ class PageSettingsContactForms extends Component<IPageProps, IPageState> {
                   <button
                     type="button"
                     className="btn btn-gradient-success btn-lg"
-                    onClick={() => this.onAccept(index)}
+                    onClick={() => onAccept(index)}
                   >
-                    {this.props.t('okay')}
+                    {t('okay')}
                   </button>
                 </div>
                 <div className="col-md-6 text-end">
                   <button
                     type="button"
                     className="btn btn-gradient-dark btn-lg"
-                    onClick={() => this.onCancelEdit()}
+                    onClick={() => onCancelEdit()}
                   >
-                    {this.props.t('cancel')}
+                    {t('cancel')}
                   </button>
                 </div>
               </div>
@@ -343,62 +330,56 @@ class PageSettingsContactForms extends Component<IPageProps, IPageState> {
     );
   };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-settings">
-        <div className="row">
-          <div className="col-md-12">
-            <ComponentForm
-              isActiveSaveButton={true}
-              saveButtonText={this.props.t('save')}
-              saveButtonLoadingText={this.props.t('loading')}
-              isSubmitting={this.state.isSubmitting}
-              formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
-            >
-              <div className="grid-margin stretch-card">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-md-7 mt-2">
-                        <div className="row">
-                          {this.state.formData.contactForms?.map(
-                            (item, index) =>
-                              this.state.selectedData &&
-                              this.state.selectedData._id == item._id
-                                ? this.ContactFormEdit(
-                                    this.state.selectedData,
-                                    index
-                                  )
-                                : this.ContactForm(item, index)
-                          )}
-                        </div>
+  return isPageLoading ? null : (
+    <div className="page-settings">
+      <div className="row">
+        <div className="col-md-12">
+          <ComponentForm
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-md-7 mt-2">
+                      <div className="row">
+                        {formReducer.formState.contactForms?.map(
+                          (item, index) =>
+                            selectedItemFormReducer.formState &&
+                            selectedItemFormReducer.formState._id == item._id
+                              ? ContactFormEdit(
+                                  selectedItemFormReducer.formState,
+                                  index
+                                )
+                              : ContactForm(item, index)
+                        )}
                       </div>
-                      {PermissionUtil.checkPermissionRoleRank(
-                        this.props.getStateApp.sessionAuth!.user.roleId,
-                        UserRoleId.SuperAdmin
-                      ) ? (
-                        <div
-                          className={`col-md-7 text-start ${this.state.formData.contactForms.length > 0 ? 'mt-4' : ''}`}
-                        >
-                          <button
-                            type={'button'}
-                            className="btn btn-gradient-success btn-lg"
-                            onClick={() => this.onCreate()}
-                          >
-                            + {this.props.t('addNew')}
-                          </button>
-                        </div>
-                      ) : null}
                     </div>
+                    {PermissionUtil.checkPermissionRoleRank(
+                      sessionAuth!.user.roleId,
+                      UserRoleId.SuperAdmin
+                    ) ? (
+                      <div
+                        className={`col-md-7 text-start ${formReducer.formState.contactForms.length > 0 ? 'mt-4' : ''}`}
+                      >
+                        <button
+                          type={'button'}
+                          className="btn btn-gradient-success btn-lg"
+                          onClick={() => onCreate()}
+                        >
+                          + {t('addNew')}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
-            </ComponentForm>
-          </div>
+            </div>
+          </ComponentForm>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
-
-export default PageSettingsContactForms;

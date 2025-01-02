@@ -18,28 +18,20 @@ import ComponentForm from '@components/elements/form';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 
 type IComponentState = {
-  isSubmitting: boolean;
   isWrong: boolean;
   user?: IUserGetResultService;
 };
 
 const initialState: IComponentState = {
-  isSubmitting: false,
   isWrong: false,
 };
 
 type IAction =
-  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState["isSubmitting"] }
-  | { type: 'SET_IS_WRONG'; payload: IComponentState["isWrong"] }
-  | { type: 'SET_USER'; payload: IComponentState["user"] };
+  | { type: 'SET_IS_WRONG'; payload: IComponentState['isWrong'] }
+  | { type: 'SET_USER'; payload: IComponentState['user'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_IS_SUBMITTING':
-      return {
-        ...state,
-        isSubmitting: action.payload,
-      };
     case 'SET_IS_WRONG':
       return {
         ...state,
@@ -100,9 +92,7 @@ export default function PageLogin() {
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
     dispatch({ type: 'SET_IS_WRONG', payload: false });
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
 
     const serviceResult = await AuthService.login(
       formState,
@@ -134,15 +124,15 @@ export default function PageLogin() {
     } else {
       dispatch({ type: 'SET_IS_WRONG', payload: true });
     }
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
   };
 
   const LoginForm = () => {
     return (
       <ComponentForm
-        isSubmitting={state.isSubmitting}
-        formAttributes={{ onSubmit: (event) => onSubmit(event) }}
         enterToSubmit={true}
+        submitButtonClassName="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn w-100"
+        submitButtonText={t('login')}
+        onSubmit={(event) => onSubmit(event)}
       >
         <div className="row">
           <div className="col-md-12 mb-3">
@@ -212,15 +202,6 @@ export default function PageLogin() {
                 </p>
               </div>
             ) : null}
-          </div>
-          <div className="col-md-12">
-            <button
-              type="submit"
-              className="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn w-100"
-              disabled={state.isSubmitting}
-            >
-              {t('login')}
-            </button>
           </div>
         </div>
       </ComponentForm>

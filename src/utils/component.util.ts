@@ -1,9 +1,9 @@
-import { IPagePropCommon } from 'types/pageProps';
 import { StatusId, status } from '@constants/status';
 import { UserRoleId, userRoles } from '@constants/userRoles';
-import { ILanguage } from 'types/constants/languages';
+import { ITranslationFunc } from '@lib/features/translationSlice';
+import { IPanelLanguage } from 'types/constants/panelLanguages';
 
-const getStatusForSelect = (statusId: StatusId[], t: IPagePropCommon['t']) => {
+const getStatusForSelect = (statusId: StatusId[], t: ITranslationFunc) => {
   return status.findMulti('id', statusId).map((item) => ({
     value: item.id,
     label: t(item.langKey),
@@ -12,7 +12,7 @@ const getStatusForSelect = (statusId: StatusId[], t: IPagePropCommon['t']) => {
 
 const getUserRolesForSelect = (
   roleId: UserRoleId[],
-  t: IPagePropCommon['t']
+  t: ITranslationFunc
 ) => {
   return userRoles.findMulti('id', roleId).map((item) => ({
     value: item.id,
@@ -20,7 +20,7 @@ const getUserRolesForSelect = (
   }));
 };
 
-const getPanelLanguageForSelect = (languages: ILanguage[]) => {
+const getPanelLanguageForSelect = (languages: IPanelLanguage[]) => {
   return languages.map((language) => ({
     label: language.title,
     value: language.id.toString(),

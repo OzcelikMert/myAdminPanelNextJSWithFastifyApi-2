@@ -1,163 +1,146 @@
-import React, { Component, FormEvent } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
-import { ComponentForm, ComponentFormType } from '@components/elements/form';
-import { HandleFormLibrary } from '@library/react/handles/form';
+import { FormEvent, useEffect, useState } from 'react';
 import ComponentToast from '@components/elements/toast';
 import { UserService } from '@services/user.service';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useFormReducer } from '@library/react/handles/form';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { EndPoints } from '@constants/endPoints';
+import ComponentForm from '@components/elements/form';
+import ComponentFormType from '@components/elements/form/input/type';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
 
-type IPageState = {
-  isSubmitting: boolean;
-  formData: {
-    password: string;
-    newPassword: string;
-    confirmPassword: string;
-  };
+type IComponentFormState = {
+  password: string;
+  newPassword: string;
+  confirmPassword: string;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialFormState: IComponentFormState = {
+  password: '',
+  newPassword: '',
+  confirmPassword: '',
+};
 
-export default class PageChangePassword extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+export default function PageChangePassword() {
+  const abortController = new AbortController();
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isSubmitting: false,
-      formData: {
-        password: '',
-        confirmPassword: '',
-        newPassword: '',
-      },
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+
+  const { formState, setFormState, onChangeInput } =
+    useFormReducer<IComponentFormState>(initialFormState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
     };
-  }
+  }, []);
 
-  componentDidMount() {
-    this.setPageTitle();
-    this.props.setStateApp({
-      isPageLoading: false,
-    });
-  }
+  const init = async () => {
+    setPageTitle();
+    appDispatch(setIsPageLoadingState(true));
+  };
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('settings'),
+          url: EndPoints.SETTINGS_WITH.GENERAL,
+        },
+        {
+          title: t('changePassword'),
+        },
+      ])
+    );
+  };
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('settings'),
-      this.props.t('changePassword'),
-    ]);
-  }
-
-  onSubmit(event: FormEvent) {
-    event.preventDefault();
-    if (
-      this.state.formData.newPassword !== this.state.formData.confirmPassword
-    ) {
+  const onSubmit = async (event: FormEvent) => {
+    if (formState.newPassword !== formState.confirmPassword) {
       new ComponentToast({
         type: 'error',
-        title: this.props.t('error'),
-        content: this.props.t('passwordsNotEqual'),
+        title: t('error'),
+        content: t('passwordsNotEqual'),
       });
       return;
     }
 
-    this.setState(
-      {
-        isSubmitting: true,
-      },
-      async () => {
-        const serviceResult = await UserService.updatePassword(
-          this.state.formData,
-          this.abortController.signal
-        );
-        if (serviceResult.status) {
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: this.props.t('passwordUpdated'),
-          });
-        } else {
-          new ComponentToast({
-            type: 'error',
-            title: this.props.t('error'),
-            content: this.props.t('wrongPassword'),
-          });
-        }
-
-        this.setState({
-          isSubmitting: false,
-        });
-      }
+    let params = formState;
+    const serviceResult = await UserService.updatePassword(
+      params,
+      abortController.signal
     );
-  }
+    if (serviceResult.status) {
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: t('passwordUpdated'),
+      });
+    } else {
+      new ComponentToast({
+        type: 'error',
+        title: t('error'),
+        content: t('wrongPassword'),
+      });
+    }
+  };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-settings">
-        <div className="row">
-          <div className="col-md-12">
-            <ComponentForm
-              isActiveSaveButton={true}
-              saveButtonText={this.props.t('save')}
-              saveButtonLoadingText={this.props.t('loading')}
-              isSubmitting={this.state.isSubmitting}
-              formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
-            >
-              <div className="grid-margin stretch-card">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="row">
-                      <div className="col-md-7 mb-3">
-                        <ComponentFormType
-                          title={`${this.props.t('password')}*`}
-                          name="password"
-                          type="password"
-                          autoComplete={'new-password'}
-                          required={true}
-                          value={this.state.formData.password}
-                          onChange={(e) =>
-                            HandleFormLibrary.onChangeInput(e, this)
-                          }
-                        />
-                      </div>
-                      <div className="col-md-7 mb-3">
-                        <ComponentFormType
-                          title={`${this.props.t('newPassword')}*`}
-                          name="newPassword"
-                          type="password"
-                          autoComplete={'new-password'}
-                          required={true}
-                          value={this.state.formData.newPassword}
-                          onChange={(e) =>
-                            HandleFormLibrary.onChangeInput(e, this)
-                          }
-                        />
-                      </div>
-                      <div className="col-md-7 mb-3">
-                        <ComponentFormType
-                          title={`${this.props.t('confirmPassword')}*`}
-                          name="confirmPassword"
-                          type="password"
-                          autoComplete={'new-password'}
-                          required={true}
-                          value={this.state.formData.confirmPassword}
-                          onChange={(e) =>
-                            HandleFormLibrary.onChangeInput(e, this)
-                          }
-                        />
-                      </div>
+  return isPageLoading ? null : (
+    <div className="page-settings">
+      <div className="row">
+        <div className="col-md-12">
+          <ComponentForm
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
+                  <div className="row">
+                    <div className="col-md-7 mb-3">
+                      <ComponentFormType
+                        title={`${t('password')}*`}
+                        name="password"
+                        type="password"
+                        autoComplete={'new-password'}
+                        required={true}
+                        value={formState.password}
+                        onChange={(e) => onChangeInput(e)}
+                      />
+                    </div>
+                    <div className="col-md-7 mb-3">
+                      <ComponentFormType
+                        title={`${t('newPassword')}*`}
+                        name="newPassword"
+                        type="password"
+                        autoComplete={'new-password'}
+                        required={true}
+                        value={formState.newPassword}
+                        onChange={(e) => onChangeInput(e)}
+                      />
+                    </div>
+                    <div className="col-md-7 mb-3">
+                      <ComponentFormType
+                        title={`${t('confirmPassword')}*`}
+                        name="confirmPassword"
+                        type="password"
+                        autoComplete={'new-password'}
+                        required={true}
+                        value={formState.confirmPassword}
+                        onChange={(e) => onChangeInput(e)}
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-            </ComponentForm>
-          </div>
+            </div>
+          </ComponentForm>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

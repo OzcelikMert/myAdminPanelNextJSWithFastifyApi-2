@@ -46,7 +46,6 @@ type IComponentState = {
   elementTypes: IThemeFormSelectData<ElementTypeId>[];
   componentTypes: IThemeFormSelectData<ComponentTypeId>[];
   mainTabActiveKey: string;
-  isSubmitting: boolean;
   mainTitle: string;
   langId: string;
   selectedItem?: IComponentElementModel;
@@ -56,7 +55,6 @@ const initialState: IComponentState = {
   elementTypes: [],
   componentTypes: [],
   mainTabActiveKey: 'general',
-  isSubmitting: false,
   mainTitle: '',
   langId: '',
 };
@@ -68,7 +66,6 @@ type IAction =
       type: 'SET_MAIN_TAB_ACTIVE_KEY';
       payload: IComponentState['mainTabActiveKey'];
     }
-  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState['isSubmitting'] }
   | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
   | { type: 'SET_LANG_ID'; payload: IComponentState['langId'] }
   | { type: 'SET_SELECTED_ITEM'; payload: IComponentState['selectedItem'] };
@@ -81,8 +78,6 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return { ...state, componentTypes: action.payload };
     case 'SET_MAIN_TAB_ACTIVE_KEY':
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_IS_SUBMITTING':
-      return { ...state, isSubmitting: action.payload };
     case 'SET_MAIN_TITLE':
       return { ...state, mainTitle: action.payload };
     case 'SET_LANG_ID':
@@ -92,7 +87,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
     default:
       return state;
   }
-}
+};
 
 type IComponentFormState = IComponentUpdateWithIdParamService;
 
@@ -248,14 +243,10 @@ export default function PageComponentAdd() {
   };
 
   const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
     const params = formState;
     const serviceResult = await (params._id
       ? ComponentService.updateWithId(params, abortController.signal)
       : ComponentService.add(params, abortController.signal));
-
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
 
     if (serviceResult.status) {
       new ComponentToast({
@@ -568,7 +559,7 @@ export default function PageComponentAdd() {
         <div className="col-md-7 mt-3">
           <ComponentFormSelect
             title={`${t('typeId')}*`}
-            name='typeId'
+            name="typeId"
             placeholder={t('typeId')}
             options={state.componentTypes}
             value={state.componentTypes.findSingle('value', formState.typeId)}
@@ -587,11 +578,9 @@ export default function PageComponentAdd() {
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
-            isActiveSaveButton={true}
-            saveButtonText={t('save')}
-            saveButtonLoadingText={t('loading')}
-            isSubmitting={state.isSubmitting}
-            formAttributes={{ onSubmit: (event) => onSubmit(event) }}
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

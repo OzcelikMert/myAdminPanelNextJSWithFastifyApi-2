@@ -64,7 +64,6 @@ export type IPostAddComponentState = {
   variations: (IThemeFormSelectData<string> & { parentId: string })[];
   status: IThemeFormSelectData<StatusId>[];
   mainTabActiveKey: string;
-  isSubmitting: boolean;
   mainTitle: string;
   item?: IPostGetResultService;
   isIconActive: boolean;
@@ -83,7 +82,6 @@ const initialState: IPostAddComponentState = {
   variations: [],
   status: [],
   mainTabActiveKey: 'general',
-  isSubmitting: false,
   mainTitle: '',
   isIconActive: false,
   langId: '',
@@ -116,10 +114,6 @@ export type IPostAddAction =
   | {
       type: 'SET_MAIN_TAB_ACTIVE_KEY';
       payload: IPostAddComponentState['mainTabActiveKey'];
-    }
-  | {
-      type: 'SET_IS_SUBMITTING';
-      payload: IPostAddComponentState['isSubmitting'];
     }
   | { type: 'SET_MAIN_TITLE'; payload: IPostAddComponentState['mainTitle'] }
   | { type: 'SET_ITEM'; payload: IPostAddComponentState['item'] }
@@ -157,8 +151,6 @@ const reducer = (
       return { ...state, status: action.payload };
     case 'SET_MAIN_TAB_ACTIVE_KEY':
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_IS_SUBMITTING':
-      return { ...state, isSubmitting: action.payload };
     case 'SET_MAIN_TITLE':
       return { ...state, mainTitle: action.payload };
     case 'SET_ITEM':
@@ -568,10 +560,6 @@ export default function PagePostAdd() {
   };
 
   const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
-
     const params = formState;
     let serviceResult;
 
@@ -584,8 +572,6 @@ export default function PagePostAdd() {
         ? PostService.updateWithId(params, abortController.signal)
         : PostService.add(params, abortController.signal));
     }
-
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
 
     if (serviceResult.status) {
       new ComponentToast({
@@ -890,11 +876,9 @@ export default function PagePostAdd() {
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
-            isActiveSaveButton={true}
-            saveButtonText={t('save')}
-            saveButtonLoadingText={t('loading')}
-            isSubmitting={state.isSubmitting}
-            formAttributes={{ onSubmit: (event) => onSubmit(event) }}
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

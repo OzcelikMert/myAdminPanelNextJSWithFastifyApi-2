@@ -1,10 +1,3 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
-import {
-  ComponentFieldSet,
-  ComponentForm,
-  ComponentFormType,
-} from '@components/elements/form';
 import { SettingService } from '@services/setting.service';
 import ComponentToast from '@components/elements/toast';
 import { ISettingUpdatePathParamService } from 'types/services/setting.service';
@@ -14,197 +7,201 @@ import { SettingsEndPointPermission } from '@constants/endPointPermissions/setti
 import { SettingProjectionKeys } from '@constants/settingProjections';
 import { cloneDeepWith } from 'lodash';
 import Swal from 'sweetalert2';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useEffect, useState } from 'react';
+import { useFormReducer } from '@library/react/handles/form';
+import ComponentForm from '@components/elements/form';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { EndPoints } from '@constants/endPoints';
+import ComponentFieldSet from '@components/elements/fieldSet';
+import ComponentFormType from '@components/elements/form/input/type';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
 
-type IPageState = {
-  isSubmitting: boolean;
-  formData: ISettingUpdatePathParamService;
-  selectedData?: ISettingPathModel;
+type IComponentState = {
   items?: ISettingPathModel[];
+  langId: string;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  items: [],
+  langId: '',
+};
 
-export default class PageSettingsPaths extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+type IComponentSelectedItemFormState = ISettingPathModel | undefined;
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isSubmitting: false,
-      formData: {
-        paths: [],
-      },
+const initialSelectedItemFormState: IComponentSelectedItemFormState = undefined;
+
+type IComponentFormState = ISettingUpdatePathParamService;
+
+const initialFormState: IComponentFormState = {
+  paths: [],
+};
+
+export default function PageSettingsPaths() {
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
+
+  const [items, setItems] = useState(initialState.items);
+  const [langId, setLangId] = useState(initialState.langId);
+  const selectedItemFormReducer =
+    useFormReducer<IComponentSelectedItemFormState>(
+      initialSelectedItemFormState
+    );
+  const formReducer = useFormReducer<IComponentFormState>(initialFormState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
     };
-  }
+  }, []);
 
-  async componentDidMount() {
+  const init = async () => {
     if (
-      PermissionUtil.checkAndRedirect(
-        this.props,
-        SettingsEndPointPermission.UPDATE_SOCIAL_MEDIA
-      )
+      PermissionUtil.checkAndRedirect({
+        appDispatch,
+        t,
+        router: router,
+        minPermission: SettingsEndPointPermission.UPDATE_PATH,
+        sessionAuth: sessionAuth,
+      })
     ) {
-      await this.getSettings();
-      this.setPageTitle();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+      await getItems();
+      setPageTitle();
+      appDispatch(setIsPageLoadingState(false));
     }
-  }
+  };
 
-  async componentDidUpdate(prevProps: Readonly<IPageProps>) {
-    if (
-      prevProps.getStateApp.appData.currentLangId !=
-      this.props.getStateApp.appData.currentLangId
-    ) {
-      this.props.setStateApp(
+  const changeLanguage = async (langId: string) => {
+    appDispatch(setIsPageLoadingState(true));
+    await getItems(langId);
+    appDispatch(setIsPageLoadingState(false));
+  };
+
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
         {
-          isPageLoading: true,
+          title: t('settings'),
+          url: EndPoints.SETTINGS_WITH.GENERAL,
         },
-        async () => {
-          await this.getSettings();
-          this.props.setStateApp({
-            isPageLoading: false,
-          });
-        }
-      );
-    }
-  }
+        {
+          title: t('paths'),
+        },
+      ])
+    );
+  };
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
-
-  setPageTitle() {
-    this.props.setBreadCrumb([this.props.t('settings'), this.props.t('paths')]);
-  }
-
-  async getSettings() {
+  const getItems = async (_langId?: string) => {
+    _langId = _langId || mainLangId;
     const serviceResult = await SettingService.get(
       {
-        langId: this.props.getStateApp.appData.currentLangId,
+        langId: _langId,
         projection: SettingProjectionKeys.Path,
       },
-      this.abortController.signal
+      abortController.signal
     );
-    if (serviceResult.status && serviceResult.data) {
+    if (
+      serviceResult.status &&
+      serviceResult.data &&
+      serviceResult.data.paths
+    ) {
       const setting = serviceResult.data;
-      this.setState((state: IPageState) => {
-        state.items = setting.paths;
-        state.formData = {
-          paths:
-            setting.paths?.map((path) => ({
-              ...path,
-              contents: {
-                ...path.contents,
-                langId: this.props.getStateApp.appData.currentLangId,
-              },
-            })) || [],
-        };
-        return state;
+      const paths = setting.paths!;
+      setItems(paths);
+      formReducer.setFormState({
+        paths: paths.map((path) => ({
+          ...path,
+          contents: {
+            ...path.contents,
+            langId: _langId,
+          },
+        })),
       });
     }
-  }
+  };
 
-  onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    this.setState(
-      {
-        isSubmitting: true,
-      },
-      async () => {
-        const serviceResult = await SettingService.updatePath(
-          this.state.formData,
-          this.abortController.signal
-        );
-        if (serviceResult.status) {
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: this.props.t('settingsUpdated'),
-          });
-        }
-
-        this.setState({
-          isSubmitting: false,
-        });
-      }
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    let params = formReducer.formState;
+    const serviceResult = await SettingService.updatePath(
+      params,
+      abortController.signal
     );
-  }
 
-  onInputChange(data: any, key: string, value: any) {
-    this.setState((state: IPageState) => {
-      data[key] = value;
-      return state;
-    });
-  }
+    if (serviceResult.status) {
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: t('settingsUpdated'),
+      });
+    }
+  };
 
-  onCreate() {
-    this.setState(
-      (state: IPageState) => {
-        state.formData.paths = [
-          ...state.formData.paths,
-          {
-            _id: String.createId(),
-            title: '',
-            key: '',
-            path: '',
-            contents: {
-              langId: this.props.getStateApp.appData.currentLangId,
-              asPath: '',
-            },
-          },
-        ];
-        return state;
+  const onCreate = () => {
+    let newPaths = formReducer.formState.paths;
+    newPaths.push({
+      title: '',
+      key: '',
+      path: '',
+      contents: {
+        langId: langId,
+        asPath: '',
       },
-      () => this.onEdit(this.state.formData.paths.length - 1)
+    });
+
+    formReducer.setFormState({
+      paths: newPaths,
+    });
+
+    onEdit(newPaths.length - 1);
+  };
+
+  const onAccept = (index: number) => {
+    let newPaths = formReducer.formState.paths;
+    newPaths[index] = selectedItemFormReducer.formState!;
+    formReducer.setFormState({
+      paths: newPaths,
+    });
+  };
+
+  const onEdit = (index: number) => {
+    selectedItemFormReducer.setFormState(
+      cloneDeepWith(formReducer.formState.paths[index])
     );
-  }
+  };
 
-  onAccept(index: number) {
-    this.setState((state: IPageState) => {
-      state.formData.paths[index] = state.selectedData!;
-      state.selectedData = undefined;
-      return state;
-    });
-  }
+  const onCancelEdit = () => {
+    selectedItemFormReducer.setFormState(undefined);
+  };
 
-  onEdit(index: number) {
-    this.setState((state: IPageState) => {
-      state.selectedData = cloneDeepWith(this.state.formData.paths[index]);
-      return state;
-    });
-  }
-
-  onCancelEdit() {
-    this.setState((state: IPageState) => {
-      state.selectedData = undefined;
-      return state;
-    });
-  }
-
-  async onDelete(index: number) {
+  const onDelete = async (index: number) => {
     const result = await Swal.fire({
-      title: this.props.t('deleteAction'),
-      html: `<b>'${this.state.formData.paths[index].key}'</b> ${this.props.t('deleteItemQuestionWithItemName')}`,
-      confirmButtonText: this.props.t('yes'),
-      cancelButtonText: this.props.t('no'),
+      title: t('deleteAction'),
+      html: `<b>'${formReducer.formState.paths[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
       icon: 'question',
       showCancelButton: true,
     });
 
     if (result.isConfirmed) {
-      this.setState((state: IPageState) => {
-        state.formData.paths.splice(index, 1);
-        return state;
+      let newPaths = formReducer.formState.paths;
+      newPaths.splice(index, 1);
+      formReducer.setFormState({
+        paths: newPaths,
       });
     }
-  }
+  };
 
-  Path = (props: ISettingPathModel, index: number) => {
+  const Path = (props: ISettingPathModel, index: number) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
         <ComponentFieldSet
@@ -213,11 +210,11 @@ export default class PageSettingsPaths extends Component<
             <span>
               <i
                 className="mdi mdi-pencil-box text-warning fs-1 cursor-pointer ms-2"
-                onClick={() => this.onEdit(index)}
+                onClick={() => onEdit(index)}
               ></i>
               <i
                 className="mdi mdi-minus-box text-danger fs-1 cursor-pointer ms-2"
-                onClick={() => this.onDelete(index)}
+                onClick={() => onDelete(index)}
               ></i>
             </span>
           }
@@ -226,11 +223,10 @@ export default class PageSettingsPaths extends Component<
             <div className="col-md-12">
               <ComponentFormType
                 type="text"
-                title={this.props.t('pathMask')}
+                name={`paths.${index}.contents.asPath`}
+                title={t('pathMask')}
                 value={props.contents.asPath}
-                onChange={(e) =>
-                  this.onInputChange(props.contents, 'asPath', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
           </div>
@@ -239,39 +235,36 @@ export default class PageSettingsPaths extends Component<
     );
   };
 
-  PathEdit = (props: ISettingPathModel, index: number) => {
+  const PathEdit = (props: ISettingPathModel, index: number) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
-        <ComponentFieldSet legend={this.props.t('newPath')}>
+        <ComponentFieldSet legend={t('newPath')}>
           <div className="row mt-3">
             <div className="col-md-12">
               <ComponentFormType
                 type="text"
-                title={this.props.t('title')}
+                name={`paths.${index}.title`}
+                title={t('title')}
                 value={props.title}
-                onChange={(e) =>
-                  this.onInputChange(props, 'title', e.target.value)
-                }
+                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-3">
               <ComponentFormType
                 type="text"
-                title={this.props.t('key')}
+                name={`paths.${index}.key`}
+                title={t('key')}
                 value={props.key}
-                onChange={(e) =>
-                  this.onInputChange(props, 'key', e.target.value)
-                }
+                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-3">
               <ComponentFormType
                 type="text"
-                title={this.props.t('path')}
+                name={`paths.${index}.path`}
+                title={t('path')}
                 value={props.path}
-                onChange={(e) =>
-                  this.onInputChange(props, 'path', e.target.value)
-                }
+                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-3">
@@ -280,18 +273,18 @@ export default class PageSettingsPaths extends Component<
                   <button
                     type="button"
                     className="btn btn-gradient-success btn-lg"
-                    onClick={() => this.onAccept(index)}
+                    onClick={() => onAccept(index)}
                   >
-                    {this.props.t('okay')}
+                    {t('okay')}
                   </button>
                 </div>
                 <div className="col-md-6 text-end">
                   <button
                     type="button"
                     className="btn btn-gradient-dark btn-lg"
-                    onClick={() => this.onCancelEdit()}
+                    onClick={() => onCancelEdit()}
                   >
-                    {this.props.t('cancel')}
+                    {t('cancel')}
                   </button>
                 </div>
               </div>
@@ -302,56 +295,53 @@ export default class PageSettingsPaths extends Component<
     );
   };
 
-  Paths = () => {
+  const Paths = () => {
     return (
       <div className="row">
         <div className="col-md-7 mt-2">
           <div className="row">
-            {this.state.formData.paths?.map((item, index) =>
-              this.state.selectedData && this.state.selectedData._id == item._id
-                ? this.PathEdit(this.state.selectedData, index)
-                : this.Path(item, index)
+            {formReducer.formState.paths?.map((item, index) =>
+              selectedItemFormReducer.formState &&
+              selectedItemFormReducer.formState._id == item._id
+                ? PathEdit(selectedItemFormReducer.formState, index)
+                : Path(item, index)
             )}
           </div>
         </div>
         <div
-          className={`col-md-7 text-start ${this.state.formData.paths.length > 0 ? 'mt-4' : ''}`}
+          className={`col-md-7 text-start ${formReducer.formState.paths.length > 0 ? 'mt-4' : ''}`}
         >
           <button
             type={'button'}
             className="btn btn-gradient-success btn-lg"
-            onClick={() => this.onCreate()}
+            onClick={() => onCreate()}
           >
-            + {this.props.t('addNew')}
+            + {t('addNew')}
           </button>
         </div>
       </div>
     );
   };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-settings">
-        <div className="row">
-          <div className="col-md-12">
-            <ComponentForm
-              isActiveSaveButton={true}
-              saveButtonText={this.props.t('save')}
-              saveButtonLoadingText={this.props.t('loading')}
-              isSubmitting={this.state.isSubmitting}
-              formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
-            >
-              <div className="grid-margin stretch-card">
-                <div className="card">
-                  <div className="card-body">
-                    <this.Paths />
-                  </div>
+  return isPageLoading ? null : (
+    <div className="page-settings">
+      <div className="row">
+        <div className="col-md-12">
+          <ComponentForm
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
+                  <Paths />
                 </div>
               </div>
-            </ComponentForm>
-          </div>
+            </div>
+          </ComponentForm>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

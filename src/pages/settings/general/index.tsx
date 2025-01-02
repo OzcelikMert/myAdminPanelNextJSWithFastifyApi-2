@@ -1,12 +1,3 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
-import {
-  ComponentFieldSet,
-  ComponentForm,
-  ComponentFormSelect,
-  ComponentFormType,
-} from '@components/elements/form';
-import { HandleFormLibrary } from '@library/react/handles/form';
 import { SettingService } from '@services/setting.service';
 import { ServerInfoService } from '@services/serverInfo.service';
 import ComponentToast from '@components/elements/toast';
@@ -16,316 +7,341 @@ import {
   ISettingUpdateGeneralParamService,
 } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import ComponentFormSelect, {
+  IThemeFormSelectData,
+} from '@components/elements/form/input/select';
 import { IServerInfoGetResultService } from 'types/services/serverInfo.service';
 import { LocalStorageUtil } from '@utils/localStorage.util';
 import { PermissionUtil } from '@utils/permission.util';
 import { SettingsEndPointPermission } from '@constants/endPointPermissions/settings.endPoint.permission';
 import { SettingProjectionKeys } from '@constants/settingProjections';
-import { languages } from '@constants/languages';
+import { panelLanguages } from '@constants/panelLanguages';
 import { ComponentUtil } from '@utils/component.util';
 import { UserRoleId } from '@constants/userRoles';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useEffect, useReducer } from 'react';
+import { useFormReducer } from '@library/react/handles/form';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { EndPoints } from '@constants/endPoints';
+import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFieldSet from '@components/elements/fieldSet';
+import ComponentForm from '@components/elements/form';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
 
-type IPageState = {
+type IComponentState = {
   panelLanguages: IThemeFormSelectData[];
-  isSubmitting: boolean;
   serverInfo: IServerInfoGetResultService;
-  formData: ISettingUpdateGeneralParamService & { panelLangId: string };
   mainTabActiveKey: string;
   isServerInfoLoading: boolean;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  panelLanguages: [],
+  serverInfo: {
+    cpu: '0',
+    storage: '0',
+    memory: '0',
+  },
+  mainTabActiveKey: `general`,
+  isServerInfoLoading: true,
+};
 
-export default class PageSettingsGeneral extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
-
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isServerInfoLoading: true,
-      panelLanguages: [],
-      isSubmitting: false,
-      mainTabActiveKey: `general`,
-      serverInfo: {
-        cpu: '0',
-        storage: '0',
-        memory: '0',
-      },
-      formData: {
-        contact: {},
-        panelLangId: LocalStorageUtil.getLanguageId().toString(),
-      },
-    };
-  }
-
-  async componentDidMount() {
-    if (
-      PermissionUtil.checkAndRedirect(
-        this.props,
-        SettingsEndPointPermission.UPDATE_GENERAL
-      )
-    ) {
-      this.setPageTitle();
-      this.getServerDetails();
-      this.getPanelLanguages();
-      await this.getSettings();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+type IAction =
+  | { type: 'SET_PANEL_LANGUAGES'; payload: IComponentState['panelLanguages'] }
+  | { type: 'SET_SERVER_INFO'; payload: IComponentState['serverInfo'] }
+  | {
+      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      payload: IComponentState['mainTabActiveKey'];
     }
-  }
+  | {
+      type: 'SET_IS_SERVER_INFO_LOADING';
+      payload: IComponentState['isServerInfoLoading'];
+    };
 
-  componentWillUnmount() {
-    this.abortController.abort();
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_PANEL_LANGUAGES':
+      return { ...state, panelLanguages: action.payload };
+    case 'SET_SERVER_INFO':
+      return { ...state, serverInfo: action.payload };
+    case 'SET_MAIN_TAB_ACTIVE_KEY':
+      return { ...state, mainTabActiveKey: action.payload };
+    case 'SET_IS_SERVER_INFO_LOADING':
+      return { ...state, isServerInfoLoading: action.payload };
+    default:
+      return state;
   }
+};
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('settings'),
-      this.props.t('general'),
-    ]);
-  }
+type IComponentFormState = ISettingUpdateGeneralParamService & {
+  panelLangId: string;
+};
 
-  async getSettings() {
+const initialFormState: IComponentFormState = {
+  contact: {},
+  panelLangId: '',
+};
+
+export default function PageSettingsGeneral() {
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { formState, setFormState, onChangeInput, onChangeSelect } =
+    useFormReducer({
+      ...initialFormState,
+      panelLangId: LocalStorageUtil.getLanguageId().toString(),
+    });
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
+  const init = async () => {
+    if (
+      PermissionUtil.checkAndRedirect({
+        router,
+        appDispatch,
+        sessionAuth,
+        t,
+        minPermission: SettingsEndPointPermission.UPDATE_GENERAL,
+      })
+    ) {
+      setPageTitle();
+      getServerDetails();
+      getPanelLanguages();
+      await getSettings();
+      appDispatch(setIsPageLoadingState(false));
+    }
+  };
+
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('settings'),
+        },
+        {
+          title: t('general'),
+        },
+      ])
+    );
+  };
+
+  const getSettings = async () => {
     const serviceResult = await SettingService.get(
       { projection: SettingProjectionKeys.General },
-      this.abortController.signal
+      abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
-      this.setState((state: IPageState) => {
-        state.formData = {
-          ...this.state.formData,
-          ...setting
-        };
-        return state;
+      setFormState({
+        ...formState,
+        ...setting,
       });
     }
-  }
+  };
 
-  getPanelLanguages() {
-    this.setState({
-      panelLanguages: ComponentUtil.getPanelLanguageForSelect(languages),
+  const getPanelLanguages = () => {
+    dispatch({
+      type: 'SET_PANEL_LANGUAGES',
+      payload: ComponentUtil.getPanelLanguageForSelect(panelLanguages),
     });
-  }
+  };
 
-  async getServerDetails() {
-    const serviceResult = await ServerInfoService.get(
-      this.abortController.signal
-    );
+  const getServerDetails = async () => {
+    const serviceResult = await ServerInfoService.get(abortController.signal);
     if (serviceResult.status && serviceResult.data) {
-      this.setState({
-        serverInfo: serviceResult.data,
-        isServerInfoLoading: false,
+      dispatch({ type: 'SET_SERVER_INFO', payload: serviceResult.data });
+      dispatch({ type: 'SET_IS_SERVER_INFO_LOADING', payload: false });
+    }
+  };
+
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    let params = formState;
+
+    const serviceResult = await SettingService.updateGeneral(
+      params,
+      abortController.signal
+    );
+    if (serviceResult.status) {
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: t('settingsUpdated'),
       });
     }
-  }
 
-  onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    this.setState(
-      {
-        isSubmitting: true,
-      },
-      async () => {
-        const serviceResult = await SettingService.updateGeneral(
-          {
-            ...this.state.formData,
-            head: this.state.formData.head,
-            script: this.state.formData.script,
-          },
-          this.abortController.signal
-        );
-        if (serviceResult.status) {
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: this.props.t('settingsUpdated'),
-          });
-        }
-        this.setState(
-          {
-            isSubmitting: false,
-          },
-          () => {
-            if (
-              this.state.formData.panelLangId !=
-              LocalStorageUtil.getLanguageId().toString()
-            ) {
-              const language = languages.findSingle(
-                'id',
-                Number(this.state.formData.panelLangId)
-              );
-              if (language) {
-                LocalStorageUtil.setLanguageId(
-                  Number(this.state.formData.panelLangId)
-                );
-                window.location.reload();
-              }
-            }
-          }
-        );
+    if (formState.panelLangId != LocalStorageUtil.getLanguageId().toString()) {
+      const panelLanguage = panelLanguages.findSingle(
+        'id',
+        Number(formState.panelLangId)
+      );
+      if (panelLanguage) {
+        LocalStorageUtil.setLanguageId(Number(formState.panelLangId));
+        window.location.reload();
       }
-    );
-  }
+    }
+  };
 
-  TabTools = () => {
+  const TabTools = () => {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={this.props.t('head')}
+            title={t('head')}
             name="head"
             type="textarea"
-            value={this.state.formData.head}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.head}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={this.props.t('script')}
+            title={t('script')}
             name="script"
             type="textarea"
-            value={this.state.formData.script}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.script}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={this.props.t('googleAnalyticURL')}
+            title={t('googleAnalyticURL')}
             name="googleAnalyticURL"
             type="url"
-            value={this.state.formData.googleAnalyticURL}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.googleAnalyticURL}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
       </div>
     );
   };
 
-  TabContact = () => {
+  const TabContact = () => {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={this.props.t('email')}
+            title={t('email')}
             name="contact.email"
             type="email"
-            value={this.state.formData.contact?.email}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.contact?.email}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={this.props.t('phone')}
+            title={t('phone')}
             name="contact.phone"
             type="tel"
-            value={this.state.formData.contact?.phone}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.contact?.phone}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={this.props.t('address')}
+            title={t('address')}
             name="contact.address"
             type="text"
-            value={this.state.formData.contact?.address}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.contact?.address}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
         <div className="col-md-7 mb-3">
           <ComponentFormType
-            title={this.props.t('addressMap')}
+            title={t('addressMap')}
             name="contact.addressMap"
             type="text"
-            value={this.state.formData.contact?.addressMap}
-            onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+            value={formState.contact?.addressMap}
+            onChange={(e) => onChangeInput(e)}
           />
         </div>
       </div>
     );
   };
 
-  TabGeneral = () => {
+  const TabGeneral = () => {
     return (
       <div className="row">
         <div className="col-md-4 mb-3">
-          <ComponentFieldSet legend={this.props.t('logo')}>
+          <ComponentFieldSet legend={t('logo')}>
             <ComponentThemeChooseImage
-              {...this.props}
               onSelected={(images) =>
-                this.setState((state: IPageState) => {
-                  state.formData.logo = images[0];
-                  return state;
+                setFormState({
+                  ...formState,
+                  logo: images[0],
                 })
               }
               isMulti={false}
               isShowReviewImage={true}
-              reviewImage={this.state.formData.logo}
+              reviewImage={formState.logo}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>
         </div>
         <div className="col-md-4 mb-3">
-          <ComponentFieldSet legend={this.props.t('logo') + ' - 2'}>
+          <ComponentFieldSet legend={t('logo') + ' - 2'}>
             <ComponentThemeChooseImage
-              {...this.props}
               onSelected={(images) =>
-                this.setState((state: IPageState) => {
-                  state.formData.logoTwo = images[0];
-                  return state;
+                setFormState({
+                  ...formState,
+                  logoTwo: images[0],
                 })
               }
               isMulti={false}
               isShowReviewImage={true}
-              reviewImage={this.state.formData.logoTwo}
+              reviewImage={formState.logoTwo}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>
         </div>
         <div className="col-md-4 mb-3">
-          <ComponentFieldSet legend={this.props.t('icon')}>
+          <ComponentFieldSet legend={t('icon')}>
             <ComponentThemeChooseImage
-              {...this.props}
               onSelected={(images) =>
-                this.setState((state: IPageState) => {
-                  state.formData.icon = images[0];
-                  return state;
+                setFormState({
+                  ...formState,
+                  icon: images[0],
                 })
               }
               isMulti={false}
               isShowReviewImage={true}
-              reviewImage={this.state.formData.icon}
+              reviewImage={formState.icon}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>
         </div>
         <div className="col-md-7 mb-3">
           <ComponentFormSelect
-            title={this.props.t('adminPanelLanguage').toCapitalizeCase()}
+            title={t('adminPanelLanguage').toCapitalizeCase()}
             name="panelLangId"
             isMulti={false}
             isSearchable={false}
-            options={this.state.panelLanguages}
-            value={this.state.panelLanguages.findSingle(
+            options={state.panelLanguages}
+            value={state.panelLanguages.findSingle(
               'value',
-              this.state.formData.panelLangId
+              formState.panelLangId
             )}
-            onChange={(item: any, e) =>
-              HandleFormLibrary.onChangeSelect(e.name, item.value, this)
-            }
+            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
           />
         </div>
       </div>
     );
   };
 
-  ServerInfo = () => {
+  const ServerInfo = () => {
     return (
       <div className="col-12 grid-margin">
         <div className="card card-statistics">
@@ -335,15 +351,13 @@ export default class PageSettingsGeneral extends Component<
                 <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row ">
                   <i className="mdi mdi-harddisk text-primary ms-0 me-sm-4 icon-lg"></i>
                   <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">
-                      {this.props.t('storage')}
-                    </p>
+                    <p className="card-text mb-0 text-dark">{t('storage')}</p>
                     <div className="fluid-container position-relative">
-                      {this.state.isServerInfoLoading ? (
+                      {state.isServerInfoLoading ? (
                         <ComponentSpinnerDonut />
                       ) : (
                         <h3 className="mb-0 font-weight-medium text-dark">
-                          {this.state.serverInfo.storage}%
+                          {state.serverInfo.storage}%
                         </h3>
                       )}
                     </div>
@@ -356,15 +370,13 @@ export default class PageSettingsGeneral extends Component<
                 <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row">
                   <i className="mdi mdi-memory text-primary ms-0 me-sm-4 icon-lg"></i>
                   <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">
-                      {this.props.t('memory')}
-                    </p>
+                    <p className="card-text mb-0 text-dark">{t('memory')}</p>
                     <div className="fluid-container position-relative">
-                      {this.state.isServerInfoLoading ? (
+                      {state.isServerInfoLoading ? (
                         <ComponentSpinnerDonut />
                       ) : (
                         <h3 className="mb-0 font-weight-medium text-dark">
-                          {this.state.serverInfo.memory}%
+                          {state.serverInfo.memory}%
                         </h3>
                       )}
                     </div>
@@ -377,15 +389,13 @@ export default class PageSettingsGeneral extends Component<
                 <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row">
                   <i className="fa fa-microchip text-primary ms-0 me-sm-4 icon-lg"></i>
                   <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">
-                      {this.props.t('processor')}
-                    </p>
+                    <p className="card-text mb-0 text-dark">{t('processor')}</p>
                     <div className="fluid-container position-relative">
-                      {this.state.isServerInfoLoading ? (
+                      {state.isServerInfoLoading ? (
                         <ComponentSpinnerDonut />
                       ) : (
                         <h3 className="mb-0 font-weight-medium text-dark">
-                          {this.state.serverInfo.cpu}%
+                          {state.serverInfo.cpu}%
                         </h3>
                       )}
                     </div>
@@ -399,54 +409,57 @@ export default class PageSettingsGeneral extends Component<
     );
   };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-settings">
-        <div className="row">
-          <this.ServerInfo />
-        </div>
-        <div className="row">
-          <div className="col-md-12">
-            <ComponentForm
-              isActiveSaveButton={true}
-              saveButtonText={this.props.t('save')}
-              saveButtonLoadingText={this.props.t('loading')}
-              isSubmitting={this.state.isSubmitting}
-              formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
-            >
-              <div className="grid-margin stretch-card">
-                <div className="card">
-                  <div className="card-body">
-                    <div className="theme-tabs">
-                      <Tabs
-                        onSelect={(key: any) =>
-                          this.setState({ mainTabActiveKey: key })
-                        }
-                        activeKey={this.state.mainTabActiveKey}
-                        className="mb-5"
-                        transition={false}
-                      >
-                        <Tab eventKey="general" title={this.props.t('general')}>
-                          <this.TabGeneral />
+  const isUserSuperAdmin = PermissionUtil.checkPermissionRoleRank(
+    sessionAuth!.user.roleId,
+    UserRoleId.SuperAdmin
+  );
+
+  return isPageLoading ? null : (
+    <div className="page-settings">
+      <div className="row">
+        <ServerInfo />
+      </div>
+      <div className="row">
+        <div className="col-md-12">
+          <ComponentForm
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
+                  <div className="theme-tabs">
+                    <Tabs
+                      onSelect={(key: any) =>
+                        dispatch({
+                          type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                          payload: key,
+                        })
+                      }
+                      activeKey={state.mainTabActiveKey}
+                      className="mb-5"
+                      transition={false}
+                    >
+                      <Tab eventKey="general" title={t('general')}>
+                        <TabGeneral />
+                      </Tab>
+                      <Tab eventKey="contact" title={t('contact')}>
+                        <TabContact />
+                      </Tab>
+                      {isUserSuperAdmin ? (
+                        <Tab eventKey="tools" title={t('tools')}>
+                          <TabTools />
                         </Tab>
-                        <Tab eventKey="contact" title={this.props.t('contact')}>
-                          <this.TabContact />
-                        </Tab>
-                        {this.props.getStateApp.sessionAuth?.user.roleId ==
-                        UserRoleId.SuperAdmin ? (
-                          <Tab eventKey="tools" title={this.props.t('tools')}>
-                            <this.TabTools />
-                          </Tab>
-                        ) : null}
-                      </Tabs>
-                    </div>
+                      ) : null}
+                    </Tabs>
                   </div>
                 </div>
               </div>
-            </ComponentForm>
-          </div>
+            </div>
+          </ComponentForm>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

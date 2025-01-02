@@ -22,22 +22,22 @@ import ComponentForm from '@components/elements/form';
 
 type IComponentState = {
   currencyTypes: IThemeFormSelectData[];
-  isSubmitting: boolean;
   item?: ISettingECommerceModel;
   mainTabActiveKey: string;
 };
 
 const initialState: IComponentState = {
   currencyTypes: [],
-  isSubmitting: false,
   mainTabActiveKey: `general`,
 };
 
 type IAction =
-  | { type: 'SET_CURRENCY_TYPES'; payload: IComponentState["currencyTypes"] }
-  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState["isSubmitting"] }
-  | { type: 'SET_ITEM'; payload: IComponentState["item"] }
-  | { type: 'SET_MAIN_TAB_ACTIVE_KEY'; payload: IComponentState["mainTabActiveKey"] };
+  | { type: 'SET_CURRENCY_TYPES'; payload: IComponentState['currencyTypes'] }
+  | { type: 'SET_ITEM'; payload: IComponentState['item'] }
+  | {
+      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      payload: IComponentState['mainTabActiveKey'];
+    };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
@@ -45,11 +45,6 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return {
         ...state,
         currencyTypes: action.payload,
-      };
-    case 'SET_IS_SUBMITTING':
-      return {
-        ...state,
-        isSubmitting: action.payload,
       };
     case 'SET_ITEM':
       return {
@@ -149,12 +144,11 @@ export default function PageECommerceSettings() {
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
     const serviceResult = await SettingService.updateECommerce(
       formState,
       abortController.signal
     );
+
     if (serviceResult.status) {
       appDispatch(setCurrencyIdState(formState.eCommerce.currencyId));
       new ComponentToast({
@@ -163,7 +157,6 @@ export default function PageECommerceSettings() {
         content: t('settingsUpdated'),
       });
     }
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
   };
 
   const TabGeneral = () => {
@@ -173,16 +166,14 @@ export default function PageECommerceSettings() {
           <ComponentFormSelect
             title={t('currencyType')}
             isMulti={false}
-            name='eCommerce.currencyId'
+            name="eCommerce.currencyId"
             isSearchable={false}
             options={state.currencyTypes}
             value={state.currencyTypes.findSingle(
               'value',
               formState.eCommerce.currencyId
             )}
-            onChange={(item: any, e) =>
-              onChangeSelect(e.name, item.value)
-            }
+            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
           />
         </div>
       </div>
@@ -194,11 +185,9 @@ export default function PageECommerceSettings() {
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
-            isActiveSaveButton={true}
-            saveButtonText={t('save')}
-            saveButtonLoadingText={t('loading')}
-            isSubmitting={state.isSubmitting}
-            formAttributes={{ onSubmit: (event) => onSubmit(event) }}
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

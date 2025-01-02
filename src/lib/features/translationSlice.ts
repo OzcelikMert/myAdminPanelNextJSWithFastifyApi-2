@@ -1,4 +1,4 @@
-import { LanguageCodes } from '@constants/languages';
+import { PanelLanguageCodes } from '@constants/panelLanguages';
 import {
   createAsyncThunk,
   createSelector,
@@ -8,7 +8,7 @@ import {
 import { ILanguageKeys } from 'types/constants/languageKeys';
 
 export interface ITranslationState {
-  langCode: LanguageCodes;
+  langCode: PanelLanguageCodes;
   isLoading: boolean;
   resources: { [key: string]: string };
 }
@@ -16,14 +16,14 @@ export interface ITranslationState {
 export type ITranslationFunc = (key: ILanguageKeys) => string;
 
 const initialState: ITranslationState = {
-  langCode: LanguageCodes.EnglishUS,
+  langCode: PanelLanguageCodes.EnglishUS,
   isLoading: true,
   resources: {},
 };
 
 export const fetchTranslationState = createAsyncThunk(
   'translation/fetchTranslationState',
-  async (langCode: LanguageCodes) => {
+  async (langCode: PanelLanguageCodes) => {
     const response = await fetch(`/languages/${langCode}.json`);
     const resources = await response.json();
     return { langCode, resources };

@@ -41,7 +41,6 @@ export default function ComponentToolLock() {
   const t = useAppSelector(selectTranslation);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
     setIsSubmitting(true);
 
     const serviceResult = await AuthService.login({
@@ -67,8 +66,8 @@ export default function ComponentToolLock() {
 
   const Form = () => (
     <ComponentForm
-      isSubmitting={isSubmitting}
-      formAttributes={{ onSubmit: (event) => onSubmit(event) }}
+      hideSubmitButton={true}
+      onSubmit={(event) => onSubmit(event)}
     >
       <div className="row">
         <div className="col-md-12 mb-3">

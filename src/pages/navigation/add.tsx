@@ -32,7 +32,6 @@ type IComponentState = {
   items: IThemeFormSelectData<string>[];
   mainTabActiveKey: string;
   status: IThemeFormSelectData<StatusId>[];
-  isSubmitting: boolean;
   mainTitle: string;
   item?: INavigationGetResultService;
   langId: string;
@@ -42,7 +41,6 @@ const initialState: IComponentState = {
   mainTabActiveKey: `general`,
   items: [],
   status: [],
-  isSubmitting: false,
   mainTitle: '',
   langId: '',
 };
@@ -50,7 +48,6 @@ const initialState: IComponentState = {
 type IAction =
   | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
   | { type: 'SET_STATUS'; payload: IComponentState['status'] }
-  | { type: 'SET_IS_SUBMITTING'; payload: IComponentState['isSubmitting'] }
   | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
   | {
       type: 'SET_MAIN_TAB_ACTIVE_KEY';
@@ -70,11 +67,6 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return {
         ...state,
         status: action.payload,
-      };
-    case 'SET_IS_SUBMITTING':
-      return {
-        ...state,
-        isSubmitting: action.payload,
       };
     case 'SET_MAIN_TITLE':
       return {
@@ -259,13 +251,11 @@ export default function PageNavigationAdd() {
   };
 
   const onSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: true });
     const params = formState;
     const serviceResult = await (formState._id
       ? NavigationService.updateWithId(params, abortController.signal)
       : NavigationService.add(params, abortController.signal));
-    dispatch({ type: 'SET_IS_SUBMITTING', payload: false });
+
     if (serviceResult.status) {
       new ComponentToast({
         type: 'success',
@@ -381,11 +371,9 @@ export default function PageNavigationAdd() {
       </div>
       <div className="row">
         <ComponentForm
-          isActiveSaveButton={true}
-          saveButtonText={t('save')}
-          saveButtonLoadingText={t('loading')}
-          isSubmitting={state.isSubmitting}
-          formAttributes={{ onSubmit: (event) => onSubmit(event) }}
+          submitButtonText={t('save')}
+          submitButtonSubmittingText={t('loading')}
+          onSubmit={(event) => onSubmit(event)}
         >
           <div className="grid-margin stretch-card">
             <div className="card">

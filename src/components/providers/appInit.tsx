@@ -7,7 +7,7 @@ import { SettingProjectionKeys } from '@constants/settingProjections';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
 import { setCurrencyIdState, setLanguagesState, setMainLangIdState } from '@lib/features/settingSlice';
 import { setIsAppLoadingState } from '@lib/features/appSlice';
-import { LanguageCodes, languages } from '@constants/languages';
+import { PanelLanguageCodes, panelLanguages } from '@constants/panelLanguages';
 import { fetchTranslationState } from '@lib/features/translationSlice';
 import { LocalStorageUtil } from '@utils/localStorage.util';
 
@@ -47,8 +47,8 @@ export default function ComponentProviderAppInit(  { children } : IComponentProp
   }
 
   const dispatchPanelLanguage = async () => {
-    let panelLanguage = languages.findSingle("id", LocalStorageUtil.getLanguageId());
-    await appDispatch(fetchTranslationState(panelLanguage ? panelLanguage.code : LanguageCodes.EnglishUS));
+    let panelLanguage = panelLanguages.findSingle("id", LocalStorageUtil.getLanguageId());
+    await appDispatch(fetchTranslationState(panelLanguage ? panelLanguage.code : PanelLanguageCodes.EnglishUS));
   }
 
   const init = async () => {

@@ -1,11 +1,4 @@
-import React, { Component, FormEvent } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
-import {
-  ComponentFieldSet,
-  ComponentForm,
-  ComponentFormType,
-} from '@components/elements/form';
-import { HandleFormLibrary } from '@library/react/handles/form';
+import { FormEvent, useEffect, useReducer } from 'react';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import { UserService } from '@services/user.service';
 import ComponentToast from '@components/elements/toast';
@@ -21,204 +14,205 @@ import { permissionGroups } from '@constants/permissionGroups';
 import { IPermissionGroup } from 'types/constants/permissionGroups';
 import { IPermission } from 'types/constants/permissions';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { useFormReducer } from '@library/react/handles/form';
+import { setSessionAuthState } from '@lib/features/sessionSlice';
+import ComponentFieldSet from '@components/elements/fieldSet';
+import ComponentForm from '@components/elements/form';
+import ComponentFormType from '@components/elements/form/input/type';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 
-type IPageState = {
-  isSubmitting: boolean;
+type IComponentState = {
   isImageChanging: boolean;
   item?: IUserGetResultService;
-  formData: IUserUpdateProfileParamService &
-    IUserUpdateProfileImageParamService;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  isImageChanging: false,
+};
 
-export default class PageSettingsProfile extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+type IAction =
+  | {
+      type: 'SET_IS_IMAGE_CHANGING';
+      payload: IComponentState['isImageChanging'];
+    }
+  | { type: 'SET_ITEM'; payload: IComponentState['item'] };
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isSubmitting: false,
-      isImageChanging: false,
-      formData: {
-        image: '',
-        name: '',
-        comment: '',
-        phone: '',
-        facebook: '',
-        instagram: '',
-        twitter: '',
-      },
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_IS_IMAGE_CHANGING':
+      return {
+        ...state,
+        isImageChanging: action.payload,
+      };
+    case 'SET_ITEM':
+      return {
+        ...state,
+        item: action.payload,
+      };
+    default:
+      return state;
+  }
+};
+
+type IComponentFormProps = IUserUpdateProfileParamService &
+  IUserUpdateProfileImageParamService;
+
+const initialFormState: IComponentFormProps = {
+  image: '',
+  name: '',
+  comment: '',
+  phone: '',
+  facebook: '',
+  instagram: '',
+  twitter: '',
+};
+
+export default function PageSettingsProfile() {
+  const abortController = new AbortController();
+
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { formState, setFormState, onChangeInput } =
+    useFormReducer(initialFormState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
     };
-  }
+  }, []);
 
-  async componentDidMount() {
-    await this.getUser();
-    this.setPageTitle();
-    this.props.setStateApp({
-      isPageLoading: false,
-    });
-  }
+  const init = async () => {
+    await getUser();
+    setPageTitle();
+    appDispatch(setIsPageLoadingState(false));
+  };
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('profile'),
+        },
+      ])
+    );
+  };
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('settings'),
-      this.props.t('profile'),
-    ]);
-  }
-
-  async getUser() {
+  const getUser = async () => {
     const serviceResult = await UserService.getWithId(
-      { _id: this.props.getStateApp.sessionAuth!.user.userId },
-      this.abortController.signal
+      { _id: sessionAuth!.user.userId },
+      abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const user = serviceResult.data;
-      await new Promise((resolve) => {
-        this.setState(
-          (state: IPageState) => {
-            state.item = user;
-            state.formData = {
-              image: user.image,
-              name: user.name,
-              comment: user.comment,
-              phone: user.phone,
-              facebook: user.facebook,
-              instagram: user.instagram,
-              twitter: user.twitter,
-            };
-
-            return state;
-          },
-          () => resolve(1)
-        );
+      dispatch({ type: 'SET_ITEM', payload: user });
+      setFormState({
+        image: user.image,
+        name: user.name,
+        comment: user.comment,
+        phone: user.phone,
+        facebook: user.facebook,
+        instagram: user.instagram,
+        twitter: user.twitter,
       });
     }
-  }
+  };
 
-  onChangeImage(image: string) {
-    this.setState(
-      {
-        isSubmitting: true,
-        isImageChanging: true,
-      },
-      async () => {
-        const serviceResult = await UserService.updateProfileImage(
-          { image: image },
-          this.abortController.signal
-        );
-        if (serviceResult.status) {
-          this.setState(
-            (state: IPageState) => {
-              state.isSubmitting = false;
-              state.isImageChanging = false;
-              state.formData.image = image;
-              return state;
-            },
-            () => {
-              this.props.setStateApp({
-                sessionAuth: {
-                  ...this.props.getStateApp.sessionAuth,
-                  user: {
-                    ...this.props.getStateApp.sessionAuth!.user,
-                    image: image,
-                  },
-                },
-              });
-            }
-          );
-        }
-      }
+  const onChangeImage = async (image: string) => {
+    dispatch({ type: 'SET_IS_IMAGE_CHANGING', payload: true });
+
+    const serviceResult = await UserService.updateProfileImage(
+      { image: image },
+      abortController.signal
     );
-  }
 
-  onSubmit(event: FormEvent) {
-    event.preventDefault();
-    this.setState(
-      {
-        isSubmitting: true,
-      },
-      async () => {
-        const serviceResult = await UserService.updateProfile(
-          this.state.formData,
-          this.abortController.signal
-        );
-        if (serviceResult.status) {
-          this.props.setStateApp(
-            {
-              sessionAuth: {
-                ...this.props.getStateApp.sessionAuth,
-                user: {
-                  ...this.props.getStateApp.sessionAuth!.user,
-                  name: this.state.formData.name ?? '',
-                },
-              },
-            },
-            () => {
-              new ComponentToast({
-                type: 'success',
-                title: this.props.t('successful'),
-                content: this.props.t('profileUpdated'),
-              });
-            }
-          );
-        }
+    if (serviceResult.status) {
+      setFormState({
+        image: image,
+      });
+      appDispatch(
+        setSessionAuthState({
+          ...sessionAuth,
+          user: {
+            ...sessionAuth!.user,
+            image: image,
+          },
+        })
+      );
 
-        this.setState({
-          isSubmitting: false,
-        });
-      }
+      dispatch({ type: 'SET_IS_IMAGE_CHANGING', payload: false });
+    }
+  };
+
+  const onSubmit = async (event: FormEvent) => {
+    let params = formState;
+    const serviceResult = await UserService.updateProfile(
+      params,
+      abortController.signal
     );
-  }
+    if (serviceResult.status) {
+      appDispatch(
+        setSessionAuthState({
+          ...sessionAuth,
+          user: {
+            ...sessionAuth!.user,
+            ...params,
+          },
+        })
+      );
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: t('profileUpdated'),
+      });
+    }
+  };
 
-  ProfileInformation = () => (
+  const ProfileInformation = () => (
     <div className="grid-margin stretch-card">
       <div className="card">
         <div className="card-body">
           <h6 className="pb-1 border-bottom fw-bold text-start">
-            {this.props.t('general')}
+            {t('general')}
           </h6>
           <div className="row">
             <div className="col-sm-12 pb-2 pt-2">
               <span className="mb-2 fw-bold">
-                {this.props.t('email')}:
-                <h6 className="d-inline-block ms-2">
-                  {this.state.item?.email}
-                </h6>
+                {t('email')}:
+                <h6 className="d-inline-block ms-2">{state.item?.email}</h6>
               </span>
             </div>
             <div className="col-sm-12 pb-2 pt-2">
               <span className="mb-2 fw-bold">
-                {this.props.t('role')}:
+                {t('role')}:
                 <ComponentThemeBadgeUserRole
-                  t={this.props.t}
-                  userRoleId={this.state.item!.roleId}
+                  userRoleId={state.item!.roleId}
                   className="ms-2"
                 />
               </span>
             </div>
             <div className="col-sm-12 pb-2 pt-2">
               <span className="mb-2 fw-bold">
-                {this.props.t('status')}:
+                {t('status')}:
                 <ComponentThemeBadgeStatus
-                  t={this.props.t}
-                  statusId={this.state.item!.statusId}
+                  statusId={state.item!.statusId}
                   className="ms-2"
                 />
               </span>
             </div>
             <div className="col-sm-12 pb-2 pt-2">
               <span className="mb-2 fw-bold">
-                {this.props.t('createdDate')}:
+                {t('createdDate')}:
                 <h6 className="d-inline-block ms-2">
-                  {new Date(this.state.item?.createdAt || '').toLocaleString()}
+                  {new Date(state.item?.createdAt || '').toLocaleString()}
                 </h6>
               </span>
             </div>
@@ -228,10 +222,10 @@ export default class PageSettingsProfile extends Component<
     </div>
   );
 
-  Permissions = () => {
+  const Permissions = () => {
     const foundPermissions = permissions.findMulti(
       'id',
-      this.state.item!.permissions
+      state.item!.permissions
     );
     let foundPermissionGroups = permissionGroups.findMulti(
       'id',
@@ -244,7 +238,7 @@ export default class PageSettingsProfile extends Component<
 
     const PermissionGroup = (props: IPermissionGroup) => (
       <div className="col-md-12 mt-3">
-        <ComponentFieldSet legend={this.props.t(props.langKey)}>
+        <ComponentFieldSet legend={t(props.langKey)}>
           <div className="permission-items">
             {foundPermissions
               .findMulti('groupId', props.id)
@@ -258,7 +252,7 @@ export default class PageSettingsProfile extends Component<
 
     const PermissionItem = (props: IPermission) => (
       <label className="badge badge-outline-info ms-1 mb-1">
-        {this.props.t(props.langKey)}
+        {t(props.langKey)}
       </label>
     );
 
@@ -267,7 +261,7 @@ export default class PageSettingsProfile extends Component<
         <div className="card">
           <div className="card-body">
             <h6 className="pb-1 border-bottom fw-bold text-start">
-              {this.props.t('permissions')}
+              {t('permissions')}
             </h6>
             <div className="row">
               {foundPermissionGroups.orderBy('rank', 'asc').map((group) => (
@@ -280,20 +274,19 @@ export default class PageSettingsProfile extends Component<
     );
   };
 
-  Image = () => (
+  const Image = () => (
     <div className="grid-margin stretch-card">
       <div className="card">
         <div className="card-body">
           <div className="d-flex flex-column align-items-center text-center">
-            {this.state.isImageChanging ? (
+            {state.isImageChanging ? (
               <ComponentSpinnerDonut customClass="profile-image-spinner" />
             ) : (
               <ComponentThemeChooseImage
-                {...this.props}
-                onSelected={(images) => this.onChangeImage(images[0])}
+                onSelected={(images) => onChangeImage(images[0])}
                 isMulti={false}
                 isShowReviewImage={true}
-                reviewImage={this.state.formData.image}
+                reviewImage={formState.image}
                 reviewImageClassName={'post-image'}
               />
             )}
@@ -303,46 +296,44 @@ export default class PageSettingsProfile extends Component<
     </div>
   );
 
-  Content = () => (
+  const Content = () => (
     <div className="grid-margin stretch-card">
       <div className="card">
         <div className="card-body">
           <div className="row">
             <div className="col-md-12">
               <ComponentForm
-                isActiveSaveButton={true}
-                saveButtonText={this.props.t('save')}
-                saveButtonLoadingText={this.props.t('loading')}
-                isSubmitting={this.state.isSubmitting}
-                formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
+                submitButtonText={t('save')}
+                submitButtonSubmittingText={t('loading')}
+                onSubmit={(event) => onSubmit(event)}
               >
                 <div className="row">
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
-                      title={`${this.props.t('name')}*`}
+                      title={`${t('name')}*`}
                       name="name"
                       type="text"
                       required={true}
-                      value={this.state.formData.name}
-                      onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+                      value={formState.name}
+                      onChange={(e) => onChangeInput(e)}
                     />
                   </div>
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
-                      title={this.props.t('comment')}
+                      title={t('comment')}
                       name="comment"
                       type="textarea"
-                      value={this.state.formData.comment}
-                      onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+                      value={formState.comment}
+                      onChange={(e) => onChangeInput(e)}
                     />
                   </div>
                   <div className="col-md-12 mb-3">
                     <ComponentFormType
-                      title={`${this.props.t('phone')}`}
+                      title={`${t('phone')}`}
                       name="phone"
                       type="text"
-                      value={this.state.formData.phone}
-                      onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+                      value={formState.phone}
+                      onChange={(e) => onChangeInput(e)}
                     />
                   </div>
                   <div className="col-md-12 mb-3">
@@ -350,8 +341,8 @@ export default class PageSettingsProfile extends Component<
                       title="Facebook"
                       name="facebook"
                       type="url"
-                      value={this.state.formData.facebook}
-                      onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+                      value={formState.facebook}
+                      onChange={(e) => onChangeInput(e)}
                     />
                   </div>
                   <div className="col-md-12 mb-3">
@@ -359,8 +350,8 @@ export default class PageSettingsProfile extends Component<
                       title="Instagram"
                       name="instagram"
                       type="url"
-                      value={this.state.formData.instagram}
-                      onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+                      value={formState.instagram}
+                      onChange={(e) => onChangeInput(e)}
                     />
                   </div>
                   <div className="col-md-12 mb-3">
@@ -368,8 +359,8 @@ export default class PageSettingsProfile extends Component<
                       title="Twitter"
                       name="twitter"
                       type="url"
-                      value={this.state.formData.twitter}
-                      onChange={(e) => HandleFormLibrary.onChangeInput(e, this)}
+                      value={formState.twitter}
+                      onChange={(e) => onChangeInput(e)}
                     />
                   </div>
                 </div>
@@ -381,32 +372,30 @@ export default class PageSettingsProfile extends Component<
     </div>
   );
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-settings page-profile">
-        <div className="row">
-          <div className="col-md-12">
-            <div className="row">
-              <div className="col-md-4">
-                <this.Image />
-              </div>
-              <div className="col-md-8">
-                <this.ProfileInformation />
-              </div>
+  return isPageLoading ? null : (
+    <div className="page-settings page-profile">
+      <div className="row">
+        <div className="col-md-12">
+          <div className="row">
+            <div className="col-md-4">
+              <Image />
+            </div>
+            <div className="col-md-8">
+              <ProfileInformation />
             </div>
           </div>
-          <div className="col-md-12">
-            <this.Content />
-          </div>
-          <div className="col-md-12">
-            <div className="row">
-              <div className="col-md-12">
-                <this.Permissions />
-              </div>
+        </div>
+        <div className="col-md-12">
+          <Content />
+        </div>
+        <div className="col-md-12">
+          <div className="row">
+            <div className="col-md-12">
+              <Permissions />
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
