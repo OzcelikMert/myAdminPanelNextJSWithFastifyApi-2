@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dropdown } from 'react-bootstrap';
 import Link from 'next/link';
 import { AuthService } from '@services/auth.service';
@@ -25,12 +25,20 @@ const initialState: IComponentState = {
 };
 
 export default function ComponentToolNavbar() {
-  const [isDarkTheme, setIsDarkTheme] = useState(initialState.isDarkTheme);
+  const abortController = new AbortController();
 
   const router = useRouter();
   const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
+
+  const [isDarkTheme, setIsDarkTheme] = useState(initialState.isDarkTheme);
+
+  useEffect(() => {
+    return () => {
+      abortController.abort();
+    };
+  }, []);
 
   const toggleOffCanvas = () => {
     (
@@ -64,13 +72,13 @@ export default function ComponentToolNavbar() {
         });
         break;
       case 'lock':
-        const resultLock = await AuthService.logOut();
+        const resultLock = await AuthService.logOut(abortController.signal);
         if (resultLock.status) {
           appDispatch(setIsLockState(true));
         }
         break;
       case 'signOut':
-        const resultSignOut = await AuthService.logOut();
+        const resultSignOut = await AuthService.logOut(abortController.signal);
         if (resultSignOut.status) {
           await RouteUtil.change({
             router: router,

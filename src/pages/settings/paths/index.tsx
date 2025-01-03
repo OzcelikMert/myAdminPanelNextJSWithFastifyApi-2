@@ -50,7 +50,7 @@ export default function PageSettingsPaths() {
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
   const [items, setItems] = useState(initialState.items);
-  const [langId, setLangId] = useState(initialState.langId);
+  const [langId, setLangId] = useState(mainLangId);
   const selectedItemFormReducer =
     useFormReducer<IComponentSelectedItemFormState>(
       initialSelectedItemFormState
@@ -101,7 +101,7 @@ export default function PageSettingsPaths() {
   };
 
   const getItems = async (_langId?: string) => {
-    _langId = _langId || mainLangId;
+    _langId = _langId || langId;
     const serviceResult = await SettingService.get(
       {
         langId: _langId,

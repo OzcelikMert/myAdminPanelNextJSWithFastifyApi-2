@@ -119,7 +119,10 @@ export default function PagePostTermAdd(props: IComponentProps) {
 
   const queries = router.query as IPageQueries;
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    langId: mainLangId,
+  });
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>({
       ...initialFormState,
@@ -239,14 +242,14 @@ export default function PagePostTermAdd(props: IComponentProps) {
     }
   };
 
-  const getItem = async (langId?: string) => {
-    langId = langId || mainLangId;
+  const getItem = async (_langId?: string) => {
+    _langId = _langId || state.langId;
     const serviceResult = await PostTermService.getWithId(
       {
         _id: formState._id,
         typeId: formState.typeId,
         postTypeId: formState.postTypeId,
-        langId: langId,
+        langId: _langId,
       },
       abortController.signal
     );
@@ -259,10 +262,10 @@ export default function PagePostTermAdd(props: IComponentProps) {
         parentId: item.parentId?._id || '',
         contents: {
           ...item.contents,
-          langId: langId,
+          langId: _langId,
         },
       });
-      if (langId == mainLangId) {
+      if (_langId == mainLangId) {
         dispatch({
           type: 'SET_MAIN_TITLE',
           payload: item.contents?.title || '',

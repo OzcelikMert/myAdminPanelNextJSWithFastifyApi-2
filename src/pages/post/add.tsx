@@ -203,7 +203,10 @@ export default function PagePostAdd() {
 
   const queries = router.query as IPageQueries;
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    langId: mainLangId,
+  });
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IPostAddComponentFormState>({
       ...initialFormState,
@@ -450,13 +453,13 @@ export default function PagePostAdd() {
     }
   };
 
-  const getItem = async (langId?: string) => {
-    langId = langId || mainLangId;
+  const getItem = async (_langId?: string) => {
+    _langId = _langId || state.langId;
     const serviceResult = await PostService.getWithId(
       {
         _id: formState._id,
         typeId: formState.typeId,
-        langId: langId,
+        langId: _langId,
       },
       abortController.signal
     );
@@ -474,7 +477,7 @@ export default function PagePostAdd() {
           ...formState.contents,
           ...item.contents,
           views: item.contents?.views ?? 0,
-          langId: langId,
+          langId: _langId,
           content: item.contents?.content || '',
         },
       };
@@ -511,7 +514,7 @@ export default function PagePostAdd() {
               ...variation.itemId,
               contents: {
                 ...variation.itemId.contents,
-                langId: langId,
+                langId: _langId,
               },
             },
             selectedVariations: variation.selectedVariations.map(
@@ -541,7 +544,7 @@ export default function PagePostAdd() {
         ),
       });
 
-      if (langId == mainLangId) {
+      if (_langId == mainLangId) {
         dispatch({
           type: 'SET_MAIN_TITLE',
           payload: item.contents?.title || '',

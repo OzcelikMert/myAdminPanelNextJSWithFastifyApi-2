@@ -1,4 +1,4 @@
-import { ActionDispatch, useState } from 'react';
+import { ActionDispatch, useEffect, useState } from 'react';
 import { Modal } from 'react-bootstrap';
 import { PostTermService } from '@services/postTerm.service';
 import { PostTermTypeId } from '@constants/postTermTypes';
@@ -53,19 +53,28 @@ export default function ComponentPagePostAddChooseTag(props: IComponentProps) {
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>(initialFormState);
 
+  useEffect(() => {
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
   const onAddNew = async () => {
     setIsSubmitting(true);
 
-    const serviceResult = await PostTermService.add({
-      typeId: PostTermTypeId.Tag,
-      postTypeId: props.formState.typeId,
-      statusId: StatusId.Active,
-      rank: 0,
-      contents: {
-        langId: props.formState.contents.langId,
-        title: formState.title,
+    const serviceResult = await PostTermService.add(
+      {
+        typeId: PostTermTypeId.Tag,
+        postTypeId: props.formState.typeId,
+        statusId: StatusId.Active,
+        rank: 0,
+        contents: {
+          langId: props.formState.contents.langId,
+          title: formState.title,
+        },
       },
-    });
+      abortController.signal
+    );
 
     if (serviceResult.status && serviceResult.data) {
       props.dispatch({

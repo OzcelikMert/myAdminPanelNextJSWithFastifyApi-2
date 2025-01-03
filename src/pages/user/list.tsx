@@ -1,5 +1,4 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
+import { useEffect, useReducer } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import { IUserGetResultService } from 'types/services/user.service';
@@ -18,144 +17,162 @@ import { ImageSourceUtil } from '@utils/imageSource.util';
 import { status } from '@constants/status';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
 import { RouteUtil } from '@utils/route.util';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { SortUtil } from '@utils/sort.util';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
 
-type IPageState = {
-  searchKey: string;
+type IComponentState = {
   items: IUserGetResultService[];
-  showingItems: IPageState['items'];
-  isViewItemInfo: boolean;
+  isShowItemModal: boolean;
   selectedItemId: string;
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  items: [],
+  isShowItemModal: false,
+  selectedItemId: '',
+};
 
-export default class PageUserList extends Component<IPageProps, IPageState> {
-  abortController = new AbortController();
-
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      searchKey: '',
-      showingItems: [],
-      items: [],
-      isViewItemInfo: false,
-      selectedItemId: '',
-    };
-  }
-
-  async componentDidMount() {
-    if (
-      PermissionUtil.checkAndRedirect(this.props, UserEndPointPermission.GET)
-    ) {
-      this.setPageTitle();
-      await this.getItems();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+type IAction =
+  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
+  | {
+      type: 'SET_IS_SHOW_ITEM_MODAL';
+      payload: IComponentState['isShowItemModal'];
     }
-  }
+  | {
+      type: 'SET_SELECTED_ITEM_ID';
+      payload: IComponentState['selectedItemId'];
+    };
 
-  componentWillUnmount() {
-    this.abortController.abort();
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_ITEMS':
+      return { ...state, items: action.payload };
+    case 'SET_IS_SHOW_ITEM_MODAL':
+      return { ...state, isShowItemModal: action.payload };
+    case 'SET_SELECTED_ITEM_ID':
+      return { ...state, selectedItemId: action.payload };
+    default:
+      return state;
   }
+};
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('settings'),
-      this.props.t('users'),
-      this.props.t('list'),
-    ]);
-  }
+export default function PageUserList() {
+  const abortController = new AbortController();
 
-  async getItems() {
-    const result = await UserService.getMany({}, this.abortController.signal);
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
+  const init = async () => {
+    if (
+      PermissionUtil.checkAndRedirect({
+        appDispatch,
+        router,
+        sessionAuth,
+        t,
+        minPermission: UserEndPointPermission.GET,
+      })
+    ) {
+      setPageTitle();
+      await getItems();
+      appDispatch(setIsPageLoadingState(false));
+    }
+  };
+
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('users'),
+        },
+        {
+          title: t('list'),
+        },
+      ])
+    );
+  };
+
+  const getItems = async () => {
+    const result = await UserService.getMany({}, abortController.signal);
     if (result.status && result.data) {
       const items = result.data.orderBy('roleId', 'desc');
-      this.setState(
-        (state: IPageState) => {
-          state.items = items
-            .filter((item) => item.roleId != UserRoleId.SuperAdmin)
-            .sort((item) => {
-              let sort = 0;
-              if (item._id == this.props.getStateApp.sessionAuth!.user.userId) {
-                sort = 1;
-              }
-              return sort;
-            });
-          return state;
-        },
-        () => this.onSearch(this.state.searchKey)
-      );
+      dispatch({
+        type: 'SET_ITEMS',
+        payload: items.filter(
+          (item) =>
+            item.roleId != UserRoleId.SuperAdmin ||
+            item._id != sessionAuth?.user.userId
+        ),
+      });
     }
-  }
+  };
 
-  async onDelete(userId: string) {
-    const item = this.state.items.findSingle('_id', userId);
+  const onDelete = async (userId: string) => {
+    const item = state.items.findSingle('_id', userId);
     if (item) {
       const result = await Swal.fire({
-        title: this.props.t('deleteAction'),
-        html: `<b>'${item.name}'</b> ${this.props.t('deleteItemQuestionWithItemName')}`,
-        confirmButtonText: this.props.t('yes'),
-        cancelButtonText: this.props.t('no'),
+        title: t('deleteAction'),
+        html: `<b>'${item.name}'</b> ${t('deleteItemQuestionWithItemName')}`,
+        confirmButtonText: t('yes'),
+        cancelButtonText: t('no'),
         icon: 'question',
         showCancelButton: true,
       });
       if (result.isConfirmed) {
         const loadingToast = new ComponentToast({
-          content: this.props.t('deleting'),
+          content: t('deleting'),
           type: 'loading',
         });
 
         const serviceResult = await UserService.deleteWithId(
           { _id: userId },
-          this.abortController.signal
+          abortController.signal
         );
         loadingToast.hide();
         if (serviceResult.status) {
-          this.setState(
-            (state: IPageState) => {
-              state.items = state.items.filter((item) => userId !== item._id);
-              return state;
-            },
-            () => {
-              this.onSearch(this.state.searchKey);
-              new ComponentToast({
-                type: 'success',
-                title: this.props.t('successful'),
-                content: this.props.t('itemDeleted'),
-              });
-            }
-          );
+          dispatch({
+            type: 'SET_ITEMS',
+            payload: state.items.filter((item) => userId !== item._id),
+          });
+          new ComponentToast({
+            type: 'success',
+            title: t('successful'),
+            content: t('itemDeleted'),
+          });
         }
       }
     }
-  }
+  };
 
-  onViewUser(userId: string) {
-    this.setState({
-      isViewItemInfo: true,
-      selectedItemId: userId,
-    });
-  }
+  const onViewUser = (userId: string) => {
+    dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: userId });
+    dispatch({ type: 'SET_IS_SHOW_ITEM_MODAL', payload: true });
+  };
 
-  onSearch(searchKey: string) {
-    this.setState({
-      searchKey: searchKey,
-      showingItems: this.state.items.filter(
-        (item) => item.name.toLowerCase().search(searchKey) > -1
-      ),
-    });
-  }
-
-  navigatePage(type: 'edit', itemId = '') {
+  const navigatePage = (type: 'edit', itemId = '') => {
     const path = EndPoints.USER_WITH.EDIT(itemId);
-    RouteUtil.change({ props: this.props, path: path });
-  }
+    RouteUtil.change({ appDispatch, router, path });
+  };
 
-  get getTableColumns(): TableColumn<IPageState['items'][0]>[] {
+  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
     return [
       {
-        name: this.props.t('image'),
+        name: t('image'),
         width: '105px',
         cell: (row) => (
           <div className="image mt-2 mb-2">
@@ -173,25 +190,20 @@ export default class PageUserList extends Component<IPageProps, IPageState> {
         ),
       },
       {
-        name: this.props.t('name'),
+        name: t('name'),
         selector: (row) => row.name,
         sortable: true,
         cell: (row) => <b>{row.name}</b>,
       },
       {
         id: 'userRole',
-        name: this.props.t('role'),
+        name: t('role'),
         selector: (row) => userRoles.findSingle('id', row.roleId)?.rank ?? 0,
         sortable: true,
-        cell: (row) => (
-          <ComponentThemeBadgeUserRole
-            t={this.props.t}
-            userRoleId={row.roleId}
-          />
-        ),
+        cell: (row) => <ComponentThemeBadgeUserRole userRoleId={row.roleId} />,
       },
       {
-        name: this.props.t('updatedBy'),
+        name: t('updatedBy'),
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
@@ -201,18 +213,16 @@ export default class PageUserList extends Component<IPageProps, IPageState> {
         ),
       },
       {
-        name: this.props.t('status'),
+        name: t('status'),
         selector: (row) => status.findSingle('id', row.statusId)?.rank ?? 0,
         sortable: true,
-        cell: (row) => (
-          <ComponentThemeBadgeStatus t={this.props.t} statusId={row.statusId} />
-        ),
+        cell: (row) => <ComponentThemeBadgeStatus statusId={row.statusId} />,
       },
       {
-        name: this.props.t('createdDate'),
+        name: t('createdDate'),
         sortable: true,
         selector: (row) => new Date(row.createdAt || '').toLocaleDateString(),
-        sortFunction: (a, b) => ComponentDataTable.dateSort(a, b),
+        sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
         cell: (row) => (
           <ComponentTableUpdatedBy
             name={row.authorId?.name || ''}
@@ -225,17 +235,14 @@ export default class PageUserList extends Component<IPageProps, IPageState> {
         width: '70px',
         cell: (row) => (
           <button
-            onClick={() => this.onViewUser(row._id)}
+            onClick={() => onViewUser(row._id)}
             className="btn btn-gradient-info"
           >
             <i className="mdi mdi-eye"></i>
           </button>
         ),
       },
-      PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
-        UserEndPointPermission.UPDATE
-      )
+      PermissionUtil.check(sessionAuth!, UserEndPointPermission.UPDATE)
         ? {
             name: '',
             button: true,
@@ -243,14 +250,14 @@ export default class PageUserList extends Component<IPageProps, IPageState> {
             cell: (row) => {
               const sessionUserRole = userRoles.findSingle(
                 'id',
-                this.props.getStateApp.sessionAuth?.user.roleId
+                sessionAuth?.user.roleId
               );
               const rowUserRole = userRoles.findSingle('id', row.roleId);
               return sessionUserRole &&
                 rowUserRole &&
                 rowUserRole.rank < sessionUserRole.rank ? (
                 <button
-                  onClick={() => this.navigatePage('edit', row._id)}
+                  onClick={() => navigatePage('edit', row._id)}
                   className="btn btn-gradient-warning"
                 >
                   <i className="fa fa-pencil-square-o"></i>
@@ -259,10 +266,7 @@ export default class PageUserList extends Component<IPageProps, IPageState> {
             },
           }
         : {},
-      PermissionUtil.check(
-        this.props.getStateApp.sessionAuth!,
-        UserEndPointPermission.DELETE
-      )
+      PermissionUtil.check(sessionAuth!, UserEndPointPermission.DELETE)
         ? {
             name: '',
             button: true,
@@ -270,14 +274,14 @@ export default class PageUserList extends Component<IPageProps, IPageState> {
             cell: (row) => {
               const sessionUserRole = userRoles.findSingle(
                 'id',
-                this.props.getStateApp.sessionAuth?.user.roleId
+                sessionAuth?.user.roleId
               );
               const rowUserRole = userRoles.findSingle('id', row.roleId);
               return sessionUserRole &&
                 rowUserRole &&
                 rowUserRole.rank < sessionUserRole.rank ? (
                 <button
-                  onClick={() => this.onDelete(row._id)}
+                  onClick={() => onDelete(row._id)}
                   className="btn btn-gradient-danger"
                 >
                   <i className="mdi mdi-trash-can-outline"></i>
@@ -287,48 +291,40 @@ export default class PageUserList extends Component<IPageProps, IPageState> {
           }
         : {},
     ];
-  }
+  };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-user">
-        {(() => {
-          const userInfo = this.state.items.findSingle(
-            '_id',
-            this.state.selectedItemId
-          );
-          return userInfo ? (
-            <ComponentThemeUsersProfileCard
-              {...this.props}
-              onClose={() => {
-                this.setState({ isViewItemInfo: false });
-              }}
-              isShow={this.state.isViewItemInfo}
-              userInfo={userInfo}
-            />
-          ) : null;
-        })()}
-        <div className="grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body">
-              <div className="table-user">
-                <ComponentDataTable
-                  columns={this.getTableColumns.filter(
-                    (column) => typeof column.name !== 'undefined'
-                  )}
-                  data={this.state.showingItems}
-                  i18={{
-                    search: this.props.t('search'),
-                    noRecords: this.props.t('noRecords'),
-                  }}
-                  isSearchable={true}
-                  onSearch={(searchKey) => this.onSearch(searchKey)}
-                />
-              </div>
+  const selectedItem = state.items.findSingle('_id', state.selectedItemId);
+
+  return isPageLoading ? null : (
+    <div className="page-user">
+      {selectedItem ? (
+        <ComponentThemeUsersProfileCard
+          onClose={() => {
+            dispatch({ type: 'SET_IS_SHOW_ITEM_MODAL', payload: false });
+          }}
+          isShow={state.isShowItemModal}
+          userInfo={selectedItem}
+        />
+      ) : null}
+      <div className="grid-margin stretch-card">
+        <div className="card">
+          <div className="card-body">
+            <div className="table-user">
+              <ComponentDataTable
+                columns={getTableColumns().filter(
+                  (column) => typeof column.name !== 'undefined'
+                )}
+                data={state.items}
+                i18={{
+                  search: t('search'),
+                  noRecords: t('noRecords'),
+                }}
+                isSearchable={true}
+              />
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

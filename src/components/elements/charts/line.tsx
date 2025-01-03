@@ -12,7 +12,7 @@ import {
   ChartData,
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 
 ChartJS.register(
   CategoryScale,
@@ -55,6 +55,24 @@ const initialState: IComponentState = {
   },
 };
 
+type IAction =
+  | { type: 'SET_OPTIONS'; payload: IComponentState['options'] }
+  | { type: 'SET_DATA'; payload: IComponentState['data'] }
+  | { type: 'SET_IS_LOADING'; payload: IComponentState['isLoading'] };
+
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_OPTIONS':
+      return { ...state, options: action.payload };
+    case 'SET_DATA':
+      return { ...state, data: action.payload };
+    case 'SET_IS_LOADING':
+      return { ...state, isLoading: action.payload };
+    default:
+      return state;
+  }
+};
+
 type IComponentProps = {
   labels?: string[];
   data: any[];
@@ -62,9 +80,7 @@ type IComponentProps = {
 };
 
 export default function ComponentChartLine(props: IComponentProps) {
-  const [options, setOptions] = useState(initialState.options);
-  const [data, setData] = useState(initialState.data);
-  const [isLoading, setIsLoading] = useState(initialState.isLoading);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     init();
@@ -73,30 +89,33 @@ export default function ComponentChartLine(props: IComponentProps) {
   const init = () => {
     const borderColor = '#1863d3';
 
-    setData({
-      labels: props.labels,
-      datasets: [
-        {
-          pointBorderWidth: 0,
-          label: props.toolTipLabel,
-          borderColor: borderColor,
-          borderWidth: 5,
-          data: props.data,
-        },
-      ],
+    dispatch({
+      type: 'SET_DATA',
+      payload: {
+        labels: props.labels,
+        datasets: [
+          {
+            pointBorderWidth: 0,
+            label: props.toolTipLabel,
+            borderColor: borderColor,
+            borderWidth: 5,
+            data: props.data,
+          },
+        ],
+      },
     });
 
-    setIsLoading(false);
+    dispatch({ type: 'SET_IS_LOADING', payload: false });
   };
 
-  return isLoading ? (
+  return state.isLoading ? (
     <Spinner animation="border" />
   ) : (
     <Line
       itemRef="chart"
       className="chartLegendContainer"
-      data={data}
-      options={options}
+      data={state.data}
+      options={state.options}
       redraw={true}
     />
   );

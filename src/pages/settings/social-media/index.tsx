@@ -1,10 +1,4 @@
-import React, { Component } from 'react';
-import { IPagePropCommon } from 'types/pageProps';
-import {
-  ComponentFieldSet,
-  ComponentForm,
-  ComponentFormType,
-} from '@components/elements/form';
+import { useEffect, useState } from 'react';
 import { SettingService } from '@services/setting.service';
 import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateSocialMediaParamService } from 'types/services/setting.service';
@@ -15,186 +9,177 @@ import { SettingProjectionKeys } from '@constants/settingProjections';
 import { UserRoleId } from '@constants/userRoles';
 import { cloneDeepWith } from 'lodash';
 import Swal from 'sweetalert2';
+import { useRouter } from 'next/router';
+import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@lib/features/translationSlice';
+import { EndPoints } from '@constants/endPoints';
+import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { useFormReducer } from '@library/react/handles/form';
+import ComponentFieldSet from '@components/elements/fieldSet';
+import ComponentFormType from '@components/elements/form/input/type';
+import ComponentForm from '@components/elements/form';
+import { setIsPageLoadingState } from '@lib/features/pageSlice';
 
-type IPageState = {
-  isSubmitting: boolean;
-  formData: ISettingUpdateSocialMediaParamService;
-  selectedData?: ISettingSocialMediaModel;
+type IComponentState = {
   items?: ISettingSocialMediaModel[];
 };
 
-type IPageProps = {} & IPagePropCommon;
+const initialState: IComponentState = {
+  items: [],
+};
 
-export default class PageSettingsSocialMedia extends Component<
-  IPageProps,
-  IPageState
-> {
-  abortController = new AbortController();
+type IComponentSelectedItemFormState = ISettingSocialMediaModel | undefined;
 
-  constructor(props: IPageProps) {
-    super(props);
-    this.state = {
-      isSubmitting: false,
-      formData: {
-        socialMedia: [],
-      },
+const initialSelectedItemFormState: IComponentSelectedItemFormState = undefined;
+
+type IComponentFormState = ISettingUpdateSocialMediaParamService;
+
+const initialFormState: IComponentFormState = {
+  socialMedia: [],
+};
+
+export default function PageSettingsSocialMedia() {
+  const abortController = new AbortController();
+
+  const router = useRouter();
+  const t = useAppSelector(selectTranslation);
+  const appDispatch = useAppDispatch();
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+
+  const [items, setItems] = useState(initialState.items);
+  const formReducer = useFormReducer(initialFormState);
+  const selectedItemFormReducer = useFormReducer(initialSelectedItemFormState);
+
+  useEffect(() => {
+    init();
+    return () => {
+      abortController.abort();
     };
-  }
+  }, []);
 
-  async componentDidMount() {
+  const init = async () => {
     if (
-      PermissionUtil.checkAndRedirect(
-        this.props,
-        SettingsEndPointPermission.UPDATE_SOCIAL_MEDIA
-      )
+      PermissionUtil.checkAndRedirect({
+        appDispatch,
+        router,
+        t,
+        sessionAuth,
+        minPermission: SettingsEndPointPermission.UPDATE_SOCIAL_MEDIA,
+      })
     ) {
-      this.setPageTitle();
-      await this.getSettings();
-      this.props.setStateApp({
-        isPageLoading: false,
-      });
+      setPageTitle();
+      await getSettings();
+      appDispatch(setIsPageLoadingState(false));
     }
-  }
+  };
 
-  componentWillUnmount() {
-    this.abortController.abort();
-  }
+  const setPageTitle = () => {
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('settings'),
+          url: EndPoints.SETTINGS_WITH.GENERAL,
+        },
+        {
+          title: t('socialMedia'),
+        },
+      ])
+    );
+  };
 
-  setPageTitle() {
-    this.props.setBreadCrumb([
-      this.props.t('settings'),
-      this.props.t('socialMedia'),
-    ]);
-  }
-
-  async getSettings() {
+  const getSettings = async () => {
     const serviceResult = await SettingService.get(
       { projection: SettingProjectionKeys.SocialMedia },
-      this.abortController.signal
+      abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
-      this.setState((state: IPageState) => {
-        state.items = setting.socialMedia;
-        state.formData = {
-          socialMedia: setting.socialMedia || [],
-        };
-        return state;
+      setItems(setting.socialMedia || []);
+      formReducer.setFormState({
+        socialMedia: setting.socialMedia || [],
       });
     }
-  }
+  };
 
-  onSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    this.setState(
-      {
-        isSubmitting: true,
-      },
-      async () => {
-        const serviceResult = await SettingService.updateSocialMedia(
-          this.state.formData,
-          this.abortController.signal
-        );
-        if (serviceResult.status) {
-          new ComponentToast({
-            type: 'success',
-            title: this.props.t('successful'),
-            content: this.props.t('settingsUpdated'),
-          });
-        }
-
-        this.setState({
-          isSubmitting: false,
-        });
-      }
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    const serviceResult = await SettingService.updateSocialMedia(
+      formReducer.formState,
+      abortController.signal
     );
-  }
+    if (serviceResult.status) {
+      new ComponentToast({
+        type: 'success',
+        title: t('successful'),
+        content: t('settingsUpdated'),
+      });
+    }
+  };
 
-  onInputChange(data: any, key: string, value: any) {
-    this.setState((state: IPageState) => {
-      data[key] = value;
-      return state;
+  const onCreate = () => {
+    const newSocialMedia = formReducer.formState.socialMedia || [];
+    newSocialMedia.push({
+      _id: String.createId(),
+      key: '',
+      url: '',
+      title: '',
     });
-  }
+    formReducer.setFormState({ socialMedia: newSocialMedia });
+    onEdit(formReducer.formState.socialMedia.length - 1);
+  };
 
-  onCreate() {
-    this.setState(
-      (state: IPageState) => {
-        state.formData.socialMedia = [
-          ...state.formData.socialMedia,
-          {
-            _id: String.createId(),
-            key: '',
-            url: '',
-            title: '',
-          },
-        ];
-        return state;
-      },
-      () => this.onEdit(this.state.formData.socialMedia.length - 1)
+  const onAccept = (index: number) => {
+    let newSocialMedia = formReducer.formState.socialMedia || [];
+    newSocialMedia[index] = selectedItemFormReducer.formState!;
+    formReducer.setFormState({ socialMedia: newSocialMedia });
+    selectedItemFormReducer.setFormState(undefined);
+  };
+
+  const onEdit = (index: number) => {
+    selectedItemFormReducer.setFormState(
+      cloneDeepWith(formReducer.formState.socialMedia[index])
     );
-  }
+  };
 
-  onAccept(index: number) {
-    this.setState((state: IPageState) => {
-      state.formData.socialMedia[index] = state.selectedData!;
-      state.selectedData = undefined;
-      return state;
-    });
-  }
+  const onCancelEdit = () => {
+    selectedItemFormReducer.setFormState(undefined);
+  };
 
-  onEdit(index: number) {
-    this.setState((state: IPageState) => {
-      state.selectedData = cloneDeepWith(
-        this.state.formData.socialMedia[index]
-      );
-      return state;
-    });
-  }
-
-  onCancelEdit() {
-    this.setState((state: IPageState) => {
-      state.selectedData = undefined;
-      return state;
-    });
-  }
-
-  async onDelete(index: number) {
+  const onDelete = async (index: number) => {
     const result = await Swal.fire({
-      title: this.props.t('deleteAction'),
-      html: `<b>'${this.state.formData.socialMedia[index].key}'</b> ${this.props.t('deleteItemQuestionWithItemName')}`,
-      confirmButtonText: this.props.t('yes'),
-      cancelButtonText: this.props.t('no'),
+      title: t('deleteAction'),
+      html: `<b>'${formReducer.formState.socialMedia[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
       icon: 'question',
       showCancelButton: true,
     });
 
     if (result.isConfirmed) {
-      this.setState((state: IPageState) => {
-        state.formData.socialMedia.splice(index, 1);
-        return state;
-      });
+      let newSocialMedia = formReducer.formState.socialMedia || [];
+      newSocialMedia.splice(index, 1);
+      formReducer.setFormState({ socialMedia: newSocialMedia });
     }
-  }
+  };
 
-  SocialMedia = (props: ISettingSocialMediaModel, index: number) => {
+  const SocialMedia = (props: ISettingSocialMediaModel, index: number) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
         <ComponentFieldSet
-          legend={`${props.title} ${PermissionUtil.checkPermissionRoleRank(this.props.getStateApp.sessionAuth!.user.roleId, UserRoleId.SuperAdmin) ? `(#${props.key})` : ''}`}
+          legend={`${props.title} ${PermissionUtil.checkPermissionRoleRank(sessionAuth!.user.roleId, UserRoleId.SuperAdmin) ? `(#${props.key})` : ''}`}
           legendElement={
             PermissionUtil.checkPermissionRoleRank(
-              this.props.getStateApp.sessionAuth!.user.roleId,
+              sessionAuth!.user.roleId,
               UserRoleId.SuperAdmin
             ) ? (
               <span>
                 <i
                   className="mdi mdi-pencil-box text-warning fs-1 cursor-pointer ms-2"
-                  onClick={() => this.onEdit(index)}
+                  onClick={() => onEdit(index)}
                 ></i>
                 <i
                   className="mdi mdi-minus-box text-danger fs-1 cursor-pointer ms-2"
-                  onClick={() => this.onDelete(index)}
+                  onClick={() => onDelete(index)}
                 ></i>
               </span>
             ) : undefined
@@ -204,11 +189,10 @@ export default class PageSettingsSocialMedia extends Component<
             <div className="col-md-12">
               <ComponentFormType
                 type="text"
-                title={this.props.t('url')}
+                title={t('url')}
+                name={`socialMedia.${index}.url`}
                 value={props.url}
-                onChange={(e) =>
-                  this.onInputChange(props, 'url', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
           </div>
@@ -217,29 +201,27 @@ export default class PageSettingsSocialMedia extends Component<
     );
   };
 
-  SocialMediaEdit = (props: ISettingSocialMediaModel, index: number) => {
+  const SocialMediaEdit = (props: ISettingSocialMediaModel, index: number) => {
     return (
       <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
-        <ComponentFieldSet legend={this.props.t('newSocialMedia')}>
+        <ComponentFieldSet legend={t('newSocialMedia')}>
           <div className="row mt-3">
             <div className="col-md-12">
               <ComponentFormType
                 type="text"
-                title={this.props.t('key')}
+                title={t('key')}
+                name={`socialMedia.${index}.key`}
                 value={props.key}
-                onChange={(e) =>
-                  this.onInputChange(props, 'key', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-3">
               <ComponentFormType
                 type="text"
-                title={this.props.t('title')}
+                title={t('title')}
+                name={`socialMedia.${index}.title`}
                 value={props.title}
-                onChange={(e) =>
-                  this.onInputChange(props, 'title', e.target.value)
-                }
+                onChange={(e) => formReducer.onChangeInput(e)}
               />
             </div>
             <div className="col-md-12 mt-3">
@@ -248,18 +230,18 @@ export default class PageSettingsSocialMedia extends Component<
                   <button
                     type="button"
                     className="btn btn-gradient-success btn-lg"
-                    onClick={() => this.onAccept(index)}
+                    onClick={() => onAccept(index)}
                   >
-                    {this.props.t('okay')}
+                    {t('okay')}
                   </button>
                 </div>
                 <div className="col-md-6 text-end">
                   <button
                     type="button"
                     className="btn btn-gradient-dark btn-lg"
-                    onClick={() => this.onCancelEdit()}
+                    onClick={() => onCancelEdit()}
                   >
-                    {this.props.t('cancel')}
+                    {t('cancel')}
                   </button>
                 </div>
               </div>
@@ -270,31 +252,32 @@ export default class PageSettingsSocialMedia extends Component<
     );
   };
 
-  SocialMediaPlatforms = () => {
+  const SocialMediaPlatforms = () => {
     return (
       <div className="row">
         <div className="col-md-7 mt-2">
           <div className="row">
-            {this.state.formData.socialMedia?.map((item, index) =>
-              this.state.selectedData && this.state.selectedData._id == item._id
-                ? this.SocialMediaEdit(this.state.selectedData, index)
-                : this.SocialMedia(item, index)
+            {formReducer.formState.socialMedia?.map((item, index) =>
+              selectedItemFormReducer.formState &&
+              selectedItemFormReducer.formState._id == item._id
+                ? SocialMediaEdit(selectedItemFormReducer.formState, index)
+                : SocialMedia(item, index)
             )}
           </div>
         </div>
         {PermissionUtil.checkPermissionRoleRank(
-          this.props.getStateApp.sessionAuth!.user.roleId,
+          sessionAuth!.user.roleId,
           UserRoleId.SuperAdmin
         ) ? (
           <div
-            className={`col-md-7 text-start ${this.state.formData.socialMedia.length > 0 ? 'mt-4' : ''}`}
+            className={`col-md-7 text-start ${formReducer.formState.socialMedia.length > 0 ? 'mt-4' : ''}`}
           >
             <button
               type={'button'}
               className="btn btn-gradient-success btn-lg"
-              onClick={() => this.onCreate()}
+              onClick={() => onCreate()}
             >
-              + {this.props.t('addNew')}
+              + {t('addNew')}
             </button>
           </div>
         ) : null}
@@ -302,29 +285,25 @@ export default class PageSettingsSocialMedia extends Component<
     );
   };
 
-  render() {
-    return this.props.getStateApp.isPageLoading ? null : (
-      <div className="page-settings">
-        <div className="row">
-          <div className="col-md-12">
-            <ComponentForm
-              isActiveSaveButton={true}
-              submitButtonText={this.props.t('save')}
-              submitButtonSubmittingText={this.props.t('loading')}
-              isSubmitting={this.state.isSubmitting}
-              formAttributes={{ onSubmit: (event) => this.onSubmit(event) }}
-            >
-              <div className="grid-margin stretch-card">
-                <div className="card">
-                  <div className="card-body">
-                    <this.SocialMediaPlatforms />
-                  </div>
+  return isPageLoading ? null : (
+    <div className="page-settings">
+      <div className="row">
+        <div className="col-md-12">
+          <ComponentForm
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
+                  <SocialMediaPlatforms />
                 </div>
               </div>
-            </ComponentForm>
-          </div>
+            </div>
+          </ComponentForm>
         </div>
       </div>
-    );
-  }
+    </div>
+  );
 }

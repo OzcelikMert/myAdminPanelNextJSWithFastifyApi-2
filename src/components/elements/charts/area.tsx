@@ -12,7 +12,7 @@ import {
   ChartData,
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 
 ChartJS.register(
   CategoryScale,
@@ -60,6 +60,24 @@ const initialState: IComponentState = {
   },
 };
 
+type IAction =
+  | { type: 'SET_OPTIONS'; payload: IComponentState['options'] }
+  | { type: 'SET_DATA'; payload: IComponentState['data'] }
+  | { type: 'SET_IS_LOADING'; payload: IComponentState['isLoading'] };
+
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_OPTIONS':
+      return { ...state, options: action.payload };
+    case 'SET_DATA':
+      return { ...state, data: action.payload };
+    case 'SET_IS_LOADING':
+      return { ...state, isLoading: action.payload };
+    default:
+      return state;
+  }
+};
+
 type IComponentProps = {
   labels: string[];
   data: any[];
@@ -67,13 +85,7 @@ type IComponentProps = {
 };
 
 export default function ComponentChartArea(props: IComponentProps) {
-  const [options, setOptions] = useState<IComponentState['options']>(
-    initialState.options
-  );
-  const [data, setData] = useState<IComponentState['data']>(initialState.data);
-  const [isLoading, setIsLoading] = useState<IComponentState['isLoading']>(
-    initialState.isLoading
-  );
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     init();
@@ -84,34 +96,37 @@ export default function ComponentChartArea(props: IComponentProps) {
     const borderColor = '#1863d3';
     const pointBorderColor = '#6a0e98';
 
-    setData({
-      labels: props.labels,
-      datasets: [
-        {
-          fill: true,
-          pointBorderWidth: 7,
-          pointBorderColor: pointBorderColor,
-          label: props.toolTipLabel,
-          borderColor: borderColor,
-          backgroundColor: bgColor,
-          hoverBackgroundColor: bgColor,
-          borderWidth: 5,
-          data: props.data,
-        },
-      ],
+    dispatch({
+      type: 'SET_DATA',
+      payload: {
+        labels: props.labels,
+        datasets: [
+          {
+            fill: true,
+            pointBorderWidth: 7,
+            pointBorderColor: pointBorderColor,
+            label: props.toolTipLabel,
+            borderColor: borderColor,
+            backgroundColor: bgColor,
+            hoverBackgroundColor: bgColor,
+            borderWidth: 5,
+            data: props.data,
+          },
+        ],
+      },
     });
 
-    setIsLoading(false);
+    dispatch({ type: 'SET_IS_LOADING', payload: false });
   };
 
-  return isLoading ? (
+  return state.isLoading ? (
     <Spinner animation="border" />
   ) : (
     <Line
       itemRef="chart"
       className="chartLegendContainer"
-      data={data}
-      options={options}
+      data={state.data}
+      options={state.options}
     />
   );
 }

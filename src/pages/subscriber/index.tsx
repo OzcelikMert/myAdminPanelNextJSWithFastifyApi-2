@@ -36,7 +36,6 @@ export default function PageSubscribers() {
   const appDispatch = useAppDispatch();
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
-  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
   const [items, setItems] = useState<IComponentState['items']>(
     initialState.items
@@ -102,6 +101,7 @@ export default function PageSubscribers() {
       icon: 'question',
       showCancelButton: true,
     });
+    
     if (result.isConfirmed) {
       const loadingToast = new ComponentToast({
         content: t('deleting'),

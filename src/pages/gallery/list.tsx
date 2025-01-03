@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useReducer } from 'react';
 import Swal from 'sweetalert2';
 import { GalleryService } from '@services/gallery.service';
 import { TableColumn } from 'react-data-table-component';
@@ -28,6 +28,33 @@ const initialState: IComponentState = {
   isListLoading: true,
 };
 
+type IAction = 
+  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
+  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
+  | { type: 'SET_IS_LIST_LOADING'; payload: IComponentState['isListLoading'] };
+
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_ITEMS':
+      return {
+        ...state,
+        items: action.payload,
+      };
+    case 'SET_SELECTED_ITEMS':
+      return {
+        ...state,
+        selectedItems: action.payload,
+      };
+    case 'SET_IS_LIST_LOADING':
+      return {
+        ...state,
+        isListLoading: action.payload,
+      };
+    default:
+      return state;
+  };
+}
+
 type IComponentProps = {
   isModal?: boolean;
   isMulti?: boolean;
@@ -40,13 +67,7 @@ export default function PageGalleryList(props: IComponentProps) {
   let toast: null | ComponentToast = null;
   const abortController = new AbortController();
 
-  const [items, setItems] = React.useState(initialState.items);
-  const [selectedItems, setSelectedItems] = React.useState(
-    initialState.selectedItems
-  );
-  const [isListLoading, setIsListLoading] = React.useState(
-    initialState.isListLoading
-  );
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   const appDispatch = useAppDispatch();
   const t = useAppSelector(selectTranslation);
@@ -62,13 +83,13 @@ export default function PageGalleryList(props: IComponentProps) {
 
   useEffect(() => {
     if (props.uploadedImages) {
-      setItems(state => state.concat(props.uploadedImages || []));
+      dispatch({ type: 'SET_ITEMS', payload: state.items.concat(props.uploadedImages || []) });
     }
   }, [props.uploadedImages]);
 
   const init = async () => {
     await getItems();
-    setIsListLoading(false);
+    dispatch({ type: 'SET_IS_LIST_LOADING', payload: false });
 
     if (!props.isModal) {
       setPageTitle();
@@ -95,12 +116,12 @@ export default function PageGalleryList(props: IComponentProps) {
       abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
-      setItems(serviceResult.data);
+      dispatch({ type: 'SET_ITEMS', payload: serviceResult.data });
     }
   }
 
   const onSelect = (images: IGalleryGetResultService[]) => {
-    setSelectedItems(images);
+    dispatch({ type: 'SET_SELECTED_ITEMS', payload: images });
     if (images.length > 0) {
       if (!toast || !toast.isShow) {
         toast = new ComponentToast({
@@ -150,13 +171,13 @@ export default function PageGalleryList(props: IComponentProps) {
       });
 
       const serviceResult = await GalleryService.deleteMany(
-        { _id: selectedItems.map((item) => item._id) },
+        { _id: state.selectedItems.map((item) => item._id) },
         abortController.signal
       );
       loadingToast.hide();
       if (serviceResult.status) {
-        setItems(items.filter((item) => !selectedItems.includes(item)));
-        setSelectedItems([]);
+        dispatch({ type: 'SET_ITEMS', payload: state.items.filter((item) => !state.selectedItems.includes(item)) });
+        dispatch({ type: 'SET_SELECTED_ITEMS', payload: [] });
         new ComponentToast({
           title: t('itemDeleted'),
           content: t('itemDeleted'),
@@ -169,9 +190,9 @@ export default function PageGalleryList(props: IComponentProps) {
 
   const onSubmit = () => {
     if (props.onSubmit) {
-      const foundSelectedItems = items.findMulti(
+      const foundSelectedItems = state.items.findMulti(
         '_id',
-        selectedItems
+        state.selectedItems
       );
       toast?.hide();
       props.onSubmit(
@@ -248,7 +269,7 @@ export default function PageGalleryList(props: IComponentProps) {
             <div className="card-body">
               <ComponentDataTable
                 columns={getTableColumns()}
-                data={items}
+                data={state.items}
                 onSelect={(rows) => onSelect(rows)}
                 i18={{
                   search: t('search'),
@@ -259,7 +280,7 @@ export default function PageGalleryList(props: IComponentProps) {
                 isAllSelectable={!(props.isModal && !props.isMulti)}
                 isMultiSelectable={!(props.isModal && !props.isMulti)}
                 isSearchable={true}
-                progressPending={isListLoading}
+                progressPending={state.isListLoading}
               />
             </div>
           </div>

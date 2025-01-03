@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { AuthService } from '@services/auth.service';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
@@ -29,6 +29,12 @@ const initialFormState: IComponentFormState = {
 };
 
 export default function ComponentToolLock() {
+  const abortController = new AbortController();
+
+  const appDispatch = useAppDispatch();
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const t = useAppSelector(selectTranslation);
+
   const [isSubmitting, setIsSubmitting] = React.useState(
     initialState.isSubmitting
   );
@@ -36,20 +42,27 @@ export default function ComponentToolLock() {
   const { formState, onChangeInput, setFormState } =
     useFormReducer<IComponentFormState>(initialFormState);
 
-  const appDispatch = useAppDispatch();
-  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
-  const t = useAppSelector(selectTranslation);
+  useEffect(() => {
+    return () => {
+      abortController.abort();
+    };
+  }, []);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     setIsSubmitting(true);
 
-    const serviceResult = await AuthService.login({
-      password: formState.password,
-      email: sessionAuth?.user.email ?? '',
-    });
+    const serviceResult = await AuthService.login(
+      {
+        password: formState.password,
+        email: sessionAuth?.user.email ?? '',
+      },
+      abortController.signal
+    );
 
     if (serviceResult.status && serviceResult.data) {
-      const resultSession = await AuthService.getSession();
+      const resultSession = await AuthService.getSession(
+        abortController.signal
+      );
       if (resultSession.status && resultSession.data) {
         setIsSubmitting(false);
         setIsWrong(false);

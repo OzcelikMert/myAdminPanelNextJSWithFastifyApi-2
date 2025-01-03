@@ -22,8 +22,9 @@ type IComponentProps = {
 };
 
 export default function ComponentProviderAuth({ children }: IComponentProps) {
-  const appDispatch = useAppDispatch();
   const abortController = new AbortController();
+  
+  const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const isSessionAuthChecked = useAppSelector((state) => state.sessionState.isAuthChecked);
   const isAppLock = useAppSelector((state) => state.appState.isLock);
@@ -31,6 +32,26 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
 
   const [isAuth, setIsAuth] = useState(initialState.isAuth);
   const [isLoading, setIsLoading] = useState(initialState.isLoading);
+
+  useEffect(() => {
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    if(!isSessionAuthChecked){
+      init();
+    }
+  }, [isSessionAuthChecked]);
+
+  const init = async () => {
+    if(!isLoading){
+      setIsLoading(true);
+    }
+    await checkSession();
+    setIsLoading(false);
+  };
 
   const checkSession = async () => {
     const serviceResult = await AuthService.getSession(abortController.signal);
@@ -51,28 +72,6 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
 
     appDispatch(setIsSessionAuthCheckedState(true));
   };
-
-  const init = async () => {
-    if(!isLoading){
-      setIsLoading(true);
-    }
-    await checkSession();
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    return () => {
-      abortController.abort();
-    };
-  }, []);
-
-  useEffect(() => {
-    if(!isSessionAuthChecked){
-      init();
-    }
-  }, [isSessionAuthChecked]);
-
-
 
   if (isLoading || abortController.signal.aborted) {
     return null;

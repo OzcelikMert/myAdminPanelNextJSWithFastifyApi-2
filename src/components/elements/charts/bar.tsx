@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
 
@@ -35,6 +35,24 @@ const initialState: IComponentState = {
   },
 };
 
+type IAction =
+  | { type: 'SET_OPTIONS'; payload: IComponentState['options'] }
+  | { type: 'SET_DATA'; payload: IComponentState['data'] }
+  | { type: 'SET_IS_LOADING'; payload: IComponentState['isLoading'] };
+
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case 'SET_OPTIONS':
+      return { ...state, options: action.payload };
+    case 'SET_DATA':
+      return { ...state, data: action.payload };
+    case 'SET_IS_LOADING':
+      return { ...state, isLoading: action.payload };
+    default:
+      return state;
+  }
+};
+
 type IComponentProps = {
   labels: string[];
   data: any[];
@@ -42,9 +60,7 @@ type IComponentProps = {
 };
 
 export default function ComponentChartBar(props: IComponentProps) {
-  const [options, setOptions] = useState(initialState.options);
-  const [data, setData] = useState(initialState.data);
-  const [isLoading, setIsLoading] = useState(initialState.isLoading);
+  const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     init();
@@ -59,30 +75,33 @@ export default function ComponentChartBar(props: IComponentProps) {
     gradientBar.addColorStop(0, '#6e3a87');
     gradientBar.addColorStop(1, 'rgba(154, 85, 255, 1)');
 
-    setData({
-      labels: props.labels,
-      datasets: [
-        {
-          label: props.label,
-          borderColor: gradientBar,
-          backgroundColor: gradientBar,
-          hoverBackgroundColor: gradientBar,
-          borderWidth: 1,
-          data: props.data,
-        },
-      ],
+    dispatch({
+      type: 'SET_DATA',
+      payload: {
+        labels: props.labels,
+        datasets: [
+          {
+            label: props.label,
+            borderColor: gradientBar,
+            backgroundColor: gradientBar,
+            hoverBackgroundColor: gradientBar,
+            borderWidth: 1,
+            data: props.data,
+          },
+        ],
+      },
     });
-    setIsLoading(false);
-  }
+    dispatch({ type: 'SET_IS_LOADING', payload: false });
+  };
 
-  return isLoading ? (
+  return state.isLoading ? (
     <Spinner animation="border" />
   ) : (
     <Bar
       itemRef="chart"
       className="chartLegendContainer"
-      data={data}
-      options={options}
+      data={state.data}
+      options={state.options}
     />
   );
 }

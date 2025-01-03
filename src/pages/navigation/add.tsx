@@ -117,7 +117,10 @@ export default function PageNavigationAdd() {
 
   const queries = router.query as IPageQueries;
 
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    langId: mainLangId,
+  });
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>({
       ...initialFormState,
@@ -211,14 +214,14 @@ export default function PageNavigationAdd() {
     }
   };
 
-  const getItem = async (langId?: string) => {
+  const getItem = async (_langId?: string) => {
     if (formState._id) {
-      langId = langId || mainLangId;
+      _langId = _langId || state.langId;
 
       const serviceResult = await NavigationService.getWithId(
         {
           _id: formState._id,
-          langId: langId,
+          langId: _langId,
         },
         abortController.signal
       );
@@ -230,10 +233,10 @@ export default function PageNavigationAdd() {
           parentId: item.parentId?._id || '',
           contents: {
             ...item.contents,
-            langId: langId,
+            langId: _langId,
           },
         });
-        if (langId == mainLangId) {
+        if (_langId == mainLangId) {
           dispatch({
             type: 'SET_MAIN_TITLE',
             payload: item.contents?.title || '',

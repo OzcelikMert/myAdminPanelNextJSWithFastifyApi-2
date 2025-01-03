@@ -46,7 +46,6 @@ export default function PageSettingsContactForms() {
   const appDispatch = useAppDispatch();
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
-  const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
   const [items, setItems] = useState(initialState.items);
   const selectedItemFormReducer = useFormReducer(initialSelectedItemFormState);
