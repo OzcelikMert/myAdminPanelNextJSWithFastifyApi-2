@@ -35,27 +35,22 @@ export default function ComponentToolSidebar() {
     findActiveItems(sidebarNavs);
   };
 
-  const findActiveItems = (
-    sidebarSubPaths: ISidebarPath[],
-    stateKey?: string
-  ) => {
+  const findActiveItems = (sidebarSubPaths: ISidebarPath[]) => {
     for (const sidebarNav of sidebarSubPaths) {
       if (router.asPath.startsWith(sidebarNav.path)) {
         toggleItemState(sidebarNav.state);
       }
 
-      if (sidebarNav.subPaths)
-        findActiveItems(sidebarNav.subPaths, sidebarNav.state);
+      if (sidebarNav.subPaths) findActiveItems(sidebarNav.subPaths);
     }
   };
 
   const toggleItemState = (stateKey?: string) => {
     if (stateKey) {
-      setActiveItems((state) => {
-        const _state = clone(state);
-        _state.activeItems[stateKey] = !_state.activeItems[stateKey];
-        return _state;
-      });
+      setActiveItems({
+        ...activeItems,
+        [stateKey]: !activeItems[stateKey],
+      })
     }
   };
 

@@ -15,6 +15,7 @@ import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import { selectTranslation } from '@lib/features/translationSlice';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items: IGalleryGetResultService[];
@@ -73,13 +74,25 @@ export default function PageGalleryList(props: IComponentProps) {
   const t = useAppSelector(selectTranslation);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
-  useEffect(() => {
+  useDidMountHook(() => {
+    console.log("list gallery did mount hook");
+    init();
+
+    return () => {
+      console.log("list gallery did mount hook return");
+      abortController.abort();
+      toast?.hide();
+    };
+  }, [])
+
+  /*useEffect(() => {
+    console.log("list gallery", abortController);
     init();
     return () => {
       abortController.abort();
       toast?.hide();
     };
-  }, []);
+  }, []);*/
 
   useEffect(() => {
     if (props.uploadedImages) {
@@ -100,12 +113,10 @@ export default function PageGalleryList(props: IComponentProps) {
   const setPageTitle = () => {
     appDispatch(setBreadCrumbState([
       {
-        title: t('gallery'),
-        url: EndPoints.GALLERY_WITH.LIST
+        title: t('gallery')
       },
       {
-        title: t('upload'),
-        url: EndPoints.GALLERY_WITH.UPLOAD
+        title: t('list')
       }
     ]));
   }

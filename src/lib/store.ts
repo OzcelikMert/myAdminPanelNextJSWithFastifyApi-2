@@ -1,4 +1,4 @@
-import { configureStore, Reducer } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import logger from "redux-logger";
 import { appReducer } from './features/appSlice';
 import { pageReducer } from './features/pageSlice';
@@ -8,7 +8,7 @@ import { translationReducer } from './features/translationSlice';
 import { breadCrumbReducer } from './features/breadCrumbSlice';
 import { routeReducer } from './features/routeSlice';
 
-
+const isProduction = process.env.RUN_TYPE === "production";
 export const makeStore = () => configureStore({
   reducer: {
     appState: appReducer,
@@ -20,7 +20,7 @@ export const makeStore = () => configureStore({
     routeState: routeReducer
   },
   devTools: true,
-  middleware: (gDM) => process.env.RUN_TYPE !== "production" ? gDM().concat(logger) : gDM()
+  //middleware: (gDM) => (isProduction ? gDM().concat(logger) : gDM())
 });
 
 

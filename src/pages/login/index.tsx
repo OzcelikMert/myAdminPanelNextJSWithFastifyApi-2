@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import ThemeInputType from '@components/elements/form/input/type';
 import { AuthService } from '@services/auth.service';
 import { IUserGetResultService } from 'types/services/user.service';
@@ -16,6 +16,7 @@ import { setSessionAuthState } from '@lib/features/sessionSlice';
 import { useRouter } from 'next/router';
 import ComponentForm from '@components/elements/form';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
+import { set } from 'lodash';
 
 type IComponentState = {
   isWrong: boolean;
@@ -68,7 +69,7 @@ export default function PageLogin() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, onChangeInput } = useFormReducer<IComponentFormState>({
+  const { formState, setFormState, onChangeInput } = useFormReducer<IComponentFormState>({
     ...initialFormState,
     email: LocalStorageUtil.getKeepMeEmail(),
     keepMe: LocalStorageUtil.getKeepMeEmail().length > 0,
@@ -93,7 +94,7 @@ export default function PageLogin() {
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     dispatch({ type: 'SET_IS_WRONG', payload: false });
-
+    
     const serviceResult = await AuthService.login(
       formState,
       abortController.signal
@@ -137,6 +138,7 @@ export default function PageLogin() {
         <div className="row">
           <div className="col-md-12 mb-3">
             <ThemeInputType
+              key="email"
               title={t('email')}
               type="email"
               name="email"
@@ -215,7 +217,7 @@ export default function PageLogin() {
           <div className="col-lg-6 d-flex align-items-center justify-content-center login-half-form">
             <div className="auth-form-transparent text-left p-3">
               <h4 className="text-center">{t('loginPanel')}</h4>
-              <LoginForm />
+              {LoginForm()}
             </div>
           </div>
           <div className="col-lg-6 login-half-bg d-flex flex-row">

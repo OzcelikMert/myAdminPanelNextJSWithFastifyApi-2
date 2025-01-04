@@ -3,7 +3,7 @@ import { ApiErrorCodes } from '@library/api/errorCodes';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { setIsSessionAuthCheckedState, setSessionAuthState } from '@lib/features/sessionSlice';
 import { useRouter } from 'next/router';
 

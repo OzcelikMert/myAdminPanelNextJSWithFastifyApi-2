@@ -1,11 +1,12 @@
 type IComponentProps = {
   text?: string;
+  className?: string
 };
 
 export default function ComponentFormLoadingButton(props: IComponentProps) {
   return (
     <button
-      className="btn btn-gradient-dark float-end btn-save"
+      className={`${props.className} btn btn-gradient-dark float-end btn-save`}
       disabled={true}
       type={'button'}
     >

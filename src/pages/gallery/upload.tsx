@@ -60,8 +60,7 @@ export default function PageGalleryUpload(props: IComponentProps) {
         url: EndPoints.GALLERY_WITH.LIST
       },
       {
-        title: t('upload'),
-        url: EndPoints.GALLERY_WITH.UPLOAD
+        title: t('upload')
       }
     ]));
   }

@@ -16,14 +16,14 @@ export default function ComponentThemeBreadCrumb() {
       {breadCrumbs.map((item, index) => (
         <span>
           <Link href={item.url ?? '#'}>
-            <label className="badge badge-gradient-dark ms-2">
+            <span className="badge badge-gradient-dark ms-2">
               {item.title}
-            </label>
+            </span>
           </Link>
           {breadCrumbs.length != index + 1 ? (
-            <label className="badge badge-gradient-primary ms-2">
+            <span className="badge badge-gradient-primary ms-2">
               <i className="mdi mdi-arrow-right"></i>
-            </label>
+            </span>
           ) : null}
         </span>
       ))}

@@ -21,7 +21,7 @@ type IComponentState = {
 };
 
 const initialState: IComponentState = {
-  isDarkTheme: LocalStorageUtil.getTheme() == 'dark',
+  isDarkTheme: false,
 };
 
 export default function ComponentToolNavbar() {
@@ -32,7 +32,7 @@ export default function ComponentToolNavbar() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
-  const [isDarkTheme, setIsDarkTheme] = useState(initialState.isDarkTheme);
+  const [isDarkTheme, setIsDarkTheme] = useState(LocalStorageUtil.getTheme() == 'dark');
 
   useEffect(() => {
     return () => {

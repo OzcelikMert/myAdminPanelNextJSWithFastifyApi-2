@@ -14,6 +14,7 @@ import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
 import { setRouteState } from '@lib/features/routeSlice';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setIsSessionAuthCheckedState } from '@lib/features/sessionSlice';
 
 type IComponentProps = {
   children: React.ReactNode;
@@ -35,6 +36,7 @@ export default function ComponentProviderNoSSR({
     const handleRouteChange = (url: string) => {
       if (routeState.pathname !== url) {
         appDispatch(setIsPageLoadingState(true));
+        appDispatch(setIsSessionAuthCheckedState(false));
         appDispatch(
           setRouteState({
             pathname: router.pathname,

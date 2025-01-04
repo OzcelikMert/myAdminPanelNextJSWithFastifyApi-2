@@ -90,8 +90,12 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
   let view: IJodit | null = null;
 
   useEffect(() => {
-    dispatch({ type: 'SET_IS_LOADING', payload: false });
+    init();
   }, []);
+
+  const init = () => {
+    dispatch({ type: 'SET_IS_LOADING', payload: false });
+  }
 
   const onClickChooseImage = async (_view: any) => {
     view = _view;

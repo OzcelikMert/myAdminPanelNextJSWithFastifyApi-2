@@ -1,8 +1,11 @@
+import { cloneDeepWith } from 'lodash';
 import React, { Component } from 'react';
+
+type ISetFormStateFuncParam<T> = (state: T) => T
 
 export type IUseFormReducer<T = any> = {
   formState: T;
-  setFormState: (state: Partial<T>) => void;
+  setFormState: (state: Partial<T> | ISetFormStateFuncParam<T>) => void;
   onChangeInput: (event: React.ChangeEvent<any>) => void;
   onChangeSelect: (name: string | undefined, value: any) => any;
 };
@@ -35,24 +38,25 @@ function setDataWithKeys(
   return data;
 }
 
-type IAction =
-  | { type: 'SET_STATE'; payload: { value: any } }
+type IAction<T> =
+  | { type: 'SET_STATE'; payload: { value: Partial<T> | ISetFormStateFuncParam<T> } }
   | { type: 'UPDATE_FIELD'; payload: { name: string; value: any } }
   | { type: 'UPDATE_SELECT'; payload: { name: string; value: any } };
 
-function formReducer(state: any, action: IAction): any {
+function formReducer<T>(state: T, action: IAction<T>): T {
   switch (action.type) {
     case 'SET_STATE': {
       const { value } = action.payload;
-      return Object.assign(state, value);
+      return {...state, ...(typeof value === "function" ? value(state) : value)};
     }
     case 'UPDATE_FIELD': {
       const { name, value } = action.payload;
-      return setDataWithKeys({ ...state }, name.split('.'), value);
+      const keys = name.split('.');
+      return setDataWithKeys(cloneDeepWith(state), keys, value);
     }
     case 'UPDATE_SELECT': {
       const { name, value } = action.payload;
-      let newState = { ...state };
+      let newState = cloneDeepWith(state);
       const keys = name.split('.');
       if (Array.isArray(value)) {
         newState = setDataWithKeys(newState, keys, []);
@@ -73,7 +77,7 @@ function formReducer(state: any, action: IAction): any {
 export function useFormReducer<T>(initialState: T): IUseFormReducer<T> {
   const [formState, dispatch] = React.useReducer(formReducer, initialState);
 
-  const onChangeInput = (event: React.ChangeEvent<any>) => {
+  const onChangeInput: IUseFormReducer<T>["onChangeInput"] = (event) => {
     const { name, type, value, checked } = event.target;
     if (name) {
       const newValue =
@@ -87,13 +91,13 @@ export function useFormReducer<T>(initialState: T): IUseFormReducer<T> {
     }
   };
 
-  const onChangeSelect = (name: string | undefined, value: any) => {
+  const onChangeSelect: IUseFormReducer<T>["onChangeSelect"] = (name, value) => {
     if (name) {
       dispatch({ type: 'UPDATE_SELECT', payload: { name, value } });
     }
   };
 
-  const setFormState = (state: Partial<T>) => {
+  const setFormState: IUseFormReducer<T>["setFormState"] = (state) => {
     dispatch({ type: 'SET_STATE', payload: { value: state } });
   };
 

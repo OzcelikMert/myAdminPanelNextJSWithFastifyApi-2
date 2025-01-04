@@ -127,6 +127,14 @@ export default function PageNavigationAdd() {
       _id: queries._id || '',
     });
 
+  useEffect(() => {
+    init();
+
+    return () => {
+      abortController.abort();
+    };
+  }, []);
+
   const init = async () => {
     const minPermission = formState._id
       ? NavigationEndPointPermission.UPDATE
@@ -149,14 +157,6 @@ export default function PageNavigationAdd() {
       appDispatch(setIsPageLoadingState(false));
     }
   };
-
-  useEffect(() => {
-    init();
-
-    return () => {
-      abortController.abort();
-    };
-  }, []);
 
   const changeLanguage = async (langId: string) => {
     appDispatch(setIsPageLoadingState(true));

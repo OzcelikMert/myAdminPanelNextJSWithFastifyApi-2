@@ -38,7 +38,7 @@ export default function ComponentForm(props: IComponentProps) {
     return (
       <button
         type={'submit'}
-        className={`btn btn-gradient-success btn-save ${props.submitButtonClassName ?? ''}`}
+        className={`btn-save ${props.submitButtonClassName ?? 'btn btn-gradient-success'}`}
         disabled={isSubmitting}
       >
         {props.submitButtonText}
@@ -60,7 +60,7 @@ export default function ComponentForm(props: IComponentProps) {
         {props.hideSubmitButton ? null : !isSubmitting ? (
           <SubmitButton />
         ) : (
-          <ComponentFormLoadingButton text={props.submitButtonSubmittingText} />
+          <ComponentFormLoadingButton text={props.submitButtonSubmittingText} className={props.submitButtonClassName} />
         )}
       </div>
     </form>
