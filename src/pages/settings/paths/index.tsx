@@ -18,6 +18,7 @@ import { EndPoints } from '@constants/endPoints';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items?: ISettingPathModel[];
@@ -57,12 +58,12 @@ export default function PageSettingsPaths() {
     );
   const formReducer = useFormReducer<IComponentFormState>(initialFormState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

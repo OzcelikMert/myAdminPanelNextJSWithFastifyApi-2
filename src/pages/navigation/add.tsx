@@ -27,6 +27,7 @@ import {
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items: IThemeFormSelectData<string>[];
@@ -127,13 +128,13 @@ export default function PageNavigationAdd() {
       _id: queries._id || '',
     });
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
 
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     const minPermission = formState._id

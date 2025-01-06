@@ -46,6 +46,7 @@ import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 const ComponentThemeRichTextBox = dynamic(
   () => import('@components/theme/richTextBox'),
@@ -214,12 +215,12 @@ export default function PagePostAdd() {
       _id: queries._id ?? '',
     });
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     const methodType = formState._id

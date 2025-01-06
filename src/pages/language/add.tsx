@@ -28,6 +28,7 @@ import {
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   mainTabActiveKey: string;
@@ -129,12 +130,12 @@ export default function PageSettingLanguageAdd() {
     }
   };
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const setPageTitle = () => {
     const breadCrumbs: IBreadCrumbData[] = [

@@ -26,6 +26,7 @@ import { selectTranslation } from '@lib/features/translationSlice';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { useRouter } from 'next/router';
+import { useDidMountHook } from '@library/react/customHooks';
 
 const WorldMap = dynamic(() => import('react-svg-worldmap'), { ssr: false });
 
@@ -94,7 +95,7 @@ export default function PageDashboard() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       if (timer) {
@@ -102,7 +103,7 @@ export default function PageDashboard() {
       }
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     setPageTitle();
@@ -111,7 +112,6 @@ export default function PageDashboard() {
     await getSettings();
     await getLastPosts();
     appDispatch(setIsPageLoadingState(false));
-    reportTimer();
   };
 
   const setPageTitle = () => {
@@ -122,15 +122,6 @@ export default function PageDashboard() {
         },
       ])
     );
-  };
-
-  const reportTimer = () => {
-    if (timer) {
-      clearInterval(timer);
-    }
-    timer = setInterval(async () => {
-      await getViewNumber();
-    }, 10000);
   };
 
   const getViewNumber = async () => {
@@ -467,9 +458,9 @@ export default function PageDashboard() {
 
   return isPageLoading ? null : (
     <div className="page-dashboard">
-      <Reports />
-      <ReportTwo />
-      <LastPost />
+      {Reports()}
+      {ReportTwo()}
+      {LastPost()}
     </div>
   );
 }

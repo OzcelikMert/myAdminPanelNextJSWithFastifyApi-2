@@ -20,6 +20,7 @@ import { selectTranslation } from '@lib/features/translationSlice';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
 import { SortUtil } from '@utils/sort.util';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items: IComponentGetResultService[];
@@ -43,13 +44,13 @@ export default function PageComponentList() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
 
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

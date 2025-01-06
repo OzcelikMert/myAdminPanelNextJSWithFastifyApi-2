@@ -17,6 +17,7 @@ import { EndPoints } from '@constants/endPoints';
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { SortUtil } from '@utils/sort.util';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items: ISubscriberGetResultService[];
@@ -44,12 +45,12 @@ export default function PageSubscribers() {
     IComponentState['selectedItems']
   >(initialState.selectedItems);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

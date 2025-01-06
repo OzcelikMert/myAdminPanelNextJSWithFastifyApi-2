@@ -23,6 +23,7 @@ import { selectTranslation } from '@lib/features/translationSlice';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { SortUtil } from '@utils/sort.util';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items: IUserGetResultService[];
@@ -71,12 +72,12 @@ export default function PageUserList() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

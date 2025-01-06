@@ -30,6 +30,7 @@ import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   panelLanguages: IThemeFormSelectData[];
@@ -101,12 +102,12 @@ export default function PageSettingsGeneral() {
       panelLangId: LocalStorageUtil.getLanguageId().toString(),
     });
 
-  useEffect(() => {
+    useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

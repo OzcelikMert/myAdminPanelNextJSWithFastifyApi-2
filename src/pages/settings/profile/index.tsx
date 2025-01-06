@@ -24,6 +24,7 @@ import ComponentForm from '@components/elements/form';
 import ComponentFormType from '@components/elements/form/input/type';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   isImageChanging: boolean;
@@ -83,12 +84,12 @@ export default function PageSettingsProfile() {
   const { formState, setFormState, onChangeInput } =
     useFormReducer(initialFormState);
 
-  useEffect(() => {
+    useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     await getUser();

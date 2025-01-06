@@ -24,6 +24,7 @@ import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
 import { SortUtil } from '@utils/sort.util';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items: INavigationGetResultService[];
@@ -80,12 +81,12 @@ export default function PageNavigationList() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

@@ -5,6 +5,7 @@ import { Config } from 'jodit/types/config';
 import Spinner from 'react-bootstrap/Spinner';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IJodit } from 'jodit/types/types';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   value: string;
@@ -89,9 +90,9 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
   const ref = useRef<JoditReact>(null);
   let view: IJodit | null = null;
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
-  }, []);
+  });
 
   const init = () => {
     dispatch({ type: 'SET_IS_LOADING', payload: false });

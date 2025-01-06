@@ -9,6 +9,7 @@ import { selectTranslation } from '@lib/features/translationSlice';
 import { EndPoints } from '@constants/endPoints';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   isDragging: boolean;
@@ -38,13 +39,13 @@ export default function PageGalleryUpload(props: IComponentProps) {
   const maxFileSize: number = Number(process.env.UPLOAD_FILE_SIZE ?? 1524000);
   const abortController = new AbortController();
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
 
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = () => {
     if (!props.isModal) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useRef } from 'react';
 import DataTable, { TableProps } from 'react-data-table-component';
 import ComponentTableToggleMenu, {
   IComponentTableToggleMenuItem,
@@ -30,7 +30,10 @@ type IAction =
   | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
   | { type: 'SET_SEARCH_KEY'; payload: IComponentState['searchKey'] }
   | { type: 'SET_CLEAR_SELECTED_ROWS'; payload: boolean }
-  | { type: 'SET_ACTIVE_FILTER_BUTTON_INDEX'; payload: IComponentState['activeFilterButtonIndex'] }
+  | {
+      type: 'SET_ACTIVE_FILTER_BUTTON_INDEX';
+      payload: IComponentState['activeFilterButtonIndex'];
+    }
   | { type: 'SET_SHOWING_ITEMS'; payload: IComponentState['showingItems'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
@@ -48,7 +51,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
     default:
       return state;
   }
-}
+};
 
 type IComponentPropI18 = {
   search?: string;
@@ -76,14 +79,18 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     showingItems: props.data,
   });
 
-  let listPage = 0;
-  let listPagePerCount = 10;
+  const didMount = useRef<boolean>(false);
+  const listPage = useRef<number>(0);
+  const listPagePerCount = useRef<number>(10);
 
   useEffect(() => {
-    resetTableList();
+    if (didMount.current) {
+      resetTableList();
+    }
+    didMount.current = true;
   }, [props.data]);
 
-  const resetTableList = () => {
+  const resetTableList = (firstRender?: boolean) => {
     dispatch({ type: 'SET_SELECTED_ITEMS', payload: [] });
     dispatch({
       type: 'SET_CLEAR_SELECTED_ROWS',
@@ -94,8 +101,8 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
 
   const getItemListForPage = () => {
     return props.data.slice(
-      listPagePerCount * listPage,
-      (listPage + 1) * listPagePerCount
+      listPagePerCount.current * listPage.current,
+      (listPage.current + 1) * listPagePerCount.current
     );
   };
 
@@ -147,32 +154,35 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     dispatch({ type: 'SET_SEARCH_KEY', payload: searchKey });
     // Find Searched Items for Showing Items
     let searchedItems = props.data.filter((item: any) => {
-      let isFound = false;
-      // Search by searchableKeys
-      props.searchableKeys?.forEach((searchableKey) => {
-        // Split searchableKey by '.'
-        let keys = searchableKey.split('.');
-        // Clone item
-        let newData = cloneDeepWith(item);
-        // Loop through keys
-        for (let i = 0; i < keys.length; i++) {
-          if (item[keys[i]]) {
-            // Assign new data
-            newData = cloneDeepWith(newData[keys[i]]);
-          } else {
-            newData = null;
-            break;
+      let isFound = true;
+      if (props.searchableKeys) {
+        // Search by searchableKeys
+        props.searchableKeys.forEach((searchableKey) => {
+          // Split searchableKey by '.'
+          let keys = searchableKey.split('.');
+          // Clone item
+          let newData = cloneDeepWith(item);
+          // Loop through keys
+          for (let i = 0; i < keys.length; i++) {
+            if (item[keys[i]]) {
+              // Assign new data
+              newData = cloneDeepWith(newData[keys[i]]);
+            } else {
+              newData = null;
+              break;
+            }
           }
-        }
-        if (newData) {
-          // Search newData by searchKey
-          if (newData.toString().toLowerCase().search(searchKey) > -1) {
-            isFound = true;
+          if (newData) {
+            // Search newData by searchKey
+            if (newData.toString().toLowerCase().search(searchKey) < 0) {
+              isFound = false;
+            }
           }
-        }
-      });
+        });
+      }
       return isFound;
     });
+
     // Set Showing Items
     dispatch({ type: 'SET_SHOWING_ITEMS', payload: searchedItems });
   };
@@ -182,10 +192,10 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     dispatch({ type: 'SET_SHOWING_ITEMS', payload: filteredItems });
     dispatch({ type: 'SET_ACTIVE_FILTER_BUTTON_INDEX', payload: index });
     resetTableList();
-    if(props.onClickFilterButton){
+    if (props.onClickFilterButton) {
       props.onClickFilterButton(item);
     }
-  }
+  };
 
   const getColumns = () => {
     let columns = [
@@ -288,7 +298,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           pagination
           highlightOnHover
           onChangePage={(page: number, totalRows: number) => {
-            listPage = page - 1;
+            listPage.current = page - 1;
             dispatch({
               type: 'SET_CLEAR_SELECTED_ROWS',
               payload: !state.clearSelectedRows,

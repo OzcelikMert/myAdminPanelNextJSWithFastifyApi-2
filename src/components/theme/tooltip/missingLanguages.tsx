@@ -3,6 +3,7 @@ import ComponentToolTip from '@components/elements/tooltip';
 import { useEffect, useState } from 'react';
 import { useAppSelector } from '@lib/hooks';
 import { selectTranslation } from '@lib/features/translationSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   missingLanguages: ILanguageGetResultService[];
@@ -28,9 +29,9 @@ export default function ComponentThemeToolTipMissingLanguages(
   const t = useAppSelector(selectTranslation);
   const languages = useAppSelector((state) => state.settingState.languages);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
-  }, []);
+  });
 
   const init = () => {
     setMissingLanguages(findMissingLanguages());

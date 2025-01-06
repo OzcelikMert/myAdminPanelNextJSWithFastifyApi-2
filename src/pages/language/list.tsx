@@ -18,6 +18,7 @@ import { useRouter } from 'next/router';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { SortUtil } from '@utils/sort.util';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items: ILanguageGetResultService[];
@@ -76,12 +77,12 @@ export default function PageSettingLanguageList() {
     }
   };
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const setPageTitle = () => {
     appDispatch(

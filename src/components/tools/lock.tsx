@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from '@lib/hooks';
 import { setSessionAuthState } from '@lib/features/sessionSlice';
 import { setIsLockState } from '@lib/features/appSlice';
 import { selectTranslation } from '@lib/features/translationSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   isSubmitting: boolean;
@@ -42,11 +43,11 @@ export default function ComponentToolLock() {
   const { formState, onChangeInput, setFormState } =
     useFormReducer<IComponentFormState>(initialFormState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     return () => {
       abortController.abort();
     };
-  }, []);
+  })
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     setIsSubmitting(true);

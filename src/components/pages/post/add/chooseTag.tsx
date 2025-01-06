@@ -15,6 +15,7 @@ import { selectTranslation } from '@lib/features/translationSlice';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
 import ComponentFormSelect from '@components/elements/form/input/select';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   isShowModal: boolean;
@@ -53,11 +54,11 @@ export default function ComponentPagePostAddChooseTag(props: IComponentProps) {
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>(initialFormState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const onAddNew = async () => {
     setIsSubmitting(true);

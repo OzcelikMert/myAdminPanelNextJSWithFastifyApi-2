@@ -25,6 +25,7 @@ import { selectTranslation } from '@lib/features/translationSlice';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormSelect from '@components/elements/form/input/select';
+import { useDidMountHook } from '@library/react/customHooks';
 
 const ComponentThemeRichTextBox = dynamic(
   () => import('@components/theme/richTextBox'),
@@ -95,9 +96,9 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
-  }, []);
+  });
 
   const init = () => {
     findDefaultVariation();

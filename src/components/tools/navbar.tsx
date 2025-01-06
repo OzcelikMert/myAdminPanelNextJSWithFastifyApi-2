@@ -15,6 +15,7 @@ import { setIsLockState } from '@lib/features/appSlice';
 import { setSessionAuthState } from '@lib/features/sessionSlice';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
 import { selectTranslation } from '@lib/features/translationSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   isDarkTheme: boolean;
@@ -34,11 +35,11 @@ export default function ComponentToolNavbar() {
 
   const [isDarkTheme, setIsDarkTheme] = useState(LocalStorageUtil.getTheme() == 'dark');
 
-  useEffect(() => {
+  useDidMountHook(() => {
     return () => {
       abortController.abort();
     };
-  }, []);
+  })
 
   const toggleOffCanvas = () => {
     (

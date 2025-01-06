@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ComponentToolNavbar from '@components/tools/navbar';
 import ComponentToolSidebar from '@components/tools/sidebar';
 import ComponentToolFooter from '@components/tools/footer';
@@ -12,16 +12,14 @@ import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentToolLock from '@components/tools/lock';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { setRouteState } from '@lib/features/routeSlice';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { setIsSessionAuthCheckedState } from '@lib/features/sessionSlice';
 
 type IComponentProps = {
   children: React.ReactNode;
   statusCode?: number;
 };
 
-export default function ComponentProviderNoSSR({
+export default function ComponentApp({
   children,
   statusCode,
 }: IComponentProps) {
@@ -30,30 +28,17 @@ export default function ComponentProviderNoSSR({
   const appState = useAppSelector((state) => state.appState);
   const breadCrumb = useAppSelector((state) => state.breadCrumbState.data);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
-  const routeState = useAppSelector((state) => state.routeState);
 
+  const pathname = useRef<string>(router.pathname);
+  
   useEffect(() => {
-    const handleRouteChange = (url: string) => {
-      if (routeState.pathname !== url) {
-        appDispatch(setIsPageLoadingState(true));
-        appDispatch(setIsSessionAuthCheckedState(false));
-        appDispatch(
-          setRouteState({
-            pathname: router.pathname,
-            query: router.query,
-          })
-        );
-        window.scrollTo(0, 0);
-        document.body.scrollTop = 0;
-      }
-    };
-
-    router.events.on('routeChangeComplete', handleRouteChange);
-
-    return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
-    };
-  }, [router]);
+    if(router.asPath != pathname.current){
+      appDispatch(setIsPageLoadingState(true));
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      pathname.current = router.asPath;
+    }
+  }, [router.asPath]);
 
   if (router.asPath === '/' || typeof statusCode !== 'undefined') {
     router.replace(EndPoints.LOGIN);
@@ -90,28 +75,30 @@ export default function ComponentProviderNoSSR({
         <ComponentSpinnerDonut customClass="app-spinner" />
       ) : null}
       <ComponentProviderAppInit>
-        <ComponentProviderAuth>
-          <div className="container-scroller">
-            {appState.isLock ? <ComponentToolLock /> : null}
-            <ToastContainer />
-            {!isFullPageLayout ? <ComponentToolNavbar /> : null}
-            <div
-              className={`container-fluid page-body-wrapper ${isFullPageLayout ? 'full-page-wrapper' : ''}`}
-            >
-              {!isFullPageLayout ? <ComponentToolSidebar /> : null}
-              <div className="main-panel">
-                <div className="content-wrapper">
-                  {isPageLoading ? (
-                    <ComponentSpinnerDonut customClass="page-spinner" />
-                  ) : null}
-                  {!isFullPageLayout ? <PageHeader /> : null}
-                  {children}
-                </div>
-                {!isFullPageLayout ? <ComponentToolFooter /> : null}
+        <div className="container-scroller">
+          {appState.isLock ? <ComponentToolLock /> : null}
+          <ToastContainer />
+          {!isFullPageLayout ? <ComponentToolNavbar /> : null}
+          <div
+            className={`container-fluid page-body-wrapper ${isFullPageLayout ? 'full-page-wrapper' : ''}`}
+          >
+            {!isFullPageLayout ? <ComponentToolSidebar /> : null}
+            <div className="main-panel">
+              <div className="content-wrapper">
+                {isPageLoading ? (
+                  <ComponentSpinnerDonut customClass="page-spinner" />
+                ) : null}
+                {!isFullPageLayout ? <PageHeader /> : null}
+                {
+                  router.asPath == pathname.current
+                    ?  <ComponentProviderAuth>{children}</ComponentProviderAuth>
+                    : null
+                }
               </div>
+              {!isFullPageLayout ? <ComponentToolFooter /> : null}
             </div>
           </div>
-        </ComponentProviderAuth>
+        </div>
       </ComponentProviderAppInit>
     </div>
   );

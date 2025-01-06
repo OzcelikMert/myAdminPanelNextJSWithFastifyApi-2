@@ -9,6 +9,7 @@ import { EndPoints } from '@constants/endPoints';
 import ComponentForm from '@components/elements/form';
 import ComponentFormType from '@components/elements/form/input/type';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentFormState = {
   password: string;
@@ -32,12 +33,12 @@ export default function PageChangePassword() {
   const { formState, setFormState, onChangeInput } =
     useFormReducer<IComponentFormState>(initialFormState);
 
-  useEffect(() => {
+    useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     setPageTitle();

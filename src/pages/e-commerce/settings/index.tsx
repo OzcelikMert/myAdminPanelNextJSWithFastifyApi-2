@@ -19,6 +19,7 @@ import { setIsPageLoadingState } from '@lib/features/pageSlice';
 import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
 import { setCurrencyIdState } from '@lib/features/settingSlice';
 import ComponentForm from '@components/elements/form';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   currencyTypes: IThemeFormSelectData[];
@@ -99,13 +100,13 @@ export default function PageECommerceSettings() {
     }
   };
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
 
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const setPageTitle = () => {
     appDispatch(

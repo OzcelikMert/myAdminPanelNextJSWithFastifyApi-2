@@ -12,7 +12,8 @@ import {
   ChartData,
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
-import { useEffect, useReducer } from 'react';
+import { useReducer } from 'react';
+import { useDidMountHook } from '@library/react/customHooks';
 
 ChartJS.register(
   CategoryScale,
@@ -82,9 +83,9 @@ type IComponentProps = {
 export default function ComponentChartLine(props: IComponentProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
-  }, []);
+  });
 
   const init = () => {
     const borderColor = '#1863d3';

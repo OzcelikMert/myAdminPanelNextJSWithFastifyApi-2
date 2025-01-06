@@ -19,6 +19,7 @@ import { EndPoints } from '@constants/endPoints';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentForm from '@components/elements/form';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items: ISettingContactFormModel[];
@@ -51,12 +52,12 @@ export default function PageSettingsContactForms() {
   const selectedItemFormReducer = useFormReducer(initialSelectedItemFormState);
   const formReducer = useFormReducer(initialFormState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

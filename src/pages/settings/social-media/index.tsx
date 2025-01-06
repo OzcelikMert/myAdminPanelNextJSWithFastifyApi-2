@@ -19,6 +19,7 @@ import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   items?: ISettingSocialMediaModel[];
@@ -51,12 +52,12 @@ export default function PageSettingsSocialMedia() {
   const formReducer = useFormReducer(initialFormState);
   const selectedItemFormReducer = useFormReducer(initialSelectedItemFormState);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

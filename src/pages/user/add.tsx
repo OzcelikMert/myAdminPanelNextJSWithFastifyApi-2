@@ -36,6 +36,7 @@ import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@lib/features/breadCrumbSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   mainTabActiveKey: string;
@@ -123,12 +124,12 @@ export default function PageUserAdd() {
       banDateEnd: new Date().getStringWithMask(DateMask.DATE),
     });
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     const minPermission = formState._id
@@ -472,7 +473,7 @@ export default function PageUserAdd() {
   };
 
   const userRole = userRoles.findSingle('id', formState.roleId);
-  
+
   return isPageLoading ? null : (
     <div className="page-settings page-user">
       <div className="row mb-3">

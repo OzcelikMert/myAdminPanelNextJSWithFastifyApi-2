@@ -14,6 +14,7 @@ import { setIsAppLoadingState } from '@lib/features/appSlice';
 import { PanelLanguageCodes, panelLanguages } from '@constants/panelLanguages';
 import { fetchTranslationState } from '@lib/features/translationSlice';
 import { LocalStorageUtil } from '@utils/localStorage.util';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentProps = {
   children: React.ReactNode;
@@ -27,12 +28,12 @@ export default function ComponentProviderAppInit({
   const appDispatch = useAppDispatch();
   const isAppLoading = useAppSelector((state) => state.appState.isLoading);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     await fetchLanguages();

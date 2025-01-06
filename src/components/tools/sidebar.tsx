@@ -9,6 +9,7 @@ import { EndPoints } from '@constants/endPoints';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
 import { useRouter } from 'next/router';
 import { selectTranslation } from '@lib/features/translationSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   activeItems: { [key: string]: any };
@@ -26,9 +27,9 @@ export default function ComponentToolSidebar() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     onRouteChanged();
-  }, []);
+  });
 
   const onRouteChanged = () => {
     setActiveItems(initialState.activeItems);

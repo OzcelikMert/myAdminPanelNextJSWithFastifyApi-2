@@ -3,9 +3,12 @@ import { ApiErrorCodes } from '@library/api/errorCodes';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
 import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { useEffect, useState } from 'react';
-import { setIsSessionAuthCheckedState, setSessionAuthState } from '@lib/features/sessionSlice';
+import { useState } from 'react';
+import {
+  setSessionAuthState,
+} from '@lib/features/sessionSlice';
 import { useRouter } from 'next/router';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   isAuth: boolean;
@@ -23,30 +26,24 @@ type IComponentProps = {
 
 export default function ComponentProviderAuth({ children }: IComponentProps) {
   const abortController = new AbortController();
-  
+
   const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
-  const isSessionAuthChecked = useAppSelector((state) => state.sessionState.isAuthChecked);
   const isAppLock = useAppSelector((state) => state.appState.isLock);
   const router = useRouter();
 
   const [isAuth, setIsAuth] = useState(initialState.isAuth);
   const [isLoading, setIsLoading] = useState(initialState.isLoading);
 
-  useEffect(() => {
+  useDidMountHook(() => {
+    init();
     return () => {
       abortController.abort();
     };
-  }, []);
-
-  useEffect(() => {
-    if(!isSessionAuthChecked){
-      init();
-    }
-  }, [isSessionAuthChecked]);
+  });
 
   const init = async () => {
-    if(!isLoading){
+    if (!isLoading) {
       setIsLoading(true);
     }
     await checkSession();
@@ -69,8 +66,6 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
     } else {
       setIsAuth(false);
     }
-
-    appDispatch(setIsSessionAuthCheckedState(true));
   };
 
   if (isLoading || abortController.signal.aborted) {

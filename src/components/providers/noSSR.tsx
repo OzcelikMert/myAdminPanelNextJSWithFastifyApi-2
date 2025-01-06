@@ -1,3 +1,4 @@
+import { useDidMountHook } from '@library/react/customHooks';
 import React, { Component, useEffect } from 'react';
 
 type IComponentState = {
@@ -15,9 +16,9 @@ type IComponentProps = {
 export default function ComponentProviderNoSSR( { children } : IComponentProps ) {
   const [isDidMount, setIsDidMount] = React.useState(initialState.isDidMount);
 
-  useEffect(() => {
+  useDidMountHook(() => {
     setIsDidMount(true);
-  }, []);
+  })
 
   return (
     <div suppressHydrationWarning>

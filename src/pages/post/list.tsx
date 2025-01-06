@@ -37,6 +37,7 @@ import {
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
 import { SortUtil } from '@utils/sort.util';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   typeId: PostTypeId;
@@ -109,12 +110,12 @@ export default function PagePostList() {
     typeId: Number(queries.postTypeId ?? PostTypeId.Blog),
   });
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   useEffect(() => {
     queries = router.query as IPageQueries;

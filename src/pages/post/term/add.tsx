@@ -29,6 +29,7 @@ import {
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   mainTabActiveKey: string;
@@ -131,12 +132,12 @@ export default function PagePostTermAdd(props: IComponentProps) {
       _id: queries._id ?? props._id ?? '',
     });
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     const methodType = formState._id

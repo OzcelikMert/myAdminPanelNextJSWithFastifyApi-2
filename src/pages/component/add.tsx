@@ -33,6 +33,7 @@ import {
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentForm from '@components/elements/form';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IHandleInputChangeParams = {
   index: number;
@@ -132,12 +133,12 @@ export default function PageComponentAdd() {
       initialSelectedItemFormState
     );
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     const minPermission = formReducer.formState._id

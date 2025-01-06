@@ -17,6 +17,7 @@ import { useRouter } from 'next/router';
 import ComponentForm from '@components/elements/form';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import { set } from 'lodash';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   isWrong: boolean;
@@ -75,13 +76,13 @@ export default function PageLogin() {
     keepMe: LocalStorageUtil.getKeepMeEmail().length > 0,
   });
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
 
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     setPageTitle();

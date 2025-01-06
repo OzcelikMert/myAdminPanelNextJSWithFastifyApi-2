@@ -29,7 +29,7 @@ const initialState: IComponentState = {
   isListLoading: true,
 };
 
-type IAction = 
+type IAction =
   | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
   | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
   | { type: 'SET_IS_LIST_LOADING'; payload: IComponentState['isListLoading'] };
@@ -53,8 +53,8 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       };
     default:
       return state;
-  };
-}
+  }
+};
 
 type IComponentProps = {
   isModal?: boolean;
@@ -68,35 +68,27 @@ export default function PageGalleryList(props: IComponentProps) {
   let toast: null | ComponentToast = null;
   const abortController = new AbortController();
 
-  const [state, dispatch] = useReducer(reducer, initialState);
-
   const appDispatch = useAppDispatch();
   const t = useAppSelector(selectTranslation);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
+  const [state, dispatch] = useReducer(reducer, initialState);
+
   useDidMountHook(() => {
-    console.log("list gallery did mount hook");
     init();
 
-    return () => {
-      console.log("list gallery did mount hook return");
-      abortController.abort();
-      toast?.hide();
-    };
-  }, [])
-
-  /*useEffect(() => {
-    console.log("list gallery", abortController);
-    init();
     return () => {
       abortController.abort();
       toast?.hide();
     };
-  }, []);*/
+  });
 
   useEffect(() => {
-    if (props.uploadedImages) {
-      dispatch({ type: 'SET_ITEMS', payload: state.items.concat(props.uploadedImages || []) });
+    if (props.uploadedImages && props.uploadedImages.length > 0) {
+      dispatch({
+        type: 'SET_ITEMS',
+        payload: state.items.concat(props.uploadedImages || []),
+      });
     }
   }, [props.uploadedImages]);
 
@@ -108,18 +100,20 @@ export default function PageGalleryList(props: IComponentProps) {
       setPageTitle();
       appDispatch(setIsPageLoadingState(false));
     }
-  }
+  };
 
   const setPageTitle = () => {
-    appDispatch(setBreadCrumbState([
-      {
-        title: t('gallery')
-      },
-      {
-        title: t('list')
-      }
-    ]));
-  }
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('gallery'),
+        },
+        {
+          title: t('list'),
+        },
+      ])
+    );
+  };
 
   const getItems = async () => {
     const serviceResult = await GalleryService.get(
@@ -129,7 +123,7 @@ export default function PageGalleryList(props: IComponentProps) {
     if (serviceResult.status && serviceResult.data) {
       dispatch({ type: 'SET_ITEMS', payload: serviceResult.data });
     }
-  }
+  };
 
   const onSelect = (images: IGalleryGetResultService[]) => {
     dispatch({ type: 'SET_SELECTED_ITEMS', payload: images });
@@ -142,8 +136,7 @@ export default function PageGalleryList(props: IComponentProps) {
               className="btn btn-gradient-success btn-icon-text w-100"
               onClick={() => onSubmit()}
             >
-              <i className="mdi mdi-check btn-icon-prepend"></i>{' '}
-              {t('okay')}
+              <i className="mdi mdi-check btn-icon-prepend"></i> {t('okay')}
             </button>
           ) : (
             <button
@@ -162,7 +155,7 @@ export default function PageGalleryList(props: IComponentProps) {
     } else {
       toast?.hide();
     }
-  }
+  };
 
   const onDelete = async () => {
     const result = await Swal.fire({
@@ -176,7 +169,7 @@ export default function PageGalleryList(props: IComponentProps) {
     if (result.isConfirmed) {
       toast?.hide();
       const loadingToast = new ComponentToast({
-        title:t('loading'),
+        title: t('loading'),
         content: t('deleting'),
         type: 'loading',
       });
@@ -187,7 +180,12 @@ export default function PageGalleryList(props: IComponentProps) {
       );
       loadingToast.hide();
       if (serviceResult.status) {
-        dispatch({ type: 'SET_ITEMS', payload: state.items.filter((item) => !state.selectedItems.includes(item)) });
+        dispatch({
+          type: 'SET_ITEMS',
+          payload: state.items.filter(
+            (item) => !state.selectedItems.includes(item)
+          ),
+        });
         dispatch({ type: 'SET_SELECTED_ITEMS', payload: [] });
         new ComponentToast({
           title: t('itemDeleted'),
@@ -197,7 +195,7 @@ export default function PageGalleryList(props: IComponentProps) {
         });
       }
     }
-  }
+  };
 
   const onSubmit = () => {
     if (props.onSubmit) {
@@ -210,7 +208,7 @@ export default function PageGalleryList(props: IComponentProps) {
         foundSelectedItems.map((selectedItem) => selectedItem.name)
       );
     }
-  }
+  };
 
   const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
     return [
@@ -271,32 +269,31 @@ export default function PageGalleryList(props: IComponentProps) {
         ),
       },
     ];
-  }
+  };
 
-    return isPageLoading ? null : (
-      <div className="page-gallery">
-        <div className="grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body">
-              <ComponentDataTable
-                columns={getTableColumns()}
-                data={state.items}
-                onSelect={(rows) => onSelect(rows)}
-                i18={{
-                  search: t('search'),
-                  noRecords: t('noRecords'),
-                }}
-                isSelectable={true}
-                searchableKeys={['name']}
-                isAllSelectable={!(props.isModal && !props.isMulti)}
-                isMultiSelectable={!(props.isModal && !props.isMulti)}
-                isSearchable={true}
-                progressPending={state.isListLoading}
-              />
-            </div>
+  return isPageLoading ? null : (
+    <div className="page-gallery">
+      <div className="grid-margin stretch-card">
+        <div className="card">
+          <div className="card-body">
+            <ComponentDataTable
+              columns={getTableColumns()}
+              data={state.items}
+              onSelect={(rows) => onSelect(rows)}
+              i18={{
+                search: t('search'),
+                noRecords: t('noRecords'),
+              }}
+              isSelectable={true}
+              searchableKeys={['name']}
+              isAllSelectable={!(props.isModal && !props.isMulti)}
+              isMultiSelectable={!(props.isModal && !props.isMulti)}
+              isSearchable={true}
+              progressPending={state.isListLoading}
+            />
           </div>
         </div>
       </div>
-    );
-  
+    </div>
+  );
 }

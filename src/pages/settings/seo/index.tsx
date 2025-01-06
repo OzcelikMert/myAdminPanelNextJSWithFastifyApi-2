@@ -16,6 +16,7 @@ import { setIsPageLoadingState } from '@lib/features/pageSlice';
 import ComponentForm from '@components/elements/form';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormTags from '@components/elements/form/input/tags';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   langId: string;
@@ -53,12 +54,12 @@ export default function PageSettingsSEO() {
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>(initialFormState);
 
-  useEffect(() => {
+    useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   const init = async () => {
     if (

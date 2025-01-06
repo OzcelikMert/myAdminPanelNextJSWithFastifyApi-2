@@ -30,6 +30,7 @@ import { IComponentTableFilterButton } from '@components/elements/table/filterBu
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { SortUtil } from '@utils/sort.util';
 import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useDidMountHook } from '@library/react/customHooks';
 
 type IComponentState = {
   typeId: PostTermTypeId;
@@ -107,12 +108,12 @@ export default function PagePostTermList() {
     postTypeId: Number(queries.postTypeId ?? PostTypeId.Blog),
   });
 
-  useEffect(() => {
+  useDidMountHook(() => {
     init();
     return () => {
       abortController.abort();
     };
-  }, []);
+  });
 
   useEffect(() => {
     queries = router.query as IPageQueries;
