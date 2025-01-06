@@ -282,7 +282,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
     const postTermTypeId = formState.typeId;
     const pagePath = PostUtil.getPagePath(postTypeId);
     const path = pagePath.TERM_WITH(postTermTypeId).LIST;
-    RouteUtil.change({ appDispatch, router, path });
+    RouteUtil.change({ router, path });
   };
 
   const onSubmit = async (event: FormEvent) => {

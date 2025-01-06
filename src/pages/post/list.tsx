@@ -293,7 +293,7 @@ export default function PagePostList() {
         path = pagePath.TERM_WITH(termTypeId).LIST;
         break;
     }
-    RouteUtil.change({ appDispatch, router, path });
+    RouteUtil.change({ router, path });
   };
 
   const onClickUpdateRank = (itemId: string) => {

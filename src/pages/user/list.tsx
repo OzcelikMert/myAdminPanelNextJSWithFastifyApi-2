@@ -167,7 +167,7 @@ export default function PageUserList() {
 
   const navigatePage = (type: 'edit', itemId = '') => {
     const path = EndPoints.USER_WITH.EDIT(itemId);
-    RouteUtil.change({ appDispatch, router, path });
+    RouteUtil.change({ router, path });
   };
 
   const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {

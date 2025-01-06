@@ -114,7 +114,7 @@ export default function PageLogin() {
           } else if (LocalStorageUtil.getKeepMeEmail().length > 0) {
             LocalStorageUtil.setKeepMeEmail('');
           }
-          RouteUtil.change({ appDispatch, router, path: EndPoints.DASHBOARD });
+          RouteUtil.change({ router, path: EndPoints.DASHBOARD });
         }
       } else {
         if (serviceResult.data._id) {

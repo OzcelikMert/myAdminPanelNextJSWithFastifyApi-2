@@ -193,7 +193,7 @@ export default function PageSettingLanguageAdd() {
 
   const navigatePage = async (isReload?: boolean) => {
     const path = EndPoints.LANGUAGE_WITH.LIST;
-    await RouteUtil.change({ router, path, appDispatch });
+    await RouteUtil.change({ router, path });
     if (isReload) {
       window.location.reload();
     }

@@ -74,8 +74,7 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
 
   if (!isAuth && !isAppLock && ![EndPoints.LOGIN].includes(router.pathname)) {
     RouteUtil.change({
-      router: router,
-      appDispatch: appDispatch,
+      router,
       path: EndPoints.LOGIN,
     });
     return null;
@@ -83,8 +82,7 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
 
   if (isAuth && [EndPoints.LOGIN].includes(router.pathname)) {
     RouteUtil.change({
-      router: router,
-      appDispatch: appDispatch,
+      router,
       path: EndPoints.DASHBOARD,
     });
     return null;

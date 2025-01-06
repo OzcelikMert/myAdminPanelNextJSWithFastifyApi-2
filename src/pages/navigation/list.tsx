@@ -230,7 +230,7 @@ export default function PageNavigationList() {
     const path = EndPoints.NAVIGATION_WITH;
     switch (type) {
       case 'edit':
-        RouteUtil.change({ appDispatch, router, path: path.EDIT(itemId) });
+        RouteUtil.change({ router, path: path.EDIT(itemId) });
         break;
     }
   };

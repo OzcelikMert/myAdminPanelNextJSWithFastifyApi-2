@@ -60,15 +60,13 @@ export default function ComponentToolNavbar() {
     switch (event) {
       case 'profile':
         await RouteUtil.change({
-          router: router,
-          appDispatch: appDispatch,
+          router,
           path: EndPoints.SETTINGS_WITH.PROFILE,
         });
         break;
       case 'changePassword':
         await RouteUtil.change({
-          router: router,
-          appDispatch: appDispatch,
+          router,
           path: EndPoints.SETTINGS_WITH.CHANGE_PASSWORD,
         });
         break;
@@ -82,8 +80,7 @@ export default function ComponentToolNavbar() {
         const resultSignOut = await AuthService.logOut(abortController.signal);
         if (resultSignOut.status) {
           await RouteUtil.change({
-            router: router,
-            appDispatch: appDispatch,
+            router,
             path: EndPoints.LOGIN,
           });
           appDispatch(setSessionAuthState(null));

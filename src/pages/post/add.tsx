@@ -560,7 +560,7 @@ export default function PagePostAdd() {
     const postTypeId = formState.typeId;
     const pagePath = PostUtil.getPagePath(postTypeId);
     const path = pagePath.LIST;
-    await RouteUtil.change({ appDispatch, router, path });
+    await RouteUtil.change({ router, path });
   };
 
   const onSubmit = async (event: FormEvent) => {

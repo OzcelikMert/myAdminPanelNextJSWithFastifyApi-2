@@ -134,7 +134,6 @@ export default function PageComponentList() {
       case 'edit':
         await RouteUtil.change({
           router,
-          appDispatch,
           path: pagePath.EDIT(itemId),
         });
         break;

@@ -264,7 +264,7 @@ export default function PageUserAdd() {
 
   const navigatePage = async () => {
     const path = EndPoints.USER_WITH.LIST;
-    await RouteUtil.change({ appDispatch, router, path });
+    await RouteUtil.change({ router, path });
   };
 
   const onSubmit = async (event: FormEvent) => {

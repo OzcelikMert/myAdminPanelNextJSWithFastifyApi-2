@@ -251,7 +251,7 @@ export default function PageNavigationAdd() {
 
   const navigatePage = async () => {
     const path = EndPoints.NAVIGATION_WITH.LIST;
-    await RouteUtil.change({ appDispatch, router, path });
+    await RouteUtil.change({ router, path });
   };
 
   const onSubmit = async (event: FormEvent) => {

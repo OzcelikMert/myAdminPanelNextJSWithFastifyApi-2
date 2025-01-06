@@ -128,7 +128,7 @@ export default function PageSettingLanguageList() {
     const path = EndPoints.LANGUAGE_WITH;
     switch (type) {
       case 'edit':
-        RouteUtil.change({ appDispatch, router, path: path.EDIT(itemId) });
+        RouteUtil.change({ router, path: path.EDIT(itemId) });
         break;
     }
   };

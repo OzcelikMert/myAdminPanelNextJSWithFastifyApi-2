@@ -303,7 +303,7 @@ export default function PagePostTermList() {
         path = pagePath.LIST;
         break;
     }
-    RouteUtil.change({ appDispatch, router, path: path });
+    RouteUtil.change({ router, path: path });
   };
 
   const getToggleMenuItems = (): IComponentTableToggleMenuItem[] => {

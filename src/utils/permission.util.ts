@@ -141,7 +141,6 @@ const checkAndRedirect = (
       });
       RouteUtil.change({
         router: props.router,
-        appDispatch: props.appDispatch,
         path: props.redirectPath ?? EndPoints.DASHBOARD,
       });
     }
@@ -155,7 +154,6 @@ const checkAndRedirect = (
     });
     RouteUtil.change({
       router: props.router,
-      appDispatch: props.appDispatch,
       path: EndPoints.LOGIN,
     });
   }

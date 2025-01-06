@@ -212,7 +212,7 @@ export default function PageDashboard() {
         path = pagePath.LIST;
         break;
     }
-    await RouteUtil.change({ path, router, appDispatch });
+    await RouteUtil.change({ path, router });
   };
 
   const getLastPostTableColumns = (): TableColumn<
