@@ -20,12 +20,12 @@ import ComponentToolTip from '@components/elements/tooltip';
 import Swal from 'sweetalert2';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { StatusId } from '@constants/status';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormSelect from '@components/elements/form/input/select';
-import { useDidMountHook } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/customHooks';
 
 const ComponentThemeRichTextBox = dynamic(
   () => import('@components/theme/richTextBox'),
@@ -49,33 +49,40 @@ const initialState: IComponentState = {
   variationAccordionToggleKey: '',
 };
 
+enum ActionTypes {
+  SET_MAIN_TAB_ACTIVE_KEY,
+  SET_VARIATION_TAB_ACTIVE_KEY,
+  SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY,
+  SET_VARIATION_ACCORDION_TOGGLE_KEY,
+}
+
 type IAction =
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
   | {
-      type: 'SET_VARIATION_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_VARIATION_TAB_ACTIVE_KEY;
       payload: IComponentState['variationTabActiveKey'];
     }
   | {
-      type: 'SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY';
+      type: ActionTypes.SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY;
       payload: IComponentState['attributeAccordionToggleKey'];
     }
   | {
-      type: 'SET_VARIATION_ACCORDION_TOGGLE_KEY';
+      type: ActionTypes.SET_VARIATION_ACCORDION_TOGGLE_KEY;
       payload: IComponentState['variationAccordionToggleKey'];
     };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_VARIATION_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_VARIATION_TAB_ACTIVE_KEY:
       return { ...state, variationTabActiveKey: action.payload };
-    case 'SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY':
+    case ActionTypes.SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY:
       return { ...state, attributeAccordionToggleKey: action.payload };
-    case 'SET_VARIATION_ACCORDION_TOGGLE_KEY':
+    case ActionTypes.SET_VARIATION_ACCORDION_TOGGLE_KEY:
       return { ...state, variationAccordionToggleKey: action.payload };
     default:
       return state;
@@ -96,7 +103,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
 
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
   });
 
@@ -210,7 +217,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
         eCommerce,
       });
 
-      dispatch({ type: 'SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY', payload: _id });
+      dispatch({ type: ActionTypes.SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY, payload: _id });
     }
   };
 
@@ -297,7 +304,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
         eCommerce,
       });
 
-      dispatch({ type: 'SET_VARIATION_ACCORDION_TOGGLE_KEY', payload: _id });
+      dispatch({ type: ActionTypes.SET_VARIATION_ACCORDION_TOGGLE_KEY, payload: _id });
     }
   };
 
@@ -378,14 +385,14 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
 
   const onClickAttributeAccordionToggle = (_id: string) => {
     dispatch({
-      type: 'SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY',
+      type: ActionTypes.SET_ATTRIBUTE_ACCORDION_TOGGLE_KEY,
       payload: _id == state.attributeAccordionToggleKey ? '' : _id,
     });
   };
 
   const onClickVariationAccordionToggle = (_id: string) => {
     dispatch({
-      type: 'SET_VARIATION_ACCORDION_TOGGLE_KEY',
+      type: ActionTypes.SET_VARIATION_ACCORDION_TOGGLE_KEY,
       payload: _id == state.variationAccordionToggleKey ? '' : _id,
     });
   };
@@ -675,7 +682,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
             <Tabs
               onSelect={(key: any) =>
                 dispatch({
-                  type: 'SET_VARIATION_TAB_ACTIVE_KEY',
+                  type: ActionTypes.SET_VARIATION_TAB_ACTIVE_KEY,
                   payload: key,
                 })
               }
@@ -1103,7 +1110,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
           <div className="theme-tabs">
             <Tabs
               onSelect={(key: any) =>
-                dispatch({ type: 'SET_MAIN_TAB_ACTIVE_KEY', payload: key })
+                dispatch({ type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY, payload: key })
               }
               activeKey={state.mainTabActiveKey}
               className="mb-5"

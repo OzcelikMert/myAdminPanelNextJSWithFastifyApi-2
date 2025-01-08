@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import ComponentToast from '@components/elements/toast';
@@ -10,14 +10,17 @@ import { status, StatusId } from '@constants/status';
 import { PermissionUtil } from '@utils/permission.util';
 import { SubscriberEndPointPermission } from '@constants/endPointPermissions/subscriber.endPoint.permission';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { SortUtil } from '@utils/sort.util';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   items: ISubscriberGetResultService[];
@@ -44,15 +47,25 @@ export default function PageSubscribers() {
   const [selectedItems, setSelectedItems] = useState<
     IComponentState['selectedItems']
   >(initialState.selectedItems);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         appDispatch,
@@ -64,7 +77,7 @@ export default function PageSubscribers() {
     ) {
       setPageTitle();
       await getItems();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
@@ -102,7 +115,7 @@ export default function PageSubscribers() {
       icon: 'question',
       showCancelButton: true,
     });
-    
+
     if (result.isConfirmed) {
       const loadingToast = new ComponentToast({
         content: t('deleting'),

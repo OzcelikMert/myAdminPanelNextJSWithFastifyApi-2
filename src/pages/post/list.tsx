@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import { PostService } from '@services/post.service';
@@ -27,17 +27,20 @@ import { UserRoleId } from '@constants/userRoles';
 import ComponentToolTip from '@components/elements/tooltip';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
-} from '@lib/features/breadCrumbSlice';
+} from '@redux/features/breadCrumbSlice';
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
 import { SortUtil } from '@utils/sort.util';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   typeId: PostTypeId;
@@ -57,30 +60,39 @@ const initialState: IComponentState = {
   listMode: 'list',
 };
 
+enum ActionTypes {
+  SET_TYPE_ID,
+  SET_ITEMS,
+  SET_SELECTED_ITEMS,
+  SET_SELECTED_ITEM_ID,
+  SET_IS_SHOW_MODAL_UPDATE_RANK,
+  SET_LIST_MODE,
+}
+
 type IAction =
-  | { type: 'SET_TYPE_ID'; payload: IComponentState['typeId'] }
-  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
-  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
-  | { type: 'SET_SELECTED_ITEM_ID'; payload: IComponentState['selectedItemId'] }
+  | { type: ActionTypes.SET_TYPE_ID; payload: IComponentState['typeId'] }
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | { type: ActionTypes.SET_SELECTED_ITEMS; payload: IComponentState['selectedItems'] }
+  | { type: ActionTypes.SET_SELECTED_ITEM_ID; payload: IComponentState['selectedItemId'] }
   | {
-      type: 'SET_IS_SHOW_MODAL_UPDATE_RANK';
+      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
       payload: IComponentState['isShowModalUpdateRank'];
     }
-  | { type: 'SET_LIST_MODE'; payload: IComponentState['listMode'] };
+  | { type: ActionTypes.SET_LIST_MODE; payload: IComponentState['listMode'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_TYPE_ID':
+    case ActionTypes.SET_TYPE_ID:
       return { ...state, typeId: action.payload };
-    case 'SET_ITEMS':
+    case ActionTypes.SET_ITEMS:
       return { ...state, items: action.payload };
-    case 'SET_SELECTED_ITEMS':
+    case ActionTypes.SET_SELECTED_ITEMS:
       return { ...state, selectedItems: action.payload };
-    case 'SET_SELECTED_ITEM_ID':
+    case ActionTypes.SET_SELECTED_ITEM_ID:
       return { ...state, selectedItemId: action.payload };
-    case 'SET_IS_SHOW_MODAL_UPDATE_RANK':
+    case ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK:
       return { ...state, isShowModalUpdateRank: action.payload };
-    case 'SET_LIST_MODE':
+    case ActionTypes.SET_LIST_MODE:
       return { ...state, listMode: action.payload };
     default:
       return state;
@@ -109,21 +121,31 @@ export default function PagePostList() {
     ...initialState,
     typeId: Number(queries.postTypeId ?? PostTypeId.Blog),
   });
+  const [isPageLoaded, setIsPageLoaded] = useState(false); 
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
-  useEffect(() => {
+  useEffectAfterDidMount(() => {
+    if(isPageLoaded){
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
+  useEffectAfterDidMount(() => {
     queries = router.query as IPageQueries;
-    dispatch({ type: 'SET_TYPE_ID', payload: Number(queries.postTypeId) });
+    dispatch({ type: ActionTypes.SET_TYPE_ID, payload: Number(queries.postTypeId) });
     init();
   }, [router.query]);
 
   const init = async () => {
+    if(isPageLoaded){
+      setIsPageLoaded(false);
+    }
     const minPermission = PermissionUtil.getPostPermission(
       state.typeId,
       PostPermissionMethod.GET
@@ -137,9 +159,9 @@ export default function PagePostList() {
         t,
       })
     ) {
-      setPageTitle();
       await getItems();
-      appDispatch(setIsPageLoadingState(false));
+      setPageTitle();
+      setIsPageLoaded(true);
     }
   };
 
@@ -166,7 +188,7 @@ export default function PagePostList() {
     );
 
     if (result.status && result.data) {
-      dispatch({ type: 'SET_ITEMS', payload: result.data });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: result.data });
     }
   };
 
@@ -199,7 +221,7 @@ export default function PagePostList() {
           const newItems = state.items.filter(
             (item) => !selectedItemId.includes(item._id)
           );
-          dispatch({ type: 'SET_ITEMS', payload: newItems });
+          dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
           new ComponentToast({
             type: 'success',
             title: t('successful'),
@@ -229,7 +251,7 @@ export default function PagePostList() {
           }
           return item;
         });
-        dispatch({ type: 'SET_ITEMS', payload: newItems });
+        dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
         new ComponentToast({
           type: 'success',
           title: t('successful'),
@@ -255,7 +277,7 @@ export default function PagePostList() {
       if (newItem) {
         newItem.rank = rank;
       }
-      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
       new ComponentToast({
         type: 'success',
         title: t('successful'),
@@ -267,11 +289,11 @@ export default function PagePostList() {
   };
 
   const onSelect = (selectedRows: IComponentState['items']) => {
-    dispatch({ type: 'SET_SELECTED_ITEMS', payload: selectedRows });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: selectedRows });
   };
 
   const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
-    dispatch({ type: 'SET_LIST_MODE', payload: item.key });
+    dispatch({ type: ActionTypes.SET_LIST_MODE, payload: item.key });
   };
 
   const navigatePage = (
@@ -297,8 +319,8 @@ export default function PagePostList() {
   };
 
   const onClickUpdateRank = (itemId: string) => {
-    dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: itemId });
-    dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: true });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEM_ID, payload: itemId });
+    dispatch({ type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK, payload: true });
   };
 
   const getToggleMenuItems = (): IComponentTableToggleMenuItem[] => {
@@ -562,7 +584,7 @@ export default function PagePostList() {
       <ComponentThemeModalUpdateItemRank
         isShow={state.isShowModalUpdateRank}
         onHide={() =>
-          dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: false })
+          dispatch({ type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK, payload: false })
         }
         onSubmit={(rank) => onChangeRank(rank)}
         rank={item?.rank}

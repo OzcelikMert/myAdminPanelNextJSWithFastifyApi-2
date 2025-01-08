@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import ComponentToast from '@components/elements/toast';
@@ -18,13 +18,16 @@ import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
 import { SortUtil } from '@utils/sort.util';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   items: INavigationGetResultService[];
@@ -42,27 +45,41 @@ const initialState: IComponentState = {
   listMode: 'list',
 };
 
+enum ActionTypes {
+  SET_ITEMS,
+  SET_SELECTED_ITEMS,
+  SET_SELECTED_ITEM_ID,
+  SET_LIST_MODE,
+  SET_IS_SHOW_MODAL_UPDATE_RANK,
+}
+
 type IAction =
-  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
-  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
-  | { type: 'SET_SELECTED_ITEM_ID'; payload: IComponentState['selectedItemId'] }
-  | { type: 'SET_LIST_MODE'; payload: IComponentState['listMode'] }
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
   | {
-      type: 'SET_IS_SHOW_MODAL_UPDATE_RANK';
+      type: ActionTypes.SET_SELECTED_ITEMS;
+      payload: IComponentState['selectedItems'];
+    }
+  | {
+      type: ActionTypes.SET_SELECTED_ITEM_ID;
+      payload: IComponentState['selectedItemId'];
+    }
+  | { type: ActionTypes.SET_LIST_MODE; payload: IComponentState['listMode'] }
+  | {
+      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
       payload: IComponentState['isShowModalUpdateRank'];
     };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_ITEMS':
+    case ActionTypes.SET_ITEMS:
       return { ...state, items: action.payload };
-    case 'SET_SELECTED_ITEMS':
+    case ActionTypes.SET_SELECTED_ITEMS:
       return { ...state, selectedItems: action.payload };
-    case 'SET_SELECTED_ITEM_ID':
+    case ActionTypes.SET_SELECTED_ITEM_ID:
       return { ...state, selectedItemId: action.payload };
-    case 'SET_IS_SHOW_MODAL_UPDATE_RANK':
+    case ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK:
       return { ...state, isShowModalUpdateRank: action.payload };
-    case 'SET_LIST_MODE':
+    case ActionTypes.SET_LIST_MODE:
       return { ...state, listMode: action.payload };
     default:
       return state;
@@ -80,15 +97,25 @@ export default function PageNavigationList() {
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         appDispatch,
@@ -100,7 +127,7 @@ export default function PageNavigationList() {
     ) {
       setPageTitle();
       await getItems();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
@@ -119,7 +146,7 @@ export default function PageNavigationList() {
     );
 
     if (result.status && result.data) {
-      dispatch({ type: 'SET_ITEMS', payload: result.data });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: result.data });
     }
   };
 
@@ -149,7 +176,7 @@ export default function PageNavigationList() {
           const newItems = state.items.filter(
             (item) => !selectedItemId.includes(item._id)
           );
-          dispatch({ type: 'SET_ITEMS', payload: newItems });
+          dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
           new ComponentToast({
             type: 'success',
             title: t('successful'),
@@ -177,7 +204,7 @@ export default function PageNavigationList() {
           }
           return item;
         });
-        dispatch({ type: 'SET_ITEMS', payload: newItems });
+        dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
         new ComponentToast({
           type: 'success',
           title: t('successful'),
@@ -202,7 +229,7 @@ export default function PageNavigationList() {
       if (newItem) {
         newItem.rank = rank;
       }
-      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
       new ComponentToast({
         type: 'success',
         title: t('successful'),
@@ -214,16 +241,19 @@ export default function PageNavigationList() {
   };
 
   const onSelect = (selectedRows: IComponentState['items']) => {
-    dispatch({ type: 'SET_SELECTED_ITEMS', payload: selectedRows });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: selectedRows });
   };
 
   const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
-    dispatch({ type: 'SET_LIST_MODE', payload: item.key });
+    dispatch({ type: ActionTypes.SET_LIST_MODE, payload: item.key });
   };
 
   const onClickUpdateRank = (itemId: string) => {
-    dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: itemId });
-    dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: true });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEM_ID, payload: itemId });
+    dispatch({
+      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+      payload: true,
+    });
   };
 
   const navigatePage = (type: 'edit', itemId = '') => {
@@ -366,7 +396,10 @@ export default function PageNavigationList() {
       <ComponentThemeModalUpdateItemRank
         isShow={state.isShowModalUpdateRank}
         onHide={() =>
-          dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: false })
+          dispatch({
+            type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+            payload: false,
+          })
         }
         onSubmit={(rank) => onChangeRank(rank)}
         rank={selectedItem?.rank}

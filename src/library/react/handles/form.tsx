@@ -1,7 +1,7 @@
 import { cloneDeepWith } from 'lodash';
 import React, { Component } from 'react';
 
-type ISetFormStateFuncParam<T> = (state: T) => T
+type ISetFormStateFuncParam<T> = (state: T) => T;
 
 export type IUseFormReducer<T = any> = {
   formState: T;
@@ -38,23 +38,35 @@ function setDataWithKeys(
   return data;
 }
 
+enum ActionTypes {
+  SET_STATE,
+  UPDATE_FIELD,
+  UPDATE_SELECT,
+}
+
 type IAction<T> =
-  | { type: 'SET_STATE'; payload: { value: Partial<T> | ISetFormStateFuncParam<T> } }
-  | { type: 'UPDATE_FIELD'; payload: { name: string; value: any } }
-  | { type: 'UPDATE_SELECT'; payload: { name: string; value: any } };
+  | {
+      type: ActionTypes.SET_STATE;
+      payload: { value: Partial<T> | ISetFormStateFuncParam<T> };
+    }
+  | { type: ActionTypes.UPDATE_FIELD; payload: { name: string; value: any } }
+  | { type: ActionTypes.UPDATE_SELECT; payload: { name: string; value: any } };
 
 function formReducer<T>(state: T, action: IAction<T>): T {
   switch (action.type) {
-    case 'SET_STATE': {
+    case ActionTypes.SET_STATE: {
       const { value } = action.payload;
-      return {...state, ...(typeof value === "function" ? value(state) : value)};
+      return {
+        ...state,
+        ...(typeof value === 'function' ? value(state) : value),
+      };
     }
-    case 'UPDATE_FIELD': {
+    case ActionTypes.UPDATE_FIELD: {
       const { name, value } = action.payload;
       const keys = name.split('.');
       return setDataWithKeys(cloneDeepWith(state), keys, value);
     }
-    case 'UPDATE_SELECT': {
+    case ActionTypes.UPDATE_SELECT: {
       const { name, value } = action.payload;
       let newState = cloneDeepWith(state);
       const keys = name.split('.');
@@ -77,7 +89,7 @@ function formReducer<T>(state: T, action: IAction<T>): T {
 export function useFormReducer<T>(initialState: T): IUseFormReducer<T> {
   const [formState, dispatch] = React.useReducer(formReducer, initialState);
 
-  const onChangeInput: IUseFormReducer<T>["onChangeInput"] = (event) => {
+  const onChangeInput: IUseFormReducer<T>['onChangeInput'] = (event) => {
     const { name, type, value, checked } = event.target;
     if (name) {
       const newValue =
@@ -87,18 +99,21 @@ export function useFormReducer<T>(initialState: T): IUseFormReducer<T> {
             ? Number(value) || 0
             : value;
 
-      dispatch({ type: 'UPDATE_FIELD', payload: { name, value: newValue } });
+      dispatch({ type: ActionTypes.UPDATE_FIELD, payload: { name, value: newValue } });
     }
   };
 
-  const onChangeSelect: IUseFormReducer<T>["onChangeSelect"] = (name, value) => {
+  const onChangeSelect: IUseFormReducer<T>['onChangeSelect'] = (
+    name,
+    value
+  ) => {
     if (name) {
-      dispatch({ type: 'UPDATE_SELECT', payload: { name, value } });
+      dispatch({ type: ActionTypes.UPDATE_SELECT, payload: { name, value } });
     }
   };
 
-  const setFormState: IUseFormReducer<T>["setFormState"] = (state) => {
-    dispatch({ type: 'SET_STATE', payload: { value: state } });
+  const setFormState: IUseFormReducer<T>['setFormState'] = (state) => {
+    dispatch({ type: ActionTypes.SET_STATE, payload: { value: state } });
   };
 
   return { formState, setFormState, onChangeInput, onChangeSelect };

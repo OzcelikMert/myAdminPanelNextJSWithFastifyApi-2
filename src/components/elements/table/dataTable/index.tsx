@@ -10,6 +10,7 @@ import { cloneDeepWith } from 'lodash';
 import ComponentTableFilterButton, {
   IComponentTableFilterButton,
 } from '../filterButton';
+import { useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   selectedItems: any[];
@@ -26,27 +27,35 @@ const initialState: IComponentState = {
   showingItems: [],
 };
 
+enum ActionTypes {
+  SET_SELECTED_ITEMS,
+  SET_SEARCH_KEY,
+  SET_CLEAR_SELECTED_ROWS,
+  SET_ACTIVE_FILTER_BUTTON_INDEX,
+  SET_SHOWING_ITEMS,
+}
+
 type IAction =
-  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
-  | { type: 'SET_SEARCH_KEY'; payload: IComponentState['searchKey'] }
-  | { type: 'SET_CLEAR_SELECTED_ROWS'; payload: boolean }
+  | { type: ActionTypes.SET_SELECTED_ITEMS; payload: IComponentState['selectedItems'] }
+  | { type: ActionTypes.SET_SEARCH_KEY; payload: IComponentState['searchKey'] }
+  | { type: ActionTypes.SET_CLEAR_SELECTED_ROWS; payload: boolean }
   | {
-      type: 'SET_ACTIVE_FILTER_BUTTON_INDEX';
+      type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX;
       payload: IComponentState['activeFilterButtonIndex'];
     }
-  | { type: 'SET_SHOWING_ITEMS'; payload: IComponentState['showingItems'] };
+  | { type: ActionTypes.SET_SHOWING_ITEMS; payload: IComponentState['showingItems'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_SELECTED_ITEMS':
+    case ActionTypes.SET_SELECTED_ITEMS:
       return { ...state, selectedItems: action.payload };
-    case 'SET_ACTIVE_FILTER_BUTTON_INDEX':
+    case ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX:
       return { ...state, activeFilterButtonIndex: action.payload };
-    case 'SET_SEARCH_KEY':
+    case ActionTypes.SET_SEARCH_KEY:
       return { ...state, searchKey: action.payload };
-    case 'SET_CLEAR_SELECTED_ROWS':
+    case ActionTypes.SET_CLEAR_SELECTED_ROWS:
       return { ...state, clearSelectedRows: action.payload };
-    case 'SET_SHOWING_ITEMS':
+    case ActionTypes.SET_SHOWING_ITEMS:
       return { ...state, showingItems: action.payload };
     default:
       return state;
@@ -79,21 +88,17 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     showingItems: props.data,
   });
 
-  const didMount = useRef<boolean>(false);
   const listPage = useRef<number>(0);
   const listPagePerCount = useRef<number>(10);
 
-  useEffect(() => {
-    if (didMount.current) {
-      resetTableList();
-    }
-    didMount.current = true;
+  useEffectAfterDidMount(() => {
+    resetTableList();
   }, [props.data]);
 
   const resetTableList = (firstRender?: boolean) => {
-    dispatch({ type: 'SET_SELECTED_ITEMS', payload: [] });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [] });
     dispatch({
-      type: 'SET_CLEAR_SELECTED_ROWS',
+      type: ActionTypes.SET_CLEAR_SELECTED_ROWS,
       payload: !state.clearSelectedRows,
     });
     onSearch();
@@ -127,7 +132,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     if (findIndex > -1) {
       if (remove) {
         dispatch({
-          type: 'SET_SELECTED_ITEMS',
+          type: ActionTypes.SET_SELECTED_ITEMS,
           payload: state.selectedItems.filter(
             (_, index) => index !== findIndex
           ),
@@ -135,10 +140,10 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
       }
     } else {
       if (props.isMultiSelectable === false) {
-        dispatch({ type: 'SET_SELECTED_ITEMS', payload: [item] });
+        dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [item] });
       } else {
         dispatch({
-          type: 'SET_SELECTED_ITEMS',
+          type: ActionTypes.SET_SELECTED_ITEMS,
           payload: [...state.selectedItems, item],
         });
       }
@@ -151,7 +156,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
 
   const onSearch = (event?: React.ChangeEvent<HTMLInputElement>) => {
     let searchKey = event ? event.target.value : state.searchKey;
-    dispatch({ type: 'SET_SEARCH_KEY', payload: searchKey });
+    dispatch({ type: ActionTypes.SET_SEARCH_KEY, payload: searchKey });
     // Find Searched Items for Showing Items
     let searchedItems = props.data.filter((item: any) => {
       let isFound = true;
@@ -184,13 +189,13 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     });
 
     // Set Showing Items
-    dispatch({ type: 'SET_SHOWING_ITEMS', payload: searchedItems });
+    dispatch({ type: ActionTypes.SET_SHOWING_ITEMS, payload: searchedItems });
   };
 
   const onFilter = (item: IComponentTableFilterButton, index: number) => {
     let filteredItems = item.onFilter(props.data);
-    dispatch({ type: 'SET_SHOWING_ITEMS', payload: filteredItems });
-    dispatch({ type: 'SET_ACTIVE_FILTER_BUTTON_INDEX', payload: index });
+    dispatch({ type: ActionTypes.SET_SHOWING_ITEMS, payload: filteredItems });
+    dispatch({ type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX, payload: index });
     resetTableList();
     if (props.onClickFilterButton) {
       props.onClickFilterButton(item);
@@ -300,7 +305,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           onChangePage={(page: number, totalRows: number) => {
             listPage.current = page - 1;
             dispatch({
-              type: 'SET_CLEAR_SELECTED_ROWS',
+              type: ActionTypes.SET_CLEAR_SELECTED_ROWS,
               payload: !state.clearSelectedRows,
             });
           }}

@@ -4,7 +4,7 @@ import { postTermTypes } from '@constants/postTermTypes';
 import { EndPoints } from '@constants/endPoints';
 import { PathUtil } from '@utils/path.util';
 import { PostEndPoint } from '@constants/endPoints/post.endPoint';
-import { IBreadCrumbData } from '@lib/features/breadCrumbSlice';
+import { IBreadCrumbData } from '@redux/features/breadCrumbSlice';
 
 const getPagePath = (postTypeId: PostTypeId) => {
   let pagePath = '';

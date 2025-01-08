@@ -6,10 +6,10 @@ import { sidebarNavs } from '@constants/sidebarNavs';
 import { PermissionUtil } from '@utils/permission.util';
 import { RouteUtil } from '@utils/route.util';
 import { EndPoints } from '@constants/endPoints';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { useRouter } from 'next/router';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   activeItems: { [key: string]: any };
@@ -27,7 +27,7 @@ export default function ComponentToolSidebar() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     onRouteChanged();
   });
 

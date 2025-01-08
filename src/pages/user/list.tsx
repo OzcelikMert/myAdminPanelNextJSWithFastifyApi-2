@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useReducer, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import { IUserGetResultService } from 'types/services/user.service';
@@ -18,12 +18,15 @@ import { status } from '@constants/status';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
 import { RouteUtil } from '@utils/route.util';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { SortUtil } from '@utils/sort.util';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   items: IUserGetResultService[];
@@ -37,24 +40,30 @@ const initialState: IComponentState = {
   selectedItemId: '',
 };
 
+enum ActionTypes {
+  SET_ITEMS,
+  SET_IS_SHOW_ITEM_MODAL,
+  SET_SELECTED_ITEM_ID,
+}
+
 type IAction =
-  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
   | {
-      type: 'SET_IS_SHOW_ITEM_MODAL';
+      type: ActionTypes.SET_IS_SHOW_ITEM_MODAL;
       payload: IComponentState['isShowItemModal'];
     }
   | {
-      type: 'SET_SELECTED_ITEM_ID';
+      type: ActionTypes.SET_SELECTED_ITEM_ID;
       payload: IComponentState['selectedItemId'];
     };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_ITEMS':
+    case ActionTypes.SET_ITEMS:
       return { ...state, items: action.payload };
-    case 'SET_IS_SHOW_ITEM_MODAL':
+    case ActionTypes.SET_IS_SHOW_ITEM_MODAL:
       return { ...state, isShowItemModal: action.payload };
-    case 'SET_SELECTED_ITEM_ID':
+    case ActionTypes.SET_SELECTED_ITEM_ID:
       return { ...state, selectedItemId: action.payload };
     default:
       return state;
@@ -71,15 +80,25 @@ export default function PageUserList() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         appDispatch,
@@ -91,7 +110,7 @@ export default function PageUserList() {
     ) {
       setPageTitle();
       await getItems();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
@@ -113,7 +132,7 @@ export default function PageUserList() {
     if (result.status && result.data) {
       const items = result.data.orderBy('roleId', 'desc');
       dispatch({
-        type: 'SET_ITEMS',
+        type: ActionTypes.SET_ITEMS,
         payload: items.filter(
           (item) =>
             item.roleId != UserRoleId.SuperAdmin ||
@@ -147,7 +166,7 @@ export default function PageUserList() {
         loadingToast.hide();
         if (serviceResult.status) {
           dispatch({
-            type: 'SET_ITEMS',
+            type: ActionTypes.SET_ITEMS,
             payload: state.items.filter((item) => userId !== item._id),
           });
           new ComponentToast({
@@ -161,8 +180,8 @@ export default function PageUserList() {
   };
 
   const onViewUser = (userId: string) => {
-    dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: userId });
-    dispatch({ type: 'SET_IS_SHOW_ITEM_MODAL', payload: true });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEM_ID, payload: userId });
+    dispatch({ type: ActionTypes.SET_IS_SHOW_ITEM_MODAL, payload: true });
   };
 
   const navigatePage = (type: 'edit', itemId = '') => {
@@ -301,7 +320,10 @@ export default function PageUserList() {
       {selectedItem ? (
         <ComponentThemeUsersProfileCard
           onClose={() => {
-            dispatch({ type: 'SET_IS_SHOW_ITEM_MODAL', payload: false });
+            dispatch({
+              type: ActionTypes.SET_IS_SHOW_ITEM_MODAL,
+              payload: false,
+            });
           }}
           isShow={state.isShowItemModal}
           userInfo={selectedItem}

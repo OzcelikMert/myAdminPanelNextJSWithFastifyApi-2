@@ -9,8 +9,8 @@ import {
 } from '@pages/post/add';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import { ImageSourceUtil } from '@utils/imageSource.util';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { IUseFormReducer } from '@library/react/handles/form';
 
 type IComponentState = {

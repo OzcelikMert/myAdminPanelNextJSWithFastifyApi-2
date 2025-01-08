@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
 import { useReducer } from 'react';
-import { useDidMountHook } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/customHooks';
 
 ChartJS.register(
   CategoryScale,
@@ -56,18 +56,24 @@ const initialState: IComponentState = {
   },
 };
 
+enum ActionTypes {
+  SET_OPTIONS,
+  SET_DATA,
+  SET_IS_LOADING,
+}
+
 type IAction =
-  | { type: 'SET_OPTIONS'; payload: IComponentState['options'] }
-  | { type: 'SET_DATA'; payload: IComponentState['data'] }
-  | { type: 'SET_IS_LOADING'; payload: IComponentState['isLoading'] };
+  | { type: ActionTypes.SET_OPTIONS; payload: IComponentState['options'] }
+  | { type: ActionTypes.SET_DATA; payload: IComponentState['data'] }
+  | { type: ActionTypes.SET_IS_LOADING; payload: IComponentState['isLoading'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_OPTIONS':
+    case ActionTypes.SET_OPTIONS:
       return { ...state, options: action.payload };
-    case 'SET_DATA':
+    case ActionTypes.SET_DATA:
       return { ...state, data: action.payload };
-    case 'SET_IS_LOADING':
+    case ActionTypes.SET_IS_LOADING:
       return { ...state, isLoading: action.payload };
     default:
       return state;
@@ -83,7 +89,7 @@ type IComponentProps = {
 export default function ComponentChartLine(props: IComponentProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
   });
 
@@ -91,7 +97,7 @@ export default function ComponentChartLine(props: IComponentProps) {
     const borderColor = '#1863d3';
 
     dispatch({
-      type: 'SET_DATA',
+      type: ActionTypes.SET_DATA,
       payload: {
         labels: props.labels,
         datasets: [
@@ -106,7 +112,7 @@ export default function ComponentChartLine(props: IComponentProps) {
       },
     });
 
-    dispatch({ type: 'SET_IS_LOADING', payload: false });
+    dispatch({ type: ActionTypes.SET_IS_LOADING, payload: false });
   };
 
   return state.isLoading ? (

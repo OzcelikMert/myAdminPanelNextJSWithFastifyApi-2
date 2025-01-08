@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { SettingService } from '@services/setting.service';
 import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateSocialMediaParamService } from 'types/services/setting.service';
@@ -10,16 +10,19 @@ import { UserRoleId } from '@constants/userRoles';
 import { cloneDeepWith } from 'lodash';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { EndPoints } from '@constants/endPoints';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { useFormReducer } from '@library/react/handles/form';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentForm from '@components/elements/form';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   items?: ISettingSocialMediaModel[];
@@ -51,15 +54,25 @@ export default function PageSettingsSocialMedia() {
   const [items, setItems] = useState(initialState.items);
   const formReducer = useFormReducer(initialFormState);
   const selectedItemFormReducer = useFormReducer(initialSelectedItemFormState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         appDispatch,
@@ -71,7 +84,7 @@ export default function PageSettingsSocialMedia() {
     ) {
       setPageTitle();
       await getSettings();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 

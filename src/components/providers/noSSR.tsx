@@ -1,4 +1,4 @@
-import { useDidMountHook } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/customHooks';
 import React, { Component, useEffect } from 'react';
 
 type IComponentState = {
@@ -16,7 +16,7 @@ type IComponentProps = {
 export default function ComponentProviderNoSSR( { children } : IComponentProps ) {
   const [isDidMount, setIsDidMount] = React.useState(initialState.isDidMount);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     setIsDidMount(true);
   })
 

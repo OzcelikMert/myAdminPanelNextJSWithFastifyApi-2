@@ -11,14 +11,17 @@ import { LanguageEndPointPermission } from '@constants/endPointPermissions/langu
 import { EndPoints } from '@constants/endPoints';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { RouteUtil } from '@utils/route.util';
-import { use, useEffect, useReducer } from 'react';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { use, useEffect, useReducer, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { SortUtil } from '@utils/sort.util';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   items: ILanguageGetResultService[];
@@ -32,18 +35,30 @@ const initialState: IComponentState = {
   isShowModalUpdateRank: false,
 };
 
+enum ActionTypes {
+  SET_ITEMS,
+  SET_SELECTED_ITEM_ID,
+  SET_IS_SHOW_MODAL_UPDATE_RANK,
+}
+
 type IAction =
-  | { type: 'SET_ITEMS'; payload: IComponentState["items"] }
-  | { type: 'SET_SELECTED_ITEM_ID'; payload: IComponentState["selectedItemId"] }
-  | { type: 'SET_IS_SHOW_MODAL_UPDATE_RANK'; payload: IComponentState["isShowModalUpdateRank"] };
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | {
+      type: ActionTypes.SET_SELECTED_ITEM_ID;
+      payload: IComponentState['selectedItemId'];
+    }
+  | {
+      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
+      payload: IComponentState['isShowModalUpdateRank'];
+    };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_ITEMS':
+    case ActionTypes.SET_ITEMS:
       return { ...state, items: action.payload };
-    case 'SET_SELECTED_ITEM_ID':
+    case ActionTypes.SET_SELECTED_ITEM_ID:
       return { ...state, selectedItemId: action.payload };
-    case 'SET_IS_SHOW_MODAL_UPDATE_RANK':
+    case ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK:
       return { ...state, isShowModalUpdateRank: action.payload };
     default:
       return state;
@@ -60,8 +75,25 @@ export default function PageSettingLanguageList() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
+
+  useDidMount(() => {
+    init();
+    return () => {
+      abortController.abort();
+    };
+  });
+
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
 
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         router,
@@ -73,16 +105,9 @@ export default function PageSettingLanguageList() {
     ) {
       setPageTitle();
       await getItems();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
-
-  useDidMountHook(() => {
-    init();
-    return () => {
-      abortController.abort();
-    };
-  });
 
   const setPageTitle = () => {
     appDispatch(
@@ -94,7 +119,7 @@ export default function PageSettingLanguageList() {
     const result = await LanguageService.getMany({}, abortController.signal);
 
     if (result.status && result.data) {
-      dispatch({ type: 'SET_ITEMS', payload: result.data });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: result.data });
     }
   };
 
@@ -113,7 +138,7 @@ export default function PageSettingLanguageList() {
       if (newItem) {
         newItem.rank = rank;
       }
-      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
       new ComponentToast({
         type: 'success',
         title: t('successful'),
@@ -181,9 +206,12 @@ export default function PageSettingLanguageList() {
             <span
               className="cursor-pointer"
               onClick={() => {
-                dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: row._id });
                 dispatch({
-                  type: 'SET_IS_SHOW_MODAL_UPDATE_RANK',
+                  type: ActionTypes.SET_SELECTED_ITEM_ID,
+                  payload: row._id,
+                });
+                dispatch({
+                  type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
                   payload: true,
                 });
               }}
@@ -240,7 +268,10 @@ export default function PageSettingLanguageList() {
       <ComponentThemeModalUpdateItemRank
         isShow={state.isShowModalUpdateRank}
         onHide={() =>
-          dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: false })
+          dispatch({
+            type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+            payload: false,
+          })
         }
         onSubmit={(rank) => onChangeRank(rank)}
         rank={selectedItem?.rank}

@@ -16,19 +16,23 @@ import { EndPoints } from '@constants/endPoints';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
-import { FormEvent, useEffect, useReducer } from 'react';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { FormEvent, useEffect, useReducer, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';
 import { useFormReducer } from '@library/react/handles/form';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
-} from '@lib/features/breadCrumbSlice';
+} from '@redux/features/breadCrumbSlice';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
 
 type IComponentState = {
   mainTabActiveKey: string;
@@ -45,27 +49,35 @@ const initialState: IComponentState = {
   mainTitle: '',
 };
 
+enum ActionTypes {
+  SET_STATUS,
+  SET_FLAGS,
+  SET_MAIN_TAB_ACTIVE_KEY,
+  SET_MAIN_TITLE,
+  SET_ITEM,
+}
+
 type IAction =
-  | { type: 'SET_STATUS'; payload: IComponentState['status'] }
-  | { type: 'SET_FLAGS'; payload: IComponentState['flags'] }
+  | { type: ActionTypes.SET_STATUS; payload: IComponentState['status'] }
+  | { type: ActionTypes.SET_FLAGS; payload: IComponentState['flags'] }
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
-  | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
-  | { type: 'SET_ITEM'; payload: IComponentState['item'] };
+  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
+  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_STATUS':
+    case ActionTypes.SET_STATUS:
       return { ...state, status: action.payload };
-    case 'SET_FLAGS':
+    case ActionTypes.SET_FLAGS:
       return { ...state, flags: action.payload };
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_MAIN_TITLE':
+    case ActionTypes.SET_MAIN_TITLE:
       return { ...state, mainTitle: action.payload };
-    case 'SET_ITEM':
+    case ActionTypes.SET_ITEM:
       return { ...state, item: action.payload };
     default:
       return state;
@@ -106,8 +118,25 @@ export default function PageSettingLanguageAdd() {
       ...initialFormState,
       _id: queries._id ?? '',
     });
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
+
+  useDidMount(() => {
+    init();
+    return () => {
+      abortController.abort();
+    };
+  });
+
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
 
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     const minPermission = formState._id
       ? LanguageEndPointPermission.UPDATE
       : LanguageEndPointPermission.ADD;
@@ -126,16 +155,9 @@ export default function PageSettingLanguageAdd() {
         await getItem();
       }
       setPageTitle();
-      appDispatch({ type: 'SET_IS_PAGE_LOADING', isPageLoading: false });
+      setIsPageLoaded(true);
     }
   };
-
-  useDidMountHook(() => {
-    init();
-    return () => {
-      abortController.abort();
-    };
-  });
 
   const setPageTitle = () => {
     const breadCrumbs: IBreadCrumbData[] = [
@@ -150,7 +172,7 @@ export default function PageSettingLanguageAdd() {
 
   const getStatus = () => {
     dispatch({
-      type: 'SET_STATUS',
+      type: ActionTypes.SET_STATUS,
       payload: ComponentUtil.getStatusForSelect(
         [StatusId.Active, StatusId.Disabled],
         t
@@ -165,7 +187,7 @@ export default function PageSettingLanguageAdd() {
     );
     if (serviceResult.status && serviceResult.data) {
       dispatch({
-        type: 'SET_FLAGS',
+        type: ActionTypes.SET_FLAGS,
         payload: serviceResult.data.map((item) => ({
           value: item,
           label: item.split('.')[0].toUpperCase(),
@@ -182,9 +204,9 @@ export default function PageSettingLanguageAdd() {
       );
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
-        dispatch({ type: 'SET_ITEM', payload: item });
+        dispatch({ type: ActionTypes.SET_ITEM, payload: item });
         setFormState(item);
-        dispatch({ type: 'SET_MAIN_TITLE', payload: item.title });
+        dispatch({ type: ActionTypes.SET_MAIN_TITLE, payload: item.title });
       } else {
         await navigatePage();
       }
@@ -204,7 +226,7 @@ export default function PageSettingLanguageAdd() {
     const serviceResult = await (formState._id
       ? LanguageService.updateWithId(params, abortController.signal)
       : LanguageService.add(params, abortController.signal));
-      
+
     if (serviceResult.status) {
       new ComponentToast({
         type: 'success',
@@ -343,7 +365,7 @@ export default function PageSettingLanguageAdd() {
                   <Tabs
                     onSelect={(key: any) =>
                       dispatch({
-                        type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
                         payload: key,
                       })
                     }

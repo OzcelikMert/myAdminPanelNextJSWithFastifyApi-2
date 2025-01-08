@@ -1,7 +1,7 @@
 import React from 'react';
 import { UserRoleId, userRoles } from '@constants/userRoles';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 
 type IComponentProps = {
   userRoleId: UserRoleId;

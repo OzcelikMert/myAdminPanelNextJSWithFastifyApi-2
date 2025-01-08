@@ -1,6 +1,6 @@
 import { StatusId, status } from '@constants/status';
 import { UserRoleId, userRoles } from '@constants/userRoles';
-import { ITranslationFunc } from '@lib/features/translationSlice';
+import { ITranslationFunc } from '@redux/features/translationSlice';
 import { IPanelLanguage } from 'types/constants/panelLanguages';
 
 const getStatusForSelect = (statusId: StatusId[], t: ITranslationFunc) => {

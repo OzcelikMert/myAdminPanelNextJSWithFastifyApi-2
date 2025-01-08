@@ -5,7 +5,7 @@ import { Config } from 'jodit/types/config';
 import Spinner from 'react-bootstrap/Spinner';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IJodit } from 'jodit/types/types';
-import { useDidMountHook } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   value: string;
@@ -13,21 +13,30 @@ type IComponentState = {
   isLoading: boolean;
 };
 
-const initialState: IComponentState = { value: '', isGalleryShow: false, isLoading: true };
+const initialState: IComponentState = {
+  value: '',
+  isGalleryShow: false,
+  isLoading: true,
+};
 
+enum ActionTypes {
+  SET_VALUE,
+  SET_IS_GALLERY_SHOW,
+  SET_IS_LOADING,
+}
 
 type IAction =
-  | { type: 'SET_VALUE'; payload: IComponentState['value'] }
-  | { type: 'SET_IS_GALLERY_SHOW'; payload: IComponentState['isGalleryShow'] }
-  | { type: 'SET_IS_LOADING'; payload: IComponentState['isLoading'] };
+  | { type: ActionTypes.SET_VALUE; payload: IComponentState['value'] }
+  | { type: ActionTypes.SET_IS_GALLERY_SHOW; payload: IComponentState['isGalleryShow'] }
+  | { type: ActionTypes.SET_IS_LOADING; payload: IComponentState['isLoading'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_VALUE':
+    case ActionTypes.SET_VALUE:
       return { ...state, value: action.payload };
-    case 'SET_IS_GALLERY_SHOW':
+    case ActionTypes.SET_IS_GALLERY_SHOW:
       return { ...state, isGalleryShow: action.payload };
-    case 'SET_IS_LOADING':
+    case ActionTypes.SET_IS_LOADING:
       return { ...state, isLoading: action.payload };
     default:
       return state;
@@ -46,13 +55,7 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
     },
     useNativeTooltip: false,
     safeMode: false,
-    activeButtonsInReadOnly: [
-      'source',
-      'fullsize',
-      'print',
-      'about',
-      'dots',
-    ],
+    activeButtonsInReadOnly: ['source', 'fullsize', 'print', 'about', 'dots'],
     toolbarButtonSize: 'middle',
     theme: 'default',
     editorClassName: 'rich-text-box',
@@ -84,38 +87,36 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
-    value: props.value || initialState.value
+    value: props.value || initialState.value,
   });
 
   const ref = useRef<JoditReact>(null);
   let view: IJodit | null = null;
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
   });
 
   const init = () => {
-    dispatch({ type: 'SET_IS_LOADING', payload: false });
-  }
+    dispatch({ type: ActionTypes.SET_IS_LOADING, payload: false });
+  };
 
   const onClickChooseImage = async (_view: any) => {
     view = _view;
-    dispatch({ type: 'SET_IS_GALLERY_SHOW', payload: true });
-  }
+    dispatch({ type: ActionTypes.SET_IS_GALLERY_SHOW, payload: true });
+  };
 
   const onSelectedImage = (images: string[]) => {
     if (view) {
       for (const image of images) {
-        view.selection.insertImage(
-          ImageSourceUtil.getUploadedImageSrc(image)
-        );
+        view.selection.insertImage(ImageSourceUtil.getUploadedImageSrc(image));
       }
     }
-  }
+  };
 
   const onHideGalleryModal = () => {
-    dispatch({ type: 'SET_IS_GALLERY_SHOW', payload: false });
-  }
+    dispatch({ type: ActionTypes.SET_IS_GALLERY_SHOW, payload: false });
+  };
 
   return state.isLoading ? (
     <Spinner animation="border" />
@@ -135,9 +136,7 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
             ref={ref}
             value={state.value}
             config={config}
-            onBlur={(newContent) =>
-              props.onChange(ref.current?.value || '')
-            }
+            onBlur={(newContent) => props.onChange(ref.current?.value || '')}
           />
         }
       </React.Fragment>

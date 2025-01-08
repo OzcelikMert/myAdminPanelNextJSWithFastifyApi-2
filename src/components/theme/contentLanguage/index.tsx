@@ -5,8 +5,8 @@ import ComponentFormSelect, {
 } from '@components/elements/form/input/select';
 import { PathUtil } from '@utils/path.util';
 import { ILanguageGetResultService } from 'types/services/language.service';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 
 type IComponentProps = {
   selectedLanguage: ILanguageGetResultService;

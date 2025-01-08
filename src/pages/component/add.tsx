@@ -1,4 +1,4 @@
-import { FormEvent, use, useEffect, useReducer } from 'react';
+import { FormEvent, use, useEffect, useReducer, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import ComponentFormSelect, {
@@ -22,18 +22,21 @@ import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useFormReducer } from '@library/react/handles/form';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
-} from '@lib/features/breadCrumbSlice';
+} from '@redux/features/breadCrumbSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentForm from '@components/elements/form';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IHandleInputChangeParams = {
   index: number;
@@ -57,27 +60,41 @@ const initialState: IComponentState = {
   langId: '',
 };
 
+enum ActionTypes {
+  SET_ELEMENT_TYPES,
+  SET_COMPONENT_TYPES,
+  SET_MAIN_TAB_ACTIVE_KEY,
+  SET_MAIN_TITLE,
+  SET_LANG_ID,
+}
+
 type IAction =
-  | { type: 'SET_ELEMENT_TYPES'; payload: IComponentState['elementTypes'] }
-  | { type: 'SET_COMPONENT_TYPES'; payload: IComponentState['componentTypes'] }
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_ELEMENT_TYPES;
+      payload: IComponentState['elementTypes'];
+    }
+  | {
+      type: ActionTypes.SET_COMPONENT_TYPES;
+      payload: IComponentState['componentTypes'];
+    }
+  | {
+      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
-  | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
-  | { type: 'SET_LANG_ID'; payload: IComponentState['langId'] };
+  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
+  | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_ELEMENT_TYPES':
+    case ActionTypes.SET_ELEMENT_TYPES:
       return { ...state, elementTypes: action.payload };
-    case 'SET_COMPONENT_TYPES':
+    case ActionTypes.SET_COMPONENT_TYPES:
       return { ...state, componentTypes: action.payload };
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_MAIN_TITLE':
+    case ActionTypes.SET_MAIN_TITLE:
       return { ...state, mainTitle: action.payload };
-    case 'SET_LANG_ID':
+    case ActionTypes.SET_LANG_ID:
       return { ...state, langId: action.payload };
     default:
       return state;
@@ -132,15 +149,25 @@ export default function PageComponentAdd() {
     useFormReducer<IComponentSelectedItemFormState>(
       initialSelectedItemFormState
     );
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     const minPermission = formReducer.formState._id
       ? ComponentEndPointPermission.UPDATE
       : ComponentEndPointPermission.ADD;
@@ -159,14 +186,15 @@ export default function PageComponentAdd() {
         await getItem();
       }
       setPageTitle();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
   const changeLanguage = async (langId: string) => {
+    setIsPageLoaded(false);
     appDispatch(setIsPageLoadingState(true));
     await getItem(langId);
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {
@@ -189,7 +217,7 @@ export default function PageComponentAdd() {
 
   const getComponentTypes = () => {
     dispatch({
-      type: 'SET_COMPONENT_TYPES',
+      type: ActionTypes.SET_COMPONENT_TYPES,
       payload: componentTypes.map((type) => ({
         label: t(type.langKey),
         value: type.id,
@@ -199,7 +227,7 @@ export default function PageComponentAdd() {
 
   const getElementTypes = () => {
     dispatch({
-      type: 'SET_ELEMENT_TYPES',
+      type: ActionTypes.SET_ELEMENT_TYPES,
       payload: elementTypes.map((type) => ({
         label: t(type.langKey),
         value: type.id,
@@ -231,7 +259,7 @@ export default function PageComponentAdd() {
         });
 
         if (_langId == mainLangId) {
-          dispatch({ type: 'SET_MAIN_TITLE', payload: item.title });
+          dispatch({ type: ActionTypes.SET_MAIN_TITLE, payload: item.title });
         }
       } else {
         await navigatePage();
@@ -571,7 +599,7 @@ export default function PageComponentAdd() {
                     <Tabs
                       onSelect={(key: any) =>
                         dispatch({
-                          type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
                           payload: key,
                         })
                       }

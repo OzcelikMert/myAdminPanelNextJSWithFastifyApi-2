@@ -1,4 +1,4 @@
-import { IAppStore, makeStore } from '@lib/store'
+import { IAppStore, makeStore } from '@redux/store'
 import { useRef } from 'react'
 import { Provider } from 'react-redux'
 

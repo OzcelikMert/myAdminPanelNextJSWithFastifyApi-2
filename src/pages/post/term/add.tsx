@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useReducer } from 'react';
+import { FormEvent, useEffect, useReducer, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import { PostTermService } from '@services/postTerm.service';
@@ -19,17 +19,20 @@ import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
 import ComponentToolTip from '@components/elements/tooltip';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormReducer } from '@library/react/handles/form';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
-} from '@lib/features/breadCrumbSlice';
+} from '@redux/features/breadCrumbSlice';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentForm from '@components/elements/form';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   mainTabActiveKey: string;
@@ -48,30 +51,39 @@ const initialState: IComponentState = {
   langId: '',
 };
 
+enum ActionTypes {
+  SET_MAIN_TAB_ACTIVE_KEY,
+  SET_ITEMS,
+  SET_STATUS,
+  SET_MAIN_TITLE,
+  SET_LANG_ID,
+  SET_ITEM,
+}
+
 type IAction =
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
-  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
-  | { type: 'SET_STATUS'; payload: IComponentState['status'] }
-  | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
-  | { type: 'SET_LANG_ID'; payload: IComponentState['langId'] }
-  | { type: 'SET_ITEM'; payload: IComponentState['item'] };
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | { type: ActionTypes.SET_STATUS; payload: IComponentState['status'] }
+  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
+  | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] }
+  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_ITEMS':
+    case ActionTypes.SET_ITEMS:
       return { ...state, items: action.payload };
-    case 'SET_STATUS':
+    case ActionTypes.SET_STATUS:
       return { ...state, status: action.payload };
-    case 'SET_MAIN_TITLE':
+    case ActionTypes.SET_MAIN_TITLE:
       return { ...state, mainTitle: action.payload };
-    case 'SET_LANG_ID':
+    case ActionTypes.SET_LANG_ID:
       return { ...state, langId: action.payload };
-    case 'SET_ITEM':
+    case ActionTypes.SET_ITEM:
       return { ...state, item: action.payload };
     default:
       return state;
@@ -131,15 +143,25 @@ export default function PagePostTermAdd(props: IComponentProps) {
       postTypeId: queries.postTypeId ?? props.postTypeId ?? PostTypeId.Blog,
       _id: queries._id ?? props._id ?? '',
     });
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     const methodType = formState._id
       ? PostPermissionMethod.UPDATE
       : PostPermissionMethod.ADD;
@@ -171,15 +193,16 @@ export default function PagePostTermAdd(props: IComponentProps) {
       }
       if (!props.isModal) {
         setPageTitle();
-        appDispatch(setIsPageLoadingState(false));
       }
+      setIsPageLoaded(true);
     }
   };
 
   const changeLanguage = async (langId: string) => {
+    setIsPageLoaded(false);
     appDispatch(setIsPageLoadingState(true));
     await getItem(langId);
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {
@@ -201,7 +224,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
 
   const getStatus = () => {
     dispatch({
-      type: 'SET_STATUS',
+      type: ActionTypes.SET_STATUS,
       payload: ComponentUtil.getStatusForSelect(
         [StatusId.Active, StatusId.InProgress],
         t
@@ -239,7 +262,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
           label: item.contents?.title || t('[noLangAdd]'),
         });
       }
-      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
     }
   };
 
@@ -257,7 +280,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
 
     if (serviceResult.status && serviceResult.data) {
       const item = serviceResult.data;
-      dispatch({ type: 'SET_ITEM', payload: item });
+      dispatch({ type: ActionTypes.SET_ITEM, payload: item });
       setFormState({
         ...item,
         parentId: item.parentId?._id || '',
@@ -268,7 +291,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
       });
       if (_langId == mainLangId) {
         dispatch({
-          type: 'SET_MAIN_TITLE',
+          type: ActionTypes.SET_MAIN_TITLE,
           payload: item.contents?.title || '',
         });
       }
@@ -467,7 +490,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
                     <Tabs
                       onSelect={(key: any) =>
                         dispatch({
-                          type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
                           payload: key,
                         })
                       }

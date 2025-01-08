@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useReducer } from 'react';
+import { FormEvent, useReducer, useState } from 'react';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import { UserService } from '@services/user.service';
 import ComponentToast from '@components/elements/toast';
@@ -15,16 +15,19 @@ import { IPermissionGroup } from 'types/constants/permissionGroups';
 import { IPermission } from 'types/constants/permissions';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormReducer } from '@library/react/handles/form';
-import { setSessionAuthState } from '@lib/features/sessionSlice';
+import { setSessionAuthState } from '@redux/features/sessionSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentForm from '@components/elements/form';
 import ComponentFormType from '@components/elements/form/input/type';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   isImageChanging: boolean;
@@ -35,21 +38,26 @@ const initialState: IComponentState = {
   isImageChanging: false,
 };
 
+enum ActionTypes {
+  SET_IS_IMAGE_CHANGING,
+  SET_ITEM,
+}
+
 type IAction =
   | {
-      type: 'SET_IS_IMAGE_CHANGING';
+      type: ActionTypes.SET_IS_IMAGE_CHANGING;
       payload: IComponentState['isImageChanging'];
     }
-  | { type: 'SET_ITEM'; payload: IComponentState['item'] };
+  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_IS_IMAGE_CHANGING':
+    case ActionTypes.SET_IS_IMAGE_CHANGING:
       return {
         ...state,
         isImageChanging: action.payload,
       };
-    case 'SET_ITEM':
+    case ActionTypes.SET_ITEM:
       return {
         ...state,
         item: action.payload,
@@ -83,18 +91,28 @@ export default function PageSettingsProfile() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { formState, setFormState, onChangeInput } =
     useFormReducer(initialFormState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-    useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     await getUser();
     setPageTitle();
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {
@@ -114,7 +132,7 @@ export default function PageSettingsProfile() {
     );
     if (serviceResult.status && serviceResult.data) {
       const user = serviceResult.data;
-      dispatch({ type: 'SET_ITEM', payload: user });
+      dispatch({ type: ActionTypes.SET_ITEM, payload: user });
       setFormState({
         image: user.image,
         name: user.name,
@@ -128,7 +146,7 @@ export default function PageSettingsProfile() {
   };
 
   const onChangeImage = async (image: string) => {
-    dispatch({ type: 'SET_IS_IMAGE_CHANGING', payload: true });
+    dispatch({ type: ActionTypes.SET_IS_IMAGE_CHANGING, payload: true });
 
     const serviceResult = await UserService.updateProfileImage(
       { image: image },
@@ -149,7 +167,7 @@ export default function PageSettingsProfile() {
         })
       );
 
-      dispatch({ type: 'SET_IS_IMAGE_CHANGING', payload: false });
+      dispatch({ type: ActionTypes.SET_IS_IMAGE_CHANGING, payload: false });
     }
   };
 

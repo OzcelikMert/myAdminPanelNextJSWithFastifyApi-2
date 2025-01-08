@@ -8,16 +8,19 @@ import { StatusId } from '@constants/status';
 import { RouteUtil } from '@utils/route.util';
 import { LocalStorageUtil } from '@utils/localStorage.util';
 import { useFormReducer } from '@library/react/handles/form';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
-import { setSessionAuthState } from '@lib/features/sessionSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
+import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useRouter } from 'next/router';
 import ComponentForm from '@components/elements/form';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import { set } from 'lodash';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   isWrong: boolean;
@@ -28,18 +31,23 @@ const initialState: IComponentState = {
   isWrong: false,
 };
 
+enum AcitonTypes {
+  SET_IS_WRONG,
+  SET_USER,
+}
+
 type IAction =
-  | { type: 'SET_IS_WRONG'; payload: IComponentState['isWrong'] }
-  | { type: 'SET_USER'; payload: IComponentState['user'] };
+  | { type: AcitonTypes.SET_IS_WRONG; payload: IComponentState['isWrong'] }
+  | { type: AcitonTypes.SET_USER; payload: IComponentState['user'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_IS_WRONG':
+    case AcitonTypes.SET_IS_WRONG:
       return {
         ...state,
         isWrong: action.payload,
       };
-    case 'SET_USER':
+    case AcitonTypes.SET_USER:
       return {
         ...state,
         user: action.payload,
@@ -70,23 +78,33 @@ export default function PageLogin() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput } = useFormReducer<IComponentFormState>({
-    ...initialFormState,
-    email: LocalStorageUtil.getKeepMeEmail(),
-    keepMe: LocalStorageUtil.getKeepMeEmail().length > 0,
-  });
+  const { formState, setFormState, onChangeInput } =
+    useFormReducer<IComponentFormState>({
+      ...initialFormState,
+      email: LocalStorageUtil.getKeepMeEmail(),
+      keepMe: LocalStorageUtil.getKeepMeEmail().length > 0,
+    });
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
-
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     setPageTitle();
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {
@@ -94,8 +112,8 @@ export default function PageLogin() {
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    dispatch({ type: 'SET_IS_WRONG', payload: false });
-    
+    dispatch({ type: AcitonTypes.SET_IS_WRONG, payload: false });
+
     const serviceResult = await AuthService.login(
       formState,
       abortController.signal
@@ -118,13 +136,13 @@ export default function PageLogin() {
         }
       } else {
         if (serviceResult.data._id) {
-          dispatch({ type: 'SET_USER', payload: serviceResult.data });
+          dispatch({ type: AcitonTypes.SET_USER, payload: serviceResult.data });
         } else {
-          dispatch({ type: 'SET_IS_WRONG', payload: true });
+          dispatch({ type: AcitonTypes.SET_IS_WRONG, payload: true });
         }
       }
     } else {
-      dispatch({ type: 'SET_IS_WRONG', payload: true });
+      dispatch({ type: AcitonTypes.SET_IS_WRONG, payload: true });
     }
   };
 

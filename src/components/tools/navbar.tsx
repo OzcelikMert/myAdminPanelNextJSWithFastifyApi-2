@@ -11,11 +11,11 @@ import { EndPoints } from '@constants/endPoints';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { RouteUtil } from '@utils/route.util';
 import { useRouter } from 'next/router';
-import { setIsLockState } from '@lib/features/appSlice';
-import { setSessionAuthState } from '@lib/features/sessionSlice';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsLockState } from '@redux/features/appSlice';
+import { setSessionAuthState } from '@redux/features/sessionSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   isDarkTheme: boolean;
@@ -35,7 +35,7 @@ export default function ComponentToolNavbar() {
 
   const [isDarkTheme, setIsDarkTheme] = useState(LocalStorageUtil.getTheme() == 'dark');
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     return () => {
       abortController.abort();
     };

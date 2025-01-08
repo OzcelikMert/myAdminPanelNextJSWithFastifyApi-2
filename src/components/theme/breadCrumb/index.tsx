@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Link from 'next/link';
 import { EndPoints } from '@constants/endPoints';
-import { useAppSelector } from '@lib/hooks';
+import { useAppSelector } from '@redux/hooks';
 
 export default function ComponentThemeBreadCrumb() {
   const breadCrumbs = useAppSelector((state) => state.breadCrumbState.data);

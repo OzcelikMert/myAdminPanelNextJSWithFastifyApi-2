@@ -1,10 +1,11 @@
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
 import ComponentFormType from '@components/elements/form/input/type';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
 import { useFormReducer } from '@library/react/handles/form';
 import React, { Component, useEffect } from 'react';
 import { Modal } from 'react-bootstrap';
+import { useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   isSubmitting: boolean;
@@ -33,6 +34,8 @@ type IComponentProps = {
 export default function ComponentThemeModalUpdateItemRank(
   props: IComponentProps
 ) {
+  const t = useAppSelector(selectTranslation);
+
   const [isSubmitting, setIsSubmitting] = React.useState(
     initialState.isSubmitting
   );
@@ -42,9 +45,7 @@ export default function ComponentThemeModalUpdateItemRank(
       newRank: props.rank ?? 0,
     });
 
-  const t = useAppSelector(selectTranslation);
-
-  useEffect(() => {
+  useEffectAfterDidMount(() => {
     if (props.isShow) {
       setFormState({
         newRank: props.rank ?? 0,

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useReducer } from 'react';
+import { FormEvent, useEffect, useReducer, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import moment from 'moment';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
@@ -35,18 +35,21 @@ import { UserRoleId } from '@constants/userRoles';
 import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormReducer } from '@library/react/handles/form';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
-} from '@lib/features/breadCrumbSlice';
+} from '@redux/features/breadCrumbSlice';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 const ComponentThemeRichTextBox = dynamic(
   () => import('@components/theme/richTextBox'),
@@ -95,72 +98,124 @@ type IActionPayloadSetTerms = {
   variations: IPostAddComponentState['variations'];
 };
 
+export enum PostAddActionTypes {
+  SET_AUTHORS,
+  SET_PAGE_TYPES,
+  SET_ATTRIBUTE_TYPES,
+  SET_PRODUCT_TYPES,
+  SET_COMPONENTS,
+  SET_CATEGORIES,
+  SET_TAGS,
+  SET_ATTRIBUTES,
+  SET_VARIATIONS,
+  SET_STATUS,
+  SET_MAIN_TAB_ACTIVE_KEY,
+  SET_MAIN_TITLE,
+  SET_ITEM,
+  SET_IS_ICON_ACTIVE,
+  SET_LANG_ID,
+  SET_TERMS,
+}
+
 export type IPostAddAction =
-  | { type: 'SET_AUTHORS'; payload: IPostAddComponentState['authors'] }
-  | { type: 'SET_PAGE_TYPES'; payload: IPostAddComponentState['pageTypes'] }
   | {
-      type: 'SET_ATTRIBUTE_TYPES';
+      type: PostAddActionTypes.SET_AUTHORS;
+      payload: IPostAddComponentState['authors'];
+    }
+  | {
+      type: PostAddActionTypes.SET_PAGE_TYPES;
+      payload: IPostAddComponentState['pageTypes'];
+    }
+  | {
+      type: PostAddActionTypes.SET_ATTRIBUTE_TYPES;
       payload: IPostAddComponentState['attributeTypes'];
     }
   | {
-      type: 'SET_PRODUCT_TYPES';
+      type: PostAddActionTypes.SET_PRODUCT_TYPES;
       payload: IPostAddComponentState['productTypes'];
     }
-  | { type: 'SET_COMPONENTS'; payload: IPostAddComponentState['components'] }
-  | { type: 'SET_CATEGORIES'; payload: IPostAddComponentState['categories'] }
-  | { type: 'SET_TAGS'; payload: IPostAddComponentState['tags'] }
-  | { type: 'SET_ATTRIBUTES'; payload: IPostAddComponentState['attributes'] }
-  | { type: 'SET_VARIATIONS'; payload: IPostAddComponentState['variations'] }
-  | { type: 'SET_STATUS'; payload: IPostAddComponentState['status'] }
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: PostAddActionTypes.SET_COMPONENTS;
+      payload: IPostAddComponentState['components'];
+    }
+  | {
+      type: PostAddActionTypes.SET_CATEGORIES;
+      payload: IPostAddComponentState['categories'];
+    }
+  | {
+      type: PostAddActionTypes.SET_TAGS;
+      payload: IPostAddComponentState['tags'];
+    }
+  | {
+      type: PostAddActionTypes.SET_ATTRIBUTES;
+      payload: IPostAddComponentState['attributes'];
+    }
+  | {
+      type: PostAddActionTypes.SET_VARIATIONS;
+      payload: IPostAddComponentState['variations'];
+    }
+  | {
+      type: PostAddActionTypes.SET_STATUS;
+      payload: IPostAddComponentState['status'];
+    }
+  | {
+      type: PostAddActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IPostAddComponentState['mainTabActiveKey'];
     }
-  | { type: 'SET_MAIN_TITLE'; payload: IPostAddComponentState['mainTitle'] }
-  | { type: 'SET_ITEM'; payload: IPostAddComponentState['item'] }
   | {
-      type: 'SET_IS_ICON_ACTIVE';
+      type: PostAddActionTypes.SET_MAIN_TITLE;
+      payload: IPostAddComponentState['mainTitle'];
+    }
+  | {
+      type: PostAddActionTypes.SET_ITEM;
+      payload: IPostAddComponentState['item'];
+    }
+  | {
+      type: PostAddActionTypes.SET_IS_ICON_ACTIVE;
       payload: IPostAddComponentState['isIconActive'];
     }
-  | { type: 'SET_LANG_ID'; payload: IPostAddComponentState['langId'] }
-  | { type: 'SET_TERMS'; payload: IActionPayloadSetTerms };
+  | {
+      type: PostAddActionTypes.SET_LANG_ID;
+      payload: IPostAddComponentState['langId'];
+    }
+  | { type: PostAddActionTypes.SET_TERMS; payload: IActionPayloadSetTerms };
 
 const reducer = (
   state: IPostAddComponentState,
   action: IPostAddAction
 ): IPostAddComponentState => {
   switch (action.type) {
-    case 'SET_AUTHORS':
+    case PostAddActionTypes.SET_AUTHORS:
       return { ...state, authors: action.payload };
-    case 'SET_PAGE_TYPES':
+    case PostAddActionTypes.SET_PAGE_TYPES:
       return { ...state, pageTypes: action.payload };
-    case 'SET_ATTRIBUTE_TYPES':
+    case PostAddActionTypes.SET_ATTRIBUTE_TYPES:
       return { ...state, attributeTypes: action.payload };
-    case 'SET_PRODUCT_TYPES':
+    case PostAddActionTypes.SET_PRODUCT_TYPES:
       return { ...state, productTypes: action.payload };
-    case 'SET_COMPONENTS':
+    case PostAddActionTypes.SET_COMPONENTS:
       return { ...state, components: action.payload };
-    case 'SET_CATEGORIES':
+    case PostAddActionTypes.SET_CATEGORIES:
       return { ...state, categories: action.payload };
-    case 'SET_TAGS':
+    case PostAddActionTypes.SET_TAGS:
       return { ...state, tags: action.payload };
-    case 'SET_ATTRIBUTES':
+    case PostAddActionTypes.SET_ATTRIBUTES:
       return { ...state, attributes: action.payload };
-    case 'SET_VARIATIONS':
+    case PostAddActionTypes.SET_VARIATIONS:
       return { ...state, variations: action.payload };
-    case 'SET_STATUS':
+    case PostAddActionTypes.SET_STATUS:
       return { ...state, status: action.payload };
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case PostAddActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_MAIN_TITLE':
+    case PostAddActionTypes.SET_MAIN_TITLE:
       return { ...state, mainTitle: action.payload };
-    case 'SET_ITEM':
+    case PostAddActionTypes.SET_ITEM:
       return { ...state, item: action.payload };
-    case 'SET_IS_ICON_ACTIVE':
+    case PostAddActionTypes.SET_IS_ICON_ACTIVE:
       return { ...state, isIconActive: action.payload };
-    case 'SET_LANG_ID':
+    case PostAddActionTypes.SET_LANG_ID:
       return { ...state, langId: action.payload };
-    case 'SET_TERMS':
+    case PostAddActionTypes.SET_TERMS:
       return {
         ...state,
         categories: action.payload.categories,
@@ -214,15 +269,25 @@ export default function PagePostAdd() {
       typeId: queries.postTypeId ?? PostTypeId.Blog,
       _id: queries._id ?? '',
     });
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     const methodType = formState._id
       ? PostPermissionMethod.UPDATE
       : PostPermissionMethod.ADD;
@@ -273,14 +338,15 @@ export default function PagePostAdd() {
         await getItem();
       }
       setPageTitle();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
   const changeLanguage = async (langId: string) => {
+    setIsPageLoaded(false);
     appDispatch(setIsPageLoadingState(true));
     await getItem(langId);
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {
@@ -301,7 +367,7 @@ export default function PagePostAdd() {
 
   const getAttributeTypes = () => {
     dispatch({
-      type: 'SET_ATTRIBUTE_TYPES',
+      type: PostAddActionTypes.SET_ATTRIBUTE_TYPES,
       payload: attributeTypes.map((attribute) => ({
         label: t(attribute.langKey),
         value: attribute.id,
@@ -311,7 +377,7 @@ export default function PagePostAdd() {
 
   const getProductTypes = () => {
     dispatch({
-      type: 'SET_PRODUCT_TYPES',
+      type: PostAddActionTypes.SET_PRODUCT_TYPES,
       payload: productTypes.map((product) => ({
         label: t(product.langKey),
         value: product.id,
@@ -328,7 +394,7 @@ export default function PagePostAdd() {
 
   const getPageTypes = () => {
     dispatch({
-      type: 'SET_PAGE_TYPES',
+      type: PostAddActionTypes.SET_PAGE_TYPES,
       payload: pageTypes.map((pageType) => ({
         label: t(pageType.langKey),
         value: pageType.id,
@@ -341,7 +407,7 @@ export default function PagePostAdd() {
 
   const getStatus = () => {
     dispatch({
-      type: 'SET_STATUS',
+      type: PostAddActionTypes.SET_STATUS,
       payload: ComponentUtil.getStatusForSelect(
         [StatusId.Active, StatusId.InProgress, StatusId.Pending],
         t
@@ -369,7 +435,7 @@ export default function PagePostAdd() {
           item._id != sessionAuth?.user.userId
       );
       dispatch({
-        type: 'SET_AUTHORS',
+        type: PostAddActionTypes.SET_AUTHORS,
         payload: newItems.map((author) => {
           return {
             value: author._id,
@@ -390,7 +456,7 @@ export default function PagePostAdd() {
     );
     if (serviceResult.status && serviceResult.data) {
       dispatch({
-        type: 'SET_COMPONENTS',
+        type: PostAddActionTypes.SET_COMPONENTS,
         payload: serviceResult.data.map((component) => {
           return {
             value: component._id,
@@ -443,7 +509,7 @@ export default function PagePostAdd() {
       }
 
       dispatch({
-        type: 'SET_TERMS',
+        type: PostAddActionTypes.SET_TERMS,
         payload: {
           categories: newCategories,
           tags: newTags,
@@ -467,7 +533,7 @@ export default function PagePostAdd() {
     if (serviceResult.status && serviceResult.data) {
       const item = serviceResult.data;
       dispatch({
-        type: 'SET_ITEM',
+        type: PostAddActionTypes.SET_ITEM,
         payload: item,
       });
 
@@ -539,7 +605,7 @@ export default function PagePostAdd() {
       setFormState(newFormState);
 
       dispatch({
-        type: 'SET_IS_ICON_ACTIVE',
+        type: PostAddActionTypes.SET_IS_ICON_ACTIVE,
         payload: Boolean(
           item.contents && item.contents.icon && item.contents.icon.length > 0
         ),
@@ -547,7 +613,7 @@ export default function PagePostAdd() {
 
       if (_langId == mainLangId) {
         dispatch({
-          type: 'SET_MAIN_TITLE',
+          type: PostAddActionTypes.SET_MAIN_TITLE,
           payload: item.contents?.title || '',
         });
       }
@@ -763,7 +829,7 @@ export default function PagePostAdd() {
                 id="flexSwitchCheckDefault"
                 onChange={(e) =>
                   dispatch({
-                    type: 'SET_IS_ICON_ACTIVE',
+                    type: PostAddActionTypes.SET_IS_ICON_ACTIVE,
                     payload: !state.isIconActive,
                   })
                 }
@@ -891,7 +957,7 @@ export default function PagePostAdd() {
                     <Tabs
                       onSelect={(key: any) =>
                         dispatch({
-                          type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                          type: PostAddActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
                           payload: key,
                         })
                       }

@@ -6,9 +6,6 @@ import { IEndPointPermission } from 'types/constants/endPoint.permissions';
 import { EndPoints } from '@constants/endPoints';
 import ComponentToast from '@components/elements/toast';
 import { RouteUtil } from '@utils/route.util';
-import { NextRouter } from 'next/router';
-import { IAppDispatch } from '@lib/store';
-import { ITranslationFunc } from '@lib/features/translationSlice';
 import { ISessionAuthResultService } from 'types/services/auth.service';
 import { IPermissionCheckAndRedirectParamUtil } from 'types/utils/permission.util';
 

@@ -9,8 +9,8 @@ import {
 } from '@pages/post/add';
 import { IUseFormReducer } from '@library/react/handles/form';
 import ComponentFormSelect from '@components/elements/form/input/select';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 
 type IComponentProps = {
   state: IPostAddComponentState;

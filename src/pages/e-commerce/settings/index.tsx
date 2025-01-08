@@ -10,16 +10,19 @@ import { SettingProjectionKeys } from '@constants/settingProjections';
 import { PermissionUtil } from '@utils/permission.util';
 import { ECommerceEndPointPermission } from '@constants/endPointPermissions/eCommerce.endPoint.permission';
 import { ISettingECommerceModel } from 'types/models/setting.model';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { useEffect, useReducer } from 'react';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { useEffect, useReducer, useState } from 'react';
 import { useFormReducer } from '@library/react/handles/form';
 import { useRouter } from 'next/router';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
-import { setCurrencyIdState } from '@lib/features/settingSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
+import { setCurrencyIdState } from '@redux/features/settingSlice';
 import ComponentForm from '@components/elements/form';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   currencyTypes: IThemeFormSelectData[];
@@ -32,27 +35,36 @@ const initialState: IComponentState = {
   mainTabActiveKey: `general`,
 };
 
+enum ActionTypes {
+  SET_CURRENCY_TYPES,
+  SET_ITEM,
+  SET_MAIN_TAB_ACTIVE_KEY,
+}
+
 type IAction =
-  | { type: 'SET_CURRENCY_TYPES'; payload: IComponentState['currencyTypes'] }
-  | { type: 'SET_ITEM'; payload: IComponentState['item'] }
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_CURRENCY_TYPES;
+      payload: IComponentState['currencyTypes'];
+    }
+  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] }
+  | {
+      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_CURRENCY_TYPES':
+    case ActionTypes.SET_CURRENCY_TYPES:
       return {
         ...state,
         currencyTypes: action.payload,
       };
-    case 'SET_ITEM':
+    case ActionTypes.SET_ITEM:
       return {
         ...state,
         item: action.payload,
       };
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return {
         ...state,
         mainTabActiveKey: action.payload,
@@ -82,8 +94,26 @@ export default function PageECommerceSettings() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { formState, onChangeSelect } =
     useFormReducer<IComponentFormState>(initialFormState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
+
+  useDidMount(() => {
+    init();
+
+    return () => {
+      abortController.abort();
+    };
+  });
+
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
 
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         router,
@@ -96,17 +126,9 @@ export default function PageECommerceSettings() {
       setPageTitle();
       getCurrencyTypes();
       await getSettings();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
-
-  useDidMountHook(() => {
-    init();
-
-    return () => {
-      abortController.abort();
-    };
-  });
 
   const setPageTitle = () => {
     appDispatch(
@@ -129,14 +151,14 @@ export default function PageECommerceSettings() {
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
       if (setting.eCommerce) {
-        dispatch({ type: 'SET_ITEM', payload: setting.eCommerce });
+        dispatch({ type: ActionTypes.SET_ITEM, payload: setting.eCommerce });
       }
     }
   };
 
   const getCurrencyTypes = () => {
     dispatch({
-      type: 'SET_CURRENCY_TYPES',
+      type: ActionTypes.SET_CURRENCY_TYPES,
       payload: currencyTypes.map((currency) => ({
         label: `${currency.title} (${currency.icon})`,
         value: currency.id.toString(),
@@ -197,7 +219,7 @@ export default function PageECommerceSettings() {
                     <Tabs
                       onSelect={(key: any) =>
                         dispatch({
-                          type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
                           payload: key,
                         })
                       }

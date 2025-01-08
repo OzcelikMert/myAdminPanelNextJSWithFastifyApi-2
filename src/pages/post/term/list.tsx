@@ -19,18 +19,21 @@ import { ImageSourceUtil } from '@utils/imageSource.util';
 import { RouteUtil } from '@utils/route.util';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useEffect, useReducer } from 'react';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useEffect, useReducer, useState } from 'react';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
-} from '@lib/features/breadCrumbSlice';
+} from '@redux/features/breadCrumbSlice';
 import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { SortUtil } from '@utils/sort.util';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   typeId: PostTermTypeId;
@@ -52,33 +55,52 @@ const initialState: IComponentState = {
   listMode: 'list',
 };
 
+enum ActionTypes {
+  SET_TYPE_ID,
+  SET_POST_TYPE_ID,
+  SET_ITEMS,
+  SET_SELECTED_ITEMS,
+  SET_SELECTED_ITEM_ID,
+  SET_IS_SHOW_MODAL_UPDATE_RANK,
+  SET_LIST_MODE,
+}
+
 type IAction =
-  | { type: 'SET_TYPE_ID'; payload: IComponentState['typeId'] }
-  | { type: 'SET_POST_TYPE_ID'; payload: IComponentState['postTypeId'] }
-  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
-  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
-  | { type: 'SET_SELECTED_ITEM_ID'; payload: IComponentState['selectedItemId'] }
+  | { type: ActionTypes.SET_TYPE_ID; payload: IComponentState['typeId'] }
   | {
-      type: 'SET_IS_SHOW_MODAL_UPDATE_RANK';
+      type: ActionTypes.SET_POST_TYPE_ID;
+      payload: IComponentState['postTypeId'];
+    }
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | {
+      type: ActionTypes.SET_SELECTED_ITEMS;
+      payload: IComponentState['selectedItems'];
+    }
+  | {
+      type: ActionTypes.SET_SELECTED_ITEM_ID;
+      payload: IComponentState['selectedItemId'];
+    }
+  | {
+      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
       payload: IComponentState['isShowModalUpdateRank'];
     }
-  | { type: 'SET_LIST_MODE'; payload: IComponentState['listMode'] };
+  | { type: ActionTypes.SET_LIST_MODE; payload: IComponentState['listMode'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_TYPE_ID':
+    case ActionTypes.SET_TYPE_ID:
       return { ...state, typeId: action.payload };
-    case 'SET_POST_TYPE_ID':
+    case ActionTypes.SET_POST_TYPE_ID:
       return { ...state, postTypeId: action.payload };
-    case 'SET_ITEMS':
+    case ActionTypes.SET_ITEMS:
       return { ...state, items: action.payload };
-    case 'SET_SELECTED_ITEMS':
+    case ActionTypes.SET_SELECTED_ITEMS:
       return { ...state, selectedItems: action.payload };
-    case 'SET_SELECTED_ITEM_ID':
+    case ActionTypes.SET_SELECTED_ITEM_ID:
       return { ...state, selectedItemId: action.payload };
-    case 'SET_IS_SHOW_MODAL_UPDATE_RANK':
+    case ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK:
       return { ...state, isShowModalUpdateRank: action.payload };
-    case 'SET_LIST_MODE':
+    case ActionTypes.SET_LIST_MODE:
       return { ...state, listMode: action.payload };
     default:
       return state;
@@ -107,22 +129,38 @@ export default function PagePostTermList() {
     typeId: Number(queries.termTypeId ?? PostTermTypeId.Category),
     postTypeId: Number(queries.postTypeId ?? PostTypeId.Blog),
   });
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
-  useEffect(() => {
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
+  useEffectAfterDidMount(() => {
     queries = router.query as IPageQueries;
-    dispatch({ type: 'SET_TYPE_ID', payload: Number(queries.termTypeId) });
-    dispatch({ type: 'SET_POST_TYPE_ID', payload: Number(queries.postTypeId) });
+    dispatch({
+      type: ActionTypes.SET_TYPE_ID,
+      payload: Number(queries.termTypeId),
+    });
+    dispatch({
+      type: ActionTypes.SET_POST_TYPE_ID,
+      payload: Number(queries.postTypeId),
+    });
     init();
   }, [router.query]);
 
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     const minPermission = PermissionUtil.getPostPermission(
       state.postTypeId,
       PostPermissionMethod.GET
@@ -138,7 +176,7 @@ export default function PagePostTermList() {
     ) {
       setPageTitle();
       await getItems();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
@@ -168,7 +206,7 @@ export default function PagePostTermList() {
     );
 
     if (result.status && result.data) {
-      dispatch({ type: 'SET_ITEMS', payload: result.data });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: result.data });
     }
   };
 
@@ -204,7 +242,7 @@ export default function PagePostTermList() {
           const newItems = state.items.filter(
             (item) => !selectedItemId.includes(item._id)
           );
-          dispatch({ type: 'SET_ITEMS', payload: newItems });
+          dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
           new ComponentToast({
             type: 'success',
             title: t('successful'),
@@ -236,7 +274,7 @@ export default function PagePostTermList() {
           }
           return item;
         });
-        dispatch({ type: 'SET_ITEMS', payload: newItems });
+        dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
         new ComponentToast({
           type: 'success',
           title: t('successful'),
@@ -263,7 +301,7 @@ export default function PagePostTermList() {
       if (newItem) {
         newItem.rank = rank;
       }
-      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
       new ComponentToast({
         type: 'success',
         title: t('successful'),
@@ -275,16 +313,19 @@ export default function PagePostTermList() {
   };
 
   const onSelect = (selectedRows: IComponentState['items']) => {
-    dispatch({ type: 'SET_SELECTED_ITEMS', payload: selectedRows });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: selectedRows });
   };
 
   const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
-    dispatch({ type: 'SET_LIST_MODE', payload: item.key });
+    dispatch({ type: ActionTypes.SET_LIST_MODE, payload: item.key });
   };
 
   const onClickUpdateRank = (itemId: string) => {
-    dispatch({ type: 'SET_SELECTED_ITEM_ID', payload: itemId });
-    dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: true });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEM_ID, payload: itemId });
+    dispatch({
+      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+      payload: true,
+    });
   };
 
   const navigatePage = (type: 'add' | 'back' | 'edit', postTermId = '') => {
@@ -476,7 +517,10 @@ export default function PagePostTermList() {
       <ComponentThemeModalUpdateItemRank
         isShow={state.isShowModalUpdateRank}
         onHide={() =>
-          dispatch({ type: 'SET_IS_SHOW_MODAL_UPDATE_RANK', payload: false })
+          dispatch({
+            type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+            payload: false,
+          })
         }
         onSubmit={(rank) => onChangeRank(rank)}
         rank={selectedItem?.rank}

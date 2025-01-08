@@ -4,17 +4,17 @@ import { SettingService } from '@services/setting.service';
 import { StatusId } from '@constants/status';
 import { CurrencyId } from '@constants/currencyTypes';
 import { SettingProjectionKeys } from '@constants/settingProjections';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import {
   setCurrencyIdState,
   setLanguagesState,
   setMainLangIdState,
-} from '@lib/features/settingSlice';
-import { setIsAppLoadingState } from '@lib/features/appSlice';
+} from '@redux/features/settingSlice';
+import { setIsAppLoadingState } from '@redux/features/appSlice';
 import { PanelLanguageCodes, panelLanguages } from '@constants/panelLanguages';
-import { fetchTranslationState } from '@lib/features/translationSlice';
+import { fetchTranslationState } from '@redux/features/translationSlice';
 import { LocalStorageUtil } from '@utils/localStorage.util';
-import { useDidMountHook } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/customHooks';
 
 type IComponentProps = {
   children: React.ReactNode;
@@ -28,7 +28,7 @@ export default function ComponentProviderAppInit({
   const appDispatch = useAppDispatch();
   const isAppLoading = useAppSelector((state) => state.appState.isLoading);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();

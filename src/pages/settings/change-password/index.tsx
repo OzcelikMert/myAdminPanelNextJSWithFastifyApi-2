@@ -1,15 +1,18 @@
 import { FormEvent, useEffect, useState } from 'react';
 import ComponentToast from '@components/elements/toast';
 import { UserService } from '@services/user.service';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormReducer } from '@library/react/handles/form';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentForm from '@components/elements/form';
 import ComponentFormType from '@components/elements/form/input/type';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentFormState = {
   password: string;
@@ -32,17 +35,27 @@ export default function PageChangePassword() {
 
   const { formState, setFormState, onChangeInput } =
     useFormReducer<IComponentFormState>(initialFormState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-    useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     setPageTitle();
-    appDispatch(setIsPageLoadingState(true));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {

@@ -8,17 +8,20 @@ import { SettingProjectionKeys } from '@constants/settingProjections';
 import { cloneDeepWith } from 'lodash';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useEffect, useState } from 'react';
 import { useFormReducer } from '@library/react/handles/form';
 import ComponentForm from '@components/elements/form';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   items?: ISettingPathModel[];
@@ -57,15 +60,25 @@ export default function PageSettingsPaths() {
       initialSelectedItemFormState
     );
   const formReducer = useFormReducer<IComponentFormState>(initialFormState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         appDispatch,
@@ -77,14 +90,15 @@ export default function PageSettingsPaths() {
     ) {
       await getItems();
       setPageTitle();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
   const changeLanguage = async (langId: string) => {
+    setIsPageLoaded(false);
     appDispatch(setIsPageLoadingState(true));
     await getItems(langId);
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {

@@ -11,8 +11,9 @@ import { EndPoints } from '@constants/endPoints';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentToolLock from '@components/tools/lock';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import { useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IComponentProps = {
   children: React.ReactNode;
@@ -29,10 +30,11 @@ export default function ComponentApp({
   const breadCrumb = useAppSelector((state) => state.breadCrumbState.data);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
-  const pathname = useRef<string>(router.pathname);
+  const pathname = useRef<string>(router.asPath);
   
-  useEffect(() => {
+  useEffectAfterDidMount(() => {
     if(router.asPath != pathname.current){
+      console.log(router);
       appDispatch(setIsPageLoadingState(true));
       window.scrollTo(0, 0);
       document.body.scrollTop = 0;

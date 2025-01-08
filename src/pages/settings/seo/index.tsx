@@ -6,17 +6,20 @@ import { SettingsEndPointPermission } from '@constants/endPointPermissions/setti
 import { SettingProjectionKeys } from '@constants/settingProjections';
 import { ISettingSeoContentModel } from 'types/models/setting.model';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useState } from 'react';
 import { useFormReducer } from '@library/react/handles/form';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import ComponentForm from '@components/elements/form';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormTags from '@components/elements/form/input/tags';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   langId: string;
@@ -53,15 +56,25 @@ export default function PageSettingsSEO() {
   const [langId, setLangId] = useState(mainLangId);
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>(initialFormState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-    useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         router,
@@ -73,14 +86,15 @@ export default function PageSettingsSEO() {
     ) {
       setPageTitle();
       await getSeo();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
   const changeLanguage = async (langId: string) => {
+    setIsPageLoaded(false);
     appDispatch(setIsPageLoadingState(true));
     await getSeo(langId);
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {

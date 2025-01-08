@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useReducer } from 'react';
+import { FormEvent, useReducer, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import moment from 'moment';
 import { VariableLibrary } from '@library/variable';
@@ -24,19 +24,22 @@ import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
 import { DateMask } from '@library/variable/date';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormReducer } from '@library/react/handles/form';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentForm from '@components/elements/form';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
-} from '@lib/features/breadCrumbSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+} from '@redux/features/breadCrumbSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   mainTabActiveKey: string;
@@ -57,36 +60,49 @@ const initialState: IComponentState = {
   mainTitle: '',
 };
 
+enum ActionTypes {
+  SET_MAIN_TAB_ACTIVE_KEY,
+  SET_USER_ROLES,
+  SET_STATUS,
+  SET_PERMISSIONS,
+  SET_PERMISSION_GROUPS,
+  SET_MAIN_TITLE,
+  SET_ITEM,
+}
+
 type IAction =
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
-  | { type: 'SET_USER_ROLES'; payload: IComponentState['userRoles'] }
-  | { type: 'SET_STATUS'; payload: IComponentState['status'] }
-  | { type: 'SET_PERMISSIONS'; payload: IComponentState['permissions'] }
+  | { type: ActionTypes.SET_USER_ROLES; payload: IComponentState['userRoles'] }
+  | { type: ActionTypes.SET_STATUS; payload: IComponentState['status'] }
   | {
-      type: 'SET_PERMISSION_GROUPS';
+      type: ActionTypes.SET_PERMISSIONS;
+      payload: IComponentState['permissions'];
+    }
+  | {
+      type: ActionTypes.SET_PERMISSION_GROUPS;
       payload: IComponentState['permissionGroups'];
     }
-  | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
-  | { type: 'SET_ITEM'; payload: IComponentState['item'] };
+  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
+  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_USER_ROLES':
+    case ActionTypes.SET_USER_ROLES:
       return { ...state, userRoles: action.payload };
-    case 'SET_STATUS':
+    case ActionTypes.SET_STATUS:
       return { ...state, status: action.payload };
-    case 'SET_PERMISSIONS':
+    case ActionTypes.SET_PERMISSIONS:
       return { ...state, permissions: action.payload };
-    case 'SET_PERMISSION_GROUPS':
+    case ActionTypes.SET_PERMISSION_GROUPS:
       return { ...state, permissionGroups: action.payload };
-    case 'SET_MAIN_TITLE':
+    case ActionTypes.SET_MAIN_TITLE:
       return { ...state, mainTitle: action.payload };
-    case 'SET_ITEM':
+    case ActionTypes.SET_ITEM:
       return { ...state, item: action.payload };
     default:
       return state;
@@ -123,15 +139,25 @@ export default function PageUserAdd() {
       _id: (router.query._id as string) ?? '',
       banDateEnd: new Date().getStringWithMask(DateMask.DATE),
     });
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     const minPermission = formState._id
       ? UserEndPointPermission.UPDATE
       : UserEndPointPermission.ADD;
@@ -151,7 +177,7 @@ export default function PageUserAdd() {
       }
       getPermissionsForUserRoleId(formState.roleId);
       setPageTitle();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
@@ -180,7 +206,7 @@ export default function PageUserAdd() {
 
   const getStatus = () => {
     dispatch({
-      type: 'SET_STATUS',
+      type: ActionTypes.SET_STATUS,
       payload: ComponentUtil.getStatusForSelect(
         [StatusId.Active, StatusId.Disabled, StatusId.Banned],
         t
@@ -191,7 +217,7 @@ export default function PageUserAdd() {
   const getRoles = () => {
     const findUserRole = userRoles.findSingle('id', sessionAuth?.user.roleId);
     dispatch({
-      type: 'SET_USER_ROLES',
+      type: ActionTypes.SET_USER_ROLES,
       payload: ComponentUtil.getUserRolesForSelect(
         userRoles
           .map((userRole) =>
@@ -214,11 +240,11 @@ export default function PageUserAdd() {
     if (serviceResult.status && serviceResult.data) {
       const user = serviceResult.data;
       dispatch({
-        type: 'SET_ITEM',
+        type: ActionTypes.SET_ITEM,
         payload: user,
       });
       dispatch({
-        type: 'SET_MAIN_TITLE',
+        type: ActionTypes.SET_MAIN_TITLE,
         payload: user.name,
       });
     } else {
@@ -253,11 +279,11 @@ export default function PageUserAdd() {
     });
 
     dispatch({
-      type: 'SET_PERMISSIONS',
+      type: ActionTypes.SET_PERMISSIONS,
       payload: filteredPermissions,
     });
     dispatch({
-      type: 'SET_PERMISSION_GROUPS',
+      type: ActionTypes.SET_PERMISSION_GROUPS,
       payload: filteredPermissionGroups,
     });
   };
@@ -493,7 +519,7 @@ export default function PageUserAdd() {
                     <Tabs
                       onSelect={(key: any) =>
                         dispatch({
-                          type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
                           payload: key,
                         })
                       }

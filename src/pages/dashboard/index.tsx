@@ -20,13 +20,16 @@ import { PostSortTypeId } from '@constants/postSortTypes';
 import { ISettingGetResultService } from 'types/services/setting.service';
 import { SettingService } from '@services/setting.service';
 import { SettingProjectionKeys } from '@constants/settingProjections';
-import { useEffect, useReducer } from 'react';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { useEffect, useReducer, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { useRouter } from 'next/router';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 const WorldMap = dynamic(() => import('react-svg-worldmap'), { ssr: false });
 
@@ -53,38 +56,48 @@ const initialState: IComponentState = {
   settings: {},
 };
 
+enum ActionTypes {
+  SET_LAST_POSTS,
+  SET_VIEWS_WITH_NUMBER,
+  SET_VIEWS_WITH_STATISTICS,
+  SET_WORLD_MAP_SIZE,
+  SET_SETTINGS,
+}
+
 type IAction =
-  | { type: 'SET_LAST_POSTS'; payload: IComponentState['lastPosts'] }
+  | { type: ActionTypes.SET_LAST_POSTS; payload: IComponentState['lastPosts'] }
   | {
-      type: 'SET_VIEWS_WITH_NUMBER';
+      type: ActionTypes.SET_VIEWS_WITH_NUMBER;
       payload: IComponentState['viewsWithNumber'];
     }
   | {
-      type: 'SET_VIEWS_WITH_STATISTICS';
+      type: ActionTypes.SET_VIEWS_WITH_STATISTICS;
       payload: IComponentState['viewsWithStatistics'];
     }
-  | { type: 'SET_WORLD_MAP_SIZE'; payload: IComponentState['worldMapSize'] }
-  | { type: 'SET_SETTINGS'; payload: IComponentState['settings'] };
+  | {
+      type: ActionTypes.SET_WORLD_MAP_SIZE;
+      payload: IComponentState['worldMapSize'];
+    }
+  | { type: ActionTypes.SET_SETTINGS; payload: IComponentState['settings'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_LAST_POSTS':
+    case ActionTypes.SET_LAST_POSTS:
       return { ...state, lastPosts: action.payload };
-    case 'SET_VIEWS_WITH_NUMBER':
+    case ActionTypes.SET_VIEWS_WITH_NUMBER:
       return { ...state, viewsWithNumber: action.payload };
-    case 'SET_VIEWS_WITH_STATISTICS':
+    case ActionTypes.SET_VIEWS_WITH_STATISTICS:
       return { ...state, viewsWithStatistics: action.payload };
-    case 'SET_WORLD_MAP_SIZE':
+    case ActionTypes.SET_WORLD_MAP_SIZE:
       return { ...state, worldMapSize: action.payload };
-    case 'SET_SETTINGS':
+    case ActionTypes.SET_SETTINGS:
       return { ...state, settings: action.payload };
     default:
       return state;
   }
-}
+};
 
 export default function PageDashboard() {
-  let timer: NodeJS.Timeout | null = null;
   const abortController = new AbortController();
 
   const router = useRouter();
@@ -94,24 +107,32 @@ export default function PageDashboard() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
+
     return () => {
-      if (timer) {
-        clearInterval(timer);
-      }
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     setPageTitle();
     await getViewNumber();
     await getViewStatistics();
     await getSettings();
     await getLastPosts();
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {
@@ -133,7 +154,7 @@ export default function PageDashboard() {
         JSON.stringify(serviceResult.data)
       ) {
         dispatch({
-          type: 'SET_VIEWS_WITH_NUMBER',
+          type: ActionTypes.SET_VIEWS_WITH_NUMBER,
           payload: serviceResult.data,
         });
       }
@@ -147,7 +168,7 @@ export default function PageDashboard() {
 
     if (serviceResult.status && serviceResult.data) {
       dispatch({
-        type: 'SET_VIEWS_WITH_STATISTICS',
+        type: ActionTypes.SET_VIEWS_WITH_STATISTICS,
         payload: serviceResult.data,
       });
     }
@@ -163,7 +184,7 @@ export default function PageDashboard() {
 
     if (serviceResult.status && serviceResult.data) {
       dispatch({
-        type: 'SET_SETTINGS',
+        type: ActionTypes.SET_SETTINGS,
         payload: serviceResult.data,
       });
     }
@@ -180,7 +201,7 @@ export default function PageDashboard() {
     );
     if (serviceResult.status && serviceResult.data) {
       dispatch({
-        type: 'SET_LAST_POSTS',
+        type: ActionTypes.SET_LAST_POSTS,
         payload: serviceResult.data,
       });
     }
@@ -188,7 +209,7 @@ export default function PageDashboard() {
 
   const setWorldMapSize = (size: IComponentState['worldMapSize']) => {
     dispatch({
-      type: 'SET_WORLD_MAP_SIZE',
+      type: ActionTypes.SET_WORLD_MAP_SIZE,
       payload: size,
     });
   };

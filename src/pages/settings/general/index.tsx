@@ -20,17 +20,20 @@ import { ComponentUtil } from '@utils/component.util';
 import { UserRoleId } from '@constants/userRoles';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useEffect, useReducer } from 'react';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useEffect, useReducer, useState } from 'react';
 import { useFormReducer } from '@library/react/handles/form';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentForm from '@components/elements/form';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   panelLanguages: IThemeFormSelectData[];
@@ -50,27 +53,40 @@ const initialState: IComponentState = {
   isServerInfoLoading: true,
 };
 
+enum ActionTypes {
+  SET_PANEL_LANGUAGES,
+  SET_SERVER_INFO,
+  SET_MAIN_TAB_ACTIVE_KEY,
+  SET_IS_SERVER_INFO_LOADING,
+}
+
 type IAction =
-  | { type: 'SET_PANEL_LANGUAGES'; payload: IComponentState['panelLanguages'] }
-  | { type: 'SET_SERVER_INFO'; payload: IComponentState['serverInfo'] }
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_PANEL_LANGUAGES;
+      payload: IComponentState['panelLanguages'];
+    }
+  | {
+      type: ActionTypes.SET_SERVER_INFO;
+      payload: IComponentState['serverInfo'];
+    }
+  | {
+      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
   | {
-      type: 'SET_IS_SERVER_INFO_LOADING';
+      type: ActionTypes.SET_IS_SERVER_INFO_LOADING;
       payload: IComponentState['isServerInfoLoading'];
     };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_PANEL_LANGUAGES':
+    case ActionTypes.SET_PANEL_LANGUAGES:
       return { ...state, panelLanguages: action.payload };
-    case 'SET_SERVER_INFO':
+    case ActionTypes.SET_SERVER_INFO:
       return { ...state, serverInfo: action.payload };
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case 'SET_IS_SERVER_INFO_LOADING':
+    case ActionTypes.SET_IS_SERVER_INFO_LOADING:
       return { ...state, isServerInfoLoading: action.payload };
     default:
       return state;
@@ -101,15 +117,25 @@ export default function PageSettingsGeneral() {
       ...initialFormState,
       panelLangId: LocalStorageUtil.getLanguageId().toString(),
     });
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-    useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         router,
@@ -123,7 +149,7 @@ export default function PageSettingsGeneral() {
       getServerDetails();
       getPanelLanguages();
       await getSettings();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
@@ -156,7 +182,7 @@ export default function PageSettingsGeneral() {
 
   const getPanelLanguages = () => {
     dispatch({
-      type: 'SET_PANEL_LANGUAGES',
+      type: ActionTypes.SET_PANEL_LANGUAGES,
       payload: ComponentUtil.getPanelLanguageForSelect(panelLanguages),
     });
   };
@@ -164,8 +190,14 @@ export default function PageSettingsGeneral() {
   const getServerDetails = async () => {
     const serviceResult = await ServerInfoService.get(abortController.signal);
     if (serviceResult.status && serviceResult.data) {
-      dispatch({ type: 'SET_SERVER_INFO', payload: serviceResult.data });
-      dispatch({ type: 'SET_IS_SERVER_INFO_LOADING', payload: false });
+      dispatch({
+        type: ActionTypes.SET_SERVER_INFO,
+        payload: serviceResult.data,
+      });
+      dispatch({
+        type: ActionTypes.SET_IS_SERVER_INFO_LOADING,
+        payload: false,
+      });
     }
   };
 
@@ -434,7 +466,7 @@ export default function PageSettingsGeneral() {
                     <Tabs
                       onSelect={(key: any) =>
                         dispatch({
-                          type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
                           payload: key,
                         })
                       }

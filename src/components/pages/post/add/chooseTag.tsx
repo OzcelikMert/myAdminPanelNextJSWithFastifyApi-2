@@ -8,14 +8,15 @@ import {
   IPostAddAction,
   IPostAddComponentFormState,
   IPostAddComponentState,
+  PostAddActionTypes,
 } from '@pages/post/add';
 import { IUseFormReducer, useFormReducer } from '@library/react/handles/form';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
 import ComponentFormSelect from '@components/elements/form/input/select';
-import { useDidMountHook } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   isShowModal: boolean;
@@ -54,7 +55,7 @@ export default function ComponentPagePostAddChooseTag(props: IComponentProps) {
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>(initialFormState);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     return () => {
       abortController.abort();
     };
@@ -79,7 +80,7 @@ export default function ComponentPagePostAddChooseTag(props: IComponentProps) {
 
     if (serviceResult.status && serviceResult.data) {
       props.dispatch({
-        type: 'SET_TAGS',
+        type: PostAddActionTypes.SET_TAGS,
         payload: [
           {
             value: serviceResult.data._id,

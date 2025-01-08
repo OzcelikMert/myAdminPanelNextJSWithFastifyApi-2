@@ -15,12 +15,15 @@ import { RouteUtil } from '@utils/route.util';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { SortUtil } from '@utils/sort.util';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   items: IComponentGetResultService[];
@@ -33,18 +36,17 @@ const initialState: IComponentState = {
 export default function PageComponentList() {
   const abortController = new AbortController();
 
-  const [items, setItems] = useState(initialState.items);
-
   const router = useRouter();
-
   const appDispatch = useAppDispatch();
-
   const t = useAppSelector(selectTranslation);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
-  useDidMountHook(() => {
+  const [items, setItems] = useState(initialState.items);
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
+
+  useDidMount(() => {
     init();
 
     return () => {
@@ -52,7 +54,16 @@ export default function PageComponentList() {
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (
       PermissionUtil.checkAndRedirect({
         router,
@@ -64,7 +75,7 @@ export default function PageComponentList() {
     ) {
       setPageTitle();
       await getItems();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
@@ -72,10 +83,10 @@ export default function PageComponentList() {
     appDispatch(
       setBreadCrumbState([
         {
-          title: t('components')
+          title: t('components'),
         },
         {
-          title: t('list')
+          title: t('list'),
         },
       ])
     );

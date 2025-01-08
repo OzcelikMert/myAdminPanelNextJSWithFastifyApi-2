@@ -2,13 +2,13 @@ import { AuthService } from '@services/auth.service';
 import { ApiErrorCodes } from '@library/api/errorCodes';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { useState } from 'react';
 import {
   setSessionAuthState,
-} from '@lib/features/sessionSlice';
+} from '@redux/features/sessionSlice';
 import { useRouter } from 'next/router';
-import { useDidMountHook } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   isAuth: boolean;
@@ -35,7 +35,7 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
   const [isAuth, setIsAuth] = useState(initialState.isAuth);
   const [isLoading, setIsLoading] = useState(initialState.isLoading);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
     return () => {
       abortController.abort();
@@ -49,10 +49,11 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
     await checkSession();
     setIsLoading(false);
   };
+  
 
   const checkSession = async () => {
     const serviceResult = await AuthService.getSession(abortController.signal);
-
+    
     if (
       serviceResult.status &&
       serviceResult.errorCode == ApiErrorCodes.success

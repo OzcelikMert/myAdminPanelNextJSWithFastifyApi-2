@@ -4,12 +4,15 @@ import { GalleryService } from '@services/gallery.service';
 import ComponentToast from '@components/elements/toast';
 import Image from 'next/image';
 import { IGalleryGetResultService } from 'types/services/gallery.service';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { EndPoints } from '@constants/endPoints';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   isDragging: boolean;
@@ -27,19 +30,22 @@ type IComponentProps = {
 };
 
 export default function PageGalleryUpload(props: IComponentProps) {
-  const [isDragging, setIsDragging] = useState(initialState.isDragging);
-  const [uploadingFiles, setUploadingFiles] = useState(initialState.uploadingFiles);
+  const abortController = new AbortController();
+  const refInputFile: RefObject<HTMLInputElement | null> = useRef(null);
+  const maxFileSize: number = Number(process.env.UPLOAD_FILE_SIZE ?? 1524000);
 
   const appDispatch = useAppDispatch();
   const t = useAppSelector(selectTranslation);
-  const sessionAuth = useAppSelector(state => state.sessionState.auth);
-  const isPageLoading = useAppSelector(state => state.pageState.isLoading);
+  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
+  const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
-  const refInputFile: RefObject<HTMLInputElement | null> = useRef(null);
-  const maxFileSize: number = Number(process.env.UPLOAD_FILE_SIZE ?? 1524000);
-  const abortController = new AbortController();
+  const [isDragging, setIsDragging] = useState(initialState.isDragging);
+  const [uploadingFiles, setUploadingFiles] = useState(
+    initialState.uploadingFiles
+  );
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
 
     return () => {
@@ -47,24 +53,37 @@ export default function PageGalleryUpload(props: IComponentProps) {
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      if (!props.isModal) {
+        appDispatch(setIsPageLoadingState(false));
+      }
+    }
+  }, [isPageLoaded]);
+
   const init = () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     if (!props.isModal) {
       setPageTitle();
-      appDispatch(setIsPageLoadingState(false));
     }
-  }
+    setIsPageLoaded(true);
+  };
 
   const setPageTitle = () => {
-    appDispatch(setBreadCrumbState([
-      {
-        title: t('gallery'),
-        url: EndPoints.GALLERY_WITH.LIST
-      },
-      {
-        title: t('upload')
-      }
-    ]));
-  }
+    appDispatch(
+      setBreadCrumbState([
+        {
+          title: t('gallery'),
+          url: EndPoints.GALLERY_WITH.LIST,
+        },
+        {
+          title: t('upload'),
+        },
+      ])
+    );
+  };
 
   const uploadFiles = async () => {
     for (const uploadingFile of uploadingFiles) {
@@ -82,7 +101,9 @@ export default function PageGalleryUpload(props: IComponentProps) {
         formData,
         (e, percent) => {
           setUploadingFiles((state) => {
-            const findIndex = state.findIndex((uploadingFile) => uploadingFile.id === uploadingFile.id);
+            const findIndex = state.findIndex(
+              (uploadingFile) => uploadingFile.id === uploadingFile.id
+            );
             if (findIndex > -1) {
               state[findIndex].progressValue = percent ?? 100;
             }
@@ -108,33 +129,33 @@ export default function PageGalleryUpload(props: IComponentProps) {
                 _id: sessionAuth!.user.userId,
                 name: sessionAuth!.user.name,
                 image: sessionAuth!.user.image,
-                url: sessionAuth!.user.url ?? "",
+                url: sessionAuth!.user.url ?? '',
               },
             }))
           );
         }
       }
     }
-  }
+  };
 
   const updateUploadingFiles = (files: FileList | null) => {
-    if(files && files.length > 0){
+    if (files && files.length > 0) {
       setIsDragging(false);
       setUploadingFiles((state) => {
-          for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            state.push({
-              id: String.createId(),
-              file: file,
-              progressValue: file.size < maxFileSize ? 0 : 100,
-              status: file.size < maxFileSize,
-            });
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          state.push({
+            id: String.createId(),
+            file: file,
+            progressValue: file.size < maxFileSize ? 0 : 100,
+            status: file.size < maxFileSize,
+          });
         }
         return state;
       });
       uploadFiles();
     }
-  }
+  };
 
   const onChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -144,12 +165,12 @@ export default function PageGalleryUpload(props: IComponentProps) {
   const onDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(true);
-  }
+  };
 
   const onDragEnd = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragging(false);
-  }
+  };
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -159,9 +180,12 @@ export default function PageGalleryUpload(props: IComponentProps) {
 
   const onClearUploadedImages = () => {
     setUploadingFiles((state) => {
-      return state.filter((uploadingFile) => uploadingFile.progressValue < 100 && uploadingFile.status);
+      return state.filter(
+        (uploadingFile) =>
+          uploadingFile.progressValue < 100 && uploadingFile.status
+      );
     });
-  }
+  };
 
   const UploadingItem = (props: IUploadingFiles) => {
     return (
@@ -205,53 +229,52 @@ export default function PageGalleryUpload(props: IComponentProps) {
     );
   };
 
-  
-    return isPageLoading ? null : (
-      <div className="page-gallery">
-        <div className="grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body">
+  return isPageLoading ? null : (
+    <div className="page-gallery">
+      <div className="grid-margin stretch-card">
+        <div className="card">
+          <div className="card-body">
+            <div
+              className="upload-container"
+              onDragOver={(event) => onDragOver(event)}
+              onDragLeave={(event) => onDragEnd(event)}
+              onDrop={(event) => onDrop(event)}
+            >
               <div
-                className="upload-container"
-                onDragOver={(event) => onDragOver(event)}
-                onDragLeave={(event) => onDragEnd(event)}
-                onDrop={(event) => onDrop(event)}
+                className={`border-container text-center ${isDragging ? `bg-gradient-dark` : ``}`}
               >
-                <div
-                  className={`border-container text-center ${isDragging ? `bg-gradient-dark` : ``}`}
+                <input
+                  type="file"
+                  ref={refInputFile}
+                  hidden={true}
+                  onChange={(event) => onChangeFile(event)}
+                  multiple={true}
+                  name="image[]"
+                  accept=".jpg,.png,.gif,.jpeg"
+                />
+                <div className="icons">
+                  <i className="mdi mdi-image"></i>
+                  <i className="mdi mdi-file"></i>
+                  <i className="mdi mdi-file-cloud"></i>
+                </div>
+                <p
+                  className="cursor-pointer"
+                  onClick={() => refInputFile.current?.click()}
                 >
-                  <input
-                    type="file"
-                    ref={refInputFile}
-                    hidden={true}
-                    onChange={(event) => onChangeFile(event)}
-                    multiple={true}
-                    name="image[]"
-                    accept=".jpg,.png,.gif,.jpeg"
-                  />
-                  <div className="icons">
-                    <i className="mdi mdi-image"></i>
-                    <i className="mdi mdi-file"></i>
-                    <i className="mdi mdi-file-cloud"></i>
-                  </div>
-                  <p
-                    className="cursor-pointer"
-                    onClick={() => refInputFile.current?.click()}
-                  >
-                    {t('dragAndDropHere')} (.jpg, .png, .gif)
-                  </p>
-                </div>
+                  {t('dragAndDropHere')} (.jpg, .png, .gif)
+                </p>
               </div>
-              {uploadingFiles.length > 0 ? (
-                <div className="row mt-5 ms-1">
-                  {uploadingFiles.map((file, index) => (
-                    <UploadingItem {...file} key={index} />
-                  ))}
-                </div>
-              ) : null}
             </div>
+            {uploadingFiles.length > 0 ? (
+              <div className="row mt-5 ms-1">
+                {uploadingFiles.map((file, index) => (
+                  <UploadingItem {...file} key={index} />
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
-    );
+    </div>
+  );
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ComponentTypeId, componentTypes } from '@constants/componentTypes';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
 
 type IComponentProps = {
   typeId: ComponentTypeId;

@@ -3,6 +3,7 @@ import {
   IPostAddAction,
   IPostAddComponentFormState,
   IPostAddComponentState,
+  PostAddActionTypes,
 } from '@pages/post/add';
 import { Modal } from 'react-bootstrap';
 import { PostTermService } from '@services/postTerm.service';
@@ -11,8 +12,8 @@ import { StatusId } from '@constants/status';
 import ComponentToast from '@components/elements/toast';
 import { IUseFormReducer, useFormReducer } from '@library/react/handles/form';
 import ComponentFormType from '@components/elements/form/input/type';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
 import ComponentFormSelect from '@components/elements/form/input/select';
 
@@ -74,7 +75,7 @@ export default function ComponentPagePostAddChooseCategory(
 
     if (serviceResult.status && serviceResult.data) {
       props.dispatch({
-        type: 'SET_CATEGORIES',
+        type: PostAddActionTypes.SET_CATEGORIES,
         payload: [
           {
             value: serviceResult.data._id,

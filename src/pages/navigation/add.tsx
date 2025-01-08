@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useReducer } from 'react';
+import { FormEvent, useEffect, useReducer, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import {
   INavigationGetResultService,
@@ -16,18 +16,21 @@ import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
 import { useRouter } from 'next/router';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormReducer } from '@library/react/handles/form';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
-} from '@lib/features/breadCrumbSlice';
+} from '@redux/features/breadCrumbSlice';
 import ComponentFormType from '@components/elements/form/input/type';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
-import { useDidMountHook } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 type IComponentState = {
   items: IThemeFormSelectData<string>[];
@@ -46,40 +49,49 @@ const initialState: IComponentState = {
   langId: '',
 };
 
+enum ActionTypes {
+  SET_ITEMS,
+  SET_STATUS,
+  SET_MAIN_TITLE,
+  SET_MAIN_TAB_ACTIVE_KEY,
+  SET_LANG_ID,
+  SET_ITEM,
+}
+
 type IAction =
-  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
-  | { type: 'SET_STATUS'; payload: IComponentState['status'] }
-  | { type: 'SET_MAIN_TITLE'; payload: IComponentState['mainTitle'] }
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | { type: ActionTypes.SET_STATUS; payload: IComponentState['status'] }
+  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
   | {
-      type: 'SET_MAIN_TAB_ACTIVE_KEY';
+      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
-  | { type: 'SET_LANG_ID'; payload: IComponentState['langId'] }
-  | { type: 'SET_ITEM'; payload: IComponentState['item'] };
+  | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] }
+  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_ITEMS':
+    case ActionTypes.SET_ITEMS:
       return {
         ...state,
         items: action.payload,
       };
-    case 'SET_STATUS':
+    case ActionTypes.SET_STATUS:
       return {
         ...state,
         status: action.payload,
       };
-    case 'SET_MAIN_TITLE':
+    case ActionTypes.SET_MAIN_TITLE:
       return {
         ...state,
         mainTitle: action.payload,
       };
-    case 'SET_MAIN_TAB_ACTIVE_KEY':
+    case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return {
         ...state,
         mainTabActiveKey: action.payload,
       };
-    case 'SET_ITEM':
+    case ActionTypes.SET_ITEM:
       return {
         ...state,
         item: action.payload,
@@ -127,8 +139,9 @@ export default function PageNavigationAdd() {
       ...initialFormState,
       _id: queries._id || '',
     });
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
 
     return () => {
@@ -136,7 +149,16 @@ export default function PageNavigationAdd() {
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (isPageLoaded) {
+      appDispatch(setIsPageLoadingState(false));
+    }
+  }, [isPageLoaded]);
+
   const init = async () => {
+    if (isPageLoaded) {
+      setIsPageLoaded(false);
+    }
     const minPermission = formState._id
       ? NavigationEndPointPermission.UPDATE
       : NavigationEndPointPermission.ADD;
@@ -155,14 +177,15 @@ export default function PageNavigationAdd() {
         await getItem();
       }
       setPageTitle();
-      appDispatch(setIsPageLoadingState(false));
+      setIsPageLoaded(true);
     }
   };
 
   const changeLanguage = async (langId: string) => {
+    setIsPageLoaded(false);
     appDispatch(setIsPageLoadingState(true));
     await getItem(langId);
-    appDispatch(setIsPageLoadingState(false));
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {
@@ -183,7 +206,7 @@ export default function PageNavigationAdd() {
 
   const getStatus = () => {
     dispatch({
-      type: 'SET_STATUS',
+      type: ActionTypes.SET_STATUS,
       payload: ComponentUtil.getStatusForSelect(
         [StatusId.Active, StatusId.InProgress],
         t
@@ -211,7 +234,7 @@ export default function PageNavigationAdd() {
         });
       }
       setFormState({ rank: newItems.length });
-      dispatch({ type: 'SET_ITEMS', payload: newItems });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
     }
   };
 
@@ -228,7 +251,7 @@ export default function PageNavigationAdd() {
       );
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
-        dispatch({ type: 'SET_ITEM', payload: item });
+        dispatch({ type: ActionTypes.SET_ITEM, payload: item });
         setFormState({
           ...item,
           parentId: item.parentId?._id || '',
@@ -239,7 +262,7 @@ export default function PageNavigationAdd() {
         });
         if (_langId == mainLangId) {
           dispatch({
-            type: 'SET_MAIN_TITLE',
+            type: ActionTypes.SET_MAIN_TITLE,
             payload: item.contents?.title || '',
           });
         }
@@ -386,7 +409,7 @@ export default function PageNavigationAdd() {
                   <Tabs
                     onSelect={(key: any) =>
                       dispatch({
-                        type: 'SET_MAIN_TAB_ACTIVE_KEY',
+                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
                         payload: key,
                       })
                     }

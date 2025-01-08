@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { status, StatusId } from '@constants/status';
 import ComponentToolTip from '@components/elements/tooltip';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 
 type IComponentProps = {
   statusId: StatusId;

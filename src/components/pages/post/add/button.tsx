@@ -1,7 +1,7 @@
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentFormType from '@components/elements/form/input/type';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useAppSelector } from '@lib/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
 import { IUseFormReducer } from '@library/react/handles/form';
 import {
   IPostAddAction,

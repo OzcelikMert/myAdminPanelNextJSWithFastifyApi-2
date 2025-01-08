@@ -5,11 +5,11 @@ import { ImageSourceUtil } from '@utils/imageSource.util';
 import ComponentForm from '@components/elements/form';
 import ThemeInputType from '@components/elements/form/input/type';
 import { useFormReducer } from '@library/react/handles/form';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { setSessionAuthState } from '@lib/features/sessionSlice';
-import { setIsLockState } from '@lib/features/appSlice';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { setSessionAuthState } from '@redux/features/sessionSlice';
+import { setIsLockState } from '@redux/features/appSlice';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   isSubmitting: boolean;
@@ -43,7 +43,7 @@ export default function ComponentToolLock() {
   const { formState, onChangeInput, setFormState } =
     useFormReducer<IComponentFormState>(initialFormState);
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     return () => {
       abortController.abort();
     };

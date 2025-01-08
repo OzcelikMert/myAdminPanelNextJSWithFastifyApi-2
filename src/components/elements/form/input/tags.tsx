@@ -1,5 +1,6 @@
 import React from 'react';
 import { VariableLibrary } from '@library/variable';
+import { useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   tags: string[];
@@ -23,7 +24,8 @@ export default function ComponentFormTags(props: IComponentProps) {
   const [tags, setTags] = React.useState<string[]>(props.value);
   const [currentTags, setCurrentTags] = React.useState<string>('');
 
-  React.useEffect(() => {
+
+  useEffectAfterDidMount(() => {
     setTags(props.value);
   }, [props.value]);
 

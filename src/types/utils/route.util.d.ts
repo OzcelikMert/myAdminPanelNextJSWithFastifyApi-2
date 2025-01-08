@@ -1,4 +1,4 @@
-import { IAppDispatch } from '@lib/store';
+import { IAppDispatch } from '@redux/store';
 import { NextRouter } from 'next/router';
 import { IPagePropCommon } from 'types/pageProps';
 

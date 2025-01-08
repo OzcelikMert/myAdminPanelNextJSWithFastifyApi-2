@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useReducer, useRef, useState } from 'react';
 import Swal from 'sweetalert2';
 import { GalleryService } from '@services/gallery.service';
 import { TableColumn } from 'react-data-table-component';
@@ -10,43 +10,48 @@ import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IGalleryGetResultService } from 'types/services/gallery.service';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
 import { SortUtil } from '@utils/sort.util';
-import { useAppDispatch, useAppSelector } from '@lib/hooks';
-import { setBreadCrumbState } from '@lib/features/breadCrumbSlice';
-import { EndPoints } from '@constants/endPoints';
-import { selectTranslation } from '@lib/features/translationSlice';
-import { setIsPageLoadingState } from '@lib/features/pageSlice';
-import { useDidMountHook } from '@library/react/customHooks';
+import { useAppDispatch, useAppSelector } from '@redux/hooks';
+import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
-  items: IGalleryGetResultService[];
+  items?: IGalleryGetResultService[];
   selectedItems: IGalleryGetResultService[];
   isListLoading: boolean;
 };
 
 const initialState: IComponentState = {
-  items: [],
+  items: undefined,
   selectedItems: [],
   isListLoading: true,
 };
 
+enum ActionTypes {
+  SET_ITEMS,
+  SET_SELECTED_ITEMS,
+  SET_IS_LIST_LOADING
+} 
+
 type IAction =
-  | { type: 'SET_ITEMS'; payload: IComponentState['items'] }
-  | { type: 'SET_SELECTED_ITEMS'; payload: IComponentState['selectedItems'] }
-  | { type: 'SET_IS_LIST_LOADING'; payload: IComponentState['isListLoading'] };
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | { type: ActionTypes.SET_SELECTED_ITEMS; payload: IComponentState['selectedItems'] }
+  | { type: ActionTypes.SET_IS_LIST_LOADING; payload: IComponentState['isListLoading'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
-    case 'SET_ITEMS':
+    case ActionTypes.SET_ITEMS:
       return {
         ...state,
         items: action.payload,
       };
-    case 'SET_SELECTED_ITEMS':
+    case ActionTypes.SET_SELECTED_ITEMS:
       return {
         ...state,
         selectedItems: action.payload,
       };
-    case 'SET_IS_LIST_LOADING':
+    case ActionTypes.SET_IS_LIST_LOADING:
       return {
         ...state,
         isListLoading: action.payload,
@@ -73,8 +78,9 @@ export default function PageGalleryList(props: IComponentProps) {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const [isPageLoaded, setIsPageLoaded] = useState(false); 
 
-  useDidMountHook(() => {
+  useDidMount(() => {
     init();
 
     return () => {
@@ -83,23 +89,33 @@ export default function PageGalleryList(props: IComponentProps) {
     };
   });
 
-  useEffect(() => {
+  useEffectAfterDidMount(() => {
+    if(isPageLoaded){
+      if (!props.isModal) {
+        appDispatch(setIsPageLoadingState(false));
+      }
+    }
+  }, [isPageLoaded]);
+
+  useEffectAfterDidMount(() => {
     if (props.uploadedImages && props.uploadedImages.length > 0) {
       dispatch({
-        type: 'SET_ITEMS',
-        payload: state.items.concat(props.uploadedImages || []),
+        type: ActionTypes.SET_ITEMS,
+        payload: state.items?.concat(props.uploadedImages || []),
       });
     }
   }, [props.uploadedImages]);
 
   const init = async () => {
+    if(isPageLoaded){
+      setIsPageLoaded(false);
+    }
     await getItems();
-    dispatch({ type: 'SET_IS_LIST_LOADING', payload: false });
-
+    dispatch({ type: ActionTypes.SET_IS_LIST_LOADING, payload: false });
     if (!props.isModal) {
       setPageTitle();
-      appDispatch(setIsPageLoadingState(false));
     }
+    setIsPageLoaded(true);
   };
 
   const setPageTitle = () => {
@@ -121,12 +137,12 @@ export default function PageGalleryList(props: IComponentProps) {
       abortController.signal
     );
     if (serviceResult.status && serviceResult.data) {
-      dispatch({ type: 'SET_ITEMS', payload: serviceResult.data });
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: serviceResult.data });
     }
   };
 
   const onSelect = (images: IGalleryGetResultService[]) => {
-    dispatch({ type: 'SET_SELECTED_ITEMS', payload: images });
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: images });
     if (images.length > 0) {
       if (!toast || !toast.isShow) {
         toast = new ComponentToast({
@@ -181,12 +197,12 @@ export default function PageGalleryList(props: IComponentProps) {
       loadingToast.hide();
       if (serviceResult.status) {
         dispatch({
-          type: 'SET_ITEMS',
-          payload: state.items.filter(
+          type: ActionTypes.SET_ITEMS,
+          payload: state.items?.filter(
             (item) => !state.selectedItems.includes(item)
           ),
         });
-        dispatch({ type: 'SET_SELECTED_ITEMS', payload: [] });
+        dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [] });
         new ComponentToast({
           title: t('itemDeleted'),
           content: t('itemDeleted'),
@@ -199,18 +215,18 @@ export default function PageGalleryList(props: IComponentProps) {
 
   const onSubmit = () => {
     if (props.onSubmit) {
-      const foundSelectedItems = state.items.findMulti(
+      const foundSelectedItems = state.items?.findMulti(
         '_id',
         state.selectedItems
       );
       toast?.hide();
       props.onSubmit(
-        foundSelectedItems.map((selectedItem) => selectedItem.name)
+        foundSelectedItems?.map((selectedItem) => selectedItem.name) ?? []
       );
     }
   };
 
-  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): TableColumn<IGalleryGetResultService>[] => {
     return [
       {
         name: t('image'),
@@ -278,7 +294,7 @@ export default function PageGalleryList(props: IComponentProps) {
           <div className="card-body">
             <ComponentDataTable
               columns={getTableColumns()}
-              data={state.items}
+              data={state.items ?? []}
               onSelect={(rows) => onSelect(rows)}
               i18={{
                 search: t('search'),

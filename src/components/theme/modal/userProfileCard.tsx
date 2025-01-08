@@ -10,8 +10,8 @@ import { permissionGroups } from '@constants/permissionGroups';
 import { IPermission } from 'types/constants/permissions';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { PermissionUtil } from '@utils/permission.util';
-import { useAppSelector } from '@lib/hooks';
-import { selectTranslation } from '@lib/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
 
 type IComponentProps = {

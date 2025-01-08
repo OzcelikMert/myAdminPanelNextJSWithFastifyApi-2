@@ -1,6 +1,6 @@
 import { EndPoints } from '@constants/endPoints';
-import { ITranslationFunc } from '@lib/features/translationSlice';
-import { IAppDispatch } from '@lib/store';
+import { ITranslationFunc } from '@redux/features/translationSlice';
+import { IAppDispatch } from '@redux/store';
 import { NextRouter } from 'next/router';
 import { IEndPointPermission } from 'types/constants/endPoint.permissions';
 import { IPagePropCommon } from 'types/pageProps';
