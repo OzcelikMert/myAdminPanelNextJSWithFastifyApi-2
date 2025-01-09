@@ -48,8 +48,11 @@ export default function ComponentToolNavbar() {
   };
 
   const onChangeTheme = () => {
-    setIsDarkTheme(!isDarkTheme);
-    const theme: IThemeKeys = isDarkTheme ? 'dark' : 'default';
+    let theme: IThemeKeys = 'default';
+    setIsDarkTheme(state => {
+      theme = !state ? 'dark' : 'default';
+      return !state;
+    });
     LocalStorageUtil.setTheme(theme);
     ThemeUtil.changeTheme(theme);
   };

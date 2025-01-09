@@ -1,4 +1,5 @@
 {
+  "warningAboutMissingLanguage": "Bu öğenin içerikleri bu dilde girilmemiş!",
   "warningAboutMissingLanguagesWithVariable": "Bu öğe bazı eksik diller içeriyor! Eksik diller şunlardır: '{{missingLanguages}}'",
   "googleAnalyticURL": "Google Analytic URL",
   "host": "Host",

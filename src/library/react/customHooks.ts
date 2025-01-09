@@ -4,10 +4,10 @@ import { DependencyList, useEffect, useRef } from "react"
 type ICallbackFuncWithoutParams<T = void> = () => T;
 
 export const useDidMount = (callback: ICallbackFuncWithoutParams | ICallbackFuncWithoutParams<ICallbackFuncWithoutParams>) => {
-    const didMount = useRef<boolean>(false);
+    const didMountRef = useRef<boolean>(false);
     useEffect(() => {
-      if (callback && !didMount.current) {
-        didMount.current = true
+      if (callback && !didMountRef.current) {
+        didMountRef.current = true
         let returnFunc = callback();
         if(typeof returnFunc === 'function') {
             return returnFunc;
@@ -17,14 +17,14 @@ export const useDidMount = (callback: ICallbackFuncWithoutParams | ICallbackFunc
 };
 
 export const useEffectAfterDidMount = (callback: ICallbackFuncWithoutParams | ICallbackFuncWithoutParams<ICallbackFuncWithoutParams>, deps?: DependencyList) => {
-  const didMount = useRef<boolean>(false);
+  const didMountRef = useRef<boolean>(false);
   useEffect(() => {
-    if (callback && didMount.current) {
+    if (callback && didMountRef.current) {
       let returnFunc = callback();
       if(typeof returnFunc === 'function') {
           return returnFunc;
       }
     }
-    didMount.current = true
+    didMountRef.current = true
   }, deps ?? [])
 };

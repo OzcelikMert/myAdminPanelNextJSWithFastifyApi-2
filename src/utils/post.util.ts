@@ -30,7 +30,7 @@ const getPageTitles = (params: IPostGetPageTitleParamUtil) => {
   let titles: IBreadCrumbData[] = [
     {
       title:
-        postTypes.findSingle('id', params.postTypeId)?.langKey ?? '[noLangAdd]',
+      params.t(postTypes.findSingle('id', params.postTypeId)?.langKey ?? '[noLangAdd]'),
       url: getPagePath(params.postTypeId).LIST,
     },
   ];
@@ -38,8 +38,8 @@ const getPageTitles = (params: IPostGetPageTitleParamUtil) => {
   if (params.termTypeId) {
     titles.push({
       title:
-        postTermTypes.findSingle('id', params.termTypeId)?.langKey ??
-        '[noLangAdd]',
+        params.t(postTermTypes.findSingle('id', params.termTypeId)?.langKey ??
+        '[noLangAdd]'),
       url: getPagePath(params.postTypeId).TERM_WITH(params.termTypeId).LIST,
     });
   }

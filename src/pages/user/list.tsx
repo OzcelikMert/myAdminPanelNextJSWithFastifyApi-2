@@ -101,7 +101,6 @@ export default function PageUserList() {
     }
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         router,
         sessionAuth,
         t,

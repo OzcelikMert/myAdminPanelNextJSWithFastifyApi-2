@@ -152,7 +152,6 @@ export default function PagePostList() {
     );
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         minPermission,
         router,
         sessionAuth,

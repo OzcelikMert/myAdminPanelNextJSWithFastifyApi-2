@@ -1,4 +1,4 @@
-import { FormEvent, use, useEffect, useReducer, useState } from 'react';
+import { FormEvent, use, useEffect, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import ComponentFormSelect, {
@@ -6,6 +6,7 @@ import ComponentFormSelect, {
 } from '@components/elements/form/input/select';
 import {
   IComponentElementGetResultService,
+  IComponentGetResultService,
   IComponentUpdateWithIdParamService,
 } from 'types/services/component.service';
 import { IComponentElementModel } from 'types/models/component.model';
@@ -37,6 +38,8 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import ComponentSpinnerDonut from '@components/elements/spinners/donut';
+import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
 
 type IHandleInputChangeParams = {
   index: number;
@@ -48,7 +51,8 @@ type IComponentState = {
   elementTypes: IThemeFormSelectData<ElementTypeId>[];
   componentTypes: IThemeFormSelectData<ComponentTypeId>[];
   mainTabActiveKey: string;
-  mainTitle: string;
+  isItemLoading: boolean;
+  item?: IComponentGetResultService;
   langId: string;
 };
 
@@ -56,7 +60,7 @@ const initialState: IComponentState = {
   elementTypes: [],
   componentTypes: [],
   mainTabActiveKey: 'general',
-  mainTitle: '',
+  isItemLoading: false,
   langId: '',
 };
 
@@ -65,7 +69,9 @@ enum ActionTypes {
   SET_COMPONENT_TYPES,
   SET_MAIN_TAB_ACTIVE_KEY,
   SET_MAIN_TITLE,
+  SET_ITEM,
   SET_LANG_ID,
+  SET_IS_ITEM_LOADING,
 }
 
 type IAction =
@@ -81,7 +87,14 @@ type IAction =
       type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
-  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
+  | {
+      type: ActionTypes.SET_IS_ITEM_LOADING;
+      payload: IComponentState['isItemLoading'];
+    }
+  | {
+      type: ActionTypes.SET_ITEM;
+      payload: IComponentState['item'];
+    }
   | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
@@ -92,8 +105,10 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return { ...state, componentTypes: action.payload };
     case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case ActionTypes.SET_MAIN_TITLE:
-      return { ...state, mainTitle: action.payload };
+    case ActionTypes.SET_IS_ITEM_LOADING:
+      return { ...state, isItemLoading: action.payload };
+    case ActionTypes.SET_ITEM:
+      return { ...state, item: action.payload };
     case ActionTypes.SET_LANG_ID:
       return { ...state, langId: action.payload };
     default:
@@ -150,6 +165,7 @@ export default function PageComponentAdd() {
       initialSelectedItemFormState
     );
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const mainTitleRef = useRef<string>('');
 
   useDidMount(() => {
     init();
@@ -173,7 +189,6 @@ export default function PageComponentAdd() {
       : ComponentEndPointPermission.ADD;
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         minPermission,
         router,
         sessionAuth,
@@ -190,11 +205,11 @@ export default function PageComponentAdd() {
     }
   };
 
-  const changeLanguage = async (langId: string) => {
-    setIsPageLoaded(false);
-    appDispatch(setIsPageLoadingState(true));
+  const onChangeLanguage = async (langId: string) => {
+    dispatch({ type: ActionTypes.SET_IS_ITEM_LOADING, payload: true });
+    dispatch({ type: ActionTypes.SET_LANG_ID, payload: langId });
     await getItem(langId);
-    setIsPageLoaded(true);
+    dispatch({ type: ActionTypes.SET_IS_ITEM_LOADING, payload: false });
   };
 
   const setPageTitle = () => {
@@ -209,7 +224,7 @@ export default function PageComponentAdd() {
     ];
     if (formReducer.formState._id) {
       titles.push({
-        title: state.mainTitle,
+        title: mainTitleRef.current,
       });
     }
     appDispatch(setBreadCrumbState(titles));
@@ -247,6 +262,7 @@ export default function PageComponentAdd() {
       );
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
+        dispatch({ type: ActionTypes.SET_ITEM, payload: item });
         formReducer.setFormState({
           ...item,
           elements: item.elements.map((element) => ({
@@ -259,7 +275,7 @@ export default function PageComponentAdd() {
         });
 
         if (_langId == mainLangId) {
-          dispatch({ type: ActionTypes.SET_MAIN_TITLE, payload: item.title });
+          mainTitleRef.current = item.title;
         }
       } else {
         await navigatePage();
@@ -286,6 +302,26 @@ export default function PageComponentAdd() {
       });
       if (!params._id) {
         await navigatePage();
+      } else {
+        const newItem: IComponentState['item'] = {
+          ...state.item!,
+          elements:
+            state.item?.elements.map((element) => {
+              if (
+                (element.alternates?.indexOfKey('langId', state.langId) ?? -1) <
+                0
+              ) {
+                element.alternates = [
+                  ...(element.alternates ?? []),
+                  {
+                    langId: state.langId,
+                  },
+                ];
+              }
+              return element;
+            }) ?? [],
+        };
+        dispatch({ type: ActionTypes.SET_ITEM, payload: newItem });
       }
     }
   };
@@ -358,15 +394,29 @@ export default function PageComponentAdd() {
 
   const Header = () => {
     return (
-      <div className="col-md-3">
+      <div className="col-md-12">
         <div className="row">
-          <div className="col-6">
-            <button
-              className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
-              onClick={() => navigatePage()}
-            >
-              <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
-            </button>
+          <div className="col-md-6 align-content-center">
+            <div className="row">
+              <div className="col-md-3 mb-md-0 mb-4">
+                <button
+                  className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
+                  onClick={() => navigatePage()}
+                >
+                  <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-6">
+            <ComponentThemeContentLanguage
+              onChange={(item) => onChangeLanguage(item.value._id)}
+              selectedLangId={state.langId}
+              showMissingMessage
+              ownedLanguages={state.item?.elements.map(
+                (item) => item.alternates ?? []
+              )}
+            />
           </div>
         </div>
       </div>
@@ -585,7 +635,10 @@ export default function PageComponentAdd() {
       <div className="row mb-3">
         <Header />
       </div>
-      <div className="row">
+      <div className="row position-relative">
+        {state.isItemLoading ? (
+            <ComponentSpinnerDonut customClass="page-spinner" />
+          ) : null}
         <div className="col-md-12">
           <ComponentForm
             submitButtonText={t('save')}

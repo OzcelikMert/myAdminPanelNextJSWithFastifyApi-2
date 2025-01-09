@@ -1,9 +1,9 @@
 import { ILanguageGetResultService } from 'types/services/language.service';
 import ComponentToolTip from '@components/elements/tooltip';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useDidMount } from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   missingLanguages: ILanguageGetResultService[];
@@ -32,6 +32,10 @@ export default function ComponentThemeToolTipMissingLanguages(
   useDidMount(() => {
     init();
   });
+
+  useEffectAfterDidMount(() => {
+    init();
+  }, [props.itemLanguages])
 
   const init = () => {
     setMissingLanguages(findMissingLanguages());

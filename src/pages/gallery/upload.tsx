@@ -31,7 +31,7 @@ type IComponentProps = {
 
 export default function PageGalleryUpload(props: IComponentProps) {
   const abortController = new AbortController();
-  const refInputFile: RefObject<HTMLInputElement | null> = useRef(null);
+  const inputFileRef: RefObject<HTMLInputElement | null> = useRef(null);
   const maxFileSize: number = Number(process.env.UPLOAD_FILE_SIZE ?? 1524000);
 
   const appDispatch = useAppDispatch();
@@ -245,7 +245,7 @@ export default function PageGalleryUpload(props: IComponentProps) {
               >
                 <input
                   type="file"
-                  ref={refInputFile}
+                  ref={inputFileRef}
                   hidden={true}
                   onChange={(event) => onChangeFile(event)}
                   multiple={true}
@@ -259,7 +259,7 @@ export default function PageGalleryUpload(props: IComponentProps) {
                 </div>
                 <p
                   className="cursor-pointer"
-                  onClick={() => refInputFile.current?.click()}
+                  onClick={() => inputFileRef.current?.click()}
                 >
                   {t('dragAndDropHere')} (.jpg, .png, .gif)
                 </p>

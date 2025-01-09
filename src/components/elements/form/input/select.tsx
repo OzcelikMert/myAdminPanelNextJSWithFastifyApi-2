@@ -8,11 +8,12 @@ export interface IThemeFormSelectData<T = any> {
 
 type IComponentProps<T = any> = {
   title?: string;
+  mainDivCustomClassName?: string
 } & StateManagerProps<T>;
 
 export default function ComponentFormSelect<T>(props: IComponentProps<T>) {
   return (
-    <label className="theme-input static">
+    <div className={`theme-input static ${props.mainDivCustomClassName}`}>
       <span className="label">{props.title}</span>
       <div className="field">
         <Select
@@ -21,6 +22,6 @@ export default function ComponentFormSelect<T>(props: IComponentProps<T>) {
           {...props}
         />
       </div>
-    </label>
+    </div>
   );
 }

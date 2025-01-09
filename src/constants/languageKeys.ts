@@ -1,4 +1,5 @@
 export const languageKeys = [
+  'warningAboutMissingLanguage',
   'warningAboutMissingLanguagesWithVariable',
   'googleAnalyticURL',
   'host',

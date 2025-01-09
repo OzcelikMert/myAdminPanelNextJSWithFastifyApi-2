@@ -75,7 +75,6 @@ export default function PageSettingsSocialMedia() {
     }
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         router,
         t,
         sessionAuth,

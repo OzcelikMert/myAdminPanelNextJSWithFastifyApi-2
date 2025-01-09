@@ -8,7 +8,6 @@ import { ISessionAuthResultService } from 'types/services/auth.service';
 
 export interface IPermissionCheckAndRedirectParamUtil {
   router: NextRouter,
-  appDispatch: IAppDispatch,
   t: ITranslationFunc,
   sessionAuth: ISessionAuthResultService | null,
   minPermission: IEndPointPermission,

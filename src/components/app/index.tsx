@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import ComponentToolNavbar from '@components/tools/navbar';
 import ComponentToolSidebar from '@components/tools/sidebar';
 import ComponentToolFooter from '@components/tools/footer';
@@ -10,10 +10,24 @@ import { ToastContainer } from 'react-toastify';
 import { EndPoints } from '@constants/endPoints';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentToolLock from '@components/tools/lock';
-import { useRouter } from 'next/router';
+import { NextRouter, useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useEffectAfterDidMount } from '@library/react/customHooks';
+
+type ICurrentPath = {
+  pathname: string,
+  query?: any
+}
+
+const checkEqualRouterAndCurrentPath = (router: NextRouter, currentPath: ICurrentPath) => {
+  const jsonCurrentPath = JSON.stringify(currentPath);
+  const jsonRouter = JSON.stringify({
+    pathname: router.pathname,
+    query: router.query
+  } as ICurrentPath);
+  return jsonCurrentPath == jsonRouter;
+}
 
 type IComponentProps = {
   children: React.ReactNode;
@@ -30,17 +44,23 @@ export default function ComponentApp({
   const breadCrumb = useAppSelector((state) => state.breadCrumbState.data);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
-  const pathname = useRef<string>(router.asPath);
+  const currentPathRef = useRef<ICurrentPath>({
+    pathname: router.pathname,
+    query: router.query
+  });
+  const isEqualRouterAndCurrentPath = checkEqualRouterAndCurrentPath(router, currentPathRef.current);
   
   useEffectAfterDidMount(() => {
-    if(router.asPath != pathname.current){
-      console.log(router);
+    if(!isEqualRouterAndCurrentPath){
       appDispatch(setIsPageLoadingState(true));
       window.scrollTo(0, 0);
       document.body.scrollTop = 0;
-      pathname.current = router.asPath;
+      currentPathRef.current = {
+        pathname: router.pathname,
+        query: router.query
+      };
     }
-  }, [router.asPath]);
+  }, [isEqualRouterAndCurrentPath]);
 
   if (router.asPath === '/' || typeof statusCode !== 'undefined') {
     router.replace(EndPoints.LOGIN);
@@ -92,7 +112,7 @@ export default function ComponentApp({
                 ) : null}
                 {!isFullPageLayout ? <PageHeader /> : null}
                 {
-                  router.asPath == pathname.current
+                  isEqualRouterAndCurrentPath
                     ?  <ComponentProviderAuth>{children}</ComponentProviderAuth>
                     : null
                 }

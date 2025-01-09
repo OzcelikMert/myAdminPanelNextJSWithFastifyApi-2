@@ -1,6 +1,9 @@
 import { SettingService } from '@services/setting.service';
 import ComponentToast from '@components/elements/toast';
-import { ISettingUpdateSEOParamService } from 'types/services/setting.service';
+import {
+  ISettingGetResultService,
+  ISettingUpdateSEOParamService,
+} from 'types/services/setting.service';
 import { PermissionUtil } from '@utils/permission.util';
 import { SettingsEndPointPermission } from '@constants/endPointPermissions/settings.endPoint.permission';
 import { SettingProjectionKeys } from '@constants/settingProjections';
@@ -8,7 +11,7 @@ import { ISettingSeoContentModel } from 'types/models/setting.model';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useState } from 'react';
+import { useReducer, useState } from 'react';
 import { useFormReducer } from '@library/react/handles/form';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
@@ -20,15 +23,44 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
+import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 
 type IComponentState = {
   langId: string;
-  item?: ISettingSeoContentModel;
+  item?: ISettingGetResultService;
+  isItemLoading: boolean;
 };
 
 const initialState: IComponentState = {
   langId: '',
   item: undefined,
+  isItemLoading: false,
+};
+
+enum ActionTypes {
+  SET_LANG_ID,
+  SET_ITEM,
+  SET_IS_ITEM_LOADING,
+}
+
+type IAction =
+  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] }
+  | {
+      type: ActionTypes.SET_IS_ITEM_LOADING;
+      payload: IComponentState['isItemLoading'];
+    }
+  | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] };
+
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case ActionTypes.SET_ITEM:
+      return { ...state, item: action.payload };
+    case ActionTypes.SET_LANG_ID:
+      return { ...state, langId: action.payload };
+    case ActionTypes.SET_IS_ITEM_LOADING:
+      return { ...state, isItemLoading: action.payload };
+  }
 };
 
 type IComponentFormState = ISettingUpdateSEOParamService;
@@ -52,8 +84,7 @@ export default function PageSettingsSEO() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
-  const [item, setItem] = useState(initialState.item);
-  const [langId, setLangId] = useState(mainLangId);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>(initialFormState);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
@@ -79,7 +110,6 @@ export default function PageSettingsSEO() {
       PermissionUtil.checkAndRedirect({
         router,
         sessionAuth,
-        appDispatch,
         t,
         minPermission: SettingsEndPointPermission.UPDATE_SEO,
       })
@@ -90,11 +120,11 @@ export default function PageSettingsSEO() {
     }
   };
 
-  const changeLanguage = async (langId: string) => {
-    setIsPageLoaded(false);
-    appDispatch(setIsPageLoadingState(true));
+  const onChangeLanguage = async (langId: string) => {
+    dispatch({ type: ActionTypes.SET_IS_ITEM_LOADING, payload: true });
+    dispatch({ type: ActionTypes.SET_LANG_ID, payload: langId });
     await getSeo(langId);
-    setIsPageLoaded(true);
+    dispatch({ type: ActionTypes.SET_IS_ITEM_LOADING, payload: false });
   };
 
   const setPageTitle = () => {
@@ -112,7 +142,7 @@ export default function PageSettingsSEO() {
   };
 
   const getSeo = async (_langId?: string) => {
-    _langId = _langId ?? langId;
+    _langId = _langId ?? state.langId;
     const serviceResult = await SettingService.get(
       {
         langId: _langId,
@@ -122,7 +152,7 @@ export default function PageSettingsSEO() {
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
-      setItem(setting.seoContents);
+      dispatch({ type: ActionTypes.SET_ITEM, payload: setting });
       setFormState({
         seoContents: {
           ...formState.seoContents,
@@ -142,6 +172,25 @@ export default function PageSettingsSEO() {
     );
 
     if (serviceResult.status) {
+      if (
+        (state.item?.seoContentAlternates?.indexOfKey('langId', state.langId) ??
+          -1) < 0
+      ) {
+        const newItem: IComponentState['item'] = {
+          ...state.item!,
+          seoContentAlternates: [
+            ...(state.item?.seoContentAlternates ?? []),
+            {
+              langId: state.langId,
+            },
+          ],
+        };
+
+        dispatch({
+          type: ActionTypes.SET_ITEM,
+          payload: newItem,
+        });
+      }
       new ComponentToast({
         type: 'success',
         title: t('successful'),
@@ -150,9 +199,33 @@ export default function PageSettingsSEO() {
     }
   };
 
+  const Header = () => {
+    return (
+      <div className="col-md-12">
+        <div className="row">
+          <div className="col-md-6 align-content-center"></div>
+          <div className="col-md-6">
+            <ComponentThemeContentLanguage
+              onChange={(item) => onChangeLanguage(item.value._id)}
+              selectedLangId={state.langId}
+              showMissingMessage
+              ownedLanguages={state.item?.seoContentAlternates}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return isPageLoading ? null : (
     <div className="page-settings">
-      <div className="row">
+      <div className="row mb-3">
+        <Header />
+      </div>
+      <div className="row position-relative">
+        {state.isItemLoading ? (
+          <ComponentSpinnerDonut customClass="page-spinner" />
+        ) : null}
         <div className="col-md-12">
           <ComponentForm
             submitButtonText={t('save')}

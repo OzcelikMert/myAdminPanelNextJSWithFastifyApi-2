@@ -167,7 +167,6 @@ export default function PagePostTermList() {
     );
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         minPermission,
         router,
         sessionAuth,

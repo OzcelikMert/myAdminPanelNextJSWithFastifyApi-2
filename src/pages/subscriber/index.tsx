@@ -68,7 +68,6 @@ export default function PageSubscribers() {
     }
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         router,
         t,
         sessionAuth,

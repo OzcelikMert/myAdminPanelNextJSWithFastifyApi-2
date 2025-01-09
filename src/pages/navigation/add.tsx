@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useReducer, useState } from 'react';
+import { FormEvent, useEffect, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import {
   INavigationGetResultService,
@@ -31,42 +31,47 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
+import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 
 type IComponentState = {
   items: IThemeFormSelectData<string>[];
   mainTabActiveKey: string;
   status: IThemeFormSelectData<StatusId>[];
-  mainTitle: string;
   item?: INavigationGetResultService;
   langId: string;
+  isItemLoading: boolean;
 };
 
 const initialState: IComponentState = {
   mainTabActiveKey: `general`,
   items: [],
   status: [],
-  mainTitle: '',
   langId: '',
+  isItemLoading: false,
 };
 
 enum ActionTypes {
   SET_ITEMS,
   SET_STATUS,
-  SET_MAIN_TITLE,
   SET_MAIN_TAB_ACTIVE_KEY,
   SET_LANG_ID,
   SET_ITEM,
+  SET_IS_ITEM_LOADING,
 }
 
 type IAction =
   | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
   | { type: ActionTypes.SET_STATUS; payload: IComponentState['status'] }
-  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
   | {
       type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
       payload: IComponentState['mainTabActiveKey'];
     }
   | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] }
+  | {
+      type: ActionTypes.SET_IS_ITEM_LOADING;
+      payload: IComponentState['isItemLoading'];
+    }
   | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
@@ -81,11 +86,6 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
         ...state,
         status: action.payload,
       };
-    case ActionTypes.SET_MAIN_TITLE:
-      return {
-        ...state,
-        mainTitle: action.payload,
-      };
     case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return {
         ...state,
@@ -95,6 +95,16 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return {
         ...state,
         item: action.payload,
+      };
+    case ActionTypes.SET_IS_ITEM_LOADING:
+      return {
+        ...state,
+        isItemLoading: action.payload,
+      };
+    case ActionTypes.SET_LANG_ID:
+      return {
+        ...state,
+        langId: action.payload,
       };
     default:
       return state;
@@ -140,6 +150,7 @@ export default function PageNavigationAdd() {
       _id: queries._id || '',
     });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const mainTitleRef = useRef<string>('');
 
   useDidMount(() => {
     init();
@@ -167,7 +178,6 @@ export default function PageNavigationAdd() {
         router,
         sessionAuth,
         t,
-        appDispatch,
         minPermission,
       })
     ) {
@@ -181,11 +191,11 @@ export default function PageNavigationAdd() {
     }
   };
 
-  const changeLanguage = async (langId: string) => {
-    setIsPageLoaded(false);
-    appDispatch(setIsPageLoadingState(true));
+  const onChangeLanguage = async (langId: string) => {
+    dispatch({ type: ActionTypes.SET_IS_ITEM_LOADING, payload: true });
+    dispatch({ type: ActionTypes.SET_LANG_ID, payload: langId });
     await getItem(langId);
-    setIsPageLoaded(true);
+    dispatch({ type: ActionTypes.SET_IS_ITEM_LOADING, payload: false });
   };
 
   const setPageTitle = () => {
@@ -199,7 +209,7 @@ export default function PageNavigationAdd() {
       },
     ];
     if (formState._id) {
-      titles.push({ title: state.mainTitle });
+      titles.push({ title: mainTitleRef.current });
     }
     appDispatch(setBreadCrumbState(titles));
   };
@@ -261,10 +271,7 @@ export default function PageNavigationAdd() {
           },
         });
         if (_langId == mainLangId) {
-          dispatch({
-            type: ActionTypes.SET_MAIN_TITLE,
-            payload: item.contents?.title || '',
-          });
+          mainTitleRef.current = item.contents?.title ?? '';
         }
       } else {
         await navigatePage();
@@ -291,21 +298,52 @@ export default function PageNavigationAdd() {
       });
       if (!formState._id) {
         await navigatePage();
+      } else {
+        if (
+          (state.item?.alternates?.indexOfKey('langId', state.langId) ?? -1) < 0
+        ) {
+          const newItem: IComponentState['item'] = {
+            ...state.item!,
+            alternates: [
+              ...(state.item?.alternates ?? []),
+              {
+                langId: state.langId,
+              },
+            ],
+          };
+
+          dispatch({
+            type: ActionTypes.SET_ITEM,
+            payload: newItem,
+          });
+        }
       }
     }
   };
 
   const Header = () => {
     return (
-      <div className="col-md-3">
+      <div className="col-md-12">
         <div className="row">
-          <div className="col-6">
-            <button
-              className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
-              onClick={() => navigatePage()}
-            >
-              <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
-            </button>
+          <div className="col-md-6 align-content-center">
+            <div className="row">
+              <div className="col-md-3 mb-md-0 mb-4">
+                <button
+                  className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
+                  onClick={() => navigatePage()}
+                >
+                  <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-6">
+            <ComponentThemeContentLanguage
+              onChange={(item) => onChangeLanguage(item.value._id)}
+              selectedLangId={state.langId}
+              showMissingMessage
+              ownedLanguages={state.item?.alternates}
+            />
           </div>
         </div>
       </div>
@@ -396,39 +434,44 @@ export default function PageNavigationAdd() {
       <div className="row mb-3">
         <Header />
       </div>
-      <div className="row">
-        <ComponentForm
-          submitButtonText={t('save')}
-          submitButtonSubmittingText={t('loading')}
-          onSubmit={(event) => onSubmit(event)}
-        >
-          <div className="grid-margin stretch-card">
-            <div className="card">
-              <div className="card-body">
-                <div className="theme-tabs">
-                  <Tabs
-                    onSelect={(key: any) =>
-                      dispatch({
-                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                        payload: key,
-                      })
-                    }
-                    activeKey={state.mainTabActiveKey}
-                    className="mb-5"
-                    transition={false}
-                  >
-                    <Tab eventKey="general" title={t('general')}>
-                      <TabGeneral />
-                    </Tab>
-                    <Tab eventKey="options" title={t('options')}>
-                      <TabOptions />
-                    </Tab>
-                  </Tabs>
+      <div className="row position-relative">
+        {state.isItemLoading ? (
+          <ComponentSpinnerDonut customClass="page-spinner" />
+        ) : null}
+        <div className="col-md-12">
+          <ComponentForm
+            submitButtonText={t('save')}
+            submitButtonSubmittingText={t('loading')}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
+                  <div className="theme-tabs">
+                    <Tabs
+                      onSelect={(key: any) =>
+                        dispatch({
+                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+                          payload: key,
+                        })
+                      }
+                      activeKey={state.mainTabActiveKey}
+                      className="mb-5"
+                      transition={false}
+                    >
+                      <Tab eventKey="general" title={t('general')}>
+                        <TabGeneral />
+                      </Tab>
+                      <Tab eventKey="options" title={t('options')}>
+                        <TabOptions />
+                      </Tab>
+                    </Tabs>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </ComponentForm>
+          </ComponentForm>
+        </div>
       </div>
     </div>
   );

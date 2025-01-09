@@ -99,7 +99,6 @@ export default function PageSettingLanguageList() {
         router,
         sessionAuth,
         t,
-        appDispatch,
         minPermission: LanguageEndPointPermission.GET,
       })
     ) {

@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useReducer, useState } from 'react';
+import { FormEvent, useEffect, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import { PostTermService } from '@services/postTerm.service';
@@ -33,6 +33,8 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
+import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 
 type IComponentState = {
   mainTabActiveKey: string;
@@ -41,6 +43,7 @@ type IComponentState = {
   mainTitle: string;
   langId: string;
   item?: IPostTermGetResultService;
+  isItemLoading: boolean;
 };
 
 const initialState: IComponentState = {
@@ -49,6 +52,7 @@ const initialState: IComponentState = {
   status: [],
   mainTitle: '',
   langId: '',
+  isItemLoading: false,
 };
 
 enum ActionTypes {
@@ -58,6 +62,7 @@ enum ActionTypes {
   SET_MAIN_TITLE,
   SET_LANG_ID,
   SET_ITEM,
+  SET_IS_ITEM_LOADING,
 }
 
 type IAction =
@@ -69,7 +74,11 @@ type IAction =
   | { type: ActionTypes.SET_STATUS; payload: IComponentState['status'] }
   | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
   | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] }
-  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
+  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] }
+  | {
+      type: ActionTypes.SET_IS_ITEM_LOADING;
+      payload: IComponentState['isItemLoading'];
+    };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
@@ -85,6 +94,8 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return { ...state, langId: action.payload };
     case ActionTypes.SET_ITEM:
       return { ...state, item: action.payload };
+    case ActionTypes.SET_IS_ITEM_LOADING:
+      return { ...state, isItemLoading: action.payload };
     default:
       return state;
   }
@@ -144,6 +155,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
       _id: queries._id ?? props._id ?? '',
     });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const mainTitleRef = useRef<string>('');
 
   useDidMount(() => {
     init();
@@ -173,7 +185,6 @@ export default function PagePostTermAdd(props: IComponentProps) {
 
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         minPermission,
         router,
         sessionAuth,
@@ -198,11 +209,11 @@ export default function PagePostTermAdd(props: IComponentProps) {
     }
   };
 
-  const changeLanguage = async (langId: string) => {
-    setIsPageLoaded(false);
-    appDispatch(setIsPageLoadingState(true));
+  const onChangeLanguage = async (langId: string) => {
+    dispatch({ type: ActionTypes.SET_IS_ITEM_LOADING, payload: true });
+    dispatch({ type: ActionTypes.SET_LANG_ID, payload: langId });
     await getItem(langId);
-    setIsPageLoaded(true);
+    dispatch({ type: ActionTypes.SET_IS_ITEM_LOADING, payload: false });
   };
 
   const setPageTitle = () => {
@@ -214,7 +225,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
 
     if (formState._id) {
       titles.push({ title: 'edit' });
-      titles.push({ title: state.mainTitle });
+      titles.push({ title: mainTitleRef.current });
     } else {
       titles.push({ title: 'add' });
     }
@@ -290,10 +301,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
         },
       });
       if (_langId == mainLangId) {
-        dispatch({
-          type: ActionTypes.SET_MAIN_TITLE,
-          payload: item.contents?.title || '',
-        });
+        mainTitleRef.current = item.contents?.title || '';
       }
     } else {
       await navigatePage();
@@ -355,31 +363,41 @@ export default function PagePostTermAdd(props: IComponentProps) {
 
   const TotalViews = () => {
     return (
-      <div className="col-6">
-        <ComponentToolTip message={t('views')}>
-          <label className="badge badge-gradient-primary w-100 p-2 fs-6 rounded-3">
-            <i className="mdi mdi-eye"></i> {formState.contents.views || 0}
-          </label>
-        </ComponentToolTip>
-      </div>
+      <ComponentToolTip message={t('views')}>
+        <label className="badge badge-gradient-primary w-100 p-2 fs-6 rounded-3">
+          <i className="mdi mdi-eye"></i> {formState.contents.views || 0}
+        </label>
+      </ComponentToolTip>
     );
   };
 
   const Header = () => {
     return (
-      <div className="col-md-3">
+      <div className="col-md-12">
         <div className="row">
-          <div className="col-6">
-            {!props.isModal ? (
-              <button
-                className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
-                onClick={() => navigatePage()}
-              >
-                <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
-              </button>
-            ) : null}
+          <div className="col-md-6 align-content-center">
+            <div className="row">
+              <div className="col-md-3 mb-md-0 mb-4">
+                <button
+                  className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
+                  onClick={() => navigatePage()}
+                >
+                  <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
+                </button>
+              </div>
+              <div className="col-md-3 mb-md-0 mb-4">
+                <TotalViews />
+              </div>
+            </div>
           </div>
-          <TotalViews />
+          <div className="col-md-6">
+            <ComponentThemeContentLanguage
+              onChange={(item) => onChangeLanguage(item.value._id)}
+              selectedLangId={state.langId}
+              showMissingMessage
+              ownedLanguages={state.item?.alternates}
+            />
+          </div>
         </div>
       </div>
     );
@@ -476,7 +494,10 @@ export default function PagePostTermAdd(props: IComponentProps) {
       <div className="row mb-3">
         <Header />
       </div>
-      <div className="row">
+      <div className="row position-relative">
+        {state.isItemLoading ? (
+          <ComponentSpinnerDonut customClass="page-spinner" />
+        ) : null}
         <div className="col-md-12">
           <ComponentForm
             submitButtonText={t('save')}

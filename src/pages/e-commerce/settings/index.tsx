@@ -117,7 +117,6 @@ export default function PageECommerceSettings() {
     if (
       PermissionUtil.checkAndRedirect({
         router,
-        appDispatch,
         t,
         sessionAuth,
         minPermission: ECommerceEndPointPermission.SETTINGS,

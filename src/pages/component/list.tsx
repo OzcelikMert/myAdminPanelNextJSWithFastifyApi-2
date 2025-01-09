@@ -67,7 +67,6 @@ export default function PageComponentList() {
     if (
       PermissionUtil.checkAndRedirect({
         router,
-        appDispatch,
         t,
         sessionAuth,
         minPermission: ComponentEndPointPermission.GET,
@@ -163,8 +162,7 @@ export default function PageComponentList() {
                 {
                   <ComponentThemeToolTipMissingLanguages
                     itemLanguages={
-                      row.elements.map((element) => element.alternates ?? []) ??
-                      []
+                      row.elements.map((element) => element.alternates ?? [])
                     }
                   />
                 }

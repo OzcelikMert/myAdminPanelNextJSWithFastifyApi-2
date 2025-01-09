@@ -1,4 +1,5 @@
 {
+  "warningAboutMissingLanguage": "This item has missing contents for this language!",
   "warningAboutMissingLanguagesWithVariable": "This item has some missing languages! The missing languages are: '{{missingLanguages}}'",
   "googleAnalyticURL": "Google Analytic URL",
   "host": "Host",

@@ -88,8 +88,8 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     showingItems: props.data,
   });
 
-  const listPage = useRef<number>(0);
-  const listPagePerCount = useRef<number>(10);
+  const listPageRef = useRef<number>(0);
+  const listPagePerCountRef = useRef<number>(10);
 
   useEffectAfterDidMount(() => {
     resetTableList();
@@ -106,8 +106,8 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
 
   const getItemListForPage = () => {
     return props.data.slice(
-      listPagePerCount.current * listPage.current,
-      (listPage.current + 1) * listPagePerCount.current
+      listPagePerCountRef.current * listPageRef.current,
+      (listPageRef.current + 1) * listPagePerCountRef.current
     );
   };
 
@@ -303,7 +303,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           pagination
           highlightOnHover
           onChangePage={(page: number, totalRows: number) => {
-            listPage.current = page - 1;
+            listPageRef.current = page - 1;
             dispatch({
               type: ActionTypes.SET_CLEAR_SELECTED_ROWS,
               payload: !state.clearSelectedRows,

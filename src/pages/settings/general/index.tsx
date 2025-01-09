@@ -139,7 +139,6 @@ export default function PageSettingsGeneral() {
     if (
       PermissionUtil.checkAndRedirect({
         router,
-        appDispatch,
         sessionAuth,
         t,
         minPermission: SettingsEndPointPermission.UPDATE_GENERAL,

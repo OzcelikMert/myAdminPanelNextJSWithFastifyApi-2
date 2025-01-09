@@ -9,7 +9,7 @@ import { EndPoints } from '@constants/endPoints';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { useRouter } from 'next/router';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useDidMount } from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
   activeItems: { [key: string]: any };
@@ -23,13 +23,16 @@ export default function ComponentToolSidebar() {
   const [activeItems, setActiveItems] = useState(initialState.activeItems);
 
   const router = useRouter();
-  const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
   useDidMount(() => {
     onRouteChanged();
   });
+
+  useEffectAfterDidMount(() => {
+    onRouteChanged();
+  }, [router.asPath])
 
   const onRouteChanged = () => {
     setActiveItems(initialState.activeItems);
@@ -38,7 +41,7 @@ export default function ComponentToolSidebar() {
 
   const findActiveItems = (sidebarSubPaths: ISidebarPath[]) => {
     for (const sidebarNav of sidebarSubPaths) {
-      if (router.asPath.startsWith(sidebarNav.path)) {
+      if (isPathActive(sidebarNav.path)) {
         toggleItemState(sidebarNav.state);
       }
 
@@ -48,10 +51,7 @@ export default function ComponentToolSidebar() {
 
   const toggleItemState = (stateKey?: string) => {
     if (stateKey) {
-      setActiveItems({
-        ...activeItems,
-        [stateKey]: !activeItems[stateKey],
-      })
+      setActiveItems(state => ({...state, [stateKey]: !state[stateKey]}));
     }
   };
 
@@ -64,7 +64,6 @@ export default function ComponentToolSidebar() {
       router,
       path: path || EndPoints.DASHBOARD,
     });
-    onRouteChanged();
   };
 
   const HasChild = (props: ISidebarPath) => {

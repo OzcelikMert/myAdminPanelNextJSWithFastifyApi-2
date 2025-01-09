@@ -7,10 +7,11 @@ type IComponentProps = {
 };
 
 export default function ComponentToolTip(props: IComponentProps) {
+
   return (
     <OverlayTrigger
       delay={{ hide: 150, show: 150 }}
-      overlay={(props) => <Tooltip {...props}>{props.message}</Tooltip>}
+      overlay={(overlayProps) => <Tooltip {...overlayProps}>{props.message}</Tooltip>}
       placement="top"
     >
       {props.children}

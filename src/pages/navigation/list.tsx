@@ -118,7 +118,6 @@ export default function PageNavigationList() {
     }
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         router,
         sessionAuth,
         t,

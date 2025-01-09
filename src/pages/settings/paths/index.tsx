@@ -81,7 +81,6 @@ export default function PageSettingsPaths() {
     }
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         t,
         router: router,
         minPermission: SettingsEndPointPermission.UPDATE_PATH,

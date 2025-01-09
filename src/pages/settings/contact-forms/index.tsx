@@ -75,7 +75,6 @@ export default function PageSettingsContactForms() {
     }
     if (
       PermissionUtil.checkAndRedirect({
-        appDispatch,
         sessionAuth,
         t,
         router,
