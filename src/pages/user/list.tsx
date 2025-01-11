@@ -333,9 +333,7 @@ export default function PageUserList() {
           <div className="card-body">
             <div className="table-user">
               <ComponentDataTable
-                columns={getTableColumns().filter(
-                  (column) => typeof column.name !== 'undefined'
-                )}
+                columns={getTableColumns()}
                 data={state.items}
                 i18={{
                   search: t('search'),

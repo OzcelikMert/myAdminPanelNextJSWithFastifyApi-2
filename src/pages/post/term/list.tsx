@@ -209,8 +209,8 @@ export default function PagePostTermList() {
     }
   };
 
-  const onChangeStatus = async (statusId: number) => {
-    const selectedItemId = state.selectedItems.map((item) => item._id);
+  const onChangeStatus = async (selectedRows: IPostTermGetResultService[], statusId: number) => {
+    const selectedItemId = selectedRows.map((item) => item._id);
 
     if (statusId === StatusId.Deleted && state.listMode === 'deleted') {
       const result = await Swal.fire({
@@ -309,10 +309,6 @@ export default function PagePostTermList() {
       });
       return true;
     }
-  };
-
-  const onSelect = (selectedRows: IComponentState['items']) => {
-    dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: selectedRows });
   };
 
   const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
@@ -563,7 +559,6 @@ export default function PagePostTermList() {
               <ComponentDataTable
                 columns={getTableColumns()}
                 data={state.items}
-                onSelect={(rows) => onSelect(rows)}
                 i18={{
                   search: t('search'),
                   noRecords: t('noRecords'),
@@ -586,9 +581,8 @@ export default function PagePostTermList() {
                 }
                 isAllSelectable={true}
                 isSearchable={true}
-                isActiveToggleMenu={true}
                 toggleMenuItems={getToggleMenuItems()}
-                onClickToggleMenuItem={(value) => onChangeStatus(value)}
+                onClickToggleMenuItem={(selectedRows, value) => onChangeStatus(selectedRows, value)}
                 filterButtons={getTableFilterButtons()}
                 onClickFilterButton={(item) => onClickTableFilterButton(item)}
               />

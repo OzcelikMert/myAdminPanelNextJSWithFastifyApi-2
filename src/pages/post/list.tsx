@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import { PostService } from '@services/post.service';
 import { IPostGetManyResultService } from 'types/services/post.service';
 import ComponentToast from '@components/elements/toast';
-import ComponentDataTable from '@components/elements/table/dataTable';
+import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';
 import Image from 'next/image';
 import ComponentThemeBadgeStatus, {
   getStatusIcon,
@@ -191,8 +191,8 @@ export default function PagePostList() {
     }
   };
 
-  const onChangeStatus = async (statusId: number) => {
-    const selectedItemId = state.selectedItems.map((item) => item._id);
+  const onChangeStatus = async (selectedRows: IComponentState['items'], statusId: number) => {
+    const selectedItemId = selectedRows.map(row => row._id); //state.selectedItems.map((item) => item._id);
     if (statusId === StatusId.Deleted && state.listMode === 'deleted') {
       const result = await Swal.fire({
         title: t('deleteAction'),
@@ -287,10 +287,6 @@ export default function PagePostList() {
     }
   };
 
-  const onSelect = (selectedRows: IComponentState['items']) => {
-    dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: selectedRows });
-  };
-
   const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
     dispatch({ type: ActionTypes.SET_LIST_MODE, payload: item.key });
   };
@@ -338,13 +334,16 @@ export default function PagePostList() {
     return [
       {
         title: `${t('list')} (${state.items.findMulti('statusId', StatusId.Deleted, false).length})`,
+        key: "list",
         className: 'btn-gradient-success',
         icon: 'mdi mdi-view-list',
         onFilter: (items) =>
           items.findMulti('statusId', StatusId.Deleted, false),
+        isDefault: true
       },
       {
         title: `${t('trash')} (${state.items.findMulti('statusId', StatusId.Deleted).length})`,
+        key: "deleted",
         className: 'btn-gradient-danger',
         icon: 'mdi mdi-delete',
         onFilter: (items) => items.findMulti('statusId', StatusId.Deleted),
@@ -352,7 +351,7 @@ export default function PagePostList() {
     ];
   };
 
-  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): IComponentDataTableColumn<IComponentState['items'][0]>[] => {
     return [
       {
         name: t('image'),
@@ -397,6 +396,7 @@ export default function PagePostList() {
         ),
         width: '250px',
         sortable: true,
+        isSearchable: true
       },
       [
         PostTypeId.Blog,
@@ -500,6 +500,7 @@ export default function PagePostList() {
       },
       {
         name: t('updatedBy'),
+        selector: (row) => row.lastAuthorId.name + new Date(row.updatedAt || '').toLocaleDateString(),
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
@@ -672,7 +673,6 @@ export default function PagePostList() {
               <ComponentDataTable
                 columns={getTableColumns()}
                 data={state.items}
-                onSelect={(rows) => onSelect(rows)}
                 i18={{
                   search: t('search'),
                   noRecords: t('noRecords'),
@@ -680,9 +680,8 @@ export default function PagePostList() {
                 isSelectable={isUserSuperAdmin}
                 isAllSelectable={true}
                 isSearchable={true}
-                isActiveToggleMenu={true}
                 toggleMenuItems={getToggleMenuItems()}
-                onClickToggleMenuItem={(value) => onChangeStatus(value)}
+                onClickToggleMenuItem={(selectedRows, value) => onChangeStatus(selectedRows, value)}
                 filterButtons={getTableFilterButtons()}
                 onClickFilterButton={(item) => onClickTableFilterButton(item)}
               />

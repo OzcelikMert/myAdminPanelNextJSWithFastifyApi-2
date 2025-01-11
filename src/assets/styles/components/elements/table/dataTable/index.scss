@@ -7,6 +7,12 @@
     min-height: 550px;
   }
 
+  .filter-buttons {
+    .active {
+      box-shadow: inset 0px 0px 10px 0px black !important;
+    }
+  }
+
   .table-responsive {
     min-height: 550px;
     .theme-data-table {

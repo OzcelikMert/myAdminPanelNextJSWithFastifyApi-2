@@ -4,8 +4,10 @@ export interface IComponentTableFilterButton<T = any[]> {
   title?: string;
   icon?: string | React.ReactNode;
   className?: string;
-  onFilter: (items: T) => T;
+  onFilter?: (items: T) => T;
+  onFilterAsync?: () => Promise<T>;
   key?: any
+  isDefault?: boolean
 }
 
 type IComponentProps<T = any[]> = {
@@ -21,7 +23,7 @@ export default function ComponentTableFilterButton<T>(
     <button
       type="button"
       className={`btn btn-gradient-primary btn-lg list-mode-btn ${props.item.className ?? ''} ${props.isActive ? 'active' : ''}`}
-      onClick={props.isActive ? undefined : () => props.onClick()}
+      onClick={() => !props.isActive && props.onClick()}
     >
       {props.item.icon ? (
         typeof props.item.icon === 'string' ? (

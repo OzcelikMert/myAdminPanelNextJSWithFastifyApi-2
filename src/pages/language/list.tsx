@@ -1,5 +1,5 @@
 import { TableColumn } from 'react-data-table-component';
-import ComponentDataTable from '@components/elements/table/dataTable';
+import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';
 import { ILanguageGetResultService } from 'types/services/language.service';
 import { LanguageService } from '@services/language.service';
 import Image from 'next/image';
@@ -157,7 +157,7 @@ export default function PageSettingLanguageList() {
     }
   };
 
-  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): IComponentDataTableColumn<IComponentState['items'][0]>[] => {
     return [
       {
         name: t('image'),
@@ -186,6 +186,7 @@ export default function PageSettingLanguageList() {
         ),
         width: '250px',
         sortable: true,
+        isSearchable: true
       },
       {
         name: t('status'),
@@ -281,11 +282,8 @@ export default function PageSettingLanguageList() {
           <div className="card-body">
             <div className="table-post">
               <ComponentDataTable
-                columns={getTableColumns().filter(
-                  (column) => typeof column.name !== 'undefined'
-                )}
+                columns={getTableColumns()}
                 data={state.items}
-                searchableKeys={['title']}
                 i18={{
                   search: t('search'),
                   noRecords: t('noRecords'),

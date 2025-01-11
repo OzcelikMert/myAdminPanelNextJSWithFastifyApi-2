@@ -150,8 +150,8 @@ export default function PagePostTermAdd(props: IComponentProps) {
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IComponentFormState>({
       ...initialFormState,
-      typeId: queries.termTypeId ?? props.typeId ?? PostTermTypeId.Category,
-      postTypeId: queries.postTypeId ?? props.postTypeId ?? PostTypeId.Blog,
+      typeId: Number(queries.termTypeId ?? props.typeId ?? PostTermTypeId.Category),
+      postTypeId: Number(queries.postTypeId ?? props.postTypeId ?? PostTypeId.Blog),
       _id: queries._id ?? props._id ?? '',
     });
   const [isPageLoaded, setIsPageLoaded] = useState(false);

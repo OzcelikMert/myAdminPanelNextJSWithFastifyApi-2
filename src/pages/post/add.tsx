@@ -268,7 +268,7 @@ export default function PagePostAdd() {
   const { formState, setFormState, onChangeInput, onChangeSelect } =
     useFormReducer<IPostAddComponentFormState>({
       ...initialFormState,
-      typeId: queries.postTypeId ?? PostTypeId.Blog,
+      typeId: Number(queries.postTypeId ?? PostTypeId.Blog),
       _id: queries._id ?? '',
     });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
@@ -317,6 +317,7 @@ export default function PagePostAdd() {
       ) {
         await getTerms();
       }
+      
       if ([PostTypeId.Page].includes(formState.typeId)) {
         await getComponents();
         getPageTypes();

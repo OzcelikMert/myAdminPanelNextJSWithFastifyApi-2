@@ -1,30 +1,36 @@
-import React, { useEffect, useReducer, useRef } from 'react';
-import DataTable, { TableProps } from 'react-data-table-component';
+import React, { useReducer, useRef, useState } from 'react';
+import DataTable, { TableColumn, TableProps } from 'react-data-table-component';
 import ComponentTableToggleMenu, {
   IComponentTableToggleMenuItem,
 } from '@components/elements/table/toggleMenu';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormType from '@components/elements/form/input/type';
-import { cloneDeepWith } from 'lodash';
 import ComponentTableFilterButton, {
   IComponentTableFilterButton,
 } from '../filterButton';
-import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/customHooks';
+
+export type IComponentDataTableColumn<T> = {
+  isSearchable?: boolean
+} & TableColumn<T>
 
 type IComponentState = {
   selectedItems: any[];
   clearSelectedRows: boolean;
   searchKey: string;
+  items: any[];
   showingItems: any[];
-  activeFilterButtonIndex?: number;
+  activeFilterButtonIndex: number;
 };
 
 const initialState: IComponentState = {
   selectedItems: [],
   clearSelectedRows: false,
   searchKey: '',
+  items: [],
   showingItems: [],
+  activeFilterButtonIndex: -1
 };
 
 enum ActionTypes {
@@ -32,6 +38,7 @@ enum ActionTypes {
   SET_SEARCH_KEY,
   SET_CLEAR_SELECTED_ROWS,
   SET_ACTIVE_FILTER_BUTTON_INDEX,
+  SET_ITEMS,
   SET_SHOWING_ITEMS,
 }
 
@@ -43,6 +50,7 @@ type IAction =
       type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX;
       payload: IComponentState['activeFilterButtonIndex'];
     }
+    | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
   | { type: ActionTypes.SET_SHOWING_ITEMS; payload: IComponentState['showingItems'] };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
@@ -55,6 +63,8 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return { ...state, searchKey: action.payload };
     case ActionTypes.SET_CLEAR_SELECTED_ROWS:
       return { ...state, clearSelectedRows: action.payload };
+    case ActionTypes.SET_ITEMS:
+      return { ...state, items: action.payload };
     case ActionTypes.SET_SHOWING_ITEMS:
       return { ...state, showingItems: action.payload };
     default:
@@ -69,31 +79,48 @@ type IComponentPropI18 = {
 
 type IComponentProps<T = any> = {
   isSearchable?: boolean;
-  searchableKeys?: string[];
   isSelectable?: boolean;
   isAllSelectable?: boolean;
   isMultiSelectable?: boolean;
-  isActiveToggleMenu?: boolean;
   toggleMenuItems?: IComponentTableToggleMenuItem[];
   filterButtons?: IComponentTableFilterButton[];
   i18?: IComponentPropI18;
-  onClickToggleMenuItem?: (value: any) => void;
+  onClickToggleMenuItem?: (selectedRows: T[], value: any) => void;
   onSelect?: (value: T[]) => void;
   onClickFilterButton?: (button: IComponentTableFilterButton) => void;
-} & TableProps<T>;
+  columns: IComponentDataTableColumn<T>[]
+} & Omit<TableProps<T>, "columns">;
 
 export default function ComponentDataTable<T>(props: IComponentProps<T>) {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
+    items: props.data,
     showingItems: props.data,
+    activeFilterButtonIndex: props.filterButtons?.indexOfKey("isDefault", true) ?? -1
   });
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const listPageRef = useRef<number>(0);
   const listPagePerCountRef = useRef<number>(10);
 
+  useDidMount(() => {
+    if(state.activeFilterButtonIndex > -1){
+      onFilter();
+    }else{
+      setIsLoading(false);
+    }
+  });
+
   useEffectAfterDidMount(() => {
     resetTableList();
   }, [props.data]);
+
+  useEffectAfterDidMount(() => {
+    onSearch();
+    if(isLoading){
+      setIsLoading(false);
+    }
+  }, [state.items])
 
   const resetTableList = (firstRender?: boolean) => {
     dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [] });
@@ -101,7 +128,6 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
       type: ActionTypes.SET_CLEAR_SELECTED_ROWS,
       payload: !state.clearSelectedRows,
     });
-    onSearch();
   };
 
   const getItemListForPage = () => {
@@ -155,50 +181,53 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
   };
 
   const onSearch = (event?: React.ChangeEvent<HTMLInputElement>) => {
-    let searchKey = event ? event.target.value : state.searchKey;
+    const searchKey = event ? event.target.value : state.searchKey;
     dispatch({ type: ActionTypes.SET_SEARCH_KEY, payload: searchKey });
     // Find Searched Items for Showing Items
-    let searchedItems = props.data.filter((item: any) => {
-      let isFound = true;
-      if (props.searchableKeys) {
-        // Search by searchableKeys
-        props.searchableKeys.forEach((searchableKey) => {
-          // Split searchableKey by '.'
-          let keys = searchableKey.split('.');
-          // Clone item
-          let newData = cloneDeepWith(item);
-          // Loop through keys
-          for (let i = 0; i < keys.length; i++) {
-            if (item[keys[i]]) {
-              // Assign new data
-              newData = cloneDeepWith(newData[keys[i]]);
-            } else {
-              newData = null;
-              break;
+    let searchedItems = state.items;
+    if(searchKey.length > 0){
+      const searchableColumns = props.columns.findMulti("isSearchable", true);
+      if(searchableColumns){
+        searchedItems = state.items.filter(item => {
+          let selectors: any[] = [];
+          
+          for(const column of searchableColumns) {
+            if(column.selector){
+              const selector = column.selector(item);
+              selectors.push(selector);
             }
           }
-          if (newData) {
-            // Search newData by searchKey
-            if (newData.toString().toLowerCase().search(searchKey) < 0) {
-              isFound = false;
-            }
-          }
+
+          return selectors.filter(selector => selector.toString().toLowerCase().search(searchKey) > -1).length > 0;
         });
       }
-      return isFound;
-    });
-
-    // Set Showing Items
+    }
+    // Set Showing Items    
     dispatch({ type: ActionTypes.SET_SHOWING_ITEMS, payload: searchedItems });
   };
 
-  const onFilter = (item: IComponentTableFilterButton, index: number) => {
-    let filteredItems = item.onFilter(props.data);
-    dispatch({ type: ActionTypes.SET_SHOWING_ITEMS, payload: filteredItems });
-    dispatch({ type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX, payload: index });
-    resetTableList();
-    if (props.onClickFilterButton) {
-      props.onClickFilterButton(item);
+  const onFilter = async (filterButtonIndex: number = -1) => {
+    if(props.filterButtons && props.filterButtons.length > 0){
+      if(!isLoading){
+        setIsLoading(true);
+      }
+      let index = state.activeFilterButtonIndex;
+      if(filterButtonIndex > -1){
+        dispatch({ type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX, payload: filterButtonIndex });
+        resetTableList();
+        index = filterButtonIndex;
+      }
+      const filterButton = props.filterButtons[index];
+      let filteredItems = props.data; 
+      if(filterButton.onFilter){
+        filteredItems = filterButton.onFilter(props.data);
+      }else if(filterButton.onFilterAsync) {
+        filteredItems = await filterButton.onFilterAsync();
+      }
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: filteredItems });
+      if (props.onClickFilterButton) {
+        props.onClickFilterButton(filterButton);
+      }
     }
   };
 
@@ -209,7 +238,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
       ),
     ];
 
-    if (props.isActiveToggleMenu) {
+    if (props.toggleMenuItems && props.toggleMenuItems.length > 0) {
       if (columns.length > 0) {
         columns[0].name =
           state.selectedItems.length > 0 ? (
@@ -217,7 +246,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
               items={props.toggleMenuItems ?? []}
               onChange={(value) =>
                 props.onClickToggleMenuItem
-                  ? props.onClickToggleMenuItem(value)
+                  ? props.onClickToggleMenuItem(state.selectedItems, value)
                   : null
               }
             />
@@ -267,13 +296,13 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
               title={`${props.i18?.search ?? 'Search'}`}
               type="text"
               value={state.searchKey}
-              onChange={(e: any) => onSearch(e)}
+              onChange={(event: any) => onSearch(event)}
             />
           </div>
         </div>
       ) : null}
       {props.filterButtons ? (
-        <div className="row pt-2 pb-2 m-0">
+        <div className="row pt-2 pb-2 m-0 filter-buttons">
           <div className="col-md-3"></div>
           <div className="col-md-9 text-end">
             <div className="btn-group" role="group">
@@ -281,7 +310,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
                 <ComponentTableFilterButton
                   key={`filter-button-${index}`}
                   item={item}
-                  onClick={() => onFilter(item, index)}
+                  onClick={() => onFilter(index)}
                   isActive={state.activeFilterButtonIndex === index}
                 />
               ))}
@@ -324,7 +353,7 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
           progressComponent={
             <ComponentSpinnerDonut customClass="component-table-spinner" />
           }
-          progressPending={props.progressPending}
+          progressPending={isLoading || props.progressPending}
         />
       </div>
     </div>

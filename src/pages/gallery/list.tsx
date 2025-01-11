@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 import { GalleryService } from '@services/gallery.service';
 import { TableColumn } from 'react-data-table-component';
 import ComponentToast from '@components/elements/toast';
-import ComponentDataTable from '@components/elements/table/dataTable';
+import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';
 import Image from 'next/image';
 import { GalleryTypeId } from '@constants/galleryTypeId';
 import { ImageSourceUtil } from '@utils/imageSource.util';
@@ -226,7 +226,7 @@ export default function PageGalleryList(props: IComponentProps) {
     }
   };
 
-  const getTableColumns = (): TableColumn<IGalleryGetResultService>[] => {
+  const getTableColumns = (): IComponentDataTableColumn<IGalleryGetResultService>[] => {
     return [
       {
         name: t('image'),
@@ -248,6 +248,7 @@ export default function PageGalleryList(props: IComponentProps) {
         name: t('title'),
         selector: (row) => row.name,
         sortable: true,
+        isSearchable: true
       },
       {
         name: t('createdDate'),
@@ -301,7 +302,6 @@ export default function PageGalleryList(props: IComponentProps) {
                 noRecords: t('noRecords'),
               }}
               isSelectable={true}
-              searchableKeys={['name']}
               isAllSelectable={!(props.isModal && !props.isMulti)}
               isMultiSelectable={!(props.isModal && !props.isMulti)}
               isSearchable={true}

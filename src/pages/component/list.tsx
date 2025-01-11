@@ -1,7 +1,7 @@
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import ComponentToast from '@components/elements/toast';
-import ComponentDataTable from '@components/elements/table/dataTable';
+import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
 import { PermissionUtil } from '@utils/permission.util';
 import { EndPoints } from '@constants/endPoints';
@@ -13,7 +13,7 @@ import ComponentThemeBadgeComponentType from '@components/theme/badge/componentT
 import { ComponentTypeId } from '@constants/componentTypes';
 import { RouteUtil } from '@utils/route.util';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -150,7 +150,7 @@ export default function PageComponentList() {
     }
   };
 
-  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): IComponentDataTableColumn<IComponentState['items'][0]>[] => {
     return [
       {
         name: t('title'),
@@ -172,6 +172,7 @@ export default function PageComponentList() {
           );
         },
         sortable: true,
+        isSearchable: true
       },
       PermissionUtil.checkPermissionRoleRank(
         sessionAuth!.user.roleId,
@@ -256,11 +257,8 @@ export default function PageComponentList() {
           <div className="card-body">
             <div className="table-post">
               <ComponentDataTable
-                columns={getTableColumns().filter(
-                  (column) => typeof column.name !== 'undefined'
-                )}
+                columns={getTableColumns()}
                 data={items}
-                searchableKeys={['title']}
                 i18={{
                   search: t('search'),
                   noRecords: t('noRecords'),

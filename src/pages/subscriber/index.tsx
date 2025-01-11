@@ -103,8 +103,8 @@ export default function PageSubscribers() {
     }
   };
 
-  const onChangeStatus = async (statusId: number) => {
-    const selectedItemId = selectedItems.map((item) => item._id);
+  const onChangeStatus = async (selectedRows: ISubscriberGetResultService[], statusId: number) => {
+    const selectedItemId = selectedRows.map((item) => item._id);
 
     const result = await Swal.fire({
       title: t('deleteAction'),
@@ -144,10 +144,6 @@ export default function PageSubscribers() {
     }
   };
 
-  const onSelect = (selectedRows: IComponentState['items']) => {
-    setSelectedItems(selectedRows);
-  };
-
   const getToggleMenuItems = (): IComponentTableToggleMenuItem[] => {
     return status.findMulti('id', [StatusId.Deleted]).map((item) => ({
       label: t(item.langKey),
@@ -185,16 +181,14 @@ export default function PageSubscribers() {
                   search: t('search'),
                   noRecords: t('noRecords'),
                 }}
-                onSelect={(rows) => onSelect(rows)}
                 isSelectable={PermissionUtil.check(
                   sessionAuth!,
                   SubscriberEndPointPermission.DELETE
                 )}
                 isAllSelectable={true}
                 isSearchable={true}
-                isActiveToggleMenu={true}
                 toggleMenuItems={getToggleMenuItems()}
-                onClickToggleMenuItem={(value) => onChangeStatus(value)}
+                onClickToggleMenuItem={(selectedRows, value) => onChangeStatus(selectedRows, value)}
               />
             </div>
           </div>

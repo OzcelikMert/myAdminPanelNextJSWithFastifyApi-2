@@ -149,8 +149,8 @@ export default function PageNavigationList() {
     }
   };
 
-  const onChangeStatus = async (statusId: number) => {
-    const selectedItemId = state.selectedItems.map((item) => item._id);
+  const onChangeStatus = async (selectedRows: INavigationGetResultService[], statusId: number) => {
+    const selectedItemId = selectedRows.map((item) => item._id);
     if (statusId === StatusId.Deleted && state.listMode === 'deleted') {
       const result = await Swal.fire({
         title: t('deleteAction'),
@@ -238,11 +238,7 @@ export default function PageNavigationList() {
       return true;
     }
   };
-
-  const onSelect = (selectedRows: IComponentState['items']) => {
-    dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: selectedRows });
-  };
-
+  
   const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
     dispatch({ type: ActionTypes.SET_LIST_MODE, payload: item.key });
   };
@@ -411,7 +407,6 @@ export default function PageNavigationList() {
               <ComponentDataTable
                 columns={getTableColumns()}
                 data={state.items}
-                onSelect={(rows) => onSelect(rows)}
                 i18={{
                   search: t('search'),
                   noRecords: t('noRecords'),
@@ -428,9 +423,8 @@ export default function PageNavigationList() {
                 }
                 isAllSelectable={true}
                 isSearchable={true}
-                isActiveToggleMenu={true}
                 toggleMenuItems={getToggleMenuItems()}
-                onClickToggleMenuItem={(value) => onChangeStatus(value)}
+                onClickToggleMenuItem={(selectedRows, value) => onChangeStatus(selectedRows, value)}
                 filterButtons={getTableFilterButtons()}
                 onClickFilterButton={(item) => onClickTableFilterButton(item)}
               />
