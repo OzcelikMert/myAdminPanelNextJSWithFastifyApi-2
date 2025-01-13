@@ -1,4 +1,4 @@
-import { FormEvent, use, useEffect, useReducer, useRef, useState } from 'react';
+import { FormEvent, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import ComponentFormSelect, {
@@ -7,7 +7,6 @@ import ComponentFormSelect, {
 import {
   IComponentElementGetResultService,
   IComponentGetResultService,
-  IComponentUpdateWithIdParamService,
 } from 'types/services/component.service';
 import { IComponentElementModel } from 'types/models/component.model';
 import { PermissionUtil } from '@utils/permission.util';
@@ -40,6 +39,13 @@ import {
 } from '@library/react/customHooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  ComponentSchema,
+  IComponentPutWithIdSchema,
+} from 'schemas/component.schema';
+import ComponentThemeModalEditComponentElement from '@components/theme/modal/editComponentElement';
 
 type IHandleInputChangeParams = {
   index: number;
@@ -54,6 +60,8 @@ type IComponentState = {
   isItemLoading: boolean;
   item?: IComponentGetResultService;
   langId: string;
+  isShowModalEditElement: boolean;
+  selectedElementId: string;
 };
 
 const initialState: IComponentState = {
@@ -62,6 +70,8 @@ const initialState: IComponentState = {
   mainTabActiveKey: 'general',
   isItemLoading: false,
   langId: '',
+  isShowModalEditElement: false,
+  selectedElementId: '',
 };
 
 enum ActionTypes {
@@ -72,6 +82,8 @@ enum ActionTypes {
   SET_ITEM,
   SET_LANG_ID,
   SET_IS_ITEM_LOADING,
+  SET_IS_SHOW_MODAL_EDIT_ELEMENT,
+  SET_SELECTED_ELEMENT_ID,
 }
 
 type IAction =
@@ -95,7 +107,15 @@ type IAction =
       type: ActionTypes.SET_ITEM;
       payload: IComponentState['item'];
     }
-  | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] };
+  | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] }
+  | {
+      type: ActionTypes.SET_IS_SHOW_MODAL_EDIT_ELEMENT;
+      payload: IComponentState['isShowModalEditElement'];
+    }
+  | {
+      type: ActionTypes.SET_SELECTED_ELEMENT_ID;
+      payload: IComponentState['selectedElementId'];
+    };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
@@ -111,6 +131,10 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return { ...state, item: action.payload };
     case ActionTypes.SET_LANG_ID:
       return { ...state, langId: action.payload };
+    case ActionTypes.SET_IS_SHOW_MODAL_EDIT_ELEMENT:
+      return { ...state, isShowModalEditElement: action.payload };
+    case ActionTypes.SET_SELECTED_ELEMENT_ID:
+      return { ...state, selectedElementId: action.payload };
     default:
       return state;
   }
@@ -120,7 +144,7 @@ type IComponentSelectedItemFormState = IComponentElementModel | undefined;
 
 const initialSelectedItemFormState: IComponentSelectedItemFormState = undefined;
 
-type IComponentFormState = IComponentUpdateWithIdParamService;
+type IComponentFormState = IComponentPutWithIdSchema;
 
 const initialFormState: IComponentFormState = {
   _id: '',
@@ -156,14 +180,15 @@ export default function PageComponentAdd() {
       ? 'general'
       : 'elements',
   });
-  const formReducer = useFormReducer<IComponentFormState>({
-    ...initialFormState,
-    _id: queries._id ?? '',
+  const form = useForm<IComponentFormState>({
+    defaultValues: {
+      ...initialFormState,
+      _id: queries._id ?? '',
+    },
+    resolver: zodResolver(
+      queries._id ? ComponentSchema.putWithId : ComponentSchema.post
+    ),
   });
-  const selectedItemFormReducer =
-    useFormReducer<IComponentSelectedItemFormState>(
-      initialSelectedItemFormState
-    );
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
 
@@ -184,7 +209,7 @@ export default function PageComponentAdd() {
     if (isPageLoaded) {
       setIsPageLoaded(false);
     }
-    const minPermission = formReducer.formState._id
+    const minPermission = queries._id
       ? ComponentEndPointPermission.UPDATE
       : ComponentEndPointPermission.ADD;
     if (
@@ -197,7 +222,7 @@ export default function PageComponentAdd() {
     ) {
       getElementTypes();
       getComponentTypes();
-      if (formReducer.formState._id) {
+      if (queries._id) {
         await getItem();
       }
       setPageTitle();
@@ -219,10 +244,10 @@ export default function PageComponentAdd() {
         url: EndPoints.COMPONENT_WITH.LIST,
       },
       {
-        title: t(formReducer.formState._id ? 'edit' : 'add'),
+        title: t(queries._id ? 'edit' : 'add'),
       },
     ];
-    if (formReducer.formState._id) {
+    if (queries._id) {
       titles.push({
         title: mainTitleRef.current,
       });
@@ -252,10 +277,10 @@ export default function PageComponentAdd() {
 
   const getItem = async (_langId?: string) => {
     _langId = _langId || state.langId;
-    if (formReducer.formState._id) {
+    if (queries._id) {
       const serviceResult = await ComponentService.getWithId(
         {
-          _id: formReducer.formState._id,
+          _id: queries._id,
           langId: _langId,
         },
         abortController.signal
@@ -263,7 +288,7 @@ export default function PageComponentAdd() {
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
         dispatch({ type: ActionTypes.SET_ITEM, payload: item });
-        formReducer.setFormState({
+        form.reset({
           ...item,
           elements: item.elements.map((element) => ({
             ...element,
@@ -289,7 +314,9 @@ export default function PageComponentAdd() {
   };
 
   const onSubmit = async (event: FormEvent) => {
-    const params = formReducer.formState;
+    const params = form.getValues();
+    console.log('onSubmit', params);
+    return;
     const serviceResult = await (params._id
       ? ComponentService.updateWithId(params, abortController.signal)
       : ComponentService.add(params, abortController.signal));
@@ -326,57 +353,48 @@ export default function PageComponentAdd() {
     }
   };
 
-  const handleInputChange = (params: IHandleInputChangeParams) => {
-    let newElements = formReducer.formState.elements as any;
-    newElements[params.index][params.key] = params.value;
-    formReducer.setFormState({
-      elements: newElements,
-    });
-  };
-
   const onCreateElement = () => {
+    const formValues = form.getValues();
     const _id = String.createId();
-    formReducer.setFormState({
-      elements: [
-        ...formReducer.formState.elements,
-        {
-          _id: _id,
-          title: '',
-          rank: formReducer.formState.elements.length + 1,
-          typeId: ElementTypeId.Text,
-          key: '',
-          contents: {
-            langId: state.langId,
-          },
+    const newElements = [
+      ...formValues.elements,
+      {
+        _id: _id,
+        title: '',
+        rank: formValues.elements.length + 1,
+        typeId: ElementTypeId.Text,
+        key: '',
+        contents: {
+          langId: state.langId,
         },
-      ],
+      },
+    ];
+    form.setValue('elements', newElements);
+    onEdit(_id);
+  };
+
+  const onAccept = async (newElement: IComponentElementModel) => {
+    let newElements = form.getValues().elements;
+    let foundIndex = newElements.indexOfKey('_id', state.selectedElementId);
+    if (foundIndex > -1) {
+      newElements[foundIndex] = newElement;
+      form.setValue('elements', newElements);
+    }
+    return true;
+  };
+
+  const onEdit = (_id: string) => {
+    dispatch({
+      type: ActionTypes.SET_IS_SHOW_MODAL_EDIT_ELEMENT,
+      payload: true,
     });
-    onEdit(formReducer.formState.elements.indexOfKey('_id', _id));
-  };
-
-  const onAccept = (index: number) => {
-    let newElements = formReducer.formState.elements;
-    newElements[index] = selectedItemFormReducer.formState!;
-    formReducer.setFormState({
-      elements: newElements,
-    });
-    onCancelEdit();
-  };
-
-  const onEdit = (index: number) => {
-    selectedItemFormReducer.setFormState(
-      cloneDeepWith(formReducer.formState.elements[index])
-    );
-  };
-
-  const onCancelEdit = () => {
-    selectedItemFormReducer.setFormState(undefined);
+    dispatch({ type: ActionTypes.SET_SELECTED_ELEMENT_ID, payload: _id });
   };
 
   const onDelete = async (index: number) => {
     const result = await Swal.fire({
       title: t('deleteAction'),
-      html: `<b>'${formReducer.formState.elements[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+      html: `<b>'${form.getValues().elements[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
       confirmButtonText: t('yes'),
       cancelButtonText: t('no'),
       icon: 'question',
@@ -384,11 +402,9 @@ export default function PageComponentAdd() {
     });
 
     if (result.isConfirmed) {
-      const newElements = formReducer.formState.elements;
+      const newElements = form.getValues().elements;
       newElements.splice(index, 1);
-      formReducer.setFormState({
-        elements: newElements,
-      });
+      form.setValue('elements', newElements);
     }
   };
 
@@ -439,7 +455,7 @@ export default function PageComponentAdd() {
               <span>
                 <i
                   className="mdi mdi-pencil-box text-warning fs-1 cursor-pointer ms-2"
-                  onClick={() => onEdit(index)}
+                  onClick={() => onEdit(elementProps._id)}
                 ></i>
                 <i
                   className="mdi mdi-minus-box text-danger fs-1 cursor-pointer ms-2"
@@ -453,9 +469,7 @@ export default function PageComponentAdd() {
             <div className="col-md">
               <ComponentPageComponentElementTypeInput
                 data={elementProps}
-                onChange={(key, value) =>
-                  handleInputChange({ index, key, value })
-                }
+                index={index}
               />
             </div>
             {
@@ -471,101 +485,15 @@ export default function PageComponentAdd() {
     );
   };
 
-  const ComponentElementEdit = (
-    elementProps: IComponentElementGetResultService,
-    index: number
-  ) => {
-    return (
-      <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
-        <ComponentFieldSet legend={t('newElement')}>
-          <div className="row mt-3">
-            <div className="col-md-12">
-              <ComponentFormType
-                title={`${t('title')}*`}
-                name="title"
-                placeholder={t('title')}
-                type="text"
-                value={elementProps.title}
-                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-3">
-              <ComponentFormType
-                title={`${t('key')}*`}
-                name="key"
-                type="text"
-                value={elementProps.key}
-                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-3">
-              <ComponentFormSelect
-                title={t('typeId')}
-                name="typeId"
-                placeholder={t('typeId')}
-                options={state.elementTypes}
-                value={state.elementTypes.filter(
-                  (item) => item.value == elementProps.typeId
-                )}
-                onChange={(item: any, e) =>
-                  selectedItemFormReducer.onChangeSelect(e.name, item)
-                }
-              />
-            </div>
-            <div className="col-md-12 mt-3">
-              <ComponentFormType
-                title={`${t('rank')}*`}
-                name="rank"
-                type="number"
-                required={true}
-                value={elementProps.rank}
-                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-3">
-              <div className="row">
-                <div className="col-md-6">
-                  <button
-                    type="button"
-                    className="btn btn-gradient-success btn-lg"
-                    onClick={() => onAccept(index)}
-                  >
-                    {t('okay')}
-                  </button>
-                </div>
-                <div className="col-md-6 text-end">
-                  <button
-                    type="button"
-                    className="btn btn-gradient-dark btn-lg"
-                    onClick={() => onCancelEdit()}
-                  >
-                    {t('cancel')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ComponentFieldSet>
-      </div>
-    );
-  };
-
   const TabElements = () => {
     return (
       <div className="row mb-3">
         <div className="col-md-7">
           <div className="row">
-            {formReducer.formState.elements
-              ?.orderBy('rank', 'asc')
-              .map((item, index) =>
-                selectedItemFormReducer.formState &&
-                selectedItemFormReducer.formState._id == item._id
-                  ? ComponentElementEdit(
-                      selectedItemFormReducer.formState,
-                      index
-                    )
-                  : ComponentElement(item, index)
-              )}
+            {form
+              .getValues()
+              .elements?.orderBy('rank', 'asc')
+              .map((item: any, index) => ComponentElement(item, index))}
           </div>
         </div>
         {PermissionUtil.checkPermissionRoleRank(
@@ -573,7 +501,7 @@ export default function PageComponentAdd() {
           UserRoleId.SuperAdmin
         ) ? (
           <div
-            className={`col-md-7 text-start ${formReducer.formState.elements.length > 0 ? 'mt-4' : ''}`}
+            className={`col-md-7 text-start ${form.getValues().elements.length > 0 ? 'mt-4' : ''}`}
           >
             <button
               type={'button'}
@@ -596,20 +524,10 @@ export default function PageComponentAdd() {
             title={`${t('title')}*`}
             name="title"
             type="text"
-            required={true}
-            value={formReducer.formState.title}
-            onChange={(e) => formReducer.onChangeInput(e)}
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
-            title={`${t('key')}*`}
-            name="key"
-            type="text"
-            required={true}
-            value={formReducer.formState.key}
-            onChange={(e) => formReducer.onChangeInput(e)}
-          />
+          <ComponentFormType title={`${t('key')}*`} name="key" type="text" />
         </div>
         <div className="col-md-7 mt-3">
           <ComponentFormSelect
@@ -619,31 +537,42 @@ export default function PageComponentAdd() {
             options={state.componentTypes}
             value={state.componentTypes.findSingle(
               'value',
-              formReducer.formState.typeId
+              form.getValues().typeId
             )}
-            onChange={(item: any, e) =>
-              formReducer.onChangeSelect(e.name, item.value)
-            }
           />
         </div>
       </div>
     );
   };
 
+  const selectedElement = form.getValues().elements.findSingle("_id", state.selectedElementId) as IComponentElementModel;
+
   return isPageLoading ? null : (
     <div className="page-post">
+      <ComponentThemeModalEditComponentElement
+        isShow={state.isShowModalEditElement}
+        onHide={() =>
+          dispatch({
+            type: ActionTypes.SET_IS_SHOW_MODAL_EDIT_ELEMENT,
+            payload: false,
+          })
+        }
+        onSubmit={(newElement) => onAccept(newElement)}
+        item={selectedElement}
+      />
       <div className="row mb-3">
         <Header />
       </div>
       <div className="row position-relative">
         {state.isItemLoading ? (
-            <ComponentSpinnerDonut customClass="page-spinner" />
-          ) : null}
+          <ComponentSpinnerDonut customClass="page-spinner" />
+        ) : null}
         <div className="col-md-12">
           <ComponentForm
             submitButtonText={t('save')}
             submitButtonSubmittingText={t('loading')}
             onSubmit={(event) => onSubmit(event)}
+            formMethods={form}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

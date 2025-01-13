@@ -38,16 +38,3 @@ export interface IComponentGetManyParamService {
   typeId?: ComponentTypeId;
   withContent?: boolean;
 }
-
-export type IComponentAddParamService = {} & Omit<
-  IComponentModel,
-  '_id' | 'authorId' | 'lastAuthorId'
->;
-
-export type IComponentUpdateWithIdParamService = {
-  _id: string;
-} & Omit<IComponentAddParamService, '_id'>;
-
-export interface IComponentDeleteManyParamService {
-  _id: string[];
-}

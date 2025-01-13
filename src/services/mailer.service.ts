@@ -1,9 +1,9 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
-import { IMailerSendParamService } from 'types/services/mailer.service';
 import { ApiRequest } from '@library/api/request';
 import { PathUtil } from '@utils/path.util';
+import { IMailerPostSchema } from 'schemas/mailer.schema';
 
-const send = (params: IMailerSendParamService, signal?: AbortSignal) => {
+const send = (params: IMailerPostSchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.MAILER_WITH.SEND,

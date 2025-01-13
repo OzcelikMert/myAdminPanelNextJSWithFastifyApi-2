@@ -1,21 +1,18 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
 import { PathUtil } from '@utils/path.util';
 import { ApiRequest } from '@library/api/request';
-import {
-  IComponentAddParamService,
-  IComponentDeleteManyParamService,
-  IComponentGetManyParamService,
-  IComponentGetResultService,
-  IComponentGetWithKeyParamService,
-  IComponentGetWithIdParamService,
-  IComponentUpdateWithIdParamService,
-} from 'types/services/component.service';
+import { IComponentGetResultService } from 'types/services/component.service';
 import { IComponentModel } from 'types/models/component.model';
+import {
+  IComponentDeleteManySchema,
+  IComponentGetManySchema,
+  IComponentGetWithIdSchema,
+  IComponentGetWithKeySchema,
+  IComponentPostSchema,
+  IComponentPutWithIdSchema,
+} from 'schemas/component.schema';
 
-const getWithId = (
-  params: IComponentGetWithIdParamService,
-  signal?: AbortSignal
-) => {
+const getWithId = (params: IComponentGetWithIdSchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.COMPONENT_WITH.GET_WITH_ID(params._id),
@@ -25,7 +22,7 @@ const getWithId = (
 };
 
 const getWithKey = (
-  params: IComponentGetWithKeyParamService,
+  params: IComponentGetWithKeySchema,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -36,10 +33,7 @@ const getWithKey = (
   }).get<IComponentGetResultService>();
 };
 
-const getMany = (
-  params: IComponentGetManyParamService,
-  signal?: AbortSignal
-) => {
+const getMany = (params: IComponentGetManySchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.COMPONENT_WITH.GET,
@@ -48,7 +42,7 @@ const getMany = (
   }).get<IComponentGetResultService[]>();
 };
 
-const add = (params: IComponentAddParamService, signal?: AbortSignal) => {
+const add = (params: IComponentPostSchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.COMPONENT_WITH.ADD,
@@ -58,7 +52,7 @@ const add = (params: IComponentAddParamService, signal?: AbortSignal) => {
 };
 
 const updateWithId = (
-  params: IComponentUpdateWithIdParamService,
+  params: IComponentPutWithIdSchema,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -70,7 +64,7 @@ const updateWithId = (
 };
 
 const deleteMany = (
-  params: IComponentDeleteManyParamService,
+  params: IComponentDeleteManySchema,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({

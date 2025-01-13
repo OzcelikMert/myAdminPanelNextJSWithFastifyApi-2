@@ -1000,7 +1000,7 @@ export default function PagePostAdd() {
                       transition={false}
                     >
                       <Tab eventKey="general" title={t('general')}>
-                        <TabGeneral />
+                        {TabGeneral()}
                       </Tab>
                       {![PostTypeId.Slider].includes(
                         Number(formState.typeId)

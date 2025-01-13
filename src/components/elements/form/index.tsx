@@ -1,8 +1,6 @@
-import {
-  FormEvent,
-  useState,
-} from 'react';
+import { FormEvent, useState } from 'react';
 import ComponentFormLoadingButton from './button/loadingButton';
+import { FormProvider, UseFormReturn } from 'react-hook-form';
 
 type IComponentState = {
   isSubmitting: boolean;
@@ -19,27 +17,17 @@ type IComponentProps = {
   submitButtonClassName?: string;
   children: React.ReactNode;
   enterToSubmit?: true;
-  onSubmit?: (event: FormEvent<HTMLFormElement>) => Promise<void> | void;
+  onSubmit?: (data: any) => Promise<void> | void;
+  formMethods: UseFormReturn<any>
 };
 
 export default function ComponentForm(props: IComponentProps) {
-  const [isSubmitting, setIsSubmitting] = useState(initialState.isSubmitting);
-
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsSubmitting(true);
-    if (props.onSubmit) {
-      await props.onSubmit(event);
-    }
-    setIsSubmitting(false);
-  };
-
   const SubmitButton = () => {
     return (
       <button
         type={'submit'}
         className={`btn-save ${props.submitButtonClassName ?? 'btn btn-gradient-success'}`}
-        disabled={isSubmitting}
+        disabled={props.formMethods.formState.isSubmitting}
       >
         {props.submitButtonText}
       </button>
@@ -47,22 +35,27 @@ export default function ComponentForm(props: IComponentProps) {
   };
 
   return (
-    <form
-      className="theme-form"
-      onKeyDown={(event) => {
-        if (!props.enterToSubmit && event.key === 'Enter')
-          event.preventDefault();
-      }}
-      onSubmit={(e) => onSubmit(e)}
-    >
-      {props.children}
-      <div className="submit-btn-div text-end mb-4">
-        {props.hideSubmitButton ? null : !isSubmitting ? (
-          <SubmitButton />
-        ) : (
-          <ComponentFormLoadingButton text={props.submitButtonSubmittingText} className={props.submitButtonClassName} />
-        )}
-      </div>
-    </form>
+    <FormProvider {...props.formMethods}>
+      <form
+        className="theme-form"
+        onKeyDown={(event) => {
+          if (!props.enterToSubmit && event.key === 'Enter')
+            event.preventDefault();
+        }}
+        onSubmit={props.onSubmit && props.formMethods.handleSubmit(props.onSubmit)}
+      >
+        {props.children}
+        <div className="submit-btn-div text-end mb-4">
+          {props.hideSubmitButton ? null : !props.formMethods.formState.isSubmitting ? (
+            <SubmitButton />
+          ) : (
+            <ComponentFormLoadingButton
+              text={props.submitButtonSubmittingText}
+              className={props.submitButtonClassName}
+            />
+          )}
+        </div>
+      </form>
+    </FormProvider>
   );
 }

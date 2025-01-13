@@ -1,8 +1,5 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
 import {
-  IGalleryDeleteManyParamService,
-  IGalleryAddParamService,
-  IGalleryGetManyParamService,
   IGalleryGetResultService,
   IGalleryImageProperties,
 } from 'types/services/gallery.service';
@@ -10,8 +7,12 @@ import { ApiRequest } from '@library/api/request';
 import { PathUtil } from '@utils/path.util';
 import { IApiRequestParam } from '@library/types/api';
 import { IGalleryModel } from 'types/models/gallery.model';
+import {
+  IGalleryDeleteManySchema,
+  IGalleryGetManySchema,
+} from 'schemas/gallery.schema';
 
-const get = (params: IGalleryGetManyParamService, signal?: AbortSignal) => {
+const get = (params: IGalleryGetManySchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.GALLERY_WITH.GET_IMAGE,
@@ -21,7 +22,7 @@ const get = (params: IGalleryGetManyParamService, signal?: AbortSignal) => {
 };
 
 const add = (
-  params: IGalleryAddParamService,
+  params: FormData,
   onUploadProgress: IApiRequestParam['onUploadProgress'],
   signal?: AbortSignal
 ) => {
@@ -36,10 +37,7 @@ const add = (
   }).post<(IGalleryModel & IGalleryImageProperties)[]>();
 };
 
-const deleteMany = (
-  params: IGalleryDeleteManyParamService,
-  signal?: AbortSignal
-) => {
+const deleteMany = (params: IGalleryDeleteManySchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.GALLERY_WITH.DELETE_IMAGE,

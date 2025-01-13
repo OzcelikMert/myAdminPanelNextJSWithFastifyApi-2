@@ -9,11 +9,14 @@ import ComponentFormType from '@components/elements/form/input/type';
 import ComponentTableFilterButton, {
   IComponentTableFilterButton,
 } from '../filterButton';
-import { useDidMount, useEffectAfterDidMount } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
 
 export type IComponentDataTableColumn<T> = {
-  isSearchable?: boolean
-} & TableColumn<T>
+  isSearchable?: boolean;
+} & TableColumn<T>;
 
 type IComponentState = {
   selectedItems: any[];
@@ -30,7 +33,7 @@ const initialState: IComponentState = {
   searchKey: '',
   items: [],
   showingItems: [],
-  activeFilterButtonIndex: -1
+  activeFilterButtonIndex: -1,
 };
 
 enum ActionTypes {
@@ -43,15 +46,21 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_SELECTED_ITEMS; payload: IComponentState['selectedItems'] }
+  | {
+      type: ActionTypes.SET_SELECTED_ITEMS;
+      payload: IComponentState['selectedItems'];
+    }
   | { type: ActionTypes.SET_SEARCH_KEY; payload: IComponentState['searchKey'] }
   | { type: ActionTypes.SET_CLEAR_SELECTED_ROWS; payload: boolean }
   | {
       type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX;
       payload: IComponentState['activeFilterButtonIndex'];
     }
-    | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
-  | { type: ActionTypes.SET_SHOWING_ITEMS; payload: IComponentState['showingItems'] };
+  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | {
+      type: ActionTypes.SET_SHOWING_ITEMS;
+      payload: IComponentState['showingItems'];
+    };
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
@@ -88,15 +97,16 @@ type IComponentProps<T = any> = {
   onClickToggleMenuItem?: (selectedRows: T[], value: any) => void;
   onSelect?: (value: T[]) => void;
   onClickFilterButton?: (button: IComponentTableFilterButton) => void;
-  columns: IComponentDataTableColumn<T>[]
-} & Omit<TableProps<T>, "columns">;
+  columns: IComponentDataTableColumn<T>[];
+} & Omit<TableProps<T>, 'columns'>;
 
 export default function ComponentDataTable<T>(props: IComponentProps<T>) {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     items: props.data,
     showingItems: props.data,
-    activeFilterButtonIndex: props.filterButtons?.indexOfKey("isDefault", true) ?? -1
+    activeFilterButtonIndex:
+      props.filterButtons?.indexOfKey('isDefault', true) ?? -1,
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -104,9 +114,9 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
   const listPagePerCountRef = useRef<number>(10);
 
   useDidMount(() => {
-    if(state.activeFilterButtonIndex > -1){
+    if (state.activeFilterButtonIndex > -1) {
       onFilter();
-    }else{
+    } else {
       setIsLoading(false);
     }
   });
@@ -117,10 +127,10 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
 
   useEffectAfterDidMount(() => {
     onSearch();
-    if(isLoading){
+    if (isLoading) {
       setIsLoading(false);
     }
-  }, [state.items])
+  }, [state.items]);
 
   const resetTableList = (firstRender?: boolean) => {
     dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [] });
@@ -185,43 +195,51 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     dispatch({ type: ActionTypes.SET_SEARCH_KEY, payload: searchKey });
     // Find Searched Items for Showing Items
     let searchedItems = state.items;
-    if(searchKey.length > 0){
-      const searchableColumns = props.columns.findMulti("isSearchable", true);
-      if(searchableColumns){
-        searchedItems = state.items.filter(item => {
+    if (searchKey.length > 0) {
+      const searchableColumns = props.columns.findMulti('isSearchable', true);
+      if (searchableColumns) {
+        searchedItems = state.items.filter((item) => {
           let selectors: any[] = [];
-          
-          for(const column of searchableColumns) {
-            if(column.selector){
+
+          for (const column of searchableColumns) {
+            if (column.selector) {
               const selector = column.selector(item);
               selectors.push(selector);
             }
           }
 
-          return selectors.filter(selector => selector.toString().toLowerCase().search(searchKey) > -1).length > 0;
+          return (
+            selectors.filter(
+              (selector) =>
+                selector.toString().toLowerCase().search(searchKey) > -1
+            ).length > 0
+          );
         });
       }
     }
-    // Set Showing Items    
+    // Set Showing Items
     dispatch({ type: ActionTypes.SET_SHOWING_ITEMS, payload: searchedItems });
   };
 
   const onFilter = async (filterButtonIndex: number = -1) => {
-    if(props.filterButtons && props.filterButtons.length > 0){
-      if(!isLoading){
+    if (props.filterButtons && props.filterButtons.length > 0) {
+      if (!isLoading) {
         setIsLoading(true);
       }
       let index = state.activeFilterButtonIndex;
-      if(filterButtonIndex > -1){
-        dispatch({ type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX, payload: filterButtonIndex });
+      if (filterButtonIndex > -1) {
+        dispatch({
+          type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX,
+          payload: filterButtonIndex,
+        });
         resetTableList();
         index = filterButtonIndex;
       }
       const filterButton = props.filterButtons[index];
-      let filteredItems = props.data; 
-      if(filterButton.onFilter){
+      let filteredItems = props.data;
+      if (filterButton.onFilter) {
         filteredItems = filterButton.onFilter(props.data);
-      }else if(filterButton.onFilterAsync) {
+      } else if (filterButton.onFilterAsync) {
         filteredItems = await filterButton.onFilterAsync();
       }
       dispatch({ type: ActionTypes.SET_ITEMS, payload: filteredItems });
@@ -286,18 +304,29 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     return columns;
   };
 
+  const SearchInput = () => {
+    return (
+      <div className="theme-input">
+        <input
+          className="field"
+          title={`${props.i18?.search ?? 'Search'}`}
+          type="text"
+          value={state.searchKey}
+          onChange={(event: any) => onSearch(event)}
+          placeholder=" "
+        />
+        <span className="label">{`${props.i18?.search ?? 'Search'}`}</span>
+      </div>
+    );
+  };
+
   return (
     <div className="theme-table">
       {props.isSearchable ? (
         <div className="row pt-2 pb-2 m-0">
           <div className="col-md-8"></div>
           <div className="col-md-4">
-            <ComponentFormType
-              title={`${props.i18?.search ?? 'Search'}`}
-              type="text"
-              value={state.searchKey}
-              onChange={(event: any) => onSearch(event)}
-            />
+            <SearchInput />
           </div>
         </div>
       ) : null}

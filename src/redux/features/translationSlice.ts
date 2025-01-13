@@ -59,7 +59,19 @@ export const selectResources = (state: {
 export const selectTranslation = createSelector(
   [selectResources],
   (resources) =>
-    (key: ILanguageKeys): string => {
-      return resources[key] || key;
+    (key: ILanguageKeys, variables?: string[] | { [key: string]: string }): string => {
+      let item = resources[key] || key;
+      if(variables){
+        if(Array.isArray(variables)){
+          for (let index = 0; index < variables.length; index++) {
+            item = item.replace(`{{${index}}}`, variables[index]);
+          } 
+        }else {
+          Object.keys(variables).forEach(variableKey => {
+            item = item.replace("{{${variableKey}}}", variables[variableKey]);
+          });
+        }
+      }
+      return item;
     }
 );

@@ -8,6 +8,8 @@ import { ILanguageGetResultService } from 'types/services/language.service';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentToolTip from '@components/elements/tooltip';
+import ComponentForm from '@components/elements/form';
+import { useForm } from 'react-hook-form';
 
 type IOwnedLanguage = {
   langId: string;
@@ -28,10 +30,14 @@ export default function ComponentThemeContentLanguage(props: IComponentProps) {
     languages.findSingle('_id', props.selectedLangId) ??
     languages.findSingle('_id', mainLangId);
 
+  const form = useForm();
+
   const checkMissingLanguage = (langId: string) => {
     const isMissing = props.ownedLanguages?.every((ownedLanguage) =>
       Array.isArray(ownedLanguage)
-        ? ownedLanguage.every((ownedLanguage_2) => langId != ownedLanguage_2.langId)
+        ? ownedLanguage.every(
+            (ownedLanguage_2) => langId != ownedLanguage_2.langId
+          )
         : langId != ownedLanguage.langId
     );
 
@@ -48,12 +54,11 @@ export default function ComponentThemeContentLanguage(props: IComponentProps) {
 
   const Item = (itemProp: IThemeFormSelectData<ILanguageGetResultService>) => {
     const isSelectedItem = itemProp.value._id == selectedLanguage?._id;
-    const isMissing = props.showMissingMessage && checkMissingLanguage(itemProp.value._id);
+    const isMissing =
+      props.showMissingMessage && checkMissingLanguage(itemProp.value._id);
     return (
       <div className={`row p-0 ${!isSelectedItem ? 'my-2' : ''}`}>
-        <div className="col-2">
-          {isMissing ? <MissingWarning /> : null}
-        </div>
+        <div className="col-2">{isMissing ? <MissingWarning /> : null}</div>
         <div className="col-4 text-end">
           <Image
             className="img-fluid"
@@ -84,18 +89,20 @@ export default function ComponentThemeContentLanguage(props: IComponentProps) {
     }));
 
   return (
-    <ComponentFormSelect
-      title={t('contentLanguage')}
-      mainDivCustomClassName="content-language"
-      isSearchable={false}
-      isMulti={false}
-      formatOptionLabel={Item}
-      options={options}
-      value={{
-        label: selectedLanguage.title,
-        value: selectedLanguage,
-      }}
-      onChange={(item: any) => props.onChange(item)}
-    />
+    <ComponentForm hideSubmitButton formMethods={form}>
+      <ComponentFormSelect
+        title={t('contentLanguage')}
+        mainDivCustomClassName="content-language"
+        isSearchable={false}
+        isMulti={false}
+        formatOptionLabel={Item}
+        options={options}
+        value={{
+          label: selectedLanguage.title,
+          value: selectedLanguage,
+        }}
+        onChange={(item: any) => props.onChange(item)}
+      />
+    </ComponentForm>
   );
 }

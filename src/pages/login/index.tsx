@@ -16,11 +16,13 @@ import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useRouter } from 'next/router';
 import ComponentForm from '@components/elements/form';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
-import { set } from 'lodash';
 import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AuthSchema, IAuthPostSchema } from 'schemas/auth.schema';
 
 type IComponentState = {
   isWrong: boolean;
@@ -57,11 +59,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentFormState = {
-  email: string;
-  password: string;
-  keepMe: boolean;
-};
+type IComponentFormState = {} & IAuthPostSchema;
 
 const initialFormState: IComponentFormState = {
   email: '',
@@ -78,12 +76,10 @@ export default function PageLogin() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput } =
-    useFormReducer<IComponentFormState>({
-      ...initialFormState,
-      email: LocalStorageUtil.getKeepMeEmail(),
-      keepMe: LocalStorageUtil.getKeepMeEmail().length > 0,
-    });
+  const form = useForm<IComponentFormState>({
+    defaultValues: initialFormState,
+    resolver: zodResolver(AuthSchema.post),
+  });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -111,13 +107,10 @@ export default function PageLogin() {
     appDispatch(setBreadCrumbState([{ title: t('login') }]));
   };
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (data: IComponentFormState) => {
     dispatch({ type: AcitonTypes.SET_IS_WRONG, payload: false });
 
-    const serviceResult = await AuthService.login(
-      formState,
-      abortController.signal
-    );
+    const serviceResult = await AuthService.login(data, abortController.signal);
 
     if (serviceResult.data) {
       if (serviceResult.status) {
@@ -127,8 +120,8 @@ export default function PageLogin() {
 
         if (resultSession.status && resultSession.data) {
           appDispatch(setSessionAuthState(resultSession.data));
-          if (formState.keepMe) {
-            LocalStorageUtil.setKeepMeEmail(formState.email);
+          if (data.keepMe) {
+            LocalStorageUtil.setKeepMeEmail(data.email);
           } else if (LocalStorageUtil.getKeepMeEmail().length > 0) {
             LocalStorageUtil.setKeepMeEmail('');
           }
@@ -152,43 +145,28 @@ export default function PageLogin() {
         enterToSubmit={true}
         submitButtonClassName="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn w-100"
         submitButtonText={t('login')}
-        onSubmit={(event) => onSubmit(event)}
+        onSubmit={onSubmit}
+        formMethods={form}
       >
         <div className="row">
           <div className="col-md-12 mb-3">
-            <ThemeInputType
-              key="email"
-              title={t('email')}
-              type="email"
-              name="email"
-              required={true}
-              value={formState.email}
-              onChange={(e) => onChangeInput(e)}
-            />
+            <ThemeInputType title={t('email')} type="email" name="email" />
           </div>
           <div className="col-md-12 mb-3">
             <ThemeInputType
               title={t('password')}
               type="password"
               name="password"
-              required={true}
-              value={formState.password}
-              onChange={(e) => onChangeInput(e)}
             />
           </div>
           <div className="col-md-12 mb-3">
-            <ComponentFormCheckBox
-              name="keepMe"
-              title={t('keepMe')}
-              checked={formState.keepMe}
-              onChange={(e) => onChangeInput(e)}
-            />
+            <ComponentFormCheckBox title={t('keepMe')} name="keepMe" />
           </div>
           <div className="col-md-12">
             {state.isWrong ? (
               <p className="fw-bold text-danger">{t('wrongEmailOrPassword')}</p>
             ) : null}
-            {state.user?.statusId == StatusId.Banned ? (
+            {state.user?.statusId == StatusId.Banned && (
               <div>
                 <p className="fw-bold text-danger">
                   {t('yourAccountIsBanned')}
@@ -208,21 +186,21 @@ export default function PageLogin() {
                   </span>
                 </p>
               </div>
-            ) : null}
-            {state.user?.statusId == StatusId.Pending ? (
+            )}
+            {state.user?.statusId == StatusId.Pending && (
               <div>
                 <p className="fw-bold text-danger">
                   {t('yourAccountIsPending')}
                 </p>
               </div>
-            ) : null}
-            {state.user?.statusId == StatusId.Disabled ? (
+            )}
+            {state.user?.statusId == StatusId.Disabled && (
               <div>
                 <p className="fw-bold text-danger">
                   {t('yourAccountIsDisabled')}
                 </p>
               </div>
-            ) : null}
+            )}
           </div>
         </div>
       </ComponentForm>
@@ -236,7 +214,7 @@ export default function PageLogin() {
           <div className="col-lg-6 d-flex align-items-center justify-content-center login-half-form">
             <div className="auth-form-transparent text-left p-3">
               <h4 className="text-center">{t('loginPanel')}</h4>
-              {LoginForm()}
+              <LoginForm />
             </div>
           </div>
           <div className="col-lg-6 login-half-bg d-flex flex-row">

@@ -1,18 +1,18 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
-import {
-  ISettingGetParamService,
-  ISettingUpdateGeneralParamService,
-  ISettingUpdateECommerceParamService,
-  ISettingUpdateContactFormParamService,
-  ISettingUpdateSEOParamService,
-  ISettingUpdateSocialMediaParamService,
-  ISettingGetResultService,
-  ISettingUpdatePathParamService,
-} from 'types/services/setting.service';
+import { ISettingGetResultService } from 'types/services/setting.service';
 import { PathUtil } from '@utils/path.util';
 import { ApiRequest } from '@library/api/request';
+import {
+  ISettingGetSchema,
+  ISettingPutContactFormSchema,
+  ISettingPutECommerceSchema,
+  ISettingPutGeneralSchema,
+  ISettingPutPathSchema,
+  ISettingPutSEOSchema,
+  ISettingPutSocialMediaSchema,
+} from 'schemas/setting.schema';
 
-const get = (params: ISettingGetParamService, signal?: AbortSignal) => {
+const get = (params: ISettingGetSchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.SETTING_WITH.GET,
@@ -22,7 +22,7 @@ const get = (params: ISettingGetParamService, signal?: AbortSignal) => {
 };
 
 const updateGeneral = (
-  params: ISettingUpdateGeneralParamService,
+  params: ISettingPutGeneralSchema,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -33,10 +33,7 @@ const updateGeneral = (
   }).put();
 };
 
-const updateSeo = (
-  params: ISettingUpdateSEOParamService,
-  signal?: AbortSignal
-) => {
+const updateSeo = (params: ISettingPutSEOSchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.SETTING_WITH.UPDATE_SEO,
@@ -46,7 +43,7 @@ const updateSeo = (
 };
 
 const updateContactForm = (
-  params: ISettingUpdateContactFormParamService,
+  params: ISettingPutContactFormSchema,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -58,7 +55,7 @@ const updateContactForm = (
 };
 
 const updateSocialMedia = (
-  params: ISettingUpdateSocialMediaParamService,
+  params: ISettingPutSocialMediaSchema,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -70,7 +67,7 @@ const updateSocialMedia = (
 };
 
 const updateECommerce = (
-  params: ISettingUpdateECommerceParamService,
+  params: ISettingPutECommerceSchema,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -81,10 +78,7 @@ const updateECommerce = (
   }).put();
 };
 
-const updatePath = (
-  params: ISettingUpdatePathParamService,
-  signal?: AbortSignal
-) => {
+const updatePath = (params: ISettingPutPathSchema, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.SETTING_WITH.UPDATE_PATH,

@@ -1,6 +1,10 @@
 import React from 'react';
 import { VariableLibrary } from '@library/variable';
 import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { useAppSelector } from '@redux/hooks';
+import { useFormContext } from 'react-hook-form';
+import { ILanguageKeys } from 'types/constants/languageKeys';
 
 type IComponentState = {
   tags: string[];
@@ -21,33 +25,47 @@ type IComponentProps = {
 };
 
 export default function ComponentFormTags(props: IComponentProps) {
-  const [tags, setTags] = React.useState<string[]>(props.value);
-  const [currentTags, setCurrentTags] = React.useState<string>('');
+  const {
+    register,
+    formState: { errors },
+    setValue,
+  } = useFormContext();
+  const registeredInput = props.name && register(props.name);
+  const t = useAppSelector(selectTranslation);
 
+  const [tags, setTags] = React.useState<string[]>(props.value);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   useEffectAfterDidMount(() => {
     setTags(props.value);
   }, [props.value]);
 
-  const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCurrentTags(event.target.value);
-  };
-
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && !VariableLibrary.isEmpty(currentTags)) {
-      const newTag = currentTags.trim();
-
+    if (
+      event.key === 'Enter' &&
+      inputRef.current?.value &&
+      !VariableLibrary.isEmpty(inputRef.current?.value)
+    ) {
+      const newTag = inputRef.current?.value.trim();
       if (!tags.includes(newTag)) {
-        setTags([...tags, newTag]);
-        setCurrentTags('');
-        props.onChange(tags, props.name);
+        const newTags = [...tags, newTag];
+        setTags(newTags);
+        if (props.name) {
+          setValue(props.name, newTags);
+        }
+        inputRef.current.value = '';
+        props.onChange(newTags, props.name);
       }
     }
   };
 
   const onRemove = (tag: string) => {
-    setTags(tags.filter((item) => item != tag));
-    props.onChange(tags, props.name);
+    const newTags = tags.filter((item) => item != tag);
+    setTags(newTags);
+    if (props.name) {
+      setValue(props.name, newTags);
+    }
+    props.onChange(newTags, props.name);
   };
 
   const Tag = (props: { title: string }) => (
@@ -72,13 +90,20 @@ export default function ComponentFormTags(props: IComponentProps) {
         ))}
         <input
           type="text"
+          ref={inputRef}
           name={props.name}
-          value={currentTags}
-          onChange={(event) => onChange(event)}
           onKeyDown={(event) => onKeyDown(event)}
           placeholder={props.placeHolder}
         />
       </div>
+      {props.name &&
+        errors &&
+        errors[props.name] &&
+        errors[props.name]?.message && (
+          <div className="error">
+            {t(errors[props.name]?.message as ILanguageKeys)}
+          </div>
+        )}
     </div>
   );
-};
+}

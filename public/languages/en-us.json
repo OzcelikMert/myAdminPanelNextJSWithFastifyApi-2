@@ -1,4 +1,6 @@
 {
+  "fillCorrectly": "Please make sure you have entered it correctly!",
+  "inputIsRequired": "This area is required, it cannot be empty!",
   "warningAboutMissingLanguage": "This item has missing contents for this language!",
   "warningAboutMissingLanguagesWithVariable": "This item has some missing languages! The missing languages are: '{{missingLanguages}}'",
   "googleAnalyticURL": "Google Analytic URL",

@@ -1,4 +1,6 @@
 export const languageKeys = [
+  'fillCorrectly',
+  'inputIsRequiredWithVariable',
   'warningAboutMissingLanguage',
   'warningAboutMissingLanguagesWithVariable',
   'googleAnalyticURL',

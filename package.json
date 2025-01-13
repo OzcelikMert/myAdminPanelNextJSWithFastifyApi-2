@@ -18,6 +18,7 @@
     "src"
   ],
   "dependencies": {
+    "@hookform/resolvers": "^3.10.0",
     "@mdi/font": "^7.4.47",
     "@reduxjs/toolkit": "^2.5.0",
     "axios": "^1.7.7",
@@ -42,6 +43,7 @@
     "react-data-table-component-extensions": "^1.6.0",
     "react-datepicker": "^7.5.0",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
     "react-redux": "^9.2.0",
     "react-router": "^6.27.0",
     "react-scripts": "^5.0.1",
@@ -52,7 +54,8 @@
     "sass": "^1.83.0",
     "sass-loader": "^16.0.4",
     "styled-components": "^6.1.13",
-    "sweetalert2": "^11.14.4"
+    "sweetalert2": "^11.14.4",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

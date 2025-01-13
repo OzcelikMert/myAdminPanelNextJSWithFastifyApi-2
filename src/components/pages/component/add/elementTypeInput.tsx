@@ -6,6 +6,7 @@ import { ElementTypeId } from '@constants/elementTypes';
 import ComponentFormType from '@components/elements/form/input/type';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
+import { useFormContext } from 'react-hook-form';
 
 const ComponentThemeRichTextBox = dynamic(
   () => import('@components/theme/richTextBox'),
@@ -16,21 +17,30 @@ type IComponentState = {} & { [key: string]: any };
 
 type IComponentProps = {
   data: Partial<IComponentElementModel>;
-  onChange: (key: string, value: any) => void;
+  index: number
+  //onChange: (key: string, value: any) => void;
 };
 
 export default function ComponentPageComponentElementTypeInput(
   props: IComponentProps
 ) {
+  const contentInputName = `elements.${props.index}.contents.content`;
+  const urlInputName = `elements.${props.index}.contents.url`;
   const t = useAppSelector(selectTranslation);
+  const { register, formState: {errors}, setValue } = useFormContext();
+  const registeredInputContent = register(contentInputName);
+  const registeredInputURL = register(urlInputName);
+
+  const onChangeContent = (text: string) => {
+    setValue(contentInputName, text);
+  }
 
   const TextArea = () => {
     return (
       <ComponentFormType
         type={'textarea'}
         title={t('text')}
-        value={props.data.contents?.content}
-        onChange={(e) => props.onChange('content', e.target.value)}
+        name={contentInputName}
       />
     );
   };
@@ -39,7 +49,7 @@ export default function ComponentPageComponentElementTypeInput(
     return (
       <ComponentThemeRichTextBox
         value={props.data.contents?.content ?? ''}
-        onChange={(e) => props.onChange('content', e)}
+        onChange={(e) => onChangeContent(e)}
       />
     );
   };
@@ -48,7 +58,7 @@ export default function ComponentPageComponentElementTypeInput(
     return (
       <div>
         <ComponentThemeChooseImage
-          onSelected={(images) => props.onChange('content', images[0])}
+          onSelected={(images) => onChangeContent(images[0])}
           isMulti={false}
           isShowReviewImage={true}
           reviewImage={props.data.contents?.content}
@@ -65,16 +75,14 @@ export default function ComponentPageComponentElementTypeInput(
           <ComponentFormType
             type={'text'}
             title={t('text')}
-            value={props.data.contents?.content}
-            onChange={(e) => props.onChange('content', e.target.value)}
+            name={contentInputName}
           />
         </div>
         <div className="col-md-6 mt-3 mt-lg-0">
           <ComponentFormType
             type={'text'}
             title={t('url')}
-            value={props.data.contents?.url || ''}
-            onChange={(e) => props.onChange('url', e.target.value)}
+            name={urlInputName}
           />
         </div>
       </div>
@@ -86,8 +94,7 @@ export default function ComponentPageComponentElementTypeInput(
       <ComponentFormType
         type={'text'}
         title={t('text')}
-        value={props.data.contents?.content}
-        onChange={(e) => props.onChange('content', e.target.value)}
+        name={contentInputName}
       />
     );
   };
