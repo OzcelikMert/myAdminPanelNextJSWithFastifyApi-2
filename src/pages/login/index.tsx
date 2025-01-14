@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import ThemeInputType from '@components/elements/form/input/type';
 import { AuthService } from '@services/auth.service';
 import { IUserGetResultService } from 'types/services/user.service';
@@ -7,7 +7,6 @@ import { EndPoints } from '@constants/endPoints';
 import { StatusId } from '@constants/status';
 import { RouteUtil } from '@utils/route.util';
 import { LocalStorageUtil } from '@utils/localStorage.util';
-import { useFormReducer } from '@library/react/handles/form';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';

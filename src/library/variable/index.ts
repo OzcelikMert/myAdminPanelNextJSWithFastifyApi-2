@@ -42,7 +42,7 @@ export class VariableLibrary {
     return this.isSet(variable) ? variable() : default_value;
   }
 
-  static nestedObjectAssign(target: any, source: any) {
+  static nestedObjectAssign<T>(target: any, source: any): T {
     Object.keys(source).forEach((sourceKey) => {
       if (
         typeof target[sourceKey] !== 'undefined' &&
@@ -57,5 +57,18 @@ export class VariableLibrary {
       }
     });
     return target;
+  }
+
+  static getDataWithKey<T>(data: any, targetKey: string): T | undefined {
+    let value = data;
+    const keys = targetKey.split(".");
+    for(const key of keys) {
+      if(value[key]){
+        value = value[key];
+      }else {
+        return undefined;
+      }
+    }
+    return value;
   }
 }

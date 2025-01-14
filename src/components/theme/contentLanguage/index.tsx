@@ -1,15 +1,14 @@
 import React from 'react';
 import Image from 'next/image';
-import ComponentFormSelect, {
-  IThemeFormSelectData,
-} from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { PathUtil } from '@utils/path.util';
 import { ILanguageGetResultService } from 'types/services/language.service';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentToolTip from '@components/elements/tooltip';
-import ComponentForm from '@components/elements/form';
-import { useForm } from 'react-hook-form';
+import Select from 'react-select';
+import { ILanguageModel } from 'types/models/language.model';
+import { useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IOwnedLanguage = {
   langId: string;
@@ -26,11 +25,16 @@ export default function ComponentThemeContentLanguage(props: IComponentProps) {
   const t = useAppSelector(selectTranslation);
   const languages = useAppSelector((state) => state.settingState.languages);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
-  const selectedLanguage =
+  const selectedLanguageRef = React.useRef<ILanguageModel>(
     languages.findSingle('_id', props.selectedLangId) ??
-    languages.findSingle('_id', mainLangId);
+      languages.findSingle('_id', mainLangId)
+  );
 
-  const form = useForm();
+  useEffectAfterDidMount(() => {
+    selectedLanguageRef.current =
+      languages.findSingle('_id', props.selectedLangId) ??
+      languages.findSingle('_id', mainLangId);
+  }, [mainLangId, props.selectedLangId]);
 
   const checkMissingLanguage = (langId: string) => {
     const isMissing = props.ownedLanguages?.every((ownedLanguage) =>
@@ -53,7 +57,7 @@ export default function ComponentThemeContentLanguage(props: IComponentProps) {
   };
 
   const Item = (itemProp: IThemeFormSelectData<ILanguageGetResultService>) => {
-    const isSelectedItem = itemProp.value._id == selectedLanguage?._id;
+    const isSelectedItem = itemProp.value._id == selectedLanguageRef.current?._id;
     const isMissing =
       props.showMissingMessage && checkMissingLanguage(itemProp.value._id);
     return (
@@ -77,32 +81,35 @@ export default function ComponentThemeContentLanguage(props: IComponentProps) {
     );
   };
 
-  if (!selectedLanguage) {
+  if (!selectedLanguageRef.current) {
     return null;
   }
 
   const options = languages
-    .filter((item) => item._id != selectedLanguage._id)
+    .filter((item) => item._id != selectedLanguageRef.current?._id)
     .map((item) => ({
       label: item.title,
       value: item,
     }));
 
   return (
-    <ComponentForm hideSubmitButton formMethods={form}>
-      <ComponentFormSelect
-        title={t('contentLanguage')}
-        mainDivCustomClassName="content-language"
-        isSearchable={false}
-        isMulti={false}
-        formatOptionLabel={Item}
-        options={options}
-        value={{
-          label: selectedLanguage.title,
-          value: selectedLanguage,
-        }}
-        onChange={(item: any) => props.onChange(item)}
-      />
-    </ComponentForm>
+    <div className={`theme-input static content-language`}>
+      <span className="label">{t('contentLanguage')}</span>
+      <label className="field">
+        <Select
+          className="custom-select"
+          classNamePrefix="custom-select"
+          isSearchable={false}
+          isMulti={false}
+          formatOptionLabel={Item}
+          options={options}
+          value={{
+            label: selectedLanguageRef.current.title,
+            value: selectedLanguageRef.current,
+          }}
+          onChange={(item: any) => props.onChange(item)}
+        />
+      </label>
+    </div>
   );
 }

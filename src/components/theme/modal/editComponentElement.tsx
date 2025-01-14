@@ -10,14 +10,12 @@ import { IComponentElementModel } from 'types/models/component.model';
 import { ElementTypeId, elementTypes } from '@constants/elementTypes';
 import { useForm } from 'react-hook-form';
 import ComponentForm from '@components/elements/form';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormSelect, {
+  IThemeFormSelectData,
+} from '@components/elements/form/input/select';
 
-type IComponentState = {
-  isSubmitting: boolean;
-};
-
-const initialState: IComponentState = {
-  isSubmitting: false,
+type IComponentRefs = {
+  elementTypes: IThemeFormSelectData<ElementTypeId>[];
 };
 
 type IComponentFormState = {} & IComponentElementModel;
@@ -44,11 +42,7 @@ export default function ComponentThemeModalEditComponentElement(
   props: IComponentProps
 ) {
   const t = useAppSelector(selectTranslation);
-  const form = useForm<IComponentFormState>({ defaultValues: props.item });
-
-  const [isSubmitting, setIsSubmitting] = React.useState(
-    initialState.isSubmitting
-  );
+  const form = useForm<IComponentFormState>({ defaultValues: props.item});
 
   const getElementTypes = () => {
     return elementTypes.map((type) => ({
@@ -57,23 +51,24 @@ export default function ComponentThemeModalEditComponentElement(
     }));
   };
 
+  const elementTypeRef =
+    React.useRef<IComponentRefs['elementTypes']>(getElementTypes());
+
   useEffectAfterDidMount(() => {
     if (props.isShow) {
       form.reset(props.item);
     }
   }, [props.isShow, props.item]);
 
-  const onSubmit = async () => {
-    setIsSubmitting(true);
-    const submitResult = await props.onSubmit(form.getValues());
-    setIsSubmitting(false);
+  const onSubmit = async (data: IComponentFormState) => {
+    console.log(form.formState.validatingFields, form.formState.errors, form.formState.isSubmitSuccessful);
+    
+    const submitResult = await props.onSubmit(data);
     if (submitResult) {
       props.onHide();
     }
   };
-
-  const _elementTypes = getElementTypes();
-
+  
   return (
     <Modal className="form-modal" size="lg" centered show={props.isShow}>
       <Modal.Header className="border-bottom-0">
@@ -90,10 +85,15 @@ export default function ComponentThemeModalEditComponentElement(
         <div className="card">
           <div className="card-body">
             <h4 className="text-center">
-              {t('component')} - {t('edit')} - {props.item?.title}
+              {t('component')} - {t('edit')} -{' '}
+              {props.item?.title || t('newElement')}
             </h4>
             <div className="row mt-4">
-              <ComponentForm hideSubmitButton formMethods={form}>
+              <ComponentForm 
+              hideSubmitButton 
+              onSubmit={data => onSubmit(data)}
+              formMethods={form}
+              >
                 <div className="row mt-3">
                   <div className="col-md-12">
                     <ComponentFormType
@@ -117,10 +117,9 @@ export default function ComponentThemeModalEditComponentElement(
                       title={t('typeId')}
                       name="typeId"
                       placeholder={t('typeId')}
-                      options={_elementTypes}
-                      value={_elementTypes.filter(
-                        (item) => item.value == form.getValues().typeId
-                      )}
+                      options={elementTypeRef.current}
+                      value={elementTypeRef.current.findSingle("value", form.getValues().typeId)}
+                      required
                     />
                   </div>
                   <div className="col-md-12 mt-3">
@@ -136,13 +135,12 @@ export default function ComponentThemeModalEditComponentElement(
                 <div className="col-md-12 mt-4 text-end submit">
                   <div className="row">
                     <div className="col-md-6 text-start">
-                      {isSubmitting ? (
+                      {form.formState.isSubmitting ? (
                         <ComponentFormLoadingButton text={t('loading')} />
                       ) : (
                         <button
-                          type={'button'}
+                          type={'submit'}
                           className="btn btn-gradient-success align-start"
-                          onClick={() => onSubmit()}
                         >
                           {t('okay')}
                         </button>

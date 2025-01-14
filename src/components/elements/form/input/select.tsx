@@ -1,5 +1,7 @@
+import { useEffectAfterDidMount } from '@library/react/customHooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import Select, { ActionMeta } from 'react-select';
 import { StateManagerProps } from 'react-select/dist/declarations/src/useStateManager';
@@ -20,9 +22,14 @@ export default function ComponentFormSelect(props: IComponentProps) {
     register,
     formState: { errors },
     setValue,
+    watch
   } = useFormContext();
-  const registeredInput = props.name && register(props.name);
+  const registeredInput = props.name ? register(props.name) : undefined;
   const t = useAppSelector(selectTranslation);
+
+  if(props.name){
+    const watchName = watch(props.name);
+  }
 
   const onChange = (
     newValue: IThemeFormSelectData,
@@ -39,15 +46,14 @@ export default function ComponentFormSelect(props: IComponentProps) {
   return (
     <div className={`theme-input static ${props.mainDivCustomClassName}`}>
       <span className="label">{props.title}</span>
-      <div className="field">
+      <label className="field">
         <Select
           className="custom-select"
           classNamePrefix="custom-select"
-          {...(props.name && register(props.name))}
           {...props}
           onChange={(newValue, action) => onChange(newValue, action)}
         />
-      </div>
+      </label>
       {props.name &&
         errors &&
         errors[props.name] &&

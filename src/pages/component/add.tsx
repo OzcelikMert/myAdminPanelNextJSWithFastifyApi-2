@@ -313,7 +313,7 @@ export default function PageComponentAdd() {
     await RouteUtil.change({ path, router });
   };
 
-  const onSubmit = async (event: FormEvent) => {
+  const onSubmit = async (data: IComponentFormState) => {
     const params = form.getValues();
     console.log('onSubmit', params);
     return;
@@ -571,7 +571,7 @@ export default function PageComponentAdd() {
           <ComponentForm
             submitButtonText={t('save')}
             submitButtonSubmittingText={t('loading')}
-            onSubmit={(event) => onSubmit(event)}
+            onSubmit={(data) => onSubmit(data)}
             formMethods={form}
           >
             <div className="grid-margin stretch-card">

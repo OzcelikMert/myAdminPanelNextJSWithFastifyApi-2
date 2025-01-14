@@ -12,19 +12,23 @@ type IComponentProps = {
 
 export default function ComponentFormType(props: IComponentProps) {
   let input: React.ReactNode;
-
+  
   const t = useAppSelector(selectTranslation);
   const {
     register,
-    formState: { errors },
+    formState: { errors }
   } = useFormContext();
+
+  const idRef = React.useRef<string>(String.createId());
+  const registeredInput = (props.name && register(props.name, {required: props.required}));
 
   switch (props.type) {
     case `textarea`:
       input = (
         <textarea
+          id={idRef.current}
+          {...registeredInput}
           {...props}
-          {...(props.name && register(props.name))}
           className={`field textarea ${typeof props.className !== 'undefined' ? props.className : ``}`}
         >
           {props.value}
@@ -34,8 +38,9 @@ export default function ComponentFormType(props: IComponentProps) {
     default:
       input = (
         <input
+          id={idRef.current}
+          {...registeredInput}
           {...props}
-          {...(props.name && register(props.name))}
           className={`field ${typeof props.className !== 'undefined' ? props.className : ``}`}
           placeholder=" "
         />
@@ -46,9 +51,9 @@ export default function ComponentFormType(props: IComponentProps) {
   return (
     <div className="theme-input">
       {input}
-      <span className="label">
+      <label className="label" htmlFor={idRef.current}>
         {props.title} {props.titleElement}
-      </span>
+      </label>
       {props.name &&
         errors &&
         errors[props.name] &&

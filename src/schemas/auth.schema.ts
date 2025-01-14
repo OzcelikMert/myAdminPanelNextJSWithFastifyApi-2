@@ -3,7 +3,7 @@ import { boolean, object, string, z } from 'zod';
 const postSchema = object({
   email: string().min(1, "inputIsRequired").email("fillCorrectly"),
   password: string().min(1, "inputIsRequired"),
-  keepMe: boolean()
+  keepMe: boolean().optional()
 });
 
 export type IAuthPostSchema = z.infer<typeof postSchema>;
