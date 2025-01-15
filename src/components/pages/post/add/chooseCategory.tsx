@@ -11,7 +11,7 @@ import { PostTermTypeId } from '@constants/postTermTypes';
 import { StatusId } from '@constants/status';
 import ComponentToast from '@components/elements/toast';
 import { IUseFormReducer, useFormReducer } from '@library/react/handles/form';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
@@ -115,7 +115,7 @@ export default function ComponentPagePostAddChooseCategory(
               <h4 className="text-center">{t('category')}</h4>
               <div className="row mt-4">
                 <div className="col-md-12">
-                  <ComponentFormType
+                  <ComponentFormInput
                     title={`${t('title')}*`}
                     name="title"
                     type="text"

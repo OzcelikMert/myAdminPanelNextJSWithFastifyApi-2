@@ -1,5 +1,5 @@
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { IUseFormReducer } from '@library/react/handles/form';
@@ -78,7 +78,7 @@ export default function ComponentPagePostAddButton(props: IComponentProps) {
         >
           <div className="row mt-2">
             <div className="col-md-6">
-              <ComponentFormType
+              <ComponentFormInput
                 type={'text'}
                 title={t('title')}
                 value={props.propButton.title}
@@ -86,7 +86,7 @@ export default function ComponentPagePostAddButton(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mt-3 mt-lg-0">
-              <ComponentFormType
+              <ComponentFormInput
                 type={'text'}
                 title={t('url')}
                 value={props.propButton.url}

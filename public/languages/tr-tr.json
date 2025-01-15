@@ -1,6 +1,6 @@
 {
-  "fillCorrectly": "Lütfen doğru girdiğinizden emin olunuz!",
-  "inputIsRequired": "Bu alan gereklidir, boş bırakılamaz!",
+  "fillCorrectlyWithName": "Lütfen '{{0}}' alanını doğru bir şekilde girdiğinizden emin olunuz!",
+  "inputIsRequiredWithName": "'{{0}}' alanı gereklidir! Lütfen boş bırakmayınız.",
   "warningAboutMissingLanguage": "Bu öğenin içerikleri bu dilde girilmemiş!",
   "warningAboutMissingLanguagesWithVariable": "Bu öğe bazı eksik diller içeriyor! Eksik diller şunlardır: '{{missingLanguages}}'",
   "googleAnalyticURL": "Google Analytic URL",

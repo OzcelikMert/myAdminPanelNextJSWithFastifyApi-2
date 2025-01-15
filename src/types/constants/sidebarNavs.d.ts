@@ -1,10 +1,10 @@
-import { ILanguageKeys } from 'types/constants/languageKeys';
+import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
 import { IEndPointPermission } from 'types/constants/endPoint.permissions';
 
 export interface ISidebarPath {
   path: string;
   maskPath?: string;
-  title: ILanguageKeys;
+  title: IPanelLanguageKeys;
   icon?: string;
   state?: string;
   subPaths?: ISidebarPath[];

@@ -31,7 +31,7 @@ import {
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentForm from '@components/elements/form';
 import {
   useDidMount,
@@ -520,14 +520,14 @@ export default function PageComponentAdd() {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('title')}*`}
             name="title"
             type="text"
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType title={`${t('key')}*`} name="key" type="text" />
+          <ComponentFormInput title={`${t('key')}*`} name="key" type="text" />
         </div>
         <div className="col-md-7 mt-3">
           <ComponentFormSelect

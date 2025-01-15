@@ -1,5 +1,5 @@
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { useFormReducer } from '@library/react/handles/form';
@@ -82,7 +82,7 @@ export default function ComponentThemeModalUpdateItemRank(
             </h4>
             <div className="row mt-4">
               <div className="col-md-12">
-                <ComponentFormType
+                <ComponentFormInput
                   title={`${t('rank')}`}
                   name="newRank"
                   type="number"

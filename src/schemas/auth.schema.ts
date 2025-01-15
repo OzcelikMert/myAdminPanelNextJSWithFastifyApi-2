@@ -1,8 +1,8 @@
 import { boolean, object, string, z } from 'zod';
 
 const postSchema = object({
-  email: string().min(1, "inputIsRequired").email("fillCorrectly"),
-  password: string().min(1, "inputIsRequired"),
+  email: string().min(1).email(),
+  password: string().min(1),
   keepMe: boolean().optional()
 });
 

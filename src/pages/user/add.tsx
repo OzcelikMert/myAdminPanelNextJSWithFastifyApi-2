@@ -29,7 +29,7 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormReducer } from '@library/react/handles/form';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
@@ -437,7 +437,7 @@ export default function PageUserAdd() {
         {formState.statusId == StatusId.Banned ? (
           <div className="col-md-7 mb-3">
             <div className="mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={`${t('banDateEnd')}*`}
                 type="date"
                 name="banDateEnd"
@@ -446,7 +446,7 @@ export default function PageUserAdd() {
               />
             </div>
             <div className="mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('banComment')}
                 name="banComment"
                 type="textarea"
@@ -464,7 +464,7 @@ export default function PageUserAdd() {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('name')}*`}
             name="name"
             type="text"
@@ -474,7 +474,7 @@ export default function PageUserAdd() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('email')}*`}
             name="email"
             type="email"
@@ -484,7 +484,7 @@ export default function PageUserAdd() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('password')}*`}
             name="password"
             type="password"

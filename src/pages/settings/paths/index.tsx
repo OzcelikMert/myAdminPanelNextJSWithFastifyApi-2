@@ -16,7 +16,7 @@ import ComponentForm from '@components/elements/form';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   useDidMount,
@@ -235,7 +235,7 @@ export default function PageSettingsPaths() {
         >
           <div className="row">
             <div className="col-md-12">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 name={`paths.${index}.contents.asPath`}
                 title={t('pathMask')}
@@ -255,7 +255,7 @@ export default function PageSettingsPaths() {
         <ComponentFieldSet legend={t('newPath')}>
           <div className="row mt-3">
             <div className="col-md-12">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 name={`paths.${index}.title`}
                 title={t('title')}
@@ -264,7 +264,7 @@ export default function PageSettingsPaths() {
               />
             </div>
             <div className="col-md-12 mt-3">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 name={`paths.${index}.key`}
                 title={t('key')}
@@ -273,7 +273,7 @@ export default function PageSettingsPaths() {
               />
             </div>
             <div className="col-md-12 mt-3">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 name={`paths.${index}.path`}
                 title={t('path')}

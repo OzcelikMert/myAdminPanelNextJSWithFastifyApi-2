@@ -5,7 +5,7 @@ import ComponentTableToggleMenu, {
 } from '@components/elements/table/toggleMenu';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentTableFilterButton, {
   IComponentTableFilterButton,
 } from '../filterButton';

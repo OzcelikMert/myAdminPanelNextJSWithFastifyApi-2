@@ -1,8 +1,8 @@
-import { ILanguageKeys } from './languageKeys';
+import { IPanelLanguageKeys } from './panelLanguageKeys';
 import { PermissionGroupId } from '@constants/permissionGroups';
 
 export interface IPermissionGroup {
   id: PermissionGroupId;
   rank: number;
-  langKey: ILanguageKeys;
+  langKey: IPanelLanguageKeys;
 }

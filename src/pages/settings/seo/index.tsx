@@ -17,7 +17,7 @@ import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import ComponentForm from '@components/elements/form';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentFormTags from '@components/elements/form/input/tags';
 import {
   useDidMount,
@@ -237,7 +237,7 @@ export default function PageSettingsSEO() {
                 <div className="card-body">
                   <div className="row">
                     <div className="col-md-7 mb-3">
-                      <ComponentFormType
+                      <ComponentFormInput
                         title={t('websiteTitle')}
                         type="text"
                         name="seoContents.title"
@@ -248,7 +248,7 @@ export default function PageSettingsSEO() {
                       />
                     </div>
                     <div className="col-md-7 mb-3">
-                      <ComponentFormType
+                      <ComponentFormInput
                         title={t('websiteDescription')}
                         type="textarea"
                         name="seoContents.content"

@@ -16,7 +16,7 @@ import { EndPoints } from '@constants/endPoints';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { useFormReducer } from '@library/react/handles/form';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
@@ -200,7 +200,7 @@ export default function PageSettingsSocialMedia() {
         >
           <div className="row">
             <div className="col-md-12">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 title={t('url')}
                 name={`socialMedia.${index}.url`}
@@ -220,7 +220,7 @@ export default function PageSettingsSocialMedia() {
         <ComponentFieldSet legend={t('newSocialMedia')}>
           <div className="row mt-3">
             <div className="col-md-12">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 title={t('key')}
                 name={`socialMedia.${index}.key`}
@@ -229,7 +229,7 @@ export default function PageSettingsSocialMedia() {
               />
             </div>
             <div className="col-md-12 mt-3">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 title={t('title')}
                 name={`socialMedia.${index}.title`}

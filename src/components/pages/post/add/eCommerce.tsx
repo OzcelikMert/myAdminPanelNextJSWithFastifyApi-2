@@ -22,7 +22,7 @@ import { ImageSourceUtil } from '@utils/imageSource.util';
 import { StatusId } from '@constants/status';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormSelect from '@components/elements/form/input/select';
 import { useDidMount } from '@library/react/customHooks';
@@ -403,7 +403,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
         <div className="col-md-7">
           <div className="row">
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('taxIncludedPrice')}
                 name="eCommerce.pricing.taxIncluded"
                 type="number"
@@ -412,7 +412,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('taxExcludedPrice')}
                 name="eCommerce.pricing.taxExcluded"
                 type="number"
@@ -421,7 +421,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('taxRate')}
                 name="eCommerce.pricing.taxRate"
                 type="number"
@@ -430,7 +430,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('comparedPrice')}
                 name="eCommerce.pricing.compared"
                 type="number"
@@ -489,7 +489,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
         <div className="col-md-7">
           <div className="row">
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('sku')}
                 name="eCommerce.inventory.sku"
                 type="text"
@@ -498,7 +498,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('quantity')}
                 name="eCommerce.inventory.quantity"
                 disabled={
@@ -531,7 +531,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
         <div className="col-md-7">
           <div className="row">
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('width')}
                 name="eCommerce.shipping.width"
                 type="text"
@@ -540,7 +540,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('height')}
                 name="eCommerce.shipping.height"
                 type="text"
@@ -549,7 +549,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('depth')}
                 name="eCommerce.shipping.depth"
                 type="text"
@@ -558,7 +558,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('weight')}
                 name="eCommerce.shipping.weight"
                 type="text"
@@ -567,7 +567,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormType
+              <ComponentFormInput
                 title={t('shippingPrice')}
                 name="eCommerce.pricing.shipping"
                 type="number"
@@ -710,7 +710,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('title')}
                       name={`eCommerce.variations.${index}.itemId.contents.title`}
                       type="text"
@@ -719,7 +719,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('shortContent').toCapitalizeCase()}
                       type="textarea"
                       name={`eCommerce.variations.${index}.itemId.contents.shortContent`}
@@ -777,7 +777,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               <Tab eventKey="pricing" title={t('pricing')}>
                 <div className="row mb-4">
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('taxIncludedPrice')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.taxIncluded`}
                       type="number"
@@ -786,7 +786,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('taxExcludedPrice')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.taxExcluded`}
                       type="number"
@@ -795,7 +795,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('taxRate')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.taxRate`}
                       type="number"
@@ -804,7 +804,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('comparedPrice')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.compared`}
                       type="number"
@@ -817,7 +817,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               <Tab eventKey="inventory" title={t('inventory')}>
                 <div className="row mb-4">
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('sku')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.inventory.sku`}
                       type="text"
@@ -826,7 +826,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       disabled={
                         !variation.itemId.eCommerce.inventory?.isManageStock ||
                         false
@@ -853,7 +853,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               <Tab eventKey="shipping" title={t('shipping')}>
                 <div className="row mb-4">
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('width')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.shipping.width`}
                       type="text"
@@ -862,7 +862,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('height')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.shipping.height`}
                       type="text"
@@ -871,7 +871,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('depth')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.shipping.depth`}
                       type="text"
@@ -880,7 +880,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('weight')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.shipping.weight`}
                       type="text"
@@ -889,7 +889,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
                     />
                   </div>
                   <div className="col-md-6 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('shippingPrice')}
                       name={`eCommerce.variations.${index}.itemId.eCommerce.pricing.shipping`}
                       type="number"

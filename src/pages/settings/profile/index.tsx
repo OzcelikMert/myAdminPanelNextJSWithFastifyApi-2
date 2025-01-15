@@ -21,7 +21,7 @@ import { useFormReducer } from '@library/react/handles/form';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentForm from '@components/elements/form';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import {
@@ -328,7 +328,7 @@ export default function PageSettingsProfile() {
               >
                 <div className="row">
                   <div className="col-md-12 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={`${t('name')}*`}
                       name="name"
                       type="text"
@@ -338,7 +338,7 @@ export default function PageSettingsProfile() {
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={t('comment')}
                       name="comment"
                       type="textarea"
@@ -347,7 +347,7 @@ export default function PageSettingsProfile() {
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={`${t('phone')}`}
                       name="phone"
                       type="text"
@@ -356,7 +356,7 @@ export default function PageSettingsProfile() {
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title="Facebook"
                       name="facebook"
                       type="url"
@@ -365,7 +365,7 @@ export default function PageSettingsProfile() {
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title="Instagram"
                       name="instagram"
                       type="url"
@@ -374,7 +374,7 @@ export default function PageSettingsProfile() {
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title="Twitter"
                       name="twitter"
                       type="url"

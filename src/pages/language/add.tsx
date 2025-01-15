@@ -25,7 +25,7 @@ import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
 import {
@@ -266,7 +266,7 @@ export default function PageSettingLanguageAdd() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('rank')}*`}
             name="rank"
             type="number"
@@ -313,7 +313,7 @@ export default function PageSettingLanguageAdd() {
           </div>
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('title')}*`}
             name="title"
             type="text"
@@ -323,7 +323,7 @@ export default function PageSettingLanguageAdd() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('shortKey')}*`}
             name="shortKey"
             type="text"
@@ -333,7 +333,7 @@ export default function PageSettingLanguageAdd() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('locale')}*`}
             name="locale"
             type="text"

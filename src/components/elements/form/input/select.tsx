@@ -1,11 +1,11 @@
-import { useEffectAfterDidMount } from '@library/react/customHooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
+import { ZodUtil } from '@utils/zod.util';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import Select, { ActionMeta } from 'react-select';
 import { StateManagerProps } from 'react-select/dist/declarations/src/useStateManager';
-import { ILanguageKeys } from 'types/constants/languageKeys';
+import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
 
 export interface IThemeFormSelectData<T = any> {
   label: string;
@@ -22,12 +22,12 @@ export default function ComponentFormSelect(props: IComponentProps) {
     register,
     formState: { errors },
     setValue,
-    watch
+    watch,
   } = useFormContext();
   const registeredInput = props.name ? register(props.name) : undefined;
   const t = useAppSelector(selectTranslation);
 
-  if(props.name){
+  if (props.name) {
     const watchName = watch(props.name);
   }
 
@@ -59,7 +59,9 @@ export default function ComponentFormSelect(props: IComponentProps) {
         errors[props.name] &&
         errors[props.name]?.message && (
           <div className="error">
-            {t(errors[props.name]?.message as ILanguageKeys)}
+            {t(ZodUtil.getErrorText(errors[props.name]?.type), [
+              props.title ?? t(props.name as IPanelLanguageKeys),
+            ])}
           </div>
         )}
     </div>

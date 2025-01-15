@@ -1,9 +1,8 @@
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
-import { useFormReducer } from '@library/react/handles/form';
-import React, { Component, useEffect } from 'react';
+import React from 'react';
 import { Modal } from 'react-bootstrap';
 import { useEffectAfterDidMount } from '@library/react/customHooks';
 import { IComponentElementModel } from 'types/models/component.model';
@@ -42,7 +41,7 @@ export default function ComponentThemeModalEditComponentElement(
   props: IComponentProps
 ) {
   const t = useAppSelector(selectTranslation);
-  const form = useForm<IComponentFormState>({ defaultValues: props.item});
+  const form = useForm<IComponentFormState>({ defaultValues: props.item || initialFormState});
 
   const getElementTypes = () => {
     return elementTypes.map((type) => ({
@@ -96,7 +95,7 @@ export default function ComponentThemeModalEditComponentElement(
               >
                 <div className="row mt-3">
                   <div className="col-md-12">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={`${t('title')}*`}
                       name="title"
                       placeholder={t('title')}
@@ -105,7 +104,7 @@ export default function ComponentThemeModalEditComponentElement(
                     />
                   </div>
                   <div className="col-md-12 mt-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={`${t('key')}*`}
                       name="key"
                       type="text"
@@ -123,7 +122,7 @@ export default function ComponentThemeModalEditComponentElement(
                     />
                   </div>
                   <div className="col-md-12 mt-3">
-                    <ComponentFormType
+                    <ComponentFormInput
                       title={`${t('rank')}*`}
                       name="rank"
                       type="number"

@@ -3,7 +3,7 @@ import { AuthService } from '@services/auth.service';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import ComponentForm from '@components/elements/form';
-import ThemeInputType from '@components/elements/form/input/type';
+import ThemeInputType from '@components/elements/form/input/input';
 import { useFormReducer } from '@library/react/handles/form';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setSessionAuthState } from '@redux/features/sessionSlice';

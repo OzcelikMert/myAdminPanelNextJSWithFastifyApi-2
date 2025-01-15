@@ -3,7 +3,7 @@ import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import dynamic from 'next/dynamic';
 import { IComponentElementModel } from 'types/models/component.model';
 import { ElementTypeId } from '@constants/elementTypes';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormContext } from 'react-hook-form';
@@ -18,7 +18,6 @@ type IComponentState = {} & { [key: string]: any };
 type IComponentProps = {
   data: Partial<IComponentElementModel>;
   index: number
-  //onChange: (key: string, value: any) => void;
 };
 
 export default function ComponentPageComponentElementTypeInput(
@@ -37,7 +36,7 @@ export default function ComponentPageComponentElementTypeInput(
 
   const TextArea = () => {
     return (
-      <ComponentFormType
+      <ComponentFormInput
         type={'textarea'}
         title={t('text')}
         name={contentInputName}
@@ -72,14 +71,14 @@ export default function ComponentPageComponentElementTypeInput(
     return (
       <div className="row">
         <div className="col-md-6">
-          <ComponentFormType
+          <ComponentFormInput
             type={'text'}
             title={t('text')}
             name={contentInputName}
           />
         </div>
         <div className="col-md-6 mt-3 mt-lg-0">
-          <ComponentFormType
+          <ComponentFormInput
             type={'text'}
             title={t('url')}
             name={urlInputName}
@@ -91,7 +90,7 @@ export default function ComponentPageComponentElementTypeInput(
 
   const Text = () => {
     return (
-      <ComponentFormType
+      <ComponentFormInput
         type={'text'}
         title={t('text')}
         name={contentInputName}

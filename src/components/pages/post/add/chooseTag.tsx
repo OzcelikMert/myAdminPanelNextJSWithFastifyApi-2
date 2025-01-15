@@ -13,7 +13,7 @@ import {
 import { IUseFormReducer, useFormReducer } from '@library/react/handles/form';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
 import ComponentFormSelect from '@components/elements/form/input/select';
 import { useDidMount } from '@library/react/customHooks';
@@ -118,7 +118,7 @@ export default function ComponentPagePostAddChooseTag(props: IComponentProps) {
               <h4 className="text-center">{t('tag')}</h4>
               <div className="row mt-4">
                 <div className="col-md-12">
-                  <ComponentFormType
+                  <ComponentFormInput
                     title={`${t('title')}*`}
                     name="newItemTitle"
                     type="text"

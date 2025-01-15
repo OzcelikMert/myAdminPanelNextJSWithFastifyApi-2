@@ -17,7 +17,7 @@ import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentForm from '@components/elements/form';
 import {
   useDidMount,
@@ -215,7 +215,7 @@ export default function PageSettingsContactForms() {
         >
           <div className="row">
             <div className="col-md-12 mt-4">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 name={`contactForms.${index}.name`}
                 title={t('name')}
@@ -224,7 +224,7 @@ export default function PageSettingsContactForms() {
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormType
+              <ComponentFormInput
                 type="email"
                 name={`contactForms.${index}.targetEmail`}
                 title={t('targetEmail')}
@@ -233,7 +233,7 @@ export default function PageSettingsContactForms() {
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormType
+              <ComponentFormInput
                 type="email"
                 name={`contactForms.${index}.email`}
                 title={t('email')}
@@ -242,7 +242,7 @@ export default function PageSettingsContactForms() {
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormType
+              <ComponentFormInput
                 type="password"
                 name={`contactForms.${index}.password`}
                 title={t('password')}
@@ -251,7 +251,7 @@ export default function PageSettingsContactForms() {
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormType
+              <ComponentFormInput
                 type="text"
                 name={`contactForms.${index}.host`}
                 title={t('host')}
@@ -260,7 +260,7 @@ export default function PageSettingsContactForms() {
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormType
+              <ComponentFormInput
                 type="number"
                 name={`contactForms.${index}.port`}
                 title={t('port')}
@@ -295,7 +295,7 @@ export default function PageSettingsContactForms() {
         <ComponentFieldSet legend={t('newContactForm')}>
           <div className="row mt-3">
             <div className="col-md-12">
-              <ComponentFormType
+              <ComponentFormInput
                 title={`${t('title')}*`}
                 name="title"
                 type="text"
@@ -305,7 +305,7 @@ export default function PageSettingsContactForms() {
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormType
+              <ComponentFormInput
                 title={`${t('key')}*`}
                 name="key"
                 type="text"

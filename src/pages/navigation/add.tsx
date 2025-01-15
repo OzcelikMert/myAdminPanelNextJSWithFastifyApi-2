@@ -24,7 +24,7 @@ import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
 import {
@@ -363,7 +363,7 @@ export default function PageNavigationAdd() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={t('rank')}
             name="rank"
             type="number"
@@ -396,7 +396,7 @@ export default function PageNavigationAdd() {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('title')}*`}
             name="contents.title"
             type="text"
@@ -406,7 +406,7 @@ export default function PageNavigationAdd() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={`${t('url')}*`}
             name="contents.url"
             type="text"

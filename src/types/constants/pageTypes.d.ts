@@ -1,8 +1,8 @@
 import { PageTypeId } from '@constants/pageTypes';
-import { ILanguageKeys } from './languageKeys';
+import { IPanelLanguageKeys } from './panelLanguageKeys';
 
 export interface IPageType {
   id: PageTypeId;
   rank: number;
-  langKey: ILanguageKeys;
+  langKey: IPanelLanguageKeys;
 }

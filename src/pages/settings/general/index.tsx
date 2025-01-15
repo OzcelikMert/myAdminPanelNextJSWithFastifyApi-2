@@ -26,7 +26,7 @@ import { useEffect, useReducer, useState } from 'react';
 import { useFormReducer } from '@library/react/handles/form';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
@@ -231,7 +231,7 @@ export default function PageSettingsGeneral() {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={t('head')}
             name="head"
             type="textarea"
@@ -240,7 +240,7 @@ export default function PageSettingsGeneral() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={t('script')}
             name="script"
             type="textarea"
@@ -249,7 +249,7 @@ export default function PageSettingsGeneral() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={t('googleAnalyticURL')}
             name="googleAnalyticURL"
             type="url"
@@ -265,7 +265,7 @@ export default function PageSettingsGeneral() {
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={t('email')}
             name="contact.email"
             type="email"
@@ -274,7 +274,7 @@ export default function PageSettingsGeneral() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={t('phone')}
             name="contact.phone"
             type="tel"
@@ -283,7 +283,7 @@ export default function PageSettingsGeneral() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={t('address')}
             name="contact.address"
             type="text"
@@ -292,7 +292,7 @@ export default function PageSettingsGeneral() {
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormType
+          <ComponentFormInput
             title={t('addressMap')}
             name="contact.addressMap"
             type="text"

@@ -7,7 +7,7 @@ import { useFormReducer } from '@library/react/handles/form';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentForm from '@components/elements/form';
-import ComponentFormType from '@components/elements/form/input/type';
+import ComponentFormInput from '@components/elements/form/input/input';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   useDidMount,
@@ -116,7 +116,7 @@ export default function PageChangePassword() {
                 <div className="card-body">
                   <div className="row">
                     <div className="col-md-7 mb-3">
-                      <ComponentFormType
+                      <ComponentFormInput
                         title={`${t('password')}*`}
                         name="password"
                         type="password"
@@ -127,7 +127,7 @@ export default function PageChangePassword() {
                       />
                     </div>
                     <div className="col-md-7 mb-3">
-                      <ComponentFormType
+                      <ComponentFormInput
                         title={`${t('newPassword')}*`}
                         name="newPassword"
                         type="password"
@@ -138,7 +138,7 @@ export default function PageChangePassword() {
                       />
                     </div>
                     <div className="col-md-7 mb-3">
-                      <ComponentFormType
+                      <ComponentFormInput
                         title={`${t('confirmPassword')}*`}
                         name="confirmPassword"
                         type="password"

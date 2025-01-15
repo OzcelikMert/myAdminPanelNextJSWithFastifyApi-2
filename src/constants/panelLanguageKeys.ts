@@ -1,6 +1,6 @@
-export const languageKeys = [
-  'fillCorrectly',
-  'inputIsRequiredWithVariable',
+export const panelLanguageKeys = [
+  'fillCorrectlyWithName',
+  'inputIsRequiredWithName',
   'warningAboutMissingLanguage',
   'warningAboutMissingLanguagesWithVariable',
   'googleAnalyticURL',

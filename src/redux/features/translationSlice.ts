@@ -5,7 +5,7 @@ import {
   createSlice,
   PayloadAction,
 } from '@reduxjs/toolkit';
-import { ILanguageKeys } from 'types/constants/languageKeys';
+import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
 
 export interface ITranslationState {
   langCode: PanelLanguageCodes;
@@ -13,7 +13,7 @@ export interface ITranslationState {
   resources: { [key: string]: string };
 }
 
-export type ITranslationFunc = (key: ILanguageKeys) => string;
+export type ITranslationFunc = (key: IPanelLanguageKeys) => string;
 
 const initialState: ITranslationState = {
   langCode: PanelLanguageCodes.EnglishUS,
@@ -59,7 +59,7 @@ export const selectResources = (state: {
 export const selectTranslation = createSelector(
   [selectResources],
   (resources) =>
-    (key: ILanguageKeys, variables?: string[] | { [key: string]: string }): string => {
+    (key: IPanelLanguageKeys, variables?: string[] | { [key: string]: string }): string => {
       let item = resources[key] || key;
       if(variables){
         if(Array.isArray(variables)){

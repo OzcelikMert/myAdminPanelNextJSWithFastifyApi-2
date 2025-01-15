@@ -4,7 +4,8 @@ import { useEffectAfterDidMount } from '@library/react/customHooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { useFormContext } from 'react-hook-form';
-import { ILanguageKeys } from 'types/constants/languageKeys';
+import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
+import { ZodUtil } from '@utils/zod.util';
 
 type IComponentState = {
   tags: string[];
@@ -101,7 +102,9 @@ export default function ComponentFormTags(props: IComponentProps) {
         errors[props.name] &&
         errors[props.name]?.message && (
           <div className="error">
-            {t(errors[props.name]?.message as ILanguageKeys)}
+            {t(ZodUtil.getErrorText(errors[props.name]?.type), [
+              props.title ?? t(props.name as IPanelLanguageKeys),
+            ])}
           </div>
         )}
     </div>

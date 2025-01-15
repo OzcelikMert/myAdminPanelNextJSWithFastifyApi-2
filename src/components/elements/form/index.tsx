@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { useDidMount } from '@library/react/customHooks';
 import ComponentFormLoadingButton from './button/loadingButton';
 import { FormProvider, UseFormReturn } from 'react-hook-form';
 
@@ -22,6 +22,11 @@ type IComponentProps = {
 };
 
 export default function ComponentForm(props: IComponentProps) {
+  useDidMount(() => {
+    console.log("ComponentForm", "useDidMount", props.formMethods);
+  })
+
+
   const SubmitButton = () => {
     return (
       <button
