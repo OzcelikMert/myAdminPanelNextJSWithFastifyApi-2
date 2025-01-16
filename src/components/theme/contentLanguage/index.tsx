@@ -21,7 +21,7 @@ type IComponentProps = {
   showMissingMessage?: boolean;
 };
 
-export default function ComponentThemeContentLanguage(props: IComponentProps) {
+const ComponentThemeLanguageSelector = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
   const languages = useAppSelector((state) => state.settingState.languages);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
@@ -57,7 +57,8 @@ export default function ComponentThemeContentLanguage(props: IComponentProps) {
   };
 
   const Item = (itemProp: IThemeFormSelectData<ILanguageGetResultService>) => {
-    const isSelectedItem = itemProp.value._id == selectedLanguageRef.current?._id;
+    const isSelectedItem =
+      itemProp.value._id == selectedLanguageRef.current?._id;
     const isMissing =
       props.showMissingMessage && checkMissingLanguage(itemProp.value._id);
     return (
@@ -112,4 +113,6 @@ export default function ComponentThemeContentLanguage(props: IComponentProps) {
       </label>
     </div>
   );
-}
+});
+
+export default ComponentThemeLanguageSelector;

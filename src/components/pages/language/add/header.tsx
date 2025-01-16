@@ -1,0 +1,28 @@
+import React from 'react';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+
+type IComponentProps = {
+  onNavigatePage: () => void;
+};
+
+const ComponentPageLanguageAddHeader = React.memo((props: IComponentProps) => {
+  const t = useAppSelector(selectTranslation);
+
+  return (
+    <div className="col-md-3">
+      <div className="row">
+        <div className="col-6">
+          <button
+            className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
+            onClick={() => props.onNavigatePage()}
+          >
+            <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+export default ComponentPageLanguageAddHeader;

@@ -17,7 +17,7 @@ type IComponentProps<T = any> = {
   mainDivCustomClassName?: string;
 } & StateManagerProps<T>;
 
-export default function ComponentFormSelect(props: IComponentProps) {
+const ComponentFormSelect = React.memo((props: IComponentProps) => {
   const {
     register,
     formState: { errors },
@@ -66,4 +66,6 @@ export default function ComponentFormSelect(props: IComponentProps) {
         )}
     </div>
   );
-}
+});
+
+export default ComponentFormSelect;

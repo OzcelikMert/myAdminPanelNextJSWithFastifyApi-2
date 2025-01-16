@@ -1,20 +1,20 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
-import { INavigationGetResultService } from 'types/services/navigation.service';
+import {
+  INavigationAddParamService,
+  INavigationGetWithIdParamService,
+  INavigationDeleteManyParamService,
+  INavigationGetManyParamService,
+  INavigationUpdateStatusManyParamService,
+  INavigationGetResultService,
+  INavigationUpdateWithIdParamService,
+  INavigationUpdateRankWithIdParamService,
+} from 'types/services/navigation.service';
 import { PathUtil } from '@utils/path.util';
 import { ApiRequest } from '@library/api/request';
 import { INavigationModel } from 'types/models/navigation.model';
-import {
-  INavigationDeleteManySchema,
-  INavigationGetManySchema,
-  INavigationGetWithIdSchema,
-  INavigationPostSchema,
-  INavigationPutRankWithIdSchema,
-  INavigationPutStatusManySchema,
-  INavigationPutWithIdSchema,
-} from 'schemas/navigation.schema';
 
 const getWithId = (
-  params: INavigationGetWithIdSchema,
+  params: INavigationGetWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -25,7 +25,7 @@ const getWithId = (
   }).get<INavigationGetResultService>();
 };
 
-const getMany = (params: INavigationGetManySchema, signal?: AbortSignal) => {
+const getMany = (params: INavigationGetManyParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.NAVIGATION_WITH.GET,
@@ -34,7 +34,7 @@ const getMany = (params: INavigationGetManySchema, signal?: AbortSignal) => {
   }).get<INavigationGetResultService[]>();
 };
 
-const add = (params: INavigationPostSchema, signal?: AbortSignal) => {
+const add = (params: INavigationAddParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.NAVIGATION_WITH.ADD,
@@ -44,7 +44,7 @@ const add = (params: INavigationPostSchema, signal?: AbortSignal) => {
 };
 
 const updateWithId = (
-  params: INavigationPutWithIdSchema,
+  params: INavigationUpdateWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -56,7 +56,7 @@ const updateWithId = (
 };
 
 const updateRankWithId = (
-  params: INavigationPutRankWithIdSchema,
+  params: INavigationUpdateRankWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -68,7 +68,7 @@ const updateRankWithId = (
 };
 
 const updateStatusMany = (
-  params: INavigationPutStatusManySchema,
+  params: INavigationUpdateStatusManyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -80,7 +80,7 @@ const updateStatusMany = (
 };
 
 const deleteMany = (
-  params: INavigationDeleteManySchema,
+  params: INavigationDeleteManyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({

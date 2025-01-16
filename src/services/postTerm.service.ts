@@ -1,19 +1,22 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
-import { IPostTermGetResultService } from 'types/services/postTerm.service';
+import {
+  IPostTermGetResultService,
+  IPostTermUpdateStatusManyParamService,
+  IPostTermUpdateRankWithIdParamService,
+  IPostTermAddParamService,
+  IPostTermGetManyParamService,
+  IPostTermUpdateWithIdParamService,
+  IPostTermGetWithIdParamService,
+  IPostTermDeleteManyParamService,
+} from 'types/services/postTerm.service';
 import { ApiRequest } from '@library/api/request';
 import { PathUtil } from '@utils/path.util';
 import { IPostTermModel } from 'types/models/postTerm.model';
-import {
-  IPostTermDeleteManySchema,
-  IPostTermGetManySchema,
-  IPostTermGetWithIdSchema,
-  IPostTermPostSchema,
-  IPostTermPutRankWithIdSchema,
-  IPostTermPutStatusManySchema,
-  IPostTermPutWithIdSchema,
-} from 'schemas/postTerm.schema';
 
-const getWithId = (params: IPostTermGetWithIdSchema, signal?: AbortSignal) => {
+const getWithId = (
+  params: IPostTermGetWithIdParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_TERM_WITH.GET_WITH_ID(params._id),
@@ -22,7 +25,10 @@ const getWithId = (params: IPostTermGetWithIdSchema, signal?: AbortSignal) => {
   }).get<IPostTermGetResultService>();
 };
 
-const getMany = (params: IPostTermGetManySchema, signal?: AbortSignal) => {
+const getMany = (
+  params: IPostTermGetManyParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_TERM_WITH.GET,
@@ -31,7 +37,7 @@ const getMany = (params: IPostTermGetManySchema, signal?: AbortSignal) => {
   }).get<IPostTermGetResultService[]>();
 };
 
-const add = (params: IPostTermPostSchema, signal?: AbortSignal) => {
+const add = (params: IPostTermAddParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_TERM_WITH.ADD,
@@ -41,7 +47,7 @@ const add = (params: IPostTermPostSchema, signal?: AbortSignal) => {
 };
 
 const updateWithId = (
-  params: IPostTermPutWithIdSchema,
+  params: IPostTermUpdateWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -53,7 +59,7 @@ const updateWithId = (
 };
 
 const updateRankWithId = (
-  params: IPostTermPutRankWithIdSchema,
+  params: IPostTermUpdateRankWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -65,7 +71,7 @@ const updateRankWithId = (
 };
 
 const updateStatusMany = (
-  params: IPostTermPutStatusManySchema,
+  params: IPostTermUpdateStatusManyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -77,7 +83,7 @@ const updateStatusMany = (
 };
 
 const deleteMany = (
-  params: IPostTermDeleteManySchema,
+  params: IPostTermDeleteManyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({

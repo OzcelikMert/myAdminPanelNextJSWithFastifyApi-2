@@ -1,12 +1,12 @@
-import { FormEvent, useReducer, useRef, useState } from 'react';
+import { useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import ComponentFormSelect, {
+import {
   IThemeFormSelectData,
 } from '@components/elements/form/input/select';
 import {
-  IComponentElementGetResultService,
   IComponentGetResultService,
+  IComponentUpdateWithIdParamService,
 } from 'types/services/component.service';
 import { IComponentElementModel } from 'types/models/component.model';
 import { PermissionUtil } from '@utils/permission.util';
@@ -14,14 +14,10 @@ import { ComponentEndPointPermission } from '@constants/endPointPermissions/comp
 import { ElementTypeId, elementTypes } from '@constants/elementTypes';
 import { ComponentService } from '@services/component.service';
 import { EndPoints } from '@constants/endPoints';
-import { cloneDeepWith } from 'lodash';
 import { UserRoleId } from '@constants/userRoles';
-import ComponentPageComponentElementTypeInput from '@components/pages/component/add/elementTypeInput';
 import { ComponentTypeId, componentTypes } from '@constants/componentTypes';
 import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
-import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
-import { useFormReducer } from '@library/react/handles/form';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';
@@ -30,30 +26,23 @@ import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentForm from '@components/elements/form';
 import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
-import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ComponentSchema,
-  IComponentPutWithIdSchema,
 } from 'schemas/component.schema';
-import ComponentThemeModalEditComponentElement from '@components/theme/modal/editComponentElement';
+import ComponentPageComponentAddElementEditModal from '@components/pages/component/add/editElementModal';
+import ComponentPageComponentAddTabGeneral from '@components/pages/component/add/tabGeneral';
+import ComponentPageComponentAddTabElements from '@components/pages/component/add/tabElements';
+import ComponentPageComponentAddHeader from '@components/pages/component/add/header';
 
-type IHandleInputChangeParams = {
-  index: number;
-  key: string;
-  value: any;
-};
-
-type IComponentState = {
+export type IPageComponentAddState = {
   elementTypes: IThemeFormSelectData<ElementTypeId>[];
   componentTypes: IThemeFormSelectData<ComponentTypeId>[];
   mainTabActiveKey: string;
@@ -64,7 +53,7 @@ type IComponentState = {
   selectedElementId: string;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageComponentAddState = {
   elementTypes: [],
   componentTypes: [],
   mainTabActiveKey: 'general',
@@ -89,35 +78,35 @@ enum ActionTypes {
 type IAction =
   | {
       type: ActionTypes.SET_ELEMENT_TYPES;
-      payload: IComponentState['elementTypes'];
+      payload: IPageComponentAddState['elementTypes'];
     }
   | {
       type: ActionTypes.SET_COMPONENT_TYPES;
-      payload: IComponentState['componentTypes'];
+      payload: IPageComponentAddState['componentTypes'];
     }
   | {
       type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IComponentState['mainTabActiveKey'];
+      payload: IPageComponentAddState['mainTabActiveKey'];
     }
   | {
       type: ActionTypes.SET_IS_ITEM_LOADING;
-      payload: IComponentState['isItemLoading'];
+      payload: IPageComponentAddState['isItemLoading'];
     }
   | {
       type: ActionTypes.SET_ITEM;
-      payload: IComponentState['item'];
+      payload: IPageComponentAddState['item'];
     }
-  | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] }
+  | { type: ActionTypes.SET_LANG_ID; payload: IPageComponentAddState['langId'] }
   | {
       type: ActionTypes.SET_IS_SHOW_MODAL_EDIT_ELEMENT;
-      payload: IComponentState['isShowModalEditElement'];
+      payload: IPageComponentAddState['isShowModalEditElement'];
     }
   | {
       type: ActionTypes.SET_SELECTED_ELEMENT_ID;
-      payload: IComponentState['selectedElementId'];
+      payload: IPageComponentAddState['selectedElementId'];
     };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (state: IPageComponentAddState, action: IAction): IPageComponentAddState => {
   switch (action.type) {
     case ActionTypes.SET_ELEMENT_TYPES:
       return { ...state, elementTypes: action.payload };
@@ -140,13 +129,9 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentSelectedItemFormState = IComponentElementModel | undefined;
+export type IPageComponentAddFormState = IComponentUpdateWithIdParamService;
 
-const initialSelectedItemFormState: IComponentSelectedItemFormState = undefined;
-
-type IComponentFormState = IComponentPutWithIdSchema;
-
-const initialFormState: IComponentFormState = {
+const initialFormState: IPageComponentAddFormState = {
   _id: '',
   elements: [],
   key: '',
@@ -180,7 +165,7 @@ export default function PageComponentAdd() {
       ? 'general'
       : 'elements',
   });
-  const form = useForm<IComponentFormState>({
+  const form = useForm<IPageComponentAddFormState>({
     defaultValues: {
       ...initialFormState,
       _id: queries._id ?? '',
@@ -313,10 +298,8 @@ export default function PageComponentAdd() {
     await RouteUtil.change({ path, router });
   };
 
-  const onSubmit = async (data: IComponentFormState) => {
-    const params = form.getValues();
-    console.log('onSubmit', params);
-    return;
+  const onSubmit = async (data: IPageComponentAddFormState) => {
+    const params = data;
     const serviceResult = await (params._id
       ? ComponentService.updateWithId(params, abortController.signal)
       : ComponentService.add(params, abortController.signal));
@@ -330,7 +313,7 @@ export default function PageComponentAdd() {
       if (!params._id) {
         await navigatePage();
       } else {
-        const newItem: IComponentState['item'] = {
+        const newItem: IPageComponentAddState['item'] = {
           ...state.item!,
           elements:
             state.item?.elements.map((element) => {
@@ -391,165 +374,31 @@ export default function PageComponentAdd() {
     dispatch({ type: ActionTypes.SET_SELECTED_ELEMENT_ID, payload: _id });
   };
 
-  const onDelete = async (index: number) => {
-    const result = await Swal.fire({
-      title: t('deleteAction'),
-      html: `<b>'${form.getValues().elements[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
-      confirmButtonText: t('yes'),
-      cancelButtonText: t('no'),
-      icon: 'question',
-      showCancelButton: true,
-    });
-
-    if (result.isConfirmed) {
-      const newElements = form.getValues().elements;
-      newElements.splice(index, 1);
-      form.setValue('elements', newElements);
+  const onDelete = async (_id: string) => {
+    const newElements = form.getValues().elements;
+    const index = newElements.indexOfKey("_id", _id);
+    if(index > -1){
+      const result = await Swal.fire({
+        title: t('deleteAction'),
+        html: `<b>'${newElements[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+        confirmButtonText: t('yes'),
+        cancelButtonText: t('no'),
+        icon: 'question',
+        showCancelButton: true,
+      });
+  
+      if (result.isConfirmed) {
+        newElements.splice(index, 1);
+        form.setValue('elements', newElements);
+      }
     }
-  };
-
-  const Header = () => {
-    return (
-      <div className="col-md-12">
-        <div className="row">
-          <div className="col-md-6 align-content-center">
-            <div className="row">
-              <div className="col-md-3 mb-md-0 mb-4">
-                <button
-                  className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
-                  onClick={() => navigatePage()}
-                >
-                  <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6">
-            <ComponentThemeContentLanguage
-              onChange={(item) => onChangeLanguage(item.value._id)}
-              selectedLangId={state.langId}
-              showMissingMessage
-              ownedLanguages={state.item?.elements.map(
-                (item) => item.alternates ?? []
-              )}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const ComponentElement = (
-    elementProps: IComponentElementGetResultService,
-    index: number
-  ) => {
-    return (
-      <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
-        <ComponentFieldSet
-          legend={`${elementProps.title} ${PermissionUtil.checkPermissionRoleRank(sessionAuth!.user.roleId, UserRoleId.SuperAdmin) ? `(#${elementProps.key})` : ''}`}
-          legendElement={
-            PermissionUtil.checkPermissionRoleRank(
-              sessionAuth!.user.roleId,
-              UserRoleId.SuperAdmin
-            ) ? (
-              <span>
-                <i
-                  className="mdi mdi-pencil-box text-warning fs-1 cursor-pointer ms-2"
-                  onClick={() => onEdit(elementProps._id)}
-                ></i>
-                <i
-                  className="mdi mdi-minus-box text-danger fs-1 cursor-pointer ms-2"
-                  onClick={() => onDelete(index)}
-                ></i>
-              </span>
-            ) : undefined
-          }
-        >
-          <div className="row">
-            <div className="col-md">
-              <ComponentPageComponentElementTypeInput
-                data={elementProps}
-                index={index}
-              />
-            </div>
-            {
-              <ComponentThemeToolTipMissingLanguages
-                itemLanguages={elementProps.alternates ?? []}
-                div={true}
-                divClass="col-md-1"
-              />
-            }
-          </div>
-        </ComponentFieldSet>
-      </div>
-    );
-  };
-
-  const TabElements = () => {
-    return (
-      <div className="row mb-3">
-        <div className="col-md-7">
-          <div className="row">
-            {form
-              .getValues()
-              .elements?.orderBy('rank', 'asc')
-              .map((item: any, index) => ComponentElement(item, index))}
-          </div>
-        </div>
-        {PermissionUtil.checkPermissionRoleRank(
-          sessionAuth!.user.roleId,
-          UserRoleId.SuperAdmin
-        ) ? (
-          <div
-            className={`col-md-7 text-start ${form.getValues().elements.length > 0 ? 'mt-4' : ''}`}
-          >
-            <button
-              type={'button'}
-              className="btn btn-gradient-success btn-lg"
-              onClick={() => onCreateElement()}
-            >
-              + {t('addNew')}
-            </button>
-          </div>
-        ) : null}
-      </div>
-    );
-  };
-
-  const TabGeneral = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={`${t('title')}*`}
-            name="title"
-            type="text"
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput title={`${t('key')}*`} name="key" type="text" />
-        </div>
-        <div className="col-md-7 mt-3">
-          <ComponentFormSelect
-            title={`${t('typeId')}*`}
-            name="typeId"
-            placeholder={t('typeId')}
-            options={state.componentTypes}
-            value={state.componentTypes.findSingle(
-              'value',
-              form.getValues().typeId
-            )}
-          />
-        </div>
-      </div>
-    );
   };
 
   const selectedElement = form.getValues().elements.findSingle("_id", state.selectedElementId) as IComponentElementModel;
 
   return isPageLoading ? null : (
     <div className="page-post">
-      <ComponentThemeModalEditComponentElement
+      <ComponentPageComponentAddElementEditModal
         isShow={state.isShowModalEditElement}
         onHide={() =>
           dispatch({
@@ -561,7 +410,11 @@ export default function PageComponentAdd() {
         item={selectedElement}
       />
       <div className="row mb-3">
-        <Header />
+        <ComponentPageComponentAddHeader
+          onChangeLanguage={_id => onChangeLanguage(_id)}
+          onNavigatePage={() => navigatePage()}
+          state={state}
+        />
       </div>
       <div className="row position-relative">
         {state.isItemLoading ? (
@@ -594,11 +447,20 @@ export default function PageComponentAdd() {
                         UserRoleId.SuperAdmin
                       ) ? (
                         <Tab eventKey="general" title={t('general')}>
-                          <TabGeneral />
+                          <ComponentPageComponentAddTabGeneral
+                            state={state}
+                            form={form}
+                          />
                         </Tab>
                       ) : null}
                       <Tab eventKey="elements" title={t('elements')}>
-                        <TabElements />
+                        <ComponentPageComponentAddTabElements
+                          form={form}
+                          state={state}
+                          onCreateNewElement={() => onCreateElement()}
+                          onDelete={_id => onDelete(_id)}
+                          onEdit={_id => onEdit(_id)}
+                        />
                       </Tab>
                     </Tabs>
                   </div>

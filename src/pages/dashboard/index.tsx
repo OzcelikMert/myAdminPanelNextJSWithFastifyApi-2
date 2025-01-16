@@ -7,9 +7,7 @@ import {
   IViewGetNumberResultService,
   IViewGetStatisticsResultService,
 } from 'types/services/view.service';
-import ComponentDataTable from '@components/elements/table/dataTable';
 import Image from 'next/image';
-import ComponentChartArea from '@components/elements/charts/area';
 import ComponentThemeBadgeStatus from '@components/theme/badge/status';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
 import { PostUtil } from '@utils/post.util';
@@ -30,10 +28,13 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import ComponentPageDashboardLastPosts from '@components/pages/dashboard/lastPosts';
+import ComponentPageDashboardReportOne from '@components/pages/dashboard/reportOne';
+import ComponentPageDashboardReportTwo from '@components/pages/dashboard/reportTwo';
 
 const WorldMap = dynamic(() => import('react-svg-worldmap'), { ssr: false });
 
-type IComponentState = {
+export type IPageDashboardState = {
   lastPosts: IPostGetManyResultService[];
   viewsWithNumber: IViewGetNumberResultService;
   viewsWithStatistics: IViewGetStatisticsResultService;
@@ -41,7 +42,7 @@ type IComponentState = {
   settings: ISettingGetResultService;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageDashboardState = {
   lastPosts: [],
   viewsWithNumber: {
     liveTotal: 0,
@@ -65,22 +66,31 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_LAST_POSTS; payload: IComponentState['lastPosts'] }
+  | {
+      type: ActionTypes.SET_LAST_POSTS;
+      payload: IPageDashboardState['lastPosts'];
+    }
   | {
       type: ActionTypes.SET_VIEWS_WITH_NUMBER;
-      payload: IComponentState['viewsWithNumber'];
+      payload: IPageDashboardState['viewsWithNumber'];
     }
   | {
       type: ActionTypes.SET_VIEWS_WITH_STATISTICS;
-      payload: IComponentState['viewsWithStatistics'];
+      payload: IPageDashboardState['viewsWithStatistics'];
     }
   | {
       type: ActionTypes.SET_WORLD_MAP_SIZE;
-      payload: IComponentState['worldMapSize'];
+      payload: IPageDashboardState['worldMapSize'];
     }
-  | { type: ActionTypes.SET_SETTINGS; payload: IComponentState['settings'] };
+  | {
+      type: ActionTypes.SET_SETTINGS;
+      payload: IPageDashboardState['settings'];
+    };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (
+  state: IPageDashboardState,
+  action: IAction
+): IPageDashboardState => {
   switch (action.type) {
     case ActionTypes.SET_LAST_POSTS:
       return { ...state, lastPosts: action.payload };
@@ -207,7 +217,7 @@ export default function PageDashboard() {
     }
   };
 
-  const setWorldMapSize = (size: IComponentState['worldMapSize']) => {
+  const setWorldMapSize = (size: IPageDashboardState['worldMapSize']) => {
     dispatch({
       type: ActionTypes.SET_WORLD_MAP_SIZE,
       payload: size,
@@ -237,7 +247,7 @@ export default function PageDashboard() {
   };
 
   const getLastPostTableColumns = (): TableColumn<
-    IComponentState['lastPosts'][0]
+    IPageDashboardState['lastPosts'][0]
   >[] => {
     return [
       {
@@ -294,194 +304,17 @@ export default function PageDashboard() {
     ];
   };
 
-  const Reports = () => {
-    return (
-      <div className="col-12 grid-margin">
-        <div className="card card-statistics">
-          <div className="row">
-            <div className="card-col col-xl-3 col-lg-3 col-md-3 col-6">
-              <div className="card-body">
-                <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row">
-                  <i className="mdi mdi-account-multiple-outline text-primary ms-0 me-sm-4 icon-lg"></i>
-                  <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">
-                      {t('currentVisitors')}
-                    </p>
-                    <div className="fluid-container">
-                      <h3 className="mb-0 font-weight-medium text-dark">
-                        {state.viewsWithNumber.liveTotal}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="card-col col-xl-3 col-lg-3 col-md-3 col-6">
-              <div className="card-body">
-                <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row">
-                  <i className="mdi mdi-target text-primary ms-0 me-sm-4 icon-lg"></i>
-                  <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">
-                      {t('dailyAverageVisitors')}
-                    </p>
-                    <div className="fluid-container">
-                      <h3 className="mb-0 font-weight-medium text-dark">
-                        {state.viewsWithNumber.averageTotal}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="card-col col-xl-3 col-lg-3 col-md-3 col-6">
-              <div className="card-body">
-                <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row">
-                  <i className="mdi mdi-calendar-week text-primary ms-0 me-sm-4 icon-lg"></i>
-                  <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">
-                      {t('weeklyTotalVisitors')}
-                    </p>
-                    <div className="fluid-container">
-                      <h3 className="mb-0 font-weight-medium text-dark">
-                        {state.viewsWithNumber.weeklyTotal}
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="card-col col-xl-3 col-lg-3 col-md-3 col-6">
-              <div className="card-body">
-                <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row">
-                  <i className="mdi mdi-google-analytics text-primary ms-0 me-sm-4 icon-lg"></i>
-                  <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">
-                      {t('lifeTimeVisitors')}
-                    </p>
-                    <div className="fluid-container">
-                      <h3 className="mb-0 font-weight-medium text-dark">
-                        <a
-                          target="_blank"
-                          className="text-info fs-6 text-decoration-none"
-                          href={
-                            state.settings.googleAnalyticURL ??
-                            'javascript:void(0);'
-                          }
-                        >
-                          {t('clickToSee')}
-                        </a>
-                      </h3>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const ReportTwo = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body">
-              <div className="clearfix mb-4">
-                <h4 className="card-title float-start">
-                  {t('weeklyVisitorsStatistics')}
-                </h4>
-              </div>
-              <div className="chart-container">
-                <ComponentChartArea
-                  toolTipLabel={t('visitors')}
-                  data={state.viewsWithStatistics.day.map((view) => view.total)}
-                  labels={state.viewsWithStatistics.day.map((view) => view._id)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-5 grid-margin stretch-card">
-          <div className="card">
-            <div className="card-body overflow-auto">
-              <h4 className="card-title">
-                {t('weeklyVisitorsStatistics')} ({t('worldMap')})
-              </h4>
-              <div className="row d-none d-lg-block">
-                <div className="col-md-12 text-end">
-                  <button
-                    className="btn btn-gradient-success btn-sm"
-                    onClick={() =>
-                      setWorldMapSize(state.worldMapSize == 'xl' ? 'xxl' : 'xl')
-                    }
-                  >
-                    <i className="fa fa-search-plus"></i>
-                  </button>
-                  <button
-                    className="btn btn-gradient-danger btn-sm"
-                    onClick={() =>
-                      setWorldMapSize(state.worldMapSize == 'xxl' ? 'xl' : 'lg')
-                    }
-                  >
-                    <i className="fa fa-search-minus"></i>
-                  </button>
-                </div>
-              </div>
-              <div className="row overflow-auto">
-                <WorldMap
-                  color="#b66dff"
-                  borderColor="var(--theme-worldmap-stroke-bg)"
-                  frameColor="red"
-                  strokeOpacity={0.4}
-                  backgroundColor="var(--theme-bg)"
-                  value-suffix="people"
-                  size={state.worldMapSize}
-                  data={state.viewsWithStatistics.country.map((view) => ({
-                    country: (
-                      view._id || window.navigator.language.slice(3)
-                    ).toLowerCase(),
-                    value: view.total,
-                  }))}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const LastPost = () => {
-    return (
-      <div className="row page-post">
-        <div className="col-12 grid-margin">
-          <div className="card">
-            <div className="card-body">
-              <h4 className="card-title">{t('lastPosts')}</h4>
-              <div className="table-post">
-                <ComponentDataTable
-                  columns={getLastPostTableColumns()}
-                  data={state.lastPosts}
-                  i18={{
-                    search: t('search'),
-                    noRecords: t('noRecords'),
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return isPageLoading ? null : (
     <div className="page-dashboard">
-      {Reports()}
-      {ReportTwo()}
-      {LastPost()}
+      <ComponentPageDashboardReportOne state={state} />
+      <ComponentPageDashboardReportTwo
+        state={state}
+        setWorldMapSize={(size) => setWorldMapSize(size)}
+      />
+      <ComponentPageDashboardLastPosts
+        columns={getLastPostTableColumns()}
+        state={state}
+      />
     </div>
   );
 }

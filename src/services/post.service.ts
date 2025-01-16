@@ -1,26 +1,24 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
 import {
+  IPostAddParamService,
+  IPostDeleteManyParamService,
+  IPostGetCountParamService,
+  IPostGetManyParamService,
   IPostGetManyResultService,
+  IPostGetWithIdParamService,
   IPostGetResultService,
+  IPostUpdateStatusManyParamService,
+  IPostUpdateWithIdParamService,
+  IPostUpdateRankWithIdParamService,
+  IPostAddProductParamService,
+  IPostUpdateProductWithIdParamService,
+  IPostDeleteProductManyParamService,
 } from 'types/services/post.service';
 import { ApiRequest } from '@library/api/request';
 import { PathUtil } from '@utils/path.util';
 import { IPostModel } from 'types/models/post.model';
-import {
-  IPostDeleteManySchema,
-  IPostDeleteProductManySchema,
-  IPostGetCountSchema,
-  IPostGetManySchema,
-  IPostGetWithIdSchema,
-  IPostPostProductSchema,
-  IPostPostSchema,
-  IPostPutProductWithIdSchema,
-  IPostPutRankWithIdSchema,
-  IPostPutStatusManySchema,
-  IPostPutWithIdSchema,
-} from 'schemas/post.schema';
 
-const getWithId = (params: IPostGetWithIdSchema, signal?: AbortSignal) => {
+const getWithId = (params: IPostGetWithIdParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.GET_WITH_ID(params._id),
@@ -29,7 +27,7 @@ const getWithId = (params: IPostGetWithIdSchema, signal?: AbortSignal) => {
   }).get<IPostGetResultService>();
 };
 
-const getMany = (params: IPostGetManySchema, signal?: AbortSignal) => {
+const getMany = (params: IPostGetManyParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.GET,
@@ -38,7 +36,7 @@ const getMany = (params: IPostGetManySchema, signal?: AbortSignal) => {
   }).get<IPostGetManyResultService[]>();
 };
 
-const getCount = (params: IPostGetCountSchema, signal?: AbortSignal) => {
+const getCount = (params: IPostGetCountParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.GET_COUNT,
@@ -47,7 +45,7 @@ const getCount = (params: IPostGetCountSchema, signal?: AbortSignal) => {
   }).get<number>();
 };
 
-const add = (params: IPostPostSchema, signal?: AbortSignal) => {
+const add = (params: IPostAddParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.ADD,
@@ -56,7 +54,7 @@ const add = (params: IPostPostSchema, signal?: AbortSignal) => {
   }).post<IPostModel>();
 };
 
-const addProduct = (params: IPostPostProductSchema, signal?: AbortSignal) => {
+const addProduct = (params: IPostAddProductParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.ADD_PRODUCT,
@@ -65,7 +63,7 @@ const addProduct = (params: IPostPostProductSchema, signal?: AbortSignal) => {
   }).post<IPostModel>();
 };
 
-const updateWithId = (params: IPostPutWithIdSchema, signal?: AbortSignal) => {
+const updateWithId = (params: IPostUpdateWithIdParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.UPDATE_WITH_ID(params._id),
@@ -75,7 +73,7 @@ const updateWithId = (params: IPostPutWithIdSchema, signal?: AbortSignal) => {
 };
 
 const updateProductWithId = (
-  params: IPostPutProductWithIdSchema,
+  params: IPostUpdateProductWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -87,7 +85,7 @@ const updateProductWithId = (
 };
 
 const updateRankWithId = (
-  params: IPostPutRankWithIdSchema,
+  params: IPostUpdateRankWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -99,7 +97,7 @@ const updateRankWithId = (
 };
 
 const updateStatusMany = (
-  params: IPostPutStatusManySchema,
+  params: IPostUpdateStatusManyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -110,7 +108,7 @@ const updateStatusMany = (
   }).put();
 };
 
-const deleteMany = (params: IPostDeleteManySchema, signal?: AbortSignal) => {
+const deleteMany = (params: IPostDeleteManyParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.DELETE,
@@ -120,7 +118,7 @@ const deleteMany = (params: IPostDeleteManySchema, signal?: AbortSignal) => {
 };
 
 const deleteProductMany = (
-  params: IPostDeleteProductManySchema,
+  params: IPostDeleteProductManyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({

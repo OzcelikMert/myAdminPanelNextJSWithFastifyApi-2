@@ -1,17 +1,20 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
-import { ILanguageGetResultService } from 'types/services/language.service';
+import {
+  ILanguageAddParamService,
+  ILanguageGetManyParamService,
+  ILanguageGetResultService,
+  ILanguageGetWithIdParamService,
+  ILanguageUpdateRankWithIdParamService,
+  ILanguageUpdateWithIdParamService,
+} from 'types/services/language.service';
 import { ApiRequest } from '@library/api/request';
 import { PathUtil } from '@utils/path.util';
 import { ILanguageModel } from 'types/models/language.model';
-import {
-  ILanguageGetManySchema,
-  ILanguageGetWithIdSchema,
-  ILanguagePostSchema,
-  ILanguagePutRankWithIdSchema,
-  ILanguagePutWithIdSchema,
-} from 'schemas/language.schema';
 
-const getWithId = (params: ILanguageGetWithIdSchema, signal?: AbortSignal) => {
+const getWithId = (
+  params: ILanguageGetWithIdParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.LANGUAGE_WITH.GET_WITH_ID(params._id),
@@ -20,7 +23,10 @@ const getWithId = (params: ILanguageGetWithIdSchema, signal?: AbortSignal) => {
   }).get<ILanguageGetResultService>();
 };
 
-const getMany = (params: ILanguageGetManySchema, signal?: AbortSignal) => {
+const getMany = (
+  params: ILanguageGetManyParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.LANGUAGE_WITH.GET,
@@ -38,7 +44,7 @@ const getFlags = (params: {}, signal?: AbortSignal) => {
   }).get<string[]>();
 };
 
-const add = (params: ILanguagePostSchema, signal?: AbortSignal) => {
+const add = (params: ILanguageAddParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.LANGUAGE_WITH.ADD,
@@ -48,7 +54,7 @@ const add = (params: ILanguagePostSchema, signal?: AbortSignal) => {
 };
 
 const updateWithId = (
-  params: ILanguagePutWithIdSchema,
+  params: ILanguageUpdateWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -60,7 +66,7 @@ const updateWithId = (
 };
 
 const updateRankWithId = (
-  params: ILanguagePutRankWithIdSchema,
+  params: ILanguageUpdateRankWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({

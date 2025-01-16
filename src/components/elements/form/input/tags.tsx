@@ -25,17 +25,22 @@ type IComponentProps = {
   placeHolder?: string;
 };
 
-export default function ComponentFormTags(props: IComponentProps) {
+const ComponentFormTags = React.memo((props: IComponentProps) => {
   const {
     register,
     formState: { errors },
     setValue,
+    watch
   } = useFormContext();
   const registeredInput = props.name && register(props.name);
   const t = useAppSelector(selectTranslation);
 
-  const [tags, setTags] = React.useState<string[]>(props.value);
+  const [tags, setTags] = React.useState<string[]>(props.value ?? initialState.tags);
   const inputRef = React.useRef<HTMLInputElement>(null);
+
+  if (props.name) {
+    const watchName = watch(props.name);
+  }
 
   useEffectAfterDidMount(() => {
     setTags(props.value);
@@ -109,4 +114,6 @@ export default function ComponentFormTags(props: IComponentProps) {
         )}
     </div>
   );
-}
+});
+
+export default ComponentFormTags;

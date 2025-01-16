@@ -127,60 +127,6 @@ const schema = object({
   similarItems: array(string().min(1)).optional(),
 });
 
-const getWithIdSchema = object({
-  _id: string().min(1),
-  typeId: ZodUtil.convertToNumber(z.nativeEnum(PostTypeId)),
-  langId: string().optional(),
-  pageTypeId: ZodUtil.convertToNumber(z.nativeEnum(PageTypeId)).optional(),
-  statusId: ZodUtil.convertToNumber(z.nativeEnum(StatusId)).optional(),
-});
-
-const getManySchema = object({
-  typeId: ZodUtil.convertToArray(
-    array(ZodUtil.convertToNumber(z.nativeEnum(PostTypeId)))
-  ).optional(),
-  _id: ZodUtil.convertToArray(array(string().min(1))).optional(),
-  pageTypeId: ZodUtil.convertToArray(
-    array(ZodUtil.convertToNumber(z.nativeEnum(PageTypeId)))
-  ).optional(),
-  langId: string().optional(),
-  title: string().optional(),
-  statusId: ZodUtil.convertToNumber(z.nativeEnum(StatusId)).optional(),
-  authorId: string().optional(),
-  count: z.coerce.number().optional(),
-  page: z.coerce.number().optional(),
-  sortTypeId: ZodUtil.convertToNumber(z.nativeEnum(PostSortTypeId)).optional(),
-  categories: ZodUtil.convertToArray(array(string().min(1))).optional(),
-  tags: ZodUtil.convertToArray(array(string().min(1))).optional(),
-  ignorePostId: ZodUtil.convertToArray(array(string().min(1))).optional(),
-});
-
-const getWithURLSchema = object({
-  url: string().min(1),
-  typeId: ZodUtil.convertToNumber(z.nativeEnum(PostTypeId)),
-  langId: string().optional(),
-  pageTypeId: ZodUtil.convertToNumber(z.nativeEnum(PageTypeId)).optional(),
-  statusId: ZodUtil.convertToNumber(z.nativeEnum(StatusId)).optional(),
-});
-
-const getPrevNextWithIdSchema = object({
-  _id: string().min(1),
-  typeId: ZodUtil.convertToNumber(z.nativeEnum(PostTypeId)),
-  statusId: ZodUtil.convertToNumber(z.nativeEnum(StatusId)).optional(),
-  langId: string().optional(),
-  authorId: string().optional(),
-  categories: ZodUtil.convertToArray(array(string().min(1))).optional(),
-  tags: ZodUtil.convertToArray(array(string().min(1))).optional(),
-});
-
-const getCountSchema = object({
-  typeId: ZodUtil.convertToNumber(z.nativeEnum(PostTypeId)),
-  statusId: ZodUtil.convertToNumber(z.nativeEnum(StatusId)).optional(),
-  categories: ZodUtil.convertToArray(array(string().min(1))).optional(),
-  title: string().optional(),
-  authorId: string().optional(),
-});
-
 const postSchema = schema;
 
 const postProductSchema = object({
@@ -195,68 +141,16 @@ const putProductWithIdSchema = object({
   _id: string().min(1),
 }).merge(schemaProduct);
 
-const putStatusManySchema = object({
-  typeId: z.nativeEnum(PostTypeId),
-  _id: array(string().min(1)).min(1),
-  statusId: z.nativeEnum(StatusId),
-});
-
-const putRankWithIdSchema = object({
-  _id: string().min(1),
-  typeId: z.nativeEnum(PostTypeId),
-  rank: number().min(0),
-});
-
-const putViewWithIdSchema = object({
-  _id: string().min(1),
-  typeId: z.nativeEnum(PostTypeId),
-  langId: string().optional(),
-  url: string().optional(),
-});
-
-const deleteManySchema = object({
-  typeId: z.nativeEnum(PostTypeId),
-  _id: array(string().min(1)).min(1),
-});
-
-const deleteProductManySchema = object({
-  _id: array(string().min(1)).min(1),
-});
-
-export type IPostGetWithIdSchema = z.infer<typeof getWithIdSchema>;
-export type IPostGetManySchema = z.infer<typeof getManySchema>;
-export type IPostGetWithURLSchema = z.infer<typeof getWithURLSchema>;
-export type IPostGetPrevNextWithURLSchema = z.infer<
-  typeof getPrevNextWithIdSchema
->;
-export type IPostGetCountSchema = z.infer<typeof getCountSchema>;
 export type IPostPostSchema = z.infer<typeof postSchema>;
 export type IPostPostProductSchema = z.infer<typeof postProductSchema>;
 export type IPostPutWithIdSchema = z.infer<typeof putWithIdSchema>;
 export type IPostPutProductWithIdSchema = z.infer<
   typeof putProductWithIdSchema
 >;
-export type IPostPutStatusManySchema = z.infer<typeof putStatusManySchema>;
-export type IPostPutRankWithIdSchema = z.infer<typeof putRankWithIdSchema>;
-export type IPostPutViewWithIdSchema = z.infer<typeof putViewWithIdSchema>;
-export type IPostDeleteManySchema = z.infer<typeof deleteManySchema>;
-export type IPostDeleteProductManySchema = z.infer<
-  typeof deleteProductManySchema
->;
 
 export const PostSchema = {
-  getWithId: getWithIdSchema,
-  getMany: getManySchema,
-  getWithURL: getWithURLSchema,
-  getPrevNextWithId: getPrevNextWithIdSchema,
-  getCount: getCountSchema,
   post: postSchema,
   postProduct: postProductSchema,
   putWithId: putWithIdSchema,
-  putProductWithId: putProductWithIdSchema,
-  putStatusMany: putStatusManySchema,
-  putRankWithId: putRankWithIdSchema,
-  putViewWithId: putViewWithIdSchema,
-  deleteMany: deleteManySchema,
-  deleteProductMany: deleteProductManySchema,
+  putProductWithId: putProductWithIdSchema
 };

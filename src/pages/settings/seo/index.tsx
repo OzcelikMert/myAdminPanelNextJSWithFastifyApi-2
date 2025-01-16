@@ -23,7 +23,7 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
-import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
+import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 
 type IComponentState = {
@@ -205,7 +205,7 @@ export default function PageSettingsSEO() {
         <div className="row">
           <div className="col-md-6 align-content-center"></div>
           <div className="col-md-6">
-            <ComponentThemeContentLanguage
+            <ComponentThemeLanguageSelector
               onChange={(item) => onChangeLanguage(item.value._id)}
               selectedLangId={state.langId}
               showMissingMessage

@@ -13,100 +13,108 @@ const ComponentThemeRichTextBox = dynamic(
   { ssr: false }
 );
 
-type IComponentState = {} & { [key: string]: any };
-
 type IComponentProps = {
   data: Partial<IComponentElementModel>;
-  index: number
+  index: number;
 };
 
-export default function ComponentPageComponentElementTypeInput(
-  props: IComponentProps
-) {
-  const contentInputName = `elements.${props.index}.contents.content`;
-  const urlInputName = `elements.${props.index}.contents.url`;
-  const t = useAppSelector(selectTranslation);
-  const { register, formState: {errors}, setValue } = useFormContext();
-  const registeredInputContent = register(contentInputName);
-  const registeredInputURL = register(urlInputName);
+const ComponentPageComponentAddElementTypeInput = React.memo(
+  (props: IComponentProps) => {
+    const contentInputName = `elements.${props.index}.contents.content`;
+    const urlInputName = `elements.${props.index}.contents.url`;
+    const t = useAppSelector(selectTranslation);
+    const {
+      register,
+      formState: { errors },
+      setValue,
+      watch,
+    } = useFormContext();
+    const registeredInputContent = register(contentInputName);
+    const registeredInputURL = register(urlInputName);
 
-  const onChangeContent = (text: string) => {
-    setValue(contentInputName, text);
-  }
+    const onChangeContent = (text: string) => {
+      setValue(contentInputName, text);
+    };
 
-  const TextArea = () => {
-    return (
-      <ComponentFormInput
-        type={'textarea'}
-        title={t('text')}
-        name={contentInputName}
-      />
-    );
-  };
-
-  const RichText = () => {
-    return (
-      <ComponentThemeRichTextBox
-        value={props.data.contents?.content ?? ''}
-        onChange={(e) => onChangeContent(e)}
-      />
-    );
-  };
-
-  const Image = () => {
-    return (
-      <div>
-        <ComponentThemeChooseImage
-          onSelected={(images) => onChangeContent(images[0])}
-          isMulti={false}
-          isShowReviewImage={true}
-          reviewImage={props.data.contents?.content}
-          reviewImageClassName={'post-image'}
+    const TextArea = () => {
+      return (
+        <ComponentFormInput
+          type={'textarea'}
+          title={t('text')}
+          {...registeredInputContent}
         />
-      </div>
-    );
-  };
+      );
+    };
 
-  const Button = () => {
-    return (
-      <div className="row">
-        <div className="col-md-6">
-          <ComponentFormInput
-            type={'text'}
-            title={t('text')}
-            name={contentInputName}
+    const RichText = () => {
+      return (
+        <ComponentThemeRichTextBox
+          value={props.data.contents?.content ?? ''}
+          onChange={(e) => onChangeContent(e)}
+        />
+      );
+    };
+
+    const Image = () => {
+      return (
+        <div>
+          <ComponentThemeChooseImage
+            onSelected={(images) => onChangeContent(images[0])}
+            isMulti={false}
+            isShowReviewImage={true}
+            reviewImage={props.data.contents?.content}
+            reviewImageClassName={'post-image'}
           />
         </div>
-        <div className="col-md-6 mt-3 mt-lg-0">
-          <ComponentFormInput
-            type={'text'}
-            title={t('url')}
-            name={urlInputName}
-          />
+      );
+    };
+
+    const Button = () => {
+      return (
+        <div className="row">
+          <div className="col-md-6">
+            <ComponentFormInput
+              type={'text'}
+              title={t('text')}
+              {...registeredInputContent}
+            />
+          </div>
+          <div className="col-md-6 mt-3 mt-lg-0">
+            <ComponentFormInput
+              type={'text'}
+              title={t('url')}
+              {...registeredInputURL}
+            />
+          </div>
         </div>
-      </div>
-    );
-  };
+      );
+    };
 
-  const Text = () => {
-    return (
-      <ComponentFormInput
-        type={'text'}
-        title={t('text')}
-        name={contentInputName}
-      />
-    );
-  };
+    const Text = () => {
+      return (
+        <ComponentFormInput
+          type={'text'}
+          title={t('text')}
+          {...registeredInputContent}
+        />
+      );
+    };
 
-  switch (props.data.typeId) {
-    case ElementTypeId.TextArea:
-      return <TextArea />;
-    case ElementTypeId.Image:
-      return <Image />;
-    case ElementTypeId.Button:
-      return <Button />;
-    case ElementTypeId.RichText:
-      return <RichText />;
+    switch (props.data.typeId) {
+      case ElementTypeId.TextArea:
+        return <TextArea />;
+      case ElementTypeId.Image:
+        watch(contentInputName);
+        return <Image />;
+      case ElementTypeId.Button:
+        return <Button />;
+      case ElementTypeId.RichText:
+        watch(contentInputName);
+        return <RichText />;
+      default:
+        return <Text />;
+    }
   }
-  return <Text />;
-}
+);
+
+export default ComponentPageComponentAddElementTypeInput;

@@ -1,4 +1,3 @@
-import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import ComponentToast from '@components/elements/toast';
 import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';

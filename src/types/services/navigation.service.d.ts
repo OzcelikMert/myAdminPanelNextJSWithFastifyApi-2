@@ -58,7 +58,7 @@ export type INavigationUpdateRankWithIdParamService = {
   rank: number;
 };
 
-export type INavigationUpdateStatusManyIdParamService = {
+export type INavigationUpdateStatusManyParamService = {
   _id: string[];
   statusId: StatusId;
 };

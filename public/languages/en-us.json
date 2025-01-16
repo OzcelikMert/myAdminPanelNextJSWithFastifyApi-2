@@ -73,7 +73,7 @@
   "worldMap": "World Map",
   "visitors": "Visitors",
   "contentLanguage": "Content Language",
-  "imageUploadedWithName": "has been uploaded successfully!",
+  "imageUploadedWithName": "'{{0}}' has been uploaded successfully!",
   "loginPanel": "Login Panel",
   "email": "Email",
   "username": "Username",

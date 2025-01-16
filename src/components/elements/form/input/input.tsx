@@ -1,7 +1,4 @@
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useEffectAfterDidMount } from '@library/react/customHooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { ZodUtil } from '@utils/zod.util';
@@ -15,24 +12,22 @@ type IComponentProps = {
 } & React.InputHTMLAttributes<HTMLInputElement> &
   React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
-export default function ComponentFormInput(props: IComponentProps) {
+const ComponentFormInput = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-  const {
-    register,
-    formState: { errors },
-  } = useFormContext();
-
-  useDidMount(() => {
-    console.log('didMount', props.name);
-  });
-
-  useEffectAfterDidMount(() => {
-    console.log('useEffectAfterDidMount', props.name);
-  }, [props.type]);
+  const form = useFormContext();
 
   const idRef = React.useRef<string>(String.createId());
-  const registeredInput =
-    props.name && register(props.name, { required: props.required });
+  const typeRef = React.useRef<string>(props.type);
+  const registeredInput = props.name
+    ? form.register(props.name, { required: props.required })
+    : undefined;
+
+  useEffectAfterDidMount(() => {
+    if (props.type != typeRef.current) {
+      inputRef.current = <Input />;
+      typeRef.current = props.type;
+    }
+  }, [props.type]);
 
   const Input = () => {
     switch (props.type) {
@@ -43,9 +38,7 @@ export default function ComponentFormInput(props: IComponentProps) {
             {...registeredInput}
             {...props}
             className={`field textarea ${typeof props.className !== 'undefined' ? props.className : ``}`}
-          >
-            {props.value}
-          </textarea>
+          ></textarea>
         );
       default:
         return (
@@ -60,24 +53,26 @@ export default function ComponentFormInput(props: IComponentProps) {
     }
   };
 
-  const input = React.useMemo(() => <Input />, [props.type]);
+  const inputRef = React.useRef<React.ReactNode>(<Input />);
 
   return (
     <div className="theme-input">
-      {input}
+      {inputRef.current}
       <label className="label" htmlFor={idRef.current}>
         {props.title} {props.titleElement}
       </label>
       {props.name &&
-        errors &&
-        errors[props.name] &&
-        errors[props.name]?.message && (
+        form.formState.errors &&
+        form.formState.errors[props.name] &&
+        form.formState.errors[props.name]?.message && (
           <div className="error">
-            {t(ZodUtil.getErrorText(errors[props.name]?.type), [
+            {t(ZodUtil.getErrorText(form.formState.errors[props.name]?.type), [
               props.title ?? t(props.name as IPanelLanguageKeys),
             ])}
           </div>
         )}
     </div>
   );
-}
+});
+
+export default ComponentFormInput;

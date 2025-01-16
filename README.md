@@ -7,3 +7,4 @@ Things to do:
     - use custom interface for IAction like ICustomAction '<IType, IPayload>'
     - move in-function components to components/pages
     - add React.memo for all components
+    - use new t function for panel language keys with variables

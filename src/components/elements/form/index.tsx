@@ -1,14 +1,7 @@
 import { useDidMount } from '@library/react/customHooks';
 import ComponentFormLoadingButton from './button/loadingButton';
 import { FormProvider, UseFormReturn } from 'react-hook-form';
-
-type IComponentState = {
-  isSubmitting: boolean;
-};
-
-const initialState: IComponentState = {
-  isSubmitting: false,
-};
+import React from 'react';
 
 type IComponentProps = {
   hideSubmitButton?: boolean;
@@ -21,12 +14,7 @@ type IComponentProps = {
   formMethods: UseFormReturn<any>
 };
 
-export default function ComponentForm(props: IComponentProps) {
-  useDidMount(() => {
-    console.log("ComponentForm", "useDidMount", props.formMethods);
-  })
-
-
+const ComponentForm = React.memo((props: IComponentProps) => {
   const SubmitButton = () => {
     return (
       <button
@@ -63,4 +51,6 @@ export default function ComponentForm(props: IComponentProps) {
       </form>
     </FormProvider>
   );
-}
+});
+
+export default ComponentForm;

@@ -1,13 +1,15 @@
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormInput from '@components/elements/form/input/input';
 import { StatusId } from '@constants/status';
-import { IPageLoginState } from '@pages/login';
+import { IPageLoginFormState, IPageLoginState } from '@pages/login';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import React from 'react';
+import { UseFormReturn } from 'react-hook-form';
 
 type IComponentProps = {
   state: IPageLoginState;
+  form: UseFormReturn<IPageLoginFormState>;
 };
 
 const ComponentPageLoginForm = React.memo((props: IComponentProps) => {

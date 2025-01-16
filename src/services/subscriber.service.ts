@@ -1,18 +1,18 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
-import { ISubscriberGetResultService } from 'types/services/subscriber.service';
+import {
+  ISubscriberAddParamService,
+  ISubscriberGetWithIdParamService,
+  ISubscriberDeleteWithIdParamService,
+  ISubscriberDeleteManyParamService,
+  ISubscriberGetResultService,
+  ISubscriberGetManyParamService,
+} from 'types/services/subscriber.service';
 import { ApiRequest } from '@library/api/request';
 import { PathUtil } from '@utils/path.util';
 import { ISubscriberModel } from 'types/models/subscriber.model';
-import {
-  ISubscriberDeleteManySchema,
-  ISubscriberDeleteWithIdSchema,
-  ISubscriberGetManySchema,
-  ISubscriberGetWithIdSchema,
-  ISubscriberPostSchema,
-} from 'schemas/subscriber.schema';
 
 const getWithId = (
-  params: ISubscriberGetWithIdSchema,
+  params: ISubscriberGetWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -23,7 +23,10 @@ const getWithId = (
   }).get<ISubscriberGetResultService>();
 };
 
-const getMany = (params: ISubscriberGetManySchema, signal?: AbortSignal) => {
+const getMany = (
+  params: ISubscriberGetManyParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.SUBSCRIBER_WITH.GET,
@@ -32,7 +35,7 @@ const getMany = (params: ISubscriberGetManySchema, signal?: AbortSignal) => {
   }).get<ISubscriberGetResultService[]>();
 };
 
-const add = (params: ISubscriberPostSchema, signal?: AbortSignal) => {
+const add = (params: ISubscriberAddParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.SUBSCRIBER_WITH.ADD,
@@ -42,7 +45,7 @@ const add = (params: ISubscriberPostSchema, signal?: AbortSignal) => {
 };
 
 const deleteWithId = (
-  params: ISubscriberDeleteWithIdSchema,
+  params: ISubscriberDeleteWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -54,7 +57,7 @@ const deleteWithId = (
 };
 
 const deleteMany = (
-  params: ISubscriberDeleteManySchema,
+  params: ISubscriberDeleteManyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({

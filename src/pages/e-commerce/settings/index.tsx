@@ -3,7 +3,7 @@ import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateECommerceParamService } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
 import { CurrencyId, currencyTypes } from '@constants/currencyTypes';
-import ComponentFormSelect, {
+import {
   IThemeFormSelectData,
 } from '@components/elements/form/input/select';
 import { SettingProjectionKeys } from '@constants/settingProjections';
@@ -12,8 +12,7 @@ import { ECommerceEndPointPermission } from '@constants/endPointPermissions/eCom
 import { ISettingECommerceModel } from 'types/models/setting.model';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
-import { useEffect, useReducer, useState } from 'react';
-import { useFormReducer } from '@library/react/handles/form';
+import { useReducer, useState } from 'react';
 import { useRouter } from 'next/router';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
@@ -23,14 +22,18 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import ComponentPageECommerceSettingsTabGeneral from '@components/pages/e-commerce/settings/tabGeneral';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SettingSchema } from 'schemas/setting.schema';
 
-type IComponentState = {
+export type IPageECommerceSettingsState = {
   currencyTypes: IThemeFormSelectData[];
   item?: ISettingECommerceModel;
   mainTabActiveKey: string;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageECommerceSettingsState = {
   currencyTypes: [],
   mainTabActiveKey: `general`,
 };
@@ -44,15 +47,15 @@ enum ActionTypes {
 type IAction =
   | {
       type: ActionTypes.SET_CURRENCY_TYPES;
-      payload: IComponentState['currencyTypes'];
+      payload: IPageECommerceSettingsState['currencyTypes'];
     }
-  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] }
+  | { type: ActionTypes.SET_ITEM; payload: IPageECommerceSettingsState['item'] }
   | {
       type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IComponentState['mainTabActiveKey'];
+      payload: IPageECommerceSettingsState['mainTabActiveKey'];
     };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (state: IPageECommerceSettingsState, action: IAction): IPageECommerceSettingsState => {
   switch (action.type) {
     case ActionTypes.SET_CURRENCY_TYPES:
       return {
@@ -74,9 +77,9 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentFormState = ISettingUpdateECommerceParamService;
+export type IPageECommerceSettingsFormState = ISettingUpdateECommerceParamService;
 
-const initialFormState: IComponentFormState = {
+const initialFormState: IPageECommerceSettingsFormState = {
   eCommerce: {
     currencyId: CurrencyId.Dollar,
   },
@@ -92,8 +95,10 @@ export default function PageECommerceSettings() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, onChangeSelect } =
-    useFormReducer<IComponentFormState>(initialFormState);
+  const form = useForm<IPageECommerceSettingsFormState>({
+      defaultValues: initialFormState,
+      resolver: zodResolver(SettingSchema.putECommerce),
+    });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -165,14 +170,15 @@ export default function PageECommerceSettings() {
     });
   };
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (data: IPageECommerceSettingsFormState) => {
+    const params = data;
     const serviceResult = await SettingService.updateECommerce(
-      formState,
+      params,
       abortController.signal
     );
 
     if (serviceResult.status) {
-      appDispatch(setCurrencyIdState(formState.eCommerce.currencyId));
+      appDispatch(setCurrencyIdState(params.eCommerce.currencyId));
       new ComponentToast({
         type: 'success',
         title: t('successful'),
@@ -181,35 +187,15 @@ export default function PageECommerceSettings() {
     }
   };
 
-  const TabGeneral = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentFormSelect
-            title={t('currencyType')}
-            isMulti={false}
-            name="eCommerce.currencyId"
-            isSearchable={false}
-            options={state.currencyTypes}
-            value={state.currencyTypes.findSingle(
-              'value',
-              formState.eCommerce.currencyId
-            )}
-            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
-          />
-        </div>
-      </div>
-    );
-  };
-
   return isPageLoading ? null : (
     <div className="page-post">
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
+            formMethods={form}
             submitButtonText={t('save')}
             submitButtonSubmittingText={t('loading')}
-            onSubmit={(event) => onSubmit(event)}
+            onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">
@@ -227,7 +213,10 @@ export default function PageECommerceSettings() {
                       transition={false}
                     >
                       <Tab eventKey="general" title={t('general')}>
-                        <TabGeneral />
+                        <ComponentPageECommerceSettingsTabGeneral 
+                          form={form}
+                          state={state}
+                        />
                       </Tab>
                     </Tabs>
                   </div>

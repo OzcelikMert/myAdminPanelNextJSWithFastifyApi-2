@@ -1,4 +1,4 @@
-import { FormEvent, useReducer, useState } from 'react';
+import { FormEvent, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import moment from 'moment';
 import { VariableLibrary } from '@library/variable';
@@ -40,24 +40,29 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { UserSchema } from 'schemas/user.schema';
+import ComponentPageUserAddHeader from '@components/pages/user/add/header';
+import ComponentPageUserAddTabGeneral from '@components/pages/user/add/tabGeneral';
+import ComponentPageUserAddTabOptions from '@components/pages/user/add/tabOptions';
+import ComponentPageUserAddTabPermissions from '@components/pages/user/add/tabPermissions';
 
-type IComponentState = {
+export type IPageUserAddState = {
   mainTabActiveKey: string;
   userRoles: IThemeFormSelectData<UserRoleId>[];
   status: IThemeFormSelectData<StatusId>[];
   permissions: IPermission[];
   permissionGroups: IPermissionGroup[];
-  mainTitle: string;
   item?: IUserGetResultService;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageUserAddState = {
   mainTabActiveKey: 'general',
   userRoles: [],
   status: [],
   permissions: [],
   permissionGroups: [],
-  mainTitle: '',
 };
 
 enum ActionTypes {
@@ -66,29 +71,33 @@ enum ActionTypes {
   SET_STATUS,
   SET_PERMISSIONS,
   SET_PERMISSION_GROUPS,
-  SET_MAIN_TITLE,
   SET_ITEM,
 }
 
 type IAction =
   | {
       type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IComponentState['mainTabActiveKey'];
+      payload: IPageUserAddState['mainTabActiveKey'];
     }
-  | { type: ActionTypes.SET_USER_ROLES; payload: IComponentState['userRoles'] }
-  | { type: ActionTypes.SET_STATUS; payload: IComponentState['status'] }
+  | {
+      type: ActionTypes.SET_USER_ROLES;
+      payload: IPageUserAddState['userRoles'];
+    }
+  | { type: ActionTypes.SET_STATUS; payload: IPageUserAddState['status'] }
   | {
       type: ActionTypes.SET_PERMISSIONS;
-      payload: IComponentState['permissions'];
+      payload: IPageUserAddState['permissions'];
     }
   | {
       type: ActionTypes.SET_PERMISSION_GROUPS;
-      payload: IComponentState['permissionGroups'];
+      payload: IPageUserAddState['permissionGroups'];
     }
-  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
-  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
+  | { type: ActionTypes.SET_ITEM; payload: IPageUserAddState['item'] };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (
+  state: IPageUserAddState,
+  action: IAction
+): IPageUserAddState => {
   switch (action.type) {
     case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
@@ -100,8 +109,6 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return { ...state, permissions: action.payload };
     case ActionTypes.SET_PERMISSION_GROUPS:
       return { ...state, permissionGroups: action.payload };
-    case ActionTypes.SET_MAIN_TITLE:
-      return { ...state, mainTitle: action.payload };
     case ActionTypes.SET_ITEM:
       return { ...state, item: action.payload };
     default:
@@ -109,9 +116,9 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentFormState = IUserUpdateWithIdParamService;
+export type IPageUserAddFormState = IUserUpdateWithIdParamService;
 
-const initialFormState: IComponentFormState = {
+const initialFormState: IPageUserAddFormState = {
   _id: '',
   name: '',
   email: '',
@@ -123,6 +130,10 @@ const initialFormState: IComponentFormState = {
   permissions: [],
 };
 
+type IPageQueries = {
+  _id?: string;
+};
+
 export default function PageUserAdd() {
   const abortController = new AbortController();
 
@@ -132,14 +143,19 @@ export default function PageUserAdd() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
+  const queries = router.query as IPageQueries;
+
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput, onChangeSelect } =
-    useFormReducer<IComponentFormState>({
+  const form = useForm<IPageUserAddFormState>({
+    defaultValues: {
       ...initialFormState,
-      _id: (router.query._id as string) ?? '',
+      _id: queries._id ?? '',
       banDateEnd: new Date().getStringWithMask(DateMask.DATE),
-    });
+    },
+    //resolver: zodResolver(queries._id ? UserSchema.putWithId : UserSchema.post),
+  });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const mainTitleRef = useRef<string>('');
 
   useDidMount(() => {
     init();
@@ -154,11 +170,16 @@ export default function PageUserAdd() {
     }
   }, [isPageLoaded]);
 
+  useEffectAfterDidMount(() => {
+    getPermissionsForUserRoleId(form.getValues().roleId);
+    form.setValue("permissions", []);
+  }, [form.getValues().roleId]);
+
   const init = async () => {
     if (isPageLoaded) {
       setIsPageLoaded(false);
     }
-    const minPermission = formState._id
+    const minPermission = queries._id
       ? UserEndPointPermission.UPDATE
       : UserEndPointPermission.ADD;
     if (
@@ -171,10 +192,10 @@ export default function PageUserAdd() {
     ) {
       getRoles();
       getStatus();
-      if (formState._id) {
+      if (queries._id) {
         await getItem();
       }
-      getPermissionsForUserRoleId(formState.roleId);
+      getPermissionsForUserRoleId(form.getValues().roleId);
       setPageTitle();
       setIsPageLoaded(true);
     }
@@ -186,18 +207,14 @@ export default function PageUserAdd() {
         title: t('users'),
         url: EndPoints.USER_WITH.LIST,
       },
+      {
+        title: t(queries._id ? 'edit' : 'add'),
+      },
     ];
 
-    if (formState._id) {
+    if (queries._id) {
       titles.push({
-        title: t('edit'),
-      });
-      titles.push({
-        title: state.mainTitle,
-      });
-    } else {
-      titles.push({
-        title: t('add'),
+        title: mainTitleRef.current,
       });
     }
     appDispatch(setBreadCrumbState(titles));
@@ -229,25 +246,24 @@ export default function PageUserAdd() {
   };
 
   const getItem = async () => {
-    const serviceResult = await UserService.getWithId(
-      {
-        _id: formState._id,
-      },
-      abortController.signal
-    );
+    if (queries._id) {
+      const serviceResult = await UserService.getWithId(
+        {
+          _id: queries._id,
+        },
+        abortController.signal
+      );
 
-    if (serviceResult.status && serviceResult.data) {
-      const user = serviceResult.data;
-      dispatch({
-        type: ActionTypes.SET_ITEM,
-        payload: user,
-      });
-      dispatch({
-        type: ActionTypes.SET_MAIN_TITLE,
-        payload: user.name,
-      });
-    } else {
-      await navigatePage();
+      if (serviceResult.status && serviceResult.data) {
+        const user = serviceResult.data;
+        dispatch({
+          type: ActionTypes.SET_ITEM,
+          payload: user,
+        });
+        mainTitleRef.current = user.name;
+      } else {
+        await navigatePage();
+      }
     }
   };
 
@@ -292,13 +308,16 @@ export default function PageUserAdd() {
     await RouteUtil.change({ router, path });
   };
 
-  const onSubmit = async (event: FormEvent) => {
-    const params = formState;
+  const onSubmit = async (data: IPageUserAddFormState) => {
+    console.log(data);
+    
+    return;
+    const params = data;
 
     const serviceResult = await (params._id
       ? UserService.updateWithId(params, abortController.signal)
       : UserService.add(
-          { ...params, password: formState.password || '' },
+          { ...params, password: params.password || '' },
           abortController.signal
         ));
 
@@ -306,30 +325,27 @@ export default function PageUserAdd() {
       new ComponentToast({
         type: 'success',
         title: t('successful'),
-        content: `${t(formState._id ? 'itemEdited' : 'itemAdded')}!`,
+        content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,
       });
 
-      if (!formState._id) {
+      if (!params._id) {
         await navigatePage();
       }
     }
   };
 
-  const onPermissionSelected = (isSelected: boolean, permId: number) => {
-    let newPermissions = formState.permissions;
+  const onSelectPermission = (isSelected: boolean, permId: number) => {
+    let newPermissions = form.getValues().permissions;
     if (isSelected) {
       newPermissions.push(permId);
     } else {
       newPermissions = newPermissions.filter((perm) => perm !== permId);
     }
-    setFormState({
-      ...formState,
-      permissions: newPermissions,
-    });
+    form.setValue("permissions", newPermissions);
   };
 
-  const onPermissionAllSelected = (isSelected: boolean) => {
-    let newPermissions = formState.permissions;
+  const onSelectAllPermissions = (isSelected: boolean) => {
+    let newPermissions = form.getValues().permissions;
     if (isSelected) {
       newPermissions = state.permissions.map((perm) => perm.id);
     } else {
@@ -337,179 +353,23 @@ export default function PageUserAdd() {
     }
   };
 
-  const onChangeUserRole = (roleId: UserRoleId) => {
-    const userRole = userRoles.findSingle('id', roleId);
-    if (userRole) {
-      getPermissionsForUserRoleId(roleId);
-      setFormState({
-        ...formState,
-        roleId: roleId,
-        permissions: [],
-      });
-    }
-  };
-
-  const Header = () => {
-    return (
-      <div className="col-md-3">
-        <div className="row">
-          <div className="col-6">
-            <button
-              className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
-              onClick={() => navigatePage()}
-            >
-              <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  function PermissionItem(props: IPermission, index: number) {
-    return (
-      <div className="col-md-4" key={index}>
-        <ComponentFormCheckBox
-          key={index}
-          title={t(props.langKey)}
-          name="permissions"
-          checked={formState.permissions.includes(props.id)}
-          onChange={(e) => onPermissionSelected(e.target.checked, props.id)}
-        />
-      </div>
-    );
-  }
-
-  const PermissionGroup = (props: IPermissionGroup, index: number) => {
-    const foundPermissions = state.permissions.findMulti('groupId', props.id);
-
-    return foundPermissions.every((permission) => permission == null) ? null : (
-      <div className="col-md-6 mb-3">
-        <ComponentFieldSet key={index} legend={t(props.langKey)}>
-          {foundPermissions.map((perm, index) => PermissionItem(perm, index))}
-        </ComponentFieldSet>
-      </div>
-    );
-  };
-
-  const TabPermissions = () => {
-    return (
-      <div className="row">
-        <div className="col-md-12 mb-3">
-          <ComponentFormCheckBox
-            title={t('selectAll')}
-            checked={state.permissions.length === formState.permissions.length}
-            onChange={(e) => onPermissionAllSelected(e.target.checked)}
-          />
-        </div>
-        {state.permissionGroups.map((group, index) =>
-          PermissionGroup(group, index)
-        )}
-      </div>
-    );
-  };
-
-  const TabOptions = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentFormSelect
-            title={t('role')}
-            name="roleId"
-            placeholder={t('chooseRole')}
-            options={state.userRoles}
-            value={state.userRoles?.findSingle('value', formState.roleId)}
-            onChange={(item: any, e) => {
-              onChangeSelect(e.name, item.value);
-              onChangeUserRole(item.value);
-            }}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormSelect
-            title={t('status')}
-            name="statusId"
-            options={state.status}
-            value={state.status?.findSingle('value', formState.statusId)}
-            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
-          />
-        </div>
-        {formState.statusId == StatusId.Banned ? (
-          <div className="col-md-7 mb-3">
-            <div className="mb-3">
-              <ComponentFormInput
-                title={`${t('banDateEnd')}*`}
-                type="date"
-                name="banDateEnd"
-                value={moment(formState.banDateEnd).format('YYYY-MM-DD')}
-                onChange={(e) => onChangeInput(e)}
-              />
-            </div>
-            <div className="mb-3">
-              <ComponentFormInput
-                title={t('banComment')}
-                name="banComment"
-                type="textarea"
-                value={formState.banComment}
-                onChange={(e) => onChangeInput(e)}
-              />
-            </div>
-          </div>
-        ) : null}
-      </div>
-    );
-  };
-
-  const TabGeneral = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={`${t('name')}*`}
-            name="name"
-            type="text"
-            required={true}
-            value={formState.name}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={`${t('email')}*`}
-            name="email"
-            type="email"
-            required={true}
-            value={formState.email}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={`${t('password')}*`}
-            name="password"
-            type="password"
-            required={VariableLibrary.isEmpty(formState._id)}
-            value={formState.password}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const userRole = userRoles.findSingle('id', formState.roleId);
+  const userRole = userRoles.findSingle('id', form.getValues().roleId);
 
   return isPageLoading ? null : (
     <div className="page-settings page-user">
       <div className="row mb-3">
-        <Header />
+        <ComponentPageUserAddHeader
+          state={state}
+          onNavigatePage={() => navigatePage()}
+        />
       </div>
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
+            formMethods={form}
             submitButtonText={t('save')}
             submitButtonSubmittingText={t('loading')}
-            onSubmit={(event) => onSubmit(event)}
+            onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">
@@ -527,16 +387,26 @@ export default function PageUserAdd() {
                       transition={false}
                     >
                       <Tab eventKey="general" title={t('general')}>
-                        <TabGeneral />
+                        <ComponentPageUserAddTabGeneral
+                          form={form}
+                          state={state}
+                        />
                       </Tab>
                       <Tab eventKey="options" title={t('options')}>
-                        <TabOptions />
+                        <ComponentPageUserAddTabOptions
+                          form={form}
+                          state={state}
+                        />
                       </Tab>
                       <Tab
                         eventKey="permissions"
                         title={`${t('permissions')} (${t(userRole?.langKey ?? '[noLangAdd]')})`}
                       >
-                        <TabPermissions />
+                        <ComponentPageUserAddTabPermissions
+                          form={form}
+                          state={state}
+                          onSelectAllPermissions={(isSelected) => onSelectAllPermissions(isSelected)}
+                        />
                       </Tab>
                     </Tabs>
                   </div>

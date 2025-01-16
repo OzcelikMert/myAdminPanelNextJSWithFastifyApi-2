@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthSchema, IAuthPostSchema } from 'schemas/auth.schema';
 import ComponentPageLoginForm from '@components/pages/login/form';
+import { IAuthLoginParamService } from 'types/services/auth.service';
 
 export type IPageLoginState = {
   isWrong: boolean;
@@ -56,7 +57,9 @@ const reducer = (state: IPageLoginState, action: IAction): IPageLoginState => {
   }
 };
 
-type IPageLoginFormState = {} & IAuthPostSchema;
+export type IPageLoginFormState = {
+  keepMe: boolean
+} & IAuthLoginParamService;
 
 const initialFormState: IPageLoginFormState = {
   email: '',
@@ -136,8 +139,6 @@ export default function PageLogin() {
     }
   };
 
-  console.log("formState", form.formState);
-
   return isPageLoading ? null : (
     <div className="page-login">
       <div className="d-flex align-items-stretch auth-img-bg h-100">
@@ -149,10 +150,10 @@ export default function PageLogin() {
                 enterToSubmit={true}
                 submitButtonClassName="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn w-100"
                 submitButtonText={t('login')}
-                onSubmit={onSubmit}
+                onSubmit={data => onSubmit(data)}
                 formMethods={form}
               >
-                <ComponentPageLoginForm  state={state} />
+                <ComponentPageLoginForm form={form} state={state} />
               </ComponentForm>
             </div>
           </div>

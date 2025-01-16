@@ -4,49 +4,46 @@ import {
   ILanguageUpdateWithIdParamService,
 } from 'types/services/language.service';
 import { LanguageService } from '@services/language.service';
-import Image from 'next/image';
-import ComponentFormSelect, {
-  IThemeFormSelectData,
-} from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { PermissionUtil } from '@utils/permission.util';
 import { LanguageEndPointPermission } from '@constants/endPointPermissions/language.endPoint.permission';
 import { StatusId } from '@constants/status';
 import { ComponentUtil } from '@utils/component.util';
 import { EndPoints } from '@constants/endPoints';
-import { ImageSourceUtil } from '@utils/imageSource.util';
 import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
-import { FormEvent, useEffect, useReducer, useState } from 'react';
+import { FormEvent, useReducer, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';
-import { useFormReducer } from '@library/react/handles/form';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import ComponentFormInput from '@components/elements/form/input/input';
-import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
 import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LanguageSchema } from 'schemas/language.schema';
+import ComponentPageLanguageAddHeader from '@components/pages/language/add/header';
+import ComponentPageLanguageAddTabGeneral from '@components/pages/language/add/tabGeneral';
+import ComponentPageLanguageAddTabOptions from '@components/pages/language/add/tabOptions';
 
-type IComponentState = {
+export type IPageLanguageAddState = {
   mainTabActiveKey: string;
   status: IThemeFormSelectData[];
   flags: IThemeFormSelectData[];
-  mainTitle: string;
   item?: ILanguageGetResultService;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageLanguageAddState = {
   mainTabActiveKey: `general`,
   status: [],
   flags: [],
-  mainTitle: '',
 };
 
 enum ActionTypes {
@@ -58,16 +55,18 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_STATUS; payload: IComponentState['status'] }
-  | { type: ActionTypes.SET_FLAGS; payload: IComponentState['flags'] }
+  | { type: ActionTypes.SET_STATUS; payload: IPageLanguageAddState['status'] }
+  | { type: ActionTypes.SET_FLAGS; payload: IPageLanguageAddState['flags'] }
   | {
       type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IComponentState['mainTabActiveKey'];
+      payload: IPageLanguageAddState['mainTabActiveKey'];
     }
-  | { type: ActionTypes.SET_MAIN_TITLE; payload: IComponentState['mainTitle'] }
-  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] };
+  | { type: ActionTypes.SET_ITEM; payload: IPageLanguageAddState['item'] };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (
+  state: IPageLanguageAddState,
+  action: IAction
+): IPageLanguageAddState => {
   switch (action.type) {
     case ActionTypes.SET_STATUS:
       return { ...state, status: action.payload };
@@ -75,8 +74,6 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
       return { ...state, flags: action.payload };
     case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
       return { ...state, mainTabActiveKey: action.payload };
-    case ActionTypes.SET_MAIN_TITLE:
-      return { ...state, mainTitle: action.payload };
     case ActionTypes.SET_ITEM:
       return { ...state, item: action.payload };
     default:
@@ -84,9 +81,9 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentFormState = ILanguageUpdateWithIdParamService;
+export type IPageLanguageAddFormState = ILanguageUpdateWithIdParamService;
 
-const initialFormState: IComponentFormState = {
+const initialFormState: IPageLanguageAddFormState = {
   _id: '',
   statusId: StatusId.Active,
   locale: '',
@@ -113,12 +110,17 @@ export default function PageSettingLanguageAdd() {
   const queries = router.query as IPageQueries;
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput, onChangeSelect } =
-    useFormReducer<IComponentFormState>({
+  const form = useForm<IPageLanguageAddFormState>({
+    defaultValues: {
       ...initialFormState,
       _id: queries._id ?? '',
-    });
+    },
+    resolver: zodResolver(
+      queries._id ? LanguageSchema.putWithId : LanguageSchema.post
+    ),
+  });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
+  const mainTitleRef = useRef<string>('');
 
   useDidMount(() => {
     init();
@@ -137,7 +139,7 @@ export default function PageSettingLanguageAdd() {
     if (isPageLoaded) {
       setIsPageLoaded(false);
     }
-    const minPermission = formState._id
+    const minPermission = queries._id
       ? LanguageEndPointPermission.UPDATE
       : LanguageEndPointPermission.ADD;
     if (
@@ -150,7 +152,7 @@ export default function PageSettingLanguageAdd() {
     ) {
       await getFlags();
       getStatus();
-      if (formState._id) {
+      if (queries._id) {
         await getItem();
       }
       setPageTitle();
@@ -161,10 +163,10 @@ export default function PageSettingLanguageAdd() {
   const setPageTitle = () => {
     const breadCrumbs: IBreadCrumbData[] = [
       { title: t('languages'), url: EndPoints.LANGUAGE_WITH.LIST },
-      { title: t(formState._id ? 'edit' : 'add') },
+      { title: t(queries._id ? 'edit' : 'add') },
     ];
-    if (formState._id) {
-      breadCrumbs.push({ title: state.mainTitle });
+    if (queries._id) {
+      breadCrumbs.push({ title: mainTitleRef.current });
     }
     appDispatch(setBreadCrumbState(breadCrumbs));
   };
@@ -196,16 +198,16 @@ export default function PageSettingLanguageAdd() {
   };
 
   const getItem = async () => {
-    if (formState._id) {
+    if (queries._id) {
       const serviceResult = await LanguageService.getWithId(
-        { _id: formState._id },
+        { _id: queries._id },
         abortController.signal
       );
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
         dispatch({ type: ActionTypes.SET_ITEM, payload: item });
-        setFormState(item);
-        dispatch({ type: ActionTypes.SET_MAIN_TITLE, payload: item.title });
+        form.reset(item);
+        mainTitleRef.current = item.title;
       } else {
         await navigatePage();
       }
@@ -220,9 +222,9 @@ export default function PageSettingLanguageAdd() {
     }
   };
 
-  const onSubmit = async (event: FormEvent) => {
-    const params = formState;
-    const serviceResult = await (formState._id
+  const onSubmit = async (data: IPageLanguageAddFormState) => {
+    const params = data;
+    const serviceResult = await (params._id
       ? LanguageService.updateWithId(params, abortController.signal)
       : LanguageService.add(params, abortController.signal));
 
@@ -230,132 +232,23 @@ export default function PageSettingLanguageAdd() {
       new ComponentToast({
         type: 'success',
         title: t('successful'),
-        content: `${t(formState._id ? 'itemEdited' : 'itemAdded')}!`,
+        content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,
       });
       await navigatePage(true);
     }
   };
 
-  const Header = () => {
-    return (
-      <div className="col-md-3">
-        <div className="row">
-          <div className="col-6">
-            <button
-              className="btn btn-gradient-dark btn-lg btn-icon-text w-100"
-              onClick={() => navigatePage()}
-            >
-              <i className="mdi mdi-arrow-left"></i> {t('returnBack')}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const TabOptions = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentFormSelect
-            title={t('status')}
-            options={state.status}
-            name="statusId"
-            value={state.status?.findSingle('value', formState.statusId)}
-            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={`${t('rank')}*`}
-            name="rank"
-            type="number"
-            required={true}
-            value={formState.rank}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormCheckBox
-            title={t('default')}
-            name="isDefault"
-            checked={Boolean(formState.isDefault)}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const TabGeneral = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <div className="row">
-            <div className="col-1 m-auto">
-              <Image
-                src={ImageSourceUtil.getUploadedFlagSrc(formState.image)}
-                alt={formState.image}
-                className="img-fluid img-sm"
-                width={100}
-                height={75}
-              />
-            </div>
-            <div className="col-11">
-              <ComponentFormSelect
-                title={t('image')}
-                name="image"
-                options={state.flags}
-                value={state.flags.findSingle('value', formState.image || '')}
-                onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={`${t('title')}*`}
-            name="title"
-            type="text"
-            required={true}
-            value={formState.title}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={`${t('shortKey')}*`}
-            name="shortKey"
-            type="text"
-            required={true}
-            value={formState.shortKey}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={`${t('locale')}*`}
-            name="locale"
-            type="text"
-            required={true}
-            value={formState.locale}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-      </div>
-    );
-  };
-
   return isPageLoading ? null : (
     <div className="page-post">
       <div className="row mb-3">
-        <Header />
+        <ComponentPageLanguageAddHeader onNavigatePage={() => navigatePage()} />
       </div>
       <div className="row">
         <ComponentForm
+          formMethods={form}
           submitButtonText={t('save')}
           submitButtonSubmittingText={t('loading')}
-          onSubmit={(event) => onSubmit(event)}
+          onSubmit={(data) => onSubmit(data)}
         >
           <div className="grid-margin stretch-card">
             <div className="card">
@@ -373,10 +266,16 @@ export default function PageSettingLanguageAdd() {
                     transition={false}
                   >
                     <Tab eventKey="general" title={t('general')}>
-                      <TabGeneral />
+                      <ComponentPageLanguageAddTabGeneral
+                        form={form}
+                        state={state}
+                      />
                     </Tab>
                     <Tab eventKey="options" title={t('options')}>
-                      <TabOptions />
+                      <ComponentPageLanguageAddTabOptions
+                        form={form}
+                        state={state}
+                      />
                     </Tab>
                   </Tabs>
                 </div>

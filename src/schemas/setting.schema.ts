@@ -1,7 +1,5 @@
 import { array, boolean, number, object, string, z } from 'zod';
-import { SettingProjectionKeys } from '@constants/settingProjections';
 import { CurrencyId } from '@constants/currencyTypes';
-import { ZodUtil } from '@utils/zod.util';
 
 const schemaPathContent = object({
   _id: string().optional(),
@@ -55,13 +53,6 @@ const schemaSEOContent = object({
   tags: array(string().min(1)).default([]),
 });
 
-const getSchema = object({
-  langId: string().optional(),
-  projection: ZodUtil.convertToNumber(
-    z.nativeEnum(SettingProjectionKeys)
-  ).optional(),
-});
-
 const putGeneralSchema = object({
   icon: string().optional(),
   logo: string().optional(),
@@ -92,7 +83,6 @@ const putPathSchema = object({
   paths: array(schemaPath).min(1),
 });
 
-export type ISettingGetSchema = z.infer<typeof getSchema>;
 export type ISettingPutGeneralSchema = z.infer<typeof putGeneralSchema>;
 export type ISettingPutSEOSchema = z.infer<typeof putSeoSchema>;
 export type ISettingPutContactFormSchema = z.infer<typeof putContactFormSchema>;
@@ -101,7 +91,6 @@ export type ISettingPutECommerceSchema = z.infer<typeof putECommerceSchema>;
 export type ISettingPutPathSchema = z.infer<typeof putPathSchema>;
 
 export const SettingSchema = {
-  get: getSchema,
   putGeneral: putGeneralSchema,
   putSeo: putSeoSchema,
   putContactForm: putContactFormSchema,

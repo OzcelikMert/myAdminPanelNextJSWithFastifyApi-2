@@ -50,7 +50,7 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
-import ComponentThemeContentLanguage from '@components/theme/contentLanguage';
+import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 
 const ComponentThemeRichTextBox = dynamic(
@@ -721,7 +721,7 @@ export default function PagePostAdd() {
             </div>
           </div>
           <div className="col-md-6">
-            <ComponentThemeContentLanguage
+            <ComponentThemeLanguageSelector
               onChange={(item) => onChangeLanguage(item.value._id)}
               selectedLangId={state.langId}
               showMissingMessage

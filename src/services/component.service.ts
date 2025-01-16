@@ -1,18 +1,21 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
 import { PathUtil } from '@utils/path.util';
 import { ApiRequest } from '@library/api/request';
-import { IComponentGetResultService } from 'types/services/component.service';
-import { IComponentModel } from 'types/models/component.model';
 import {
-  IComponentDeleteManySchema,
-  IComponentGetManySchema,
-  IComponentGetWithIdSchema,
-  IComponentGetWithKeySchema,
-  IComponentPostSchema,
-  IComponentPutWithIdSchema,
-} from 'schemas/component.schema';
+  IComponentAddParamService,
+  IComponentDeleteManyParamService,
+  IComponentGetManyParamService,
+  IComponentGetResultService,
+  IComponentGetWithIdParamService,
+  IComponentGetWithKeyParamService,
+  IComponentUpdateWithIdParamService,
+} from 'types/services/component.service';
+import { IComponentModel } from 'types/models/component.model';
 
-const getWithId = (params: IComponentGetWithIdSchema, signal?: AbortSignal) => {
+const getWithId = (
+  params: IComponentGetWithIdParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.COMPONENT_WITH.GET_WITH_ID(params._id),
@@ -22,7 +25,7 @@ const getWithId = (params: IComponentGetWithIdSchema, signal?: AbortSignal) => {
 };
 
 const getWithKey = (
-  params: IComponentGetWithKeySchema,
+  params: IComponentGetWithKeyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -33,7 +36,10 @@ const getWithKey = (
   }).get<IComponentGetResultService>();
 };
 
-const getMany = (params: IComponentGetManySchema, signal?: AbortSignal) => {
+const getMany = (
+  params: IComponentGetManyParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.COMPONENT_WITH.GET,
@@ -42,7 +48,7 @@ const getMany = (params: IComponentGetManySchema, signal?: AbortSignal) => {
   }).get<IComponentGetResultService[]>();
 };
 
-const add = (params: IComponentPostSchema, signal?: AbortSignal) => {
+const add = (params: IComponentAddParamService, signal?: AbortSignal) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.COMPONENT_WITH.ADD,
@@ -52,7 +58,7 @@ const add = (params: IComponentPostSchema, signal?: AbortSignal) => {
 };
 
 const updateWithId = (
-  params: IComponentPutWithIdSchema,
+  params: IComponentUpdateWithIdParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
@@ -64,7 +70,7 @@ const updateWithId = (
 };
 
 const deleteMany = (
-  params: IComponentDeleteManySchema,
+  params: IComponentDeleteManyParamService,
   signal?: AbortSignal
 ) => {
   return new ApiRequest({
