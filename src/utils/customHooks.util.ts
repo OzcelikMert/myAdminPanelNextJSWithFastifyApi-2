@@ -7,7 +7,7 @@ const useZodValidationResolver = <T = any>(
 ) =>
   useCallback(
     async (data: T) => {
-      const validatedData = await ZodUtil.check(validationSchema)(data);
+      const validatedData = await ZodUtil.getParsedData(validationSchema)(data);
       if (validatedData.success) {
         return {
           values: validatedData.data,

@@ -5,7 +5,8 @@ import { IPageNavigationAddState } from '@pages/navigation/add';
 import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
 
 type IComponentProps = {
-  state: IPageNavigationAddState;
+  langId: IPageNavigationAddState['langId'];
+  item: IPageNavigationAddState['item'];
   onNavigatePage: () => void;
   onChangeLanguage: (_id: string) => void;
 };
@@ -32,9 +33,9 @@ const ComponentPageNavigationAddHeader = React.memo(
           <div className="col-md-6">
             <ComponentThemeLanguageSelector
               onChange={(item) => props.onChangeLanguage(item.value._id)}
-              selectedLangId={props.state.langId}
+              selectedLangId={props.langId}
               showMissingMessage
-              ownedLanguages={props.state.item?.alternates}
+              ownedLanguages={props.item?.alternates}
             />
           </div>
         </div>

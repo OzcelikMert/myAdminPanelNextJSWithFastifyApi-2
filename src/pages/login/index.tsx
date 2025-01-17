@@ -58,7 +58,7 @@ const reducer = (state: IPageLoginState, action: IAction): IPageLoginState => {
 };
 
 export type IPageLoginFormState = {
-  keepMe: boolean
+  keepMe: boolean;
 } & IAuthLoginParamService;
 
 const initialFormState: IPageLoginFormState = {
@@ -150,10 +150,13 @@ export default function PageLogin() {
                 enterToSubmit={true}
                 submitButtonClassName="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn w-100"
                 submitButtonText={t('login')}
-                onSubmit={data => onSubmit(data)}
+                onSubmit={(data) => onSubmit(data)}
                 formMethods={form}
               >
-                <ComponentPageLoginForm form={form} state={state} />
+                <ComponentPageLoginForm
+                  isWrong={state.isWrong}
+                  user={state.user}
+                />
               </ComponentForm>
             </div>
           </div>

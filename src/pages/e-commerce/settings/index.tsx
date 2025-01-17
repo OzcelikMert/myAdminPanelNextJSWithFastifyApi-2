@@ -3,9 +3,7 @@ import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateECommerceParamService } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
 import { CurrencyId, currencyTypes } from '@constants/currencyTypes';
-import {
-  IThemeFormSelectData,
-} from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { SettingProjectionKeys } from '@constants/settingProjections';
 import { PermissionUtil } from '@utils/permission.util';
 import { ECommerceEndPointPermission } from '@constants/endPointPermissions/eCommerce.endPoint.permission';
@@ -55,7 +53,10 @@ type IAction =
       payload: IPageECommerceSettingsState['mainTabActiveKey'];
     };
 
-const reducer = (state: IPageECommerceSettingsState, action: IAction): IPageECommerceSettingsState => {
+const reducer = (
+  state: IPageECommerceSettingsState,
+  action: IAction
+): IPageECommerceSettingsState => {
   switch (action.type) {
     case ActionTypes.SET_CURRENCY_TYPES:
       return {
@@ -77,7 +78,8 @@ const reducer = (state: IPageECommerceSettingsState, action: IAction): IPageECom
   }
 };
 
-export type IPageECommerceSettingsFormState = ISettingUpdateECommerceParamService;
+export type IPageECommerceSettingsFormState =
+  ISettingUpdateECommerceParamService;
 
 const initialFormState: IPageECommerceSettingsFormState = {
   eCommerce: {
@@ -96,9 +98,9 @@ export default function PageECommerceSettings() {
 
   const [state, dispatch] = useReducer(reducer, initialState);
   const form = useForm<IPageECommerceSettingsFormState>({
-      defaultValues: initialFormState,
-      resolver: zodResolver(SettingSchema.putECommerce),
-    });
+    defaultValues: initialFormState,
+    resolver: zodResolver(SettingSchema.putECommerce),
+  });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -187,6 +189,8 @@ export default function PageECommerceSettings() {
     }
   };
 
+  const formValues = form.getValues();
+
   return isPageLoading ? null : (
     <div className="page-post">
       <div className="row">
@@ -213,9 +217,9 @@ export default function PageECommerceSettings() {
                       transition={false}
                     >
                       <Tab eventKey="general" title={t('general')}>
-                        <ComponentPageECommerceSettingsTabGeneral 
-                          form={form}
-                          state={state}
+                        <ComponentPageECommerceSettingsTabGeneral
+                          currencyTypes={state.currencyTypes}
+                          currencyId={formValues.eCommerce.currencyId}
                         />
                       </Tab>
                     </Tabs>

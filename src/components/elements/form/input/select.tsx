@@ -1,3 +1,4 @@
+import { useEffectAfterDidMount } from '@library/react/customHooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { ZodUtil } from '@utils/zod.util';
@@ -15,28 +16,23 @@ export interface IThemeFormSelectData<T = any> {
 type IComponentProps<T = any> = {
   title?: string;
   mainDivCustomClassName?: string;
-} & StateManagerProps<T>;
+} & (StateManagerProps<T>);
 
 const ComponentFormSelect = React.memo((props: IComponentProps) => {
-  const {
-    register,
-    formState: { errors },
-    setValue,
-    watch,
-  } = useFormContext();
-  const registeredInput = props.name ? register(props.name) : undefined;
+  const form = useFormContext();
+  const registeredInput = form && props.name ? form.register(props.name) : undefined;
   const t = useAppSelector(selectTranslation);
 
-  if (props.name) {
-    const watchName = watch(props.name);
+  if (form && props.name) {
+    const watchName = form.watch(props.name);
   }
 
   const onChange = (
     newValue: IThemeFormSelectData,
     action: ActionMeta<any>
   ) => {
-    if (registeredInput && props.name) {
-      setValue(props.name, newValue.value);
+    if (form && registeredInput && props.name) {
+      form.setValue(props.name, newValue.value);
     }
     if (props.onChange) {
       props.onChange(newValue, action);
@@ -54,12 +50,12 @@ const ComponentFormSelect = React.memo((props: IComponentProps) => {
           onChange={(newValue, action) => onChange(newValue, action)}
         />
       </label>
-      {props.name &&
-        errors &&
-        errors[props.name] &&
-        errors[props.name]?.message && (
+      {form && props.name &&
+        form.formState.errors &&
+        form.formState.errors[props.name] &&
+        form.formState.errors[props.name]?.message && (
           <div className="error">
-            {t(ZodUtil.getErrorText(errors[props.name]?.type), [
+            {t(ZodUtil.getErrorText(form.formState.errors[props.name]?.type), [
               props.title ?? t(props.name as IPanelLanguageKeys),
             ])}
           </div>

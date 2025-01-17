@@ -1,22 +1,18 @@
-import { FormEvent, useReducer, useRef, useState } from 'react';
+import { useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
-import moment from 'moment';
-import { VariableLibrary } from '@library/variable';
 import { UserService } from '@services/user.service';
 import {
   IUserGetResultService,
   IUserUpdateWithIdParamService,
 } from 'types/services/user.service';
-import ComponentFormSelect, {
-  IThemeFormSelectData,
-} from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { UserEndPointPermission } from '@constants/endPointPermissions/user.endPoint.permission';
 import { PermissionUtil } from '@utils/permission.util';
 import { ComponentUtil } from '@utils/component.util';
 import { StatusId } from '@constants/status';
 import { UserRoleId, userRoles } from '@constants/userRoles';
 import { EndPoints } from '@constants/endPoints';
-import { permissions } from '@constants/permissions';
+import { PermissionId, permissions } from '@constants/permissions';
 import { IPermissionGroup } from 'types/constants/permissionGroups';
 import { IPermission } from 'types/constants/permissions';
 import { permissionGroups } from '@constants/permissionGroups';
@@ -26,10 +22,6 @@ import { DateMask } from '@library/variable/date';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useFormReducer } from '@library/react/handles/form';
-import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
-import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
@@ -152,7 +144,7 @@ export default function PageUserAdd() {
       _id: queries._id ?? '',
       banDateEnd: new Date().getStringWithMask(DateMask.DATE),
     },
-    //resolver: zodResolver(queries._id ? UserSchema.putWithId : UserSchema.post),
+    resolver: zodResolver(queries._id ? UserSchema.putWithId : UserSchema.post),
   });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
@@ -172,7 +164,7 @@ export default function PageUserAdd() {
 
   useEffectAfterDidMount(() => {
     getPermissionsForUserRoleId(form.getValues().roleId);
-    form.setValue("permissions", []);
+    form.setValue('permissions', []);
   }, [form.getValues().roleId]);
 
   const init = async () => {
@@ -309,9 +301,6 @@ export default function PageUserAdd() {
   };
 
   const onSubmit = async (data: IPageUserAddFormState) => {
-    console.log(data);
-    
-    return;
     const params = data;
 
     const serviceResult = await (params._id
@@ -334,34 +323,34 @@ export default function PageUserAdd() {
     }
   };
 
-  const onSelectPermission = (isSelected: boolean, permId: number) => {
+  const onSelectPermission = (id: PermissionId) => {
     let newPermissions = form.getValues().permissions;
-    if (isSelected) {
-      newPermissions.push(permId);
+    if (newPermissions.includes(id)) {
+      newPermissions = newPermissions.filter((perm) => perm !== id);
     } else {
-      newPermissions = newPermissions.filter((perm) => perm !== permId);
+      newPermissions.push(id);
     }
-    form.setValue("permissions", newPermissions);
+    form.setValue('permissions', newPermissions, {shouldValidate: true});
+    //form.trigger('permissions');
   };
 
-  const onSelectAllPermissions = (isSelected: boolean) => {
+  const onSelectAllPermissions = () => {
     let newPermissions = form.getValues().permissions;
-    if (isSelected) {
-      newPermissions = state.permissions.map((perm) => perm.id);
-    } else {
+    if (newPermissions.length == state.permissions.length) {
       newPermissions = [];
+    } else {
+      newPermissions = state.permissions.map((perm) => perm.id);
     }
+    form.setValue('permissions', newPermissions, {shouldValidate: true});
   };
 
-  const userRole = userRoles.findSingle('id', form.getValues().roleId);
+  const formValues = form.getValues();
+  const userRole = userRoles.findSingle('id', formValues.roleId);
 
   return isPageLoading ? null : (
     <div className="page-settings page-user">
       <div className="row mb-3">
-        <ComponentPageUserAddHeader
-          state={state}
-          onNavigatePage={() => navigatePage()}
-        />
+        <ComponentPageUserAddHeader onNavigatePage={() => navigatePage()} />
       </div>
       <div className="row">
         <div className="col-md-12">
@@ -388,14 +377,15 @@ export default function PageUserAdd() {
                     >
                       <Tab eventKey="general" title={t('general')}>
                         <ComponentPageUserAddTabGeneral
-                          form={form}
-                          state={state}
+                          isPasswordRequired={!queries._id}
                         />
                       </Tab>
                       <Tab eventKey="options" title={t('options')}>
                         <ComponentPageUserAddTabOptions
-                          form={form}
-                          state={state}
+                          roleId={formValues.roleId}
+                          statusId={formValues.statusId}
+                          status={state.status}
+                          userRoles={state.userRoles}
                         />
                       </Tab>
                       <Tab
@@ -403,9 +393,13 @@ export default function PageUserAdd() {
                         title={`${t('permissions')} (${t(userRole?.langKey ?? '[noLangAdd]')})`}
                       >
                         <ComponentPageUserAddTabPermissions
-                          form={form}
-                          state={state}
-                          onSelectAllPermissions={(isSelected) => onSelectAllPermissions(isSelected)}
+                          permissionGroups={state.permissionGroups}
+                          permissions={state.permissions}
+                          userPermissions={formValues.permissions}
+                          onSelectAllPermissions={() =>
+                            onSelectAllPermissions()
+                          }
+                          onSelectPermission={(id) => onSelectPermission(id)}
                         />
                       </Tab>
                     </Tabs>

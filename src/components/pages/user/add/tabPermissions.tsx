@@ -1,42 +1,40 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/input/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { UseFormReturn } from 'react-hook-form';
-import { VariableLibrary } from '@library/variable';
-import { IPageUserAddFormState, IPageUserAddState } from '@pages/user/add';
+import { IPageUserAddState } from '@pages/user/add';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentPageUserAddPermissionGroup from './permissionGroup';
+import { PermissionId } from '@constants/permissions';
 
 type IComponentProps = {
-  state: IPageUserAddState;
-  form: UseFormReturn<IPageUserAddFormState>;
-  onSelectAllPermissions: (isSelected: boolean) => void;
+  permissions: IPageUserAddState['permissions'];
+  permissionGroups: IPageUserAddState['permissionGroups'];
+  userPermissions: PermissionId[];
+  onSelectAllPermissions: () => void;
+  onSelectPermission: (id: PermissionId) => void;
 };
 
 const ComponentPageUserAddTabPermissions = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
 
-    const formValues = props.form.getValues();
-
     return (
       <div className="row">
         <div className="col-md-12 mb-3">
           <ComponentFormCheckBox
             title={t('selectAll')}
-            checked={
-              props.state.permissions.length === formValues.permissions.length
-            }
-            onChange={(e) => props.onSelectAllPermissions(e.target.checked)}
+            checked={props.permissions.length === props.userPermissions.length}
+            onChange={(e) => props.onSelectAllPermissions()}
           />
         </div>
-        {props.state.permissionGroups.map((item, index) => (
+        {props.permissionGroups.map((item, index) => (
           <ComponentPageUserAddPermissionGroup
             key={`permission_group_${index}`}
             item={item}
-            state={props.state}
+            permissions={props.permissions}
+            userPermissions={props.userPermissions}
             index={index}
+            onSelectPermission={(id) => props.onSelectPermission(id)}
           />
         ))}
       </div>

@@ -1,16 +1,13 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { UseFormReturn } from 'react-hook-form';
 import ComponentFormSelect from '@components/elements/form/input/select';
-import {
-  IPageECommerceSettingsFormState,
-  IPageECommerceSettingsState,
-} from '@pages/e-commerce/settings';
+import { IPageECommerceSettingsState } from '@pages/e-commerce/settings';
+import { CurrencyId } from '@constants/currencyTypes';
 
 type IComponentProps = {
-  state: IPageECommerceSettingsState;
-  form: UseFormReturn<IPageECommerceSettingsFormState>;
+  currencyTypes: IPageECommerceSettingsState['currencyTypes'];
+  currencyId: CurrencyId;
 };
 
 const ComponentPageECommerceSettingsTabGeneral = React.memo(
@@ -25,11 +22,8 @@ const ComponentPageECommerceSettingsTabGeneral = React.memo(
             isMulti={false}
             name="eCommerce.currencyId"
             isSearchable={false}
-            options={props.state.currencyTypes}
-            value={props.state.currencyTypes.findSingle(
-              'value',
-              props.form.getValues().eCommerce.currencyId
-            )}
+            options={props.currencyTypes}
+            value={props.currencyTypes.findSingle('value', props.currencyId)}
           />
         </div>
       </div>

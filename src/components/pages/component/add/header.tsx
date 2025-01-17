@@ -1,13 +1,12 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import {
-  IPageComponentAddState,
-} from '@pages/component/add';
+import { IPageComponentAddState } from '@pages/component/add';
 import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
 
 type IComponentProps = {
-  state: IPageComponentAddState;
+  langId: IPageComponentAddState['langId'];
+  item: IPageComponentAddState['item'];
   onNavigatePage: () => void;
   onChangeLanguage: (_id: string) => void;
 };
@@ -33,9 +32,9 @@ const ComponentPageComponentAddHeader = React.memo((props: IComponentProps) => {
         <div className="col-md-6">
           <ComponentThemeLanguageSelector
             onChange={(item) => props.onChangeLanguage(item.value._id)}
-            selectedLangId={props.state.langId}
+            selectedLangId={props.langId}
             showMissingMessage
-            ownedLanguages={props.state.item?.elements.map(
+            ownedLanguages={props.item?.elements.map(
               (item) => item.alternates ?? []
             )}
           />

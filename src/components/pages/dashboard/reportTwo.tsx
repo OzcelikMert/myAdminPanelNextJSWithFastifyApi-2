@@ -6,7 +6,8 @@ import WorldMap from 'react-svg-worldmap';
 import ComponentChartArea from '@components/elements/charts/area';
 
 type IComponentProps = {
-  state: IPageDashboardState;
+  viewsWithStatistics: IPageDashboardState['viewsWithStatistics'];
+  worldMapSize: IPageDashboardState['worldMapSize'];
   setWorldMapSize: (size: IPageDashboardState['worldMapSize']) => void;
 };
 
@@ -26,12 +27,8 @@ const ComponentPageDashboardReportTwo = React.memo((props: IComponentProps) => {
             <div className="chart-container">
               <ComponentChartArea
                 toolTipLabel={t('visitors')}
-                data={props.state.viewsWithStatistics.day.map(
-                  (view) => view.total
-                )}
-                labels={props.state.viewsWithStatistics.day.map(
-                  (view) => view._id
-                )}
+                data={props.viewsWithStatistics.day.map((view) => view.total)}
+                labels={props.viewsWithStatistics.day.map((view) => view._id)}
               />
             </div>
           </div>
@@ -49,7 +46,7 @@ const ComponentPageDashboardReportTwo = React.memo((props: IComponentProps) => {
                   className="btn btn-gradient-success btn-sm"
                   onClick={() =>
                     props.setWorldMapSize(
-                      props.state.worldMapSize == 'xl' ? 'xxl' : 'xl'
+                      props.worldMapSize == 'xl' ? 'xxl' : 'xl'
                     )
                   }
                 >
@@ -59,7 +56,7 @@ const ComponentPageDashboardReportTwo = React.memo((props: IComponentProps) => {
                   className="btn btn-gradient-danger btn-sm"
                   onClick={() =>
                     props.setWorldMapSize(
-                      props.state.worldMapSize == 'xxl' ? 'xl' : 'lg'
+                      props.worldMapSize == 'xxl' ? 'xl' : 'lg'
                     )
                   }
                 >
@@ -75,8 +72,8 @@ const ComponentPageDashboardReportTwo = React.memo((props: IComponentProps) => {
                 strokeOpacity={0.4}
                 backgroundColor="var(--theme-bg)"
                 value-suffix="people"
-                size={props.state.worldMapSize}
-                data={props.state.viewsWithStatistics.country.map((view) => ({
+                size={props.worldMapSize}
+                data={props.viewsWithStatistics.country.map((view) => ({
                   country: (
                     view._id || window.navigator.language.slice(3)
                   ).toLowerCase(),

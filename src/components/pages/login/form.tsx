@@ -1,15 +1,14 @@
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormInput from '@components/elements/form/input/input';
 import { StatusId } from '@constants/status';
-import { IPageLoginFormState, IPageLoginState } from '@pages/login';
+import { IPageLoginState } from '@pages/login';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import React from 'react';
-import { UseFormReturn } from 'react-hook-form';
 
 type IComponentProps = {
-  state: IPageLoginState;
-  form: UseFormReturn<IPageLoginFormState>;
+  user: IPageLoginState['user'];
+  isWrong: IPageLoginState['isWrong'];
 };
 
 const ComponentPageLoginForm = React.memo((props: IComponentProps) => {
@@ -31,34 +30,30 @@ const ComponentPageLoginForm = React.memo((props: IComponentProps) => {
         <ComponentFormCheckBox title={t('keepMe')} name="keepMe" />
       </div>
       <div className="col-md-12">
-        {props.state.isWrong ? (
+        {props.isWrong ? (
           <p className="fw-bold text-danger">{t('wrongEmailOrPassword')}</p>
         ) : null}
-        {props.state.user?.statusId == StatusId.Banned && (
+        {props.user?.statusId == StatusId.Banned && (
           <div>
             <p className="fw-bold text-danger">{t('yourAccountIsBanned')}</p>
             <p className="fw-bold text-danger">
               {t('banDateEnd')}:
               <span className="text-muted ms-1">
-                {new Date(
-                  props.state.user?.banDateEnd || ''
-                ).toLocaleDateString()}
+                {new Date(props.user?.banDateEnd || '').toLocaleDateString()}
               </span>
             </p>
             <p className="fw-bold text-danger">
               {t('banComment')}:
-              <span className="text-muted ms-1">
-                {props.state.user?.banComment}
-              </span>
+              <span className="text-muted ms-1">{props.user?.banComment}</span>
             </p>
           </div>
         )}
-        {props.state.user?.statusId == StatusId.Pending && (
+        {props.user?.statusId == StatusId.Pending && (
           <div>
             <p className="fw-bold text-danger">{t('yourAccountIsPending')}</p>
           </div>
         )}
-        {props.state.user?.statusId == StatusId.Disabled && (
+        {props.user?.statusId == StatusId.Disabled && (
           <div>
             <p className="fw-bold text-danger">{t('yourAccountIsDisabled')}</p>
           </div>

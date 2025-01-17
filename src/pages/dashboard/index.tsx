@@ -306,14 +306,18 @@ export default function PageDashboard() {
 
   return isPageLoading ? null : (
     <div className="page-dashboard">
-      <ComponentPageDashboardReportOne state={state} />
+      <ComponentPageDashboardReportOne
+        viewsWithNumber={state.viewsWithNumber}
+        googleAnalyticURL={state.settings.googleAnalyticURL}
+      />
       <ComponentPageDashboardReportTwo
-        state={state}
+        viewsWithStatistics={state.viewsWithStatistics}
+        worldMapSize={state.worldMapSize}
         setWorldMapSize={(size) => setWorldMapSize(size)}
       />
       <ComponentPageDashboardLastPosts
         columns={getLastPostTableColumns()}
-        state={state}
+        lastPosts={state.lastPosts}
       />
     </div>
   );

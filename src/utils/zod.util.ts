@@ -24,11 +24,11 @@ const convertToArray = <T extends ZodTypeAny>(schema: T) => {
   }, schema);
 };
 
-const check = <T = any>(
-  validationSchema: ZodSchema<T>
-) => async (data: T) => {
-  return validationSchema.safeParseAsync(data);
-}
+const getParsedData =
+  <T = any>(validationSchema: ZodSchema<T>) =>
+  async (data: T) => {
+    return validationSchema.safeParseAsync(data);
+  };
 
 const getErrorText = (errorCode?: any): IPanelLanguageKeys => {
   switch (errorCode as ZodIssueCode) {
@@ -51,9 +51,35 @@ const getErrorText = (errorCode?: any): IPanelLanguageKeys => {
   }
 };
 
+const validationResolver =
+  <T = any>(validationSchema: z.ZodSchema) =>
+  async (data: T) => {
+    const validatedData = await getParsedData(validationSchema)(data);
+    if (validatedData.success) {
+      return {
+        values: validatedData.data,
+        errors: {},
+      };
+    } else {
+      return {
+        values: {},
+        errors: validatedData.error.errors.reduce((allErrors, currentError) => {
+          return {
+            ...allErrors,
+            [currentError.path[0]]: {
+              type: currentError.code ?? 'invalid_string',
+              message: currentError.message,
+            },
+          };
+        }, {}),
+      };
+    }
+  };
+
 export const ZodUtil = {
   convertToNumber: convertToNumber,
   convertToArray: convertToArray,
-  check: check,
-  getErrorText: getErrorText
+  getParsedData: getParsedData,
+  getErrorText: getErrorText,
+  validationResolver: validationResolver
 };

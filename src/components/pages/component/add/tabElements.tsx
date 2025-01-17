@@ -1,19 +1,14 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { UseFormReturn } from 'react-hook-form';
-import {
-  IPageComponentAddFormState,
-  IPageComponentAddState,
-} from '@pages/component/add';
 import { PermissionUtil } from '@utils/permission.util';
 import { UserRoleId } from '@constants/userRoles';
 import ComponentPageComponentAddElement from './element';
+import { IComponentElementModel } from 'types/models/component.model';
 
 type IComponentProps = {
-  state: IPageComponentAddState;
-  form: UseFormReturn<IPageComponentAddFormState>;
-  onCreateNewElement: () => void
+  elements: IComponentElementModel[];
+  onCreateNewElement: () => void;
   onEdit: (_id: string) => void;
   onDelete: (_id: string) => void;
 };
@@ -27,15 +22,16 @@ const ComponentPageComponentAddTabElements = React.memo(
       <div className="row mb-3">
         <div className="col-md-7">
           <div className="row">
-            {props.form
-              .getValues()
-              .elements?.orderBy('rank', 'asc')
-              .map((item, index) => <ComponentPageComponentAddElement 
-                index={index}
-                item={item}
-                onDelete={(_id) => props.onDelete(_id)}
-                onEdit={(_id) => props.onEdit(_id)}
-              />)}
+            {props.elements
+              ?.orderBy('rank', 'asc')
+              .map((item, index) => (
+                <ComponentPageComponentAddElement
+                  index={index}
+                  item={item}
+                  onDelete={(_id) => props.onDelete(_id)}
+                  onEdit={(_id) => props.onEdit(_id)}
+                />
+              ))}
           </div>
         </div>
         {PermissionUtil.checkPermissionRoleRank(
@@ -43,7 +39,7 @@ const ComponentPageComponentAddTabElements = React.memo(
           UserRoleId.SuperAdmin
         ) ? (
           <div
-            className={`col-md-7 text-start ${props.form.getValues().elements.length > 0 ? 'mt-4' : ''}`}
+            className={`col-md-7 text-start ${props.elements.length > 0 ? 'mt-4' : ''}`}
           >
             <button
               type={'button'}

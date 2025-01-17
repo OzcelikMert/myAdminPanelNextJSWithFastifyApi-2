@@ -23,23 +23,19 @@ type IComponentProps = {
   name?: string;
   title?: string;
   placeHolder?: string;
+  valueAsNumber?: boolean
 };
 
 const ComponentFormTags = React.memo((props: IComponentProps) => {
-  const {
-    register,
-    formState: { errors },
-    setValue,
-    watch
-  } = useFormContext();
-  const registeredInput = props.name && register(props.name);
+  const form = useFormContext();
+  const registeredInput = form && props.name && form.register(props.name, {valueAsNumber: props.valueAsNumber});
   const t = useAppSelector(selectTranslation);
 
   const [tags, setTags] = React.useState<string[]>(props.value ?? initialState.tags);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  if (props.name) {
-    const watchName = watch(props.name);
+  if (form && props.name) {
+    const watchName = form.watch(props.name);
   }
 
   useEffectAfterDidMount(() => {
@@ -56,8 +52,8 @@ const ComponentFormTags = React.memo((props: IComponentProps) => {
       if (!tags.includes(newTag)) {
         const newTags = [...tags, newTag];
         setTags(newTags);
-        if (props.name) {
-          setValue(props.name, newTags);
+        if (form && props.name) {
+          form.setValue(props.name, newTags);
         }
         inputRef.current.value = '';
         props.onChange(newTags, props.name);
@@ -68,8 +64,8 @@ const ComponentFormTags = React.memo((props: IComponentProps) => {
   const onRemove = (tag: string) => {
     const newTags = tags.filter((item) => item != tag);
     setTags(newTags);
-    if (props.name) {
-      setValue(props.name, newTags);
+    if (form && props.name) {
+      form.setValue(props.name, newTags);
     }
     props.onChange(newTags, props.name);
   };
@@ -102,12 +98,12 @@ const ComponentFormTags = React.memo((props: IComponentProps) => {
           placeholder={props.placeHolder}
         />
       </div>
-      {props.name &&
-        errors &&
-        errors[props.name] &&
-        errors[props.name]?.message && (
+      {form && props.name &&
+        form.formState.errors &&
+        form.formState.errors[props.name] &&
+        form.formState.errors[props.name]?.message && (
           <div className="error">
-            {t(ZodUtil.getErrorText(errors[props.name]?.type), [
+            {t(ZodUtil.getErrorText(form.formState.errors[props.name]?.type), [
               props.title ?? t(props.name as IPanelLanguageKeys),
             ])}
           </div>

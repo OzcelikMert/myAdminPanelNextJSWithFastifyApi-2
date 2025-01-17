@@ -238,6 +238,8 @@ export default function PageSettingLanguageAdd() {
     }
   };
 
+  const formValues = form.getValues();
+
   return isPageLoading ? null : (
     <div className="page-post">
       <div className="row mb-3">
@@ -267,14 +269,14 @@ export default function PageSettingLanguageAdd() {
                   >
                     <Tab eventKey="general" title={t('general')}>
                       <ComponentPageLanguageAddTabGeneral
-                        form={form}
-                        state={state}
+                        flags={state.flags}
+                        image={formValues.image}
                       />
                     </Tab>
                     <Tab eventKey="options" title={t('options')}>
                       <ComponentPageLanguageAddTabOptions
-                        form={form}
-                        state={state}
+                        status={state.status}
+                        statusId={formValues.statusId}
                       />
                     </Tab>
                   </Tabs>

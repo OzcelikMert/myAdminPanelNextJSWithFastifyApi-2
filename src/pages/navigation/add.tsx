@@ -5,9 +5,7 @@ import {
   INavigationUpdateWithIdParamService,
 } from 'types/services/navigation.service';
 import { NavigationService } from '@services/navigation.service';
-import {
-  IThemeFormSelectData,
-} from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { PermissionUtil } from '@utils/permission.util';
 import { NavigationEndPointPermission } from '@constants/endPointPermissions/navigation.endPoint.permission';
 import { ComponentUtil } from '@utils/component.util';
@@ -332,11 +330,14 @@ export default function PageNavigationAdd() {
     }
   };
 
+  const formValues = form.getValues();
+
   return isPageLoading ? null : (
     <div className="page-post">
       <div className="row mb-3">
         <ComponentPageNavigationAddHeader
-          state={state}
+          langId={state.langId}
+          item={state.item}
           onNavigatePage={() => navigatePage()}
           onChangeLanguage={(_id) => onChangeLanguage(_id)}
         />
@@ -369,14 +370,14 @@ export default function PageNavigationAdd() {
                     >
                       <Tab eventKey="general" title={t('general')}>
                         <ComponentPageNavigationAddTabGeneral
-                          form={form}
-                          state={state}
+                          items={state.items}
+                          parentId={formValues.parentId}
                         />
                       </Tab>
                       <Tab eventKey="options" title={t('options')}>
                         <ComponentPageNavigationAddTabOptions
-                          form={form}
-                          state={state}
+                          status={state.status}
+                          statusId={formValues.statusId}
                         />
                       </Tab>
                     </Tabs>

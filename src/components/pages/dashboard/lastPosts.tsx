@@ -7,7 +7,7 @@ import ComponentDataTable, {
 import { IPageDashboardState } from '@pages/dashboard';
 
 type IComponentProps = {
-  state: IPageDashboardState;
+  lastPosts: IPageDashboardState['lastPosts'];
   columns: IComponentDataTableColumn<IPageDashboardState['lastPosts'][0]>[];
 };
 
@@ -24,7 +24,7 @@ const ComponentPageDashboardLastPosts = React.memo((props: IComponentProps) => {
               <div className="table-post">
                 <ComponentDataTable
                   columns={props.columns}
-                  data={props.state.lastPosts}
+                  data={props.lastPosts}
                   i18={{
                     search: t('search'),
                     noRecords: t('noRecords'),

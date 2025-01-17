@@ -4,7 +4,8 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import { IPageDashboardState } from '@pages/dashboard';
 
 type IComponentProps = {
-  state: IPageDashboardState;
+  viewsWithNumber: IPageDashboardState['viewsWithNumber'];
+  googleAnalyticURL?: string;
 };
 
 const ComponentPageDashboardReportOne = React.memo((props: IComponentProps) => {
@@ -24,7 +25,7 @@ const ComponentPageDashboardReportOne = React.memo((props: IComponentProps) => {
                   </p>
                   <div className="fluid-container">
                     <h3 className="mb-0 font-weight-medium text-dark">
-                      {props.state.viewsWithNumber.liveTotal}
+                      {props.viewsWithNumber.liveTotal}
                     </h3>
                   </div>
                 </div>
@@ -41,7 +42,7 @@ const ComponentPageDashboardReportOne = React.memo((props: IComponentProps) => {
                   </p>
                   <div className="fluid-container">
                     <h3 className="mb-0 font-weight-medium text-dark">
-                      {props.state.viewsWithNumber.averageTotal}
+                      {props.viewsWithNumber.averageTotal}
                     </h3>
                   </div>
                 </div>
@@ -58,7 +59,7 @@ const ComponentPageDashboardReportOne = React.memo((props: IComponentProps) => {
                   </p>
                   <div className="fluid-container">
                     <h3 className="mb-0 font-weight-medium text-dark">
-                      {props.state.viewsWithNumber.weeklyTotal}
+                      {props.viewsWithNumber.weeklyTotal}
                     </h3>
                   </div>
                 </div>
@@ -78,10 +79,7 @@ const ComponentPageDashboardReportOne = React.memo((props: IComponentProps) => {
                       <a
                         target="_blank"
                         className="text-info fs-6 text-decoration-none"
-                        href={
-                          props.state.settings.googleAnalyticURL ??
-                          'javascript:void(0);'
-                        }
+                        href={props.googleAnalyticURL ?? 'javascript:void(0);'}
                       >
                         {t('clickToSee')}
                       </a>

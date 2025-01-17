@@ -1,9 +1,7 @@
 import { useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import {
-  IThemeFormSelectData,
-} from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import {
   IComponentGetResultService,
   IComponentUpdateWithIdParamService,
@@ -34,9 +32,7 @@ import {
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ComponentSchema,
-} from 'schemas/component.schema';
+import { ComponentSchema } from 'schemas/component.schema';
 import ComponentPageComponentAddElementEditModal from '@components/pages/component/add/editElementModal';
 import ComponentPageComponentAddTabGeneral from '@components/pages/component/add/tabGeneral';
 import ComponentPageComponentAddTabElements from '@components/pages/component/add/tabElements';
@@ -106,7 +102,10 @@ type IAction =
       payload: IPageComponentAddState['selectedElementId'];
     };
 
-const reducer = (state: IPageComponentAddState, action: IAction): IPageComponentAddState => {
+const reducer = (
+  state: IPageComponentAddState,
+  action: IAction
+): IPageComponentAddState => {
   switch (action.type) {
     case ActionTypes.SET_ELEMENT_TYPES:
       return { ...state, elementTypes: action.payload };
@@ -376,8 +375,8 @@ export default function PageComponentAdd() {
 
   const onDelete = async (_id: string) => {
     const newElements = form.getValues().elements;
-    const index = newElements.indexOfKey("_id", _id);
-    if(index > -1){
+    const index = newElements.indexOfKey('_id', _id);
+    if (index > -1) {
       const result = await Swal.fire({
         title: t('deleteAction'),
         html: `<b>'${newElements[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
@@ -386,7 +385,7 @@ export default function PageComponentAdd() {
         icon: 'question',
         showCancelButton: true,
       });
-  
+
       if (result.isConfirmed) {
         newElements.splice(index, 1);
         form.setValue('elements', newElements);
@@ -394,7 +393,11 @@ export default function PageComponentAdd() {
     }
   };
 
-  const selectedElement = form.getValues().elements.findSingle("_id", state.selectedElementId) as IComponentElementModel;
+  const formValues = form.getValues();
+  const selectedElement = formValues.elements.findSingle(
+    '_id',
+    state.selectedElementId
+  ) as IComponentElementModel;
 
   return isPageLoading ? null : (
     <div className="page-post">
@@ -411,9 +414,10 @@ export default function PageComponentAdd() {
       />
       <div className="row mb-3">
         <ComponentPageComponentAddHeader
-          onChangeLanguage={_id => onChangeLanguage(_id)}
+          onChangeLanguage={(_id) => onChangeLanguage(_id)}
           onNavigatePage={() => navigatePage()}
-          state={state}
+          item={state.item}
+          langId={state.langId}
         />
       </div>
       <div className="row position-relative">
@@ -448,18 +452,17 @@ export default function PageComponentAdd() {
                       ) ? (
                         <Tab eventKey="general" title={t('general')}>
                           <ComponentPageComponentAddTabGeneral
-                            state={state}
-                            form={form}
+                            componentTypes={state.componentTypes}
+                            typeId={formValues.typeId}
                           />
                         </Tab>
                       ) : null}
                       <Tab eventKey="elements" title={t('elements')}>
                         <ComponentPageComponentAddTabElements
-                          form={form}
-                          state={state}
+                          elements={formValues.elements}
                           onCreateNewElement={() => onCreateElement()}
-                          onDelete={_id => onDelete(_id)}
-                          onEdit={_id => onEdit(_id)}
+                          onDelete={(_id) => onDelete(_id)}
+                          onEdit={(_id) => onEdit(_id)}
                         />
                       </Tab>
                     </Tabs>

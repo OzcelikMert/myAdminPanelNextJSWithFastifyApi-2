@@ -2,19 +2,13 @@ import React from 'react';
 import ComponentFormInput from '@components/elements/form/input/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { UseFormReturn } from 'react-hook-form';
-import { VariableLibrary } from '@library/variable';
-import { IPageUserAddFormState, IPageUserAddState } from '@pages/user/add';
 
 type IComponentProps = {
-  state: IPageUserAddState;
-  form: UseFormReturn<IPageUserAddFormState>;
+  isPasswordRequired?: boolean;
 };
 
 const ComponentPageUserAddTabGeneral = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-
-  const formValues = props.form.getValues();
 
   return (
     <div className="row">
@@ -39,7 +33,7 @@ const ComponentPageUserAddTabGeneral = React.memo((props: IComponentProps) => {
           title={`${t('password')}*`}
           name="password"
           type="password"
-          required={VariableLibrary.isEmpty(formValues._id)}
+          required={props.isPasswordRequired}
         />
       </div>
     </div>

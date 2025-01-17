@@ -2,23 +2,17 @@ import React from 'react';
 import ComponentFormInput from '@components/elements/form/input/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { UseFormReturn } from 'react-hook-form';
 import ComponentFormSelect from '@components/elements/form/input/select';
-import {
-  IPageNavigationAddFormState,
-  IPageNavigationAddState,
-} from '@pages/navigation/add';
+import { IPageNavigationAddState } from '@pages/navigation/add';
 
 type IComponentProps = {
-  state: IPageNavigationAddState;
-  form: UseFormReturn<IPageNavigationAddFormState>;
+  items: IPageNavigationAddState['items'];
+  parentId?: string;
 };
 
 const ComponentPageNavigationAddTabGeneral = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
-
-    const formValues = props.form.getValues();
 
     return (
       <div className="row">
@@ -43,11 +37,8 @@ const ComponentPageNavigationAddTabGeneral = React.memo(
             title={t('main')}
             name="parentId"
             placeholder={t('chooseMain')}
-            options={props.state.items}
-            value={props.state.items.findSingle(
-              'value',
-              formValues.parentId || ''
-            )}
+            options={props.items}
+            value={props.items.findSingle('value', props.parentId || '')}
           />
         </div>
       </div>
