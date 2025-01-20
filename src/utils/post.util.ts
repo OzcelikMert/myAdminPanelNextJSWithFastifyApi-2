@@ -5,6 +5,7 @@ import { EndPoints } from '@constants/endPoints';
 import { PathUtil } from '@utils/path.util';
 import { PostEndPoint } from '@constants/endPoints/post.endPoint';
 import { IBreadCrumbData } from '@redux/features/breadCrumbSlice';
+import { PostSchema } from 'schemas/post.schema';
 
 const getPagePath = (postTypeId: PostTypeId) => {
   let pagePath = '';
@@ -29,17 +30,19 @@ const getPagePath = (postTypeId: PostTypeId) => {
 const getPageTitles = (params: IPostGetPageTitleParamUtil) => {
   let titles: IBreadCrumbData[] = [
     {
-      title:
-      params.t(postTypes.findSingle('id', params.postTypeId)?.langKey ?? '[noLangAdd]'),
+      title: params.t(
+        postTypes.findSingle('id', params.postTypeId)?.langKey ?? '[noLangAdd]'
+      ),
       url: getPagePath(params.postTypeId).LIST,
     },
   ];
 
   if (params.termTypeId) {
     titles.push({
-      title:
-        params.t(postTermTypes.findSingle('id', params.termTypeId)?.langKey ??
-        '[noLangAdd]'),
+      title: params.t(
+        postTermTypes.findSingle('id', params.termTypeId)?.langKey ??
+          '[noLangAdd]'
+      ),
       url: getPagePath(params.postTypeId).TERM_WITH(params.termTypeId).LIST,
     });
   }
@@ -65,7 +68,26 @@ const getPageTitles = (params: IPostGetPageTitleParamUtil) => {
   return titles;
 };
 
+const getSchema = (typeId: PostTypeId, _id?: string) => {
+  let postSchema = null;
+  if (typeId == PostTypeId.Product) {
+    if (_id) {
+      postSchema = PostSchema.putProductWithId;
+    } else {
+      postSchema = PostSchema.postProduct;
+    }
+  } else {
+    if (_id) {
+      postSchema = PostSchema.putWithId;
+    } else {
+      postSchema = PostSchema.post;
+    }
+  }
+  return postSchema;
+};
+
 export const PostUtil = {
   getPagePath: getPagePath,
   getPageTitles: getPageTitles,
+  getSchema: getSchema,
 };

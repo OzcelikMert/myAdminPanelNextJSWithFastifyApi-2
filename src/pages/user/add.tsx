@@ -330,8 +330,7 @@ export default function PageUserAdd() {
     } else {
       newPermissions.push(id);
     }
-    form.setValue('permissions', newPermissions, {shouldValidate: true});
-    //form.trigger('permissions');
+    form.setValue('permissions', newPermissions, { shouldValidate: true });
   };
 
   const onSelectAllPermissions = () => {
@@ -341,7 +340,7 @@ export default function PageUserAdd() {
     } else {
       newPermissions = state.permissions.map((perm) => perm.id);
     }
-    form.setValue('permissions', newPermissions, {shouldValidate: true});
+    form.setValue('permissions', newPermissions, { shouldValidate: true });
   };
 
   const formValues = form.getValues();

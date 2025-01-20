@@ -47,7 +47,7 @@ export interface IPostBeforeAndAfterModel {
 }
 
 export interface IPostContentButtonModel {
-  _id?: string;
+  _id: string;
   title: string;
   url?: string;
 }
@@ -85,7 +85,7 @@ export interface IPostECommerceShippingModel {
 }
 
 export interface IPostECommerceAttributeModel<T = string, P = string[]> {
-  _id?: string;
+  _id: string;
   attributeId: T;
   variations: P;
   typeId: AttributeTypeId;

@@ -1,5 +1,4 @@
-import { ActionDispatch, useEffect, useReducer } from 'react';
-import { IUseFormReducer } from '@library/react/handles/form';
+import React from 'react';
 import {
   IPostECommerceAttributeModel,
   IPostECommerceVariationModel,
@@ -9,11 +8,7 @@ import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import Image from 'next/image';
 import { ProductTypeId } from '@constants/productTypes';
-import {
-  IPostAddAction,
-  IPostAddComponentFormState,
-  IPostAddComponentState,
-} from '@pages/post/add';
+
 import { AttributeTypeId } from '@constants/attributeTypes';
 import dynamic from 'next/dynamic';
 import ComponentToolTip from '@components/elements/tooltip';
@@ -26,6 +21,12 @@ import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentFormSelect from '@components/elements/form/input/select';
 import { useDidMount } from '@library/react/customHooks';
+import ComponentPagePostAddECommerceTabOptions from './eCommerceTabOptions';
+import ComponentPagePostAddECommerceTabGallery from './eCommerceTabGallery';
+import ComponentPagePostAddECommerceTabPricing from './eCommerceTabPricing';
+import ComponentPagePostAddECommerceTabInvertory from './eCommerceTabInventory';
+import ComponentPagePostAddECommerceTabShipping from './eCommerceTabShipping';
+import ComponentPagePostAddECommerceTabAttributes from './eCommerceTabAttributes';
 
 const ComponentThemeRichTextBox = dynamic(
   () => import('@components/theme/richTextBox'),
@@ -90,12 +91,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
 };
 
 type IComponentProps = {
-  state: IPostAddComponentState;
-  dispatch: ActionDispatch<[action: IPostAddAction]>;
-  formState: IPostAddComponentFormState;
-  setFormState: IUseFormReducer<IPostAddComponentFormState>['setFormState'];
-  onChangeInput: IUseFormReducer<IPostAddComponentFormState>['onChangeInput'];
-  onChangeSelect: IUseFormReducer<IPostAddComponentFormState>['onChangeSelect'];
+
 };
 
 export default function ComponentPagePostAddECommerce(props: IComponentProps) {
@@ -396,190 +392,7 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
       payload: _id == state.variationAccordionToggleKey ? '' : _id,
     });
   };
-
-  const TabPricing = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7">
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('taxIncludedPrice')}
-                name="eCommerce.pricing.taxIncluded"
-                type="number"
-                value={props.formState.eCommerce?.pricing?.taxIncluded}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('taxExcludedPrice')}
-                name="eCommerce.pricing.taxExcluded"
-                type="number"
-                value={props.formState.eCommerce?.pricing?.taxExcluded}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('taxRate')}
-                name="eCommerce.pricing.taxRate"
-                type="number"
-                value={props.formState.eCommerce?.pricing?.taxRate}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('comparedPrice')}
-                name="eCommerce.pricing.compared"
-                type="number"
-                value={props.formState.eCommerce?.pricing?.compared}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const TabGallery = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentThemeChooseImage
-            onSelected={(images) =>
-              props.setFormState({
-                eCommerce: {
-                  ...props.formState.eCommerce!,
-                  images,
-                },
-              })
-            }
-            isMulti={true}
-            selectedImages={props.formState.eCommerce?.images}
-            showModalButtonText={t('selectImages')}
-          />
-        </div>
-        <div className="col-md-12 mb-3">
-          <div className="row">
-            {props.formState.eCommerce?.images?.map((image) => (
-              <div className="col-md-3 mb-3">
-                <Image
-                  src={ImageSourceUtil.getUploadedImageSrc(image)}
-                  alt={image}
-                  className="post-image img-fluid"
-                  layout="responsive"
-                  objectFit="contain"
-                  width={0}
-                  height={0}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const TabInventory = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7">
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('sku')}
-                name="eCommerce.inventory.sku"
-                type="text"
-                value={props.formState.eCommerce?.inventory?.sku}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('quantity')}
-                name="eCommerce.inventory.quantity"
-                disabled={
-                  !props.formState.eCommerce?.inventory?.isManageStock || false
-                }
-                type="number"
-                value={props.formState.eCommerce?.inventory?.quantity}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-7">
-              <ComponentFormCheckBox
-                title={t('isManageStock')}
-                name="eCommerce.inventory.isManageStock"
-                checked={Boolean(
-                  props.formState.eCommerce?.inventory?.isManageStock
-                )}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const TabShipping = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7">
-          <div className="row">
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('width')}
-                name="eCommerce.shipping.width"
-                type="text"
-                value={props.formState.eCommerce?.shipping?.width}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('height')}
-                name="eCommerce.shipping.height"
-                type="text"
-                value={props.formState.eCommerce?.shipping?.height}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('depth')}
-                name="eCommerce.shipping.depth"
-                type="text"
-                value={props.formState.eCommerce?.shipping?.depth}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('weight')}
-                name="eCommerce.shipping.weight"
-                type="text"
-                value={props.formState.eCommerce?.shipping?.weight}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-6 mb-3">
-              <ComponentFormInput
-                title={t('shippingPrice')}
-                name="eCommerce.pricing.shipping"
-                type="number"
-                value={props.formState.eCommerce?.pricing?.shipping}
-                onChange={(e) => props.onChangeInput(e)}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  
 
   const Variation = (
     variation: IPostECommerceVariationModel,
@@ -906,128 +719,6 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
     );
   };
 
-  const Attribute = (
-    attribute: IPostECommerceAttributeModel,
-    index: number
-  ) => {
-    return (
-      <Card>
-        <Card.Header>
-          <div className="row">
-            <div className="col-9">
-              <div className="row">
-                <div className="col-md-6 mt-2 mt-md-0">
-                  <ComponentFormSelect
-                    title={t('attribute')}
-                    options={props.state.attributes}
-                    value={props.state.attributes.findSingle(
-                      'value',
-                      attribute.attributeId
-                    )}
-                    onChange={(item: any, e) =>
-                      onChangeAttribute(index, item.value)
-                    }
-                  />
-                </div>
-                <div className="col-md-6 mt-2 mt-md-0">
-                  <ComponentFormSelect
-                    title={t('type')}
-                    name={`eCommerce.attributes.${index}.typeId`}
-                    options={props.state.attributeTypes}
-                    value={props.state.attributeTypes?.findSingle(
-                      'value',
-                      attribute.typeId
-                    )}
-                    onChange={(item: any, e) =>
-                      props.onChangeSelect(e.name, item.value)
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="col-3 m-auto">
-              <div className="row">
-                <div className="col-md-6 text-center text-md-end">
-                  <button
-                    type="button"
-                    className="btn btn-gradient-danger btn-lg"
-                    onClick={() => onDeleteAttribute(index)}
-                  >
-                    <i className="mdi mdi-trash-can"></i>
-                  </button>
-                </div>
-                <div className="col-md-6 text-center pt-1 mt-5 m-md-auto">
-                  <ComponentAccordionToggle
-                    eventKey={attribute._id || ''}
-                    onClick={() =>
-                      onClickAttributeAccordionToggle(attribute._id ?? '')
-                    }
-                  >
-                    <div className="fs-4 cursor-pointer">
-                      <i
-                        className={`mdi mdi-chevron-${state.attributeAccordionToggleKey == attribute._id ? 'up' : 'down'}`}
-                      ></i>
-                    </div>
-                  </ComponentAccordionToggle>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Card.Header>
-        <Accordion.Collapse
-          eventKey={attribute._id || ''}
-          in={state.attributeAccordionToggleKey == attribute._id}
-        >
-          <Card.Body>
-            <div className="row">
-              <div className="col-md-12">
-                <ComponentFormSelect
-                  title={t('variations')}
-                  isMulti
-                  closeMenuOnSelect={false}
-                  options={props.state.variations.findMulti(
-                    'parentId',
-                    attribute.attributeId
-                  )}
-                  value={props.state.variations.findMulti(
-                    'value',
-                    attribute.variations
-                  )}
-                  onChange={(item: any, e) =>
-                    onChangeAttributeVariations(index, item)
-                  }
-                />
-              </div>
-            </div>
-          </Card.Body>
-        </Accordion.Collapse>
-      </Card>
-    );
-  };
-
-  const TabAttributes = () => {
-    return (
-      <div className="row mb-3">
-        <div className="col-md-7">
-          <button
-            type={'button'}
-            className="btn btn-gradient-success btn-lg"
-            onClick={() => onAddNewAttribute()}
-          >
-            + {t('addNew')}
-          </button>
-        </div>
-        <div className="col-md-7 mt-2">
-          <Accordion flush>
-            {props.formState.eCommerce?.attributes?.map((option, index) => {
-              return Attribute(option, index);
-            })}
-          </Accordion>
-        </div>
-      </div>
-    );
-  };
-
   const TabVariations = () => {
     return (
       <div className="row mb-3">
@@ -1082,27 +773,6 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
     );
   };
 
-  const TabOptions = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentFormSelect
-            title={t('productType')}
-            name="eCommerce.typeId"
-            options={props.state.productTypes}
-            value={props.state.productTypes?.findSingle(
-              'value',
-              props.formState.eCommerce?.typeId || ''
-            )}
-            onChange={(item: any, e) =>
-              props.onChangeSelect(e.name, item.value)
-            }
-          />
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="grid-margin stretch-card">
       <div className="card">
@@ -1117,34 +787,52 @@ export default function ComponentPagePostAddECommerce(props: IComponentProps) {
               transition={false}
             >
               <Tab eventKey="options" title={t('options')}>
-                <TabOptions />
+                <ComponentPagePostAddECommerceTabOptions
+                  productTypes={}
+                  productTypeId={}
+                />
               </Tab>
               {props.formState.eCommerce?.typeId ==
               ProductTypeId.SimpleProduct ? (
                 <Tab eventKey="gallery" title={t('gallery')}>
-                  <TabGallery />
+                  <ComponentPagePostAddECommerceTabGallery
+                    images={}
+                    onChangeImages={}
+                  />
                 </Tab>
               ) : null}
               {props.formState.eCommerce?.typeId ==
               ProductTypeId.SimpleProduct ? (
                 <Tab eventKey="pricing" title={t('pricing')}>
-                  <TabPricing />
+                  <ComponentPagePostAddECommerceTabPricing
+                    pricing={}
+                  />
                 </Tab>
               ) : null}
               {props.formState.eCommerce?.typeId ==
               ProductTypeId.SimpleProduct ? (
                 <Tab eventKey="inventory" title={t('inventory')}>
-                  <TabInventory />
+                  <ComponentPagePostAddECommerceTabInvertory
+                    inventory={}
+                  />
                 </Tab>
               ) : null}
               {props.formState.eCommerce?.typeId ==
               ProductTypeId.SimpleProduct ? (
                 <Tab eventKey="shipping" title={t('shipping')}>
-                  <TabShipping />
+                  <ComponentPagePostAddECommerceTabShipping
+                    shipping={}
+                  />
                 </Tab>
               ) : null}
               <Tab eventKey="attributes" title={t('attributes')}>
-                <TabAttributes />
+                <ComponentPagePostAddECommerceTabAttributes
+                  attributes={}
+                  attributeTypes={}
+                  variations={}
+                  onClickAddNew={}
+                  onClickDelete={}
+                />
               </Tab>
               {props.formState.eCommerce?.typeId ==
               ProductTypeId.VariableProduct ? (

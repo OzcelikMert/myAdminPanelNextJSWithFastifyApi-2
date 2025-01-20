@@ -8,3 +8,7 @@ Things to do:
     - move in-function components to components/pages
     - add React.memo for all components
     - use new t function for panel language keys with variables
+    - use specific props instead of global props
+    - set rich textbox for use form hook
+    - add value to checkboxes
+    - rename eCommerce.variations.itemId to eCommerce.variations.item

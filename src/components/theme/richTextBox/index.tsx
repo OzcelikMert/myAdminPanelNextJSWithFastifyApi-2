@@ -44,8 +44,8 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
 };
 
 type IComponentProps = {
-  value: string;
-  onChange: (newContent: string) => void;
+  value?: string;
+  onChange?: (newContent: string) => void;
 };
 
 export default function ComponentThemeRichTextBox(props: IComponentProps) {
@@ -118,6 +118,12 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
     dispatch({ type: ActionTypes.SET_IS_GALLERY_SHOW, payload: false });
   };
 
+  const onChange = (newValue: string) => {
+    if(props.onChange){
+      props.onChange(newValue);
+    }
+  }
+
   return state.isLoading ? (
     <Spinner animation="border" />
   ) : (
@@ -136,7 +142,7 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
             ref={ref}
             value={state.value}
             config={config}
-            onBlur={(newContent) => props.onChange(ref.current?.value || '')}
+            onBlur={(newContent) => onChange(ref.current?.value || '')}
           />
         }
       </React.Fragment>
