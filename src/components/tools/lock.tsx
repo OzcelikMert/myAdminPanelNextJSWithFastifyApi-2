@@ -29,7 +29,7 @@ const initialFormState: IComponentFormState = {
   password: '',
 };
 
-export default function ComponentToolLock() {
+const ComponentToolLock = React.memo(() => {
   const abortController = new AbortController();
 
   const appDispatch = useAppDispatch();
@@ -142,4 +142,6 @@ export default function ComponentToolLock() {
       </div>
     </div>
   );
-}
+});
+
+export default ComponentToolLock;

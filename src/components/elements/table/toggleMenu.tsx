@@ -14,7 +14,7 @@ type IComponentProps = {
   label?: string | any;
 };
 
-export default function ComponentTableToggleMenu(props: IComponentProps) {
+const ComponentTableToggleMenu = React.memo((props: IComponentProps) => {
   return (
     <Dropdown align={'end'} className="theme-table-toggle">
       <Dropdown.Toggle className="theme-table-toggle-btn p-0">
@@ -36,4 +36,6 @@ export default function ComponentTableToggleMenu(props: IComponentProps) {
       </Dropdown.Menu>
     </Dropdown>
   );
-}
+});
+
+export default ComponentTableToggleMenu;

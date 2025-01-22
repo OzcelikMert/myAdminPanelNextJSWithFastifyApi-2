@@ -1,6 +1,6 @@
 import React from 'react';
 import { Modal } from 'react-bootstrap';
-import { PostTermTypeId } from '@constants/postTermTypes';
+import { PostTermTypeId, postTermTypes } from '@constants/postTermTypes';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import PagePostTermAdd, {
@@ -22,6 +22,8 @@ type IComponentProps = {
 const ComponentThemeModalPostTerm = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
 
+  const selectedTerm = postTermTypes.findSingle("id", props.termTypeId);
+
   return (
     <Modal className="form-modal" size="lg" centered show={props.isShow}>
       <Modal.Header className="border-bottom-0">
@@ -37,7 +39,7 @@ const ComponentThemeModalPostTerm = React.memo((props: IComponentProps) => {
       <Modal.Body className="m-0 p-0">
         <div className="card">
           <div className="card-body">
-            <h4 className="text-center">{t('tag')}</h4>
+            <h4 className="text-center">{t(selectedTerm?.langKey ?? "[noLangAdd]")}</h4>
             <PagePostTermAdd
               _id={props._id}
               postTypeId={props.postTypeId}

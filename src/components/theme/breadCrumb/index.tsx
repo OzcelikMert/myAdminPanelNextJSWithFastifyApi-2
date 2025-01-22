@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { EndPoints } from '@constants/endPoints';
 import { useAppSelector } from '@redux/hooks';
 
-export default function ComponentThemeBreadCrumb() {
+const ComponentThemeBreadCrumb = () => {
   const breadCrumbs = useAppSelector((state) => state.breadCrumbState.data);
 
   return (
@@ -30,3 +30,5 @@ export default function ComponentThemeBreadCrumb() {
     </h3>
   );
 }
+
+export default ComponentThemeBreadCrumb;

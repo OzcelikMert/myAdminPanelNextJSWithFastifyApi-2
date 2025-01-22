@@ -8,7 +8,6 @@ import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import { PostTermTypeId } from '@constants/postTermTypes';
 
 type IComponentProps = {
-  item: IPagePostAddState['item'];
   categories?: IPagePostAddState['categories'];
   tags?: IPagePostAddState['tags'];
   image?: string;
@@ -19,9 +18,11 @@ type IComponentProps = {
   showIconCheckBox?: boolean;
   showCategorySelect?: boolean;
   showTagSelect?: boolean;
-  onChangeImage: (image: string) => void;
-  onChangeIsIconActive: () => void;
-  onClickShowTermModal: (termTypeId: PostTermTypeId) => void;
+  isECommerceVariation?: boolean;
+  index?: number;
+  onChangeImage?: (image: string) => void;
+  onChangeIsIconActive?: () => void;
+  onClickShowTermModal?: (termTypeId: PostTermTypeId) => void;
 };
 
 const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
@@ -37,7 +38,9 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
               className="form-check-input"
               type="checkbox"
               id="flexSwitchCheckDefault"
-              onChange={(e) => props.onChangeIsIconActive()}
+              onChange={(e) =>
+                props.onChangeIsIconActive && props.onChangeIsIconActive()
+              }
             />
             <label
               className="form-check-label ms-2"
@@ -60,8 +63,11 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
       {!props.isIconActive ? (
         <div className="col-md-7 mb-3">
           <ComponentThemeChooseImage
-            onSelected={(images) => props.onChangeImage(images[0])}
-            isMulti={false}
+            name={
+              props.isECommerceVariation
+                ? `eCommerce.variations.${props.index}.itemId.contents.image`
+                : `contents.image`
+            }
             selectedImages={props.image ? [props.image] : undefined}
             isShowReviewImage={true}
             reviewImage={props.image}
@@ -72,7 +78,11 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
       <div className="col-md-7 mb-3">
         <ComponentFormInput
           title={`${t('title')}*`}
-          name="contents.title"
+          name={
+            props.isECommerceVariation
+              ? `eCommerce.variations.${props.index}.itemId.contents.title`
+              : `contents.title`
+          }
           type="text"
           required={true}
         />
@@ -80,7 +90,11 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
       <div className="col-md-7 mb-3">
         <ComponentFormInput
           title={t('shortContent').toCapitalizeCase()}
-          name="contents.shortContent"
+          name={
+            props.isECommerceVariation
+              ? `eCommerce.variations.${props.index}.itemId.contents.shortContent`
+              : `contents.shortContent`
+          }
           type="textarea"
         />
       </div>
@@ -104,6 +118,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
               type={'button'}
               className="btn btn-gradient-success btn-lg"
               onClick={() =>
+                props.onClickShowTermModal &&
                 props.onClickShowTermModal(PostTermTypeId.Category)
               }
             >
@@ -131,7 +146,10 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
             <button
               type={'button'}
               className="btn btn-gradient-success btn-lg"
-              onClick={() => props.onClickShowTermModal(PostTermTypeId.Tag)}
+              onClick={() =>
+                props.onClickShowTermModal &&
+                props.onClickShowTermModal(PostTermTypeId.Tag)
+              }
             >
               <i className="mdi mdi-plus"></i> {t('addNew')}
             </button>

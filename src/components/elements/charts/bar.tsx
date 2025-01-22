@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
-import { useReducer } from 'react';
+import React, { useReducer } from 'react';
 import { useDidMount } from '@library/react/customHooks';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip);
@@ -66,7 +66,7 @@ type IComponentProps = {
   label: string;
 };
 
-export default function ComponentChartBar(props: IComponentProps) {
+const ComponentChartBar = React.memo((props: IComponentProps) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useDidMount(() => {
@@ -111,4 +111,6 @@ export default function ComponentChartBar(props: IComponentProps) {
       options={state.options}
     />
   );
-}
+});
+
+export default ComponentChartBar;

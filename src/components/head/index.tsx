@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import Head from 'next/head';
 
 type IComponentProps = {
@@ -6,10 +6,10 @@ type IComponentProps = {
   icon?: string;
 };
 
-export default function ComponentHead( { title, icon }: IComponentProps) {
+const ComponentHead = React.memo((props: IComponentProps) => {
   return (
     <Head>
-      <title>Admin Panel | {title || 'Loading...'}</title>
+      <title>Admin Panel | {props.title || 'Loading...'}</title>
       <meta charSet="utf-8" />
       <link rel="shortcut icon" href="/images/ozcelikLogoMini.png" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,4 +18,6 @@ export default function ComponentHead( { title, icon }: IComponentProps) {
       <meta name="author" content="Özçelik Software" />
     </Head>
   );
-}
+});
+
+export default ComponentHead;

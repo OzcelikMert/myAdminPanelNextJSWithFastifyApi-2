@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Modal, Tab, Tabs } from 'react-bootstrap';
 import PageGalleryList from '@pages/gallery/list';
 import PageGalleryUpload from '@pages/gallery/upload';
@@ -22,7 +22,7 @@ type IComponentProps = {
   selectedImages?: string[];
 };
 
-export default function ComponentThemeChooseImageGallery(props: IComponentProps) {
+const ComponentThemeChooseImageGallery = React.memo((props: IComponentProps) => {
   const [formActiveKey, setFormActiveKey] = React.useState(initialState.formActiveKey);
   const [uploadedImages, setUploadedImages] = React.useState(initialState.uploadedImages);
 
@@ -78,4 +78,6 @@ export default function ComponentThemeChooseImageGallery(props: IComponentProps)
       </Modal.Body>
     </Modal>
   );
-}
+});
+
+export default ComponentThemeChooseImageGallery;

@@ -16,28 +16,28 @@ import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useEffectAfterDidMount } from '@library/react/customHooks';
 
 type ICurrentPath = {
-  pathname: string,
-  query?: any
-}
+  pathname: string;
+  query?: any;
+};
 
-const checkEqualRouterAndCurrentPath = (router: NextRouter, currentPath: ICurrentPath) => {
+const checkEqualRouterAndCurrentPath = (
+  router: NextRouter,
+  currentPath: ICurrentPath
+) => {
   const jsonCurrentPath = JSON.stringify(currentPath);
   const jsonRouter = JSON.stringify({
     pathname: router.pathname,
-    query: router.query
+    query: router.query,
   } as ICurrentPath);
   return jsonCurrentPath == jsonRouter;
-}
+};
 
 type IComponentProps = {
   children: React.ReactNode;
   statusCode?: number;
 };
 
-export default function ComponentApp({
-  children,
-  statusCode,
-}: IComponentProps) {
+const ComponentApp = React.memo((props: IComponentProps) => {
   const appDispatch = useAppDispatch();
   const router = useRouter();
   const appState = useAppSelector((state) => state.appState);
@@ -46,23 +46,26 @@ export default function ComponentApp({
 
   const currentPathRef = useRef<ICurrentPath>({
     pathname: router.pathname,
-    query: router.query
+    query: router.query,
   });
-  const isEqualRouterAndCurrentPath = checkEqualRouterAndCurrentPath(router, currentPathRef.current);
-  
+  const isEqualRouterAndCurrentPath = checkEqualRouterAndCurrentPath(
+    router,
+    currentPathRef.current
+  );
+
   useEffectAfterDidMount(() => {
-    if(!isEqualRouterAndCurrentPath){
+    if (!isEqualRouterAndCurrentPath) {
       appDispatch(setIsPageLoadingState(true));
       window.scrollTo(0, 0);
       document.body.scrollTop = 0;
       currentPathRef.current = {
         pathname: router.pathname,
-        query: router.query
+        query: router.query,
       };
     }
   }, [isEqualRouterAndCurrentPath]);
 
-  if (router.asPath === '/' || typeof statusCode !== 'undefined') {
+  if (router.asPath === '/' || typeof props.statusCode !== 'undefined') {
     router.replace(EndPoints.LOGIN);
     return null;
   }
@@ -111,11 +114,11 @@ export default function ComponentApp({
                   <ComponentSpinnerDonut customClass="page-spinner" />
                 ) : null}
                 {!isFullPageLayout ? <PageHeader /> : null}
-                {
-                  isEqualRouterAndCurrentPath
-                    ?  <ComponentProviderAuth>{children}</ComponentProviderAuth>
-                    : null
-                }
+                {isEqualRouterAndCurrentPath ? (
+                  <ComponentProviderAuth>
+                    {props.children}
+                  </ComponentProviderAuth>
+                ) : null}
               </div>
               {!isFullPageLayout ? <ComponentToolFooter /> : null}
             </div>
@@ -124,4 +127,6 @@ export default function ComponentApp({
       </ComponentProviderAppInit>
     </div>
   );
-}
+});
+
+export default ComponentApp;

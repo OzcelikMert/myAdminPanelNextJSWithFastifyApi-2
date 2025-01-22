@@ -13,6 +13,7 @@ import { PermissionUtil } from '@utils/permission.util';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
+import React from 'react';
 
 type IComponentProps = {
   isShow: boolean;
@@ -20,7 +21,7 @@ type IComponentProps = {
   userInfo: IUserModel;
 };
 
-export default function ComponentThemeUsersProfileCard(props: IComponentProps) {
+const ComponentThemeUsersProfileCard = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
@@ -218,4 +219,6 @@ export default function ComponentThemeUsersProfileCard(props: IComponentProps) {
       </Modal.Body>
     </Modal>
   );
-}
+});
+
+export default ComponentThemeUsersProfileCard;

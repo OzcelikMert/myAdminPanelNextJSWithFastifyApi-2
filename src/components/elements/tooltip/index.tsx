@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 type IComponentProps = {
@@ -6,15 +6,18 @@ type IComponentProps = {
   children: React.ReactElement;
 };
 
-export default function ComponentToolTip(props: IComponentProps) {
-
+const ComponentToolTip = React.memo((props: IComponentProps) => {
   return (
     <OverlayTrigger
       delay={{ hide: 150, show: 150 }}
-      overlay={(overlayProps) => <Tooltip {...overlayProps}>{props.message}</Tooltip>}
+      overlay={(overlayProps) => (
+        <Tooltip {...overlayProps}>{props.message}</Tooltip>
+      )}
       placement="top"
     >
       {props.children}
     </OverlayTrigger>
   );
-}
+});
+
+export default ComponentToolTip;

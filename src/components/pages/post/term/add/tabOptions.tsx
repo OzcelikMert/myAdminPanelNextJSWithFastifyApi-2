@@ -9,6 +9,7 @@ import { IPagePostTermAddState } from '@pages/post/term/add';
 type IComponentProps = {
   status: IPagePostTermAddState["status"]
   statusId: StatusId;
+  isModal?: boolean
 };
 
 const ComponentPagePostTermAddTabOptions = React.memo(
@@ -17,7 +18,7 @@ const ComponentPagePostTermAddTabOptions = React.memo(
 
     return (
       <div className="row">
-        <div className="col-md-7 mb-3">
+        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
           <ComponentFormSelect
             title={t('status')}
             name="statusId"
@@ -25,7 +26,7 @@ const ComponentPagePostTermAddTabOptions = React.memo(
             value={props.status?.findSingle('value', props.statusId)}
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
           <ComponentFormInput
             title={t('rank')}
             name="rank"

@@ -1,17 +1,19 @@
-import { IAppStore, makeStore } from '@redux/store'
-import { useRef } from 'react'
-import { Provider } from 'react-redux'
+import { IAppStore, makeStore } from '@redux/store';
+import { useRef } from 'react';
+import { Provider } from 'react-redux';
 
-export default function ComponentProviderStoreInit({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+type IComponentProps = {
+  children: React.ReactNode;
+};
+
+const ComponentProviderStoreInit = (props: IComponentProps) => {
   const storeRef = useRef<IAppStore>(undefined);
 
   if (!storeRef.current) {
     storeRef.current = makeStore();
   }
 
-  return <Provider store={storeRef.current}>{children}</Provider>
-}
+  return <Provider store={storeRef.current}>{props.children}</Provider>;
+};
+
+export default ComponentProviderStoreInit;

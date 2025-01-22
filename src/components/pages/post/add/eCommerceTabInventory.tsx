@@ -7,6 +7,8 @@ import { IPostECommerceInventoryModel } from 'types/models/post.model';
 
 type IComponentProps = {
   inventory?: IPostECommerceInventoryModel;
+  isECommerceVariation?: boolean;
+  index?: number;
 };
 
 const ComponentPagePostAddECommerceTabInvertory = React.memo(
@@ -20,14 +22,22 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
             <div className="col-md-6 mb-3">
               <ComponentFormInput
                 title={t('sku')}
-                name="eCommerce.inventory.sku"
+                name={
+                  props.isECommerceVariation
+                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.inventory.sku`
+                    : `eCommerce.inventory.sku`
+                }
                 type="text"
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormInput
                 title={t('quantity')}
-                name="eCommerce.inventory.quantity"
+                name={
+                  props.isECommerceVariation
+                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.inventory.quantity`
+                    : `eCommerce.inventory.quantity`
+                }
                 disabled={!props.inventory?.isManageStock || false}
                 type="number"
               />
@@ -35,7 +45,11 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
             <div className="col-md-7">
               <ComponentFormCheckBox
                 title={t('isManageStock')}
-                name="eCommerce.inventory.isManageStock"
+                name={
+                  props.isECommerceVariation
+                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.inventory.isManageStock`
+                    : `eCommerce.inventory.isManageStock`
+                }
                 value={1}
               />
             </div>

@@ -4,7 +4,9 @@ import Swal from 'sweetalert2';
 import { PostService } from '@services/post.service';
 import { IPostGetManyResultService } from 'types/services/post.service';
 import ComponentToast from '@components/elements/toast';
-import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';
+import ComponentDataTable, {
+  IComponentDataTableColumn,
+} from '@components/elements/table/dataTable';
 import Image from 'next/image';
 import ComponentThemeBadgeStatus, {
   getStatusIcon,
@@ -72,8 +74,14 @@ enum ActionTypes {
 type IAction =
   | { type: ActionTypes.SET_TYPE_ID; payload: IComponentState['typeId'] }
   | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
-  | { type: ActionTypes.SET_SELECTED_ITEMS; payload: IComponentState['selectedItems'] }
-  | { type: ActionTypes.SET_SELECTED_ITEM_ID; payload: IComponentState['selectedItemId'] }
+  | {
+      type: ActionTypes.SET_SELECTED_ITEMS;
+      payload: IComponentState['selectedItems'];
+    }
+  | {
+      type: ActionTypes.SET_SELECTED_ITEM_ID;
+      payload: IComponentState['selectedItemId'];
+    }
   | {
       type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
       payload: IComponentState['isShowModalUpdateRank'];
@@ -101,7 +109,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
 
 type IPageQueries = {
   _id?: string;
-  postTypeId?: PostTypeId;
+  postTypeId: PostTypeId;
 };
 
 export default function PagePostList() {
@@ -115,13 +123,20 @@ export default function PagePostList() {
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
   const currencyId = useAppSelector((state) => state.settingState.currencyId);
 
-  let queries = router.query as IPageQueries;
+  const getQueries = () => {
+    return {
+      ...router.query,
+      postTypeId: Number(router.query.postTypeId ?? PostTypeId.Blog),
+    } as IPageQueries;
+  }
+
+  let queries = getQueries();
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
-    typeId: Number(queries.postTypeId ?? PostTypeId.Blog),
+    typeId: queries.postTypeId,
   });
-  const [isPageLoaded, setIsPageLoaded] = useState(false); 
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
     init();
@@ -131,19 +146,22 @@ export default function PagePostList() {
   });
 
   useEffectAfterDidMount(() => {
-    if(isPageLoaded){
+    if (isPageLoaded) {
       appDispatch(setIsPageLoadingState(false));
     }
   }, [isPageLoaded]);
 
   useEffectAfterDidMount(() => {
-    queries = router.query as IPageQueries;
-    dispatch({ type: ActionTypes.SET_TYPE_ID, payload: Number(queries.postTypeId) });
+    queries = getQueries();
+    dispatch({
+      type: ActionTypes.SET_TYPE_ID,
+      payload: Number(queries.postTypeId),
+    });
     init();
   }, [router.query]);
 
   const init = async () => {
-    if(isPageLoaded){
+    if (isPageLoaded) {
       setIsPageLoaded(false);
     }
     const minPermission = PermissionUtil.getPostPermission(
@@ -191,8 +209,11 @@ export default function PagePostList() {
     }
   };
 
-  const onChangeStatus = async (selectedRows: IComponentState['items'], statusId: number) => {
-    const selectedItemId = selectedRows.map(row => row._id); //state.selectedItems.map((item) => item._id);
+  const onChangeStatus = async (
+    selectedRows: IComponentState['items'],
+    statusId: number
+  ) => {
+    const selectedItemId = selectedRows.map((row) => row._id); //state.selectedItems.map((item) => item._id);
     if (statusId === StatusId.Deleted && state.listMode === 'deleted') {
       const result = await Swal.fire({
         title: t('deleteAction'),
@@ -315,7 +336,10 @@ export default function PagePostList() {
 
   const onClickUpdateRank = (itemId: string) => {
     dispatch({ type: ActionTypes.SET_SELECTED_ITEM_ID, payload: itemId });
-    dispatch({ type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK, payload: true });
+    dispatch({
+      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+      payload: true,
+    });
   };
 
   const getToggleMenuItems = (): IComponentTableToggleMenuItem[] => {
@@ -334,16 +358,16 @@ export default function PagePostList() {
     return [
       {
         title: `${t('list')} (${state.items.findMulti('statusId', StatusId.Deleted, false).length})`,
-        key: "list",
+        key: 'list',
         className: 'btn-gradient-success',
         icon: 'mdi mdi-view-list',
         onFilter: (items) =>
           items.findMulti('statusId', StatusId.Deleted, false),
-        isDefault: true
+        isDefault: true,
       },
       {
         title: `${t('trash')} (${state.items.findMulti('statusId', StatusId.Deleted).length})`,
-        key: "deleted",
+        key: 'deleted',
         className: 'btn-gradient-danger',
         icon: 'mdi mdi-delete',
         onFilter: (items) => items.findMulti('statusId', StatusId.Deleted),
@@ -351,7 +375,9 @@ export default function PagePostList() {
     ];
   };
 
-  const getTableColumns = (): IComponentDataTableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): IComponentDataTableColumn<
+    IComponentState['items'][0]
+  >[] => {
     return [
       {
         name: t('image'),
@@ -396,7 +422,7 @@ export default function PagePostList() {
         ),
         width: '250px',
         sortable: true,
-        isSearchable: true
+        isSearchable: true,
       },
       [
         PostTypeId.Blog,
@@ -500,7 +526,9 @@ export default function PagePostList() {
       },
       {
         name: t('updatedBy'),
-        selector: (row) => row.lastAuthorId.name + new Date(row.updatedAt || '').toLocaleDateString(),
+        selector: (row) =>
+          row.lastAuthorId.name +
+          new Date(row.updatedAt || '').toLocaleDateString(),
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
@@ -584,7 +612,10 @@ export default function PagePostList() {
       <ComponentThemeModalUpdateItemRank
         isShow={state.isShowModalUpdateRank}
         onHide={() =>
-          dispatch({ type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK, payload: false })
+          dispatch({
+            type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+            payload: false,
+          })
         }
         onSubmit={(rank) => onChangeRank(rank)}
         rank={item?.rank}
@@ -681,7 +712,9 @@ export default function PagePostList() {
                 isAllSelectable={true}
                 isSearchable={true}
                 toggleMenuItems={getToggleMenuItems()}
-                onClickToggleMenuItem={(selectedRows, value) => onChangeStatus(selectedRows, value)}
+                onClickToggleMenuItem={(selectedRows, value) =>
+                  onChangeStatus(selectedRows, value)
+                }
                 filterButtons={getTableFilterButtons()}
                 onClickFilterButton={(item) => onClickTableFilterButton(item)}
               />

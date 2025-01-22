@@ -13,6 +13,7 @@ type IComponentProps = {
   parentId?: string;
   image?: string;
   showParentSelect?: boolean;
+  isModal?: boolean
   onChangeImage: (image: string) => void;
 };
 
@@ -37,7 +38,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
 
     return (
       <div className="row">
-        <div className="col-md-7 mb-3">
+        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
           <ComponentThemeChooseImage
             {...props}
             onSelected={(images) => props.onChangeImage(images[0])}
@@ -48,7 +49,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
             reviewImageClassName={'post-image'}
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
           <ComponentFormInput
             title={`${t('title')}*`}
             name="contents.title"
@@ -56,7 +57,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
             required={true}
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
           <ComponentFormInput
             title={t('shortContent').toCapitalizeCase()}
             name="contents.shortContent"
@@ -64,7 +65,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
           />
         </div>
         {props.showParentSelect ? (
-          <div className="col-md-7 mb-3">
+          <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
             <ComponentFormSelect
               title={getSelectMainInputTitle()}
               name="parentId"

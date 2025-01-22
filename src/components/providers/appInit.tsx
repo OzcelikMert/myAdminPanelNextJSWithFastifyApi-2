@@ -20,9 +20,7 @@ type IComponentProps = {
   children: React.ReactNode;
 };
 
-export default function ComponentProviderAppInit({
-  children,
-}: IComponentProps) {
+const ComponentProviderAppInit = (props: IComponentProps) => {
   const abortController = new AbortController();
 
   const appDispatch = useAppDispatch();
@@ -94,5 +92,7 @@ export default function ComponentProviderAppInit({
     return null;
   }
 
-  return children;
+  return props.children;
 }
+
+export default ComponentProviderAppInit;

@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { IPostECommerceAttributeModel } from 'types/models/post.model';
-import { Accordion, Card } from 'react-bootstrap';
+import { Accordion, Card, NavItem } from 'react-bootstrap';
 import ComponentFormSelect from '@components/elements/form/input/select';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
@@ -16,11 +16,13 @@ const initialState: IComponentState = {
 };
 
 type IComponentProps = {
-  attributes?: IPostECommerceAttributeModel[];
+  attributes?: IPagePostAddState['attributes'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
   variations?: IPagePostAddState['variations'];
+  selectedAttributes?: IPostECommerceAttributeModel[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
+  onChangeAttribute: (mainId: string, attributeId: string) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
@@ -32,7 +34,9 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
     );
 
     const onClickAccordionToggle = (_id: string) => {
-      setAccordionKey(_id);
+      setAccordionKey((state) =>
+        state != _id ? _id : initialState.accordionKey
+      );
     };
 
     const Attribute = React.memo(
@@ -57,6 +61,12 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
                           'value',
                           attributeProps.item.attributeId
                         )}
+                        onChange={(selectedItem: any, e) =>
+                          props.onChangeAttribute(
+                            attributeProps.item._id,
+                            selectedItem.value
+                          )
+                        }
                       />
                     </div>
                     <div className="col-md-6 mt-2 mt-md-0">
@@ -146,7 +156,7 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
         </div>
         <div className="col-md-7 mt-2">
           <Accordion flush>
-            {props.attributes?.map((item, index) => (
+            {props.selectedAttributes?.map((item, index) => (
               <Attribute item={item} index={index} />
             ))}
           </Accordion>

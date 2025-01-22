@@ -151,9 +151,9 @@ export default function PagePostTermAdd(props: IComponentProps) {
 
   const queries = {
     ...router.query,
-    postTypeId: router.query.postTypeId ?? props.postTypeId ?? PostTypeId.Blog,
+    postTypeId: Number(router.query.postTypeId ?? props.postTypeId ?? PostTypeId.Blog),
     termTypeId:
-      router.query.termTypeId ?? props.termTypeId ?? PostTermTypeId.Category,
+    Number(router.query.termTypeId ?? props.termTypeId ?? PostTermTypeId.Category),
   } as IPageQueries;
 
   const [state, dispatch] = useReducer(reducer, {
@@ -163,8 +163,8 @@ export default function PagePostTermAdd(props: IComponentProps) {
   const form = useForm<IPagePostTermAddFormState>({
     defaultValues: {
       ...initialFormState,
-      typeId: Number(queries.termTypeId),
-      postTypeId: Number(queries.postTypeId),
+      typeId: queries.termTypeId,
+      postTypeId: queries.postTypeId,
       _id: queries._id ?? props._id ?? '',
     },
     resolver: zodResolver(
@@ -444,6 +444,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
                           termTypeId={formValues.typeId}
                           image={formValues.contents.image}
                           parentId={formValues.parentId}
+                          isModal={props.isModal}
                           showParentSelect={[
                             PostTermTypeId.Category,
                             PostTermTypeId.Variations,
@@ -457,6 +458,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
                         <ComponentPagePostTermAddTabOptions
                           status={state.status}
                           statusId={formValues.statusId}
+                          isModal={props.isModal}
                         />
                       </Tab>
                     </Tabs>

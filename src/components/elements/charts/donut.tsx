@@ -9,7 +9,7 @@ import {
   Title,
   Tooltip,
 } from 'chart.js';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 ChartJS.register(
   LineElement,
@@ -49,8 +49,10 @@ type IComponentProps = {
   };
 };
 
-export default function ComponentChartDonut(props: IComponentProps) {
+const ComponentChartDonut = React.memo((props: IComponentProps) => {
   const [options, setOptions] = useState(initialState.options);
 
   return <Doughnut data={props.data} options={options} />;
-}
+});
+
+export default ComponentChartDonut;

@@ -1,28 +1,7 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { ComponentTypeId, componentTypes } from '@constants/componentTypes';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
-
-type IComponentProps = {
-  typeId: ComponentTypeId;
-  className?: string;
-};
-
-export default function ComponentThemeBadgeComponentType(
-  props: IComponentProps
-) {
-  const t = useAppSelector(selectTranslation);
-
-  return (
-    <label
-      className={`badge badge-gradient-${getComponentTypeColor(props.typeId)} text-start ${props.className ?? ''}`}
-    >
-      {t(
-        componentTypes.findSingle('id', props.typeId)?.langKey ?? '[noLangAdd]'
-      )}
-    </label>
-  );
-}
 
 export function getComponentTypeColor(typeId: ComponentTypeId): string {
   let className = ``;
@@ -36,3 +15,27 @@ export function getComponentTypeColor(typeId: ComponentTypeId): string {
   }
   return className;
 }
+
+type IComponentProps = {
+  typeId: ComponentTypeId;
+  className?: string;
+};
+
+const ComponentThemeBadgeComponentType = React.memo(
+  (props: IComponentProps) => {
+    const t = useAppSelector(selectTranslation);
+
+    return (
+      <label
+        className={`badge badge-gradient-${getComponentTypeColor(props.typeId)} text-start ${props.className ?? ''}`}
+      >
+        {t(
+          componentTypes.findSingle('id', props.typeId)?.langKey ??
+            '[noLangAdd]'
+        )}
+      </label>
+    );
+  }
+);
+
+export default ComponentThemeBadgeComponentType;

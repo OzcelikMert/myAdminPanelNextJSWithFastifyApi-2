@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ComponentToolFooter() {
+const ComponentToolFooter = React.memo(() => {
   return (
     <footer className="footer">
       <div className="d-sm-flex justify-content-center py-2">
@@ -17,4 +17,6 @@ export default function ComponentToolFooter() {
       </div>
     </footer>
   );
-}
+});
+
+export default ComponentToolFooter;

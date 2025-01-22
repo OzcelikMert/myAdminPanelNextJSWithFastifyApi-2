@@ -2,6 +2,7 @@ import React from 'react';
 import ComponentThemeChooseImageGallery from './gallery';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
+import { useFormContext } from 'react-hook-form';
 
 type IComponentState = {
   isShowModal: boolean;
@@ -12,9 +13,10 @@ const initialState: IComponentState = {
 };
 
 type IComponentProps = {
+  name?: string;
   isShow?: boolean;
   onHideModal?: () => void;
-  onSelected: (images: string[]) => void;
+  onSelected?: (images: string[]) => void;
   isMulti?: boolean;
   selectedImages?: string[];
   isShowReviewImage?: boolean;
@@ -27,19 +29,33 @@ type IComponentProps = {
   hideShowModalButton?: boolean;
 };
 
-export default function ComponentThemeChooseImage(props: IComponentProps) {
+const ComponentThemeChooseImage = React.memo((props: IComponentProps) => {
+  const form = useFormContext();
+  const registeredInput =
+    props.name && form ? form.register(props.name) : undefined;
+
   const [isShowModal, setIsShowModal] = React.useState(
     initialState.isShowModal
   );
   const $html = document.querySelector('html');
 
   const onSelected = (images: string[]) => {
-    props.onSelected(images);
+    if (props.onSelected) {
+      props.onSelected(images);
+    }
+    if (registeredInput && props.name) {
+      form.setValue(props.name, props.isMulti ? images : images[0]);
+    }
     onHide();
   };
 
   const onClickClear = () => {
-    props.onSelected([]);
+    if (props.onSelected) {
+      props.onSelected([]);
+    }
+    if (registeredInput && props.name) {
+      form.setValue(props.name, props.isMulti ? [] : '');
+    }
   };
 
   const onHide = () => {
@@ -104,4 +120,6 @@ export default function ComponentThemeChooseImage(props: IComponentProps) {
       </div>
     </div>
   );
-}
+});
+
+export default ComponentThemeChooseImage;

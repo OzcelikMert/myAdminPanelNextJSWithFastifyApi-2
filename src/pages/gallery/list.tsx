@@ -17,13 +17,13 @@ import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/customHooks';
 
 type IComponentState = {
-  items?: IGalleryGetResultService[];
+  items: IGalleryGetResultService[];
   selectedItems: IGalleryGetResultService[];
   isListLoading: boolean;
 };
 
 const initialState: IComponentState = {
-  items: undefined,
+  items: [],
   selectedItems: [],
   isListLoading: true,
 };
@@ -101,7 +101,7 @@ export default function PageGalleryList(props: IComponentProps) {
     if (props.uploadedImages && props.uploadedImages.length > 0) {
       dispatch({
         type: ActionTypes.SET_ITEMS,
-        payload: state.items?.concat(props.uploadedImages || []),
+        payload: state.items.concat(props.uploadedImages || []),
       });
     }
   }, [props.uploadedImages]);
@@ -288,6 +288,8 @@ export default function PageGalleryList(props: IComponentProps) {
     ];
   };
 
+  console.log("page gallery list", state)
+
   return isPageLoading ? null : (
     <div className="page-gallery">
       <div className="grid-margin stretch-card">
@@ -295,7 +297,7 @@ export default function PageGalleryList(props: IComponentProps) {
           <div className="card-body">
             <ComponentDataTable
               columns={getTableColumns()}
-              data={state.items ?? []}
+              data={state.items}
               onSelect={(rows) => onSelect(rows)}
               i18={{
                 search: t('search'),

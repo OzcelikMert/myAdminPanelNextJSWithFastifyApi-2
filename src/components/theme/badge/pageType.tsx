@@ -3,23 +3,6 @@ import { PageTypeId, pageTypes } from '@constants/pageTypes';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 
-type IComponentProps = {
-  typeId: PageTypeId;
-  className?: string;
-};
-
-export default function ComponentThemeBadgePageType(props: IComponentProps) {
-  const t = useAppSelector(selectTranslation);
-
-  return (
-    <label
-      className={`badge badge-gradient-${getPageTypeColor(props.typeId)} text-start ${props.className ?? ''}`}
-    >
-      {t(pageTypes.findSingle('id', props.typeId)?.langKey ?? '[noLangAdd]')}
-    </label>
-  );
-}
-
 export function getPageTypeColor(typeId: PageTypeId): string {
   let className = ``;
   switch (typeId) {
@@ -40,3 +23,22 @@ export function getPageTypeColor(typeId: PageTypeId): string {
   }
   return className;
 }
+
+type IComponentProps = {
+  typeId: PageTypeId;
+  className?: string;
+};
+
+const ComponentThemeBadgePageType = React.memo((props: IComponentProps) => {
+  const t = useAppSelector(selectTranslation);
+
+  return (
+    <label
+      className={`badge badge-gradient-${getPageTypeColor(props.typeId)} text-start ${props.className ?? ''}`}
+    >
+      {t(pageTypes.findSingle('id', props.typeId)?.langKey ?? '[noLangAdd]')}
+    </label>
+  );
+});
+
+export default ComponentThemeBadgePageType;

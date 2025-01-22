@@ -1,9 +1,11 @@
+import React from 'react';
+
 type IComponentProps = {
   text?: string;
-  className?: string
+  className?: string;
 };
 
-export default function ComponentFormLoadingButton(props: IComponentProps) {
+const ComponentFormLoadingButton = React.memo((props: IComponentProps) => {
   return (
     <button
       className={`${props.className} btn btn-gradient-dark float-end btn-save`}
@@ -14,4 +16,6 @@ export default function ComponentFormLoadingButton(props: IComponentProps) {
       {props.text}
     </button>
   );
-}
+});
+
+export default ComponentFormLoadingButton;

@@ -6,6 +6,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IJodit } from 'jodit/types/types';
 import { useDidMount } from '@library/react/customHooks';
+import { useFormContext } from 'react-hook-form';
 
 type IComponentState = {
   value: string;
@@ -44,11 +45,12 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
 };
 
 type IComponentProps = {
+  name?: string
   value?: string;
   onChange?: (newContent: string) => void;
 };
 
-export default function ComponentThemeRichTextBox(props: IComponentProps) {
+const ComponentThemeRichTextBox = React.memo((props: IComponentProps) => {
   const config: Partial<Config> = {
     extraIcons: {
       gallery: `<i class="mdi mdi-folder-multiple-image"></i>`,
@@ -85,6 +87,9 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
     },
   };
 
+  const form = useFormContext();
+  const registeredInput = props.name && form ? form.register(props.name) : undefined;
+
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     value: props.value || initialState.value,
@@ -119,6 +124,9 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
   };
 
   const onChange = (newValue: string) => {
+    if(registeredInput && props.name){
+      form.setValue(props.name, newValue);
+    }
     if(props.onChange){
       props.onChange(newValue);
     }
@@ -148,4 +156,6 @@ export default function ComponentThemeRichTextBox(props: IComponentProps) {
       </React.Fragment>
     </div>
   );
-}
+});
+
+export default ComponentThemeRichTextBox;

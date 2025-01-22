@@ -100,7 +100,7 @@ type IComponentProps<T = any> = {
   columns: IComponentDataTableColumn<T>[];
 } & Omit<TableProps<T>, 'columns'>;
 
-export default function ComponentDataTable<T>(props: IComponentProps<T>) {
+const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
     items: props.data,
@@ -304,29 +304,17 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
     return columns;
   };
 
-  const SearchInput = () => {
-    return (
-      <div className="theme-input">
-        <input
-          className="field"
-          title={`${props.i18?.search ?? 'Search'}`}
-          type="text"
-          value={state.searchKey}
-          onChange={(event: any) => onSearch(event)}
-          placeholder=" "
-        />
-        <span className="label">{`${props.i18?.search ?? 'Search'}`}</span>
-      </div>
-    );
-  };
-
   return (
     <div className="theme-table">
       {props.isSearchable ? (
         <div className="row pt-2 pb-2 m-0">
           <div className="col-md-8"></div>
           <div className="col-md-4">
-            <SearchInput />
+            <ComponentFormInput 
+              title={`${props.i18?.search ?? 'Search'}`}
+              onChange={(event: any) => onSearch(event)}
+              value={state.searchKey}
+            />
           </div>
         </div>
       ) : null}
@@ -387,4 +375,6 @@ export default function ComponentDataTable<T>(props: IComponentProps<T>) {
       </div>
     </div>
   );
-}
+}) as <T,>(props: IComponentProps<T>) => React.ReactNode;
+
+export default ComponentDataTable;

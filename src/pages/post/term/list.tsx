@@ -108,8 +108,8 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
 };
 
 type IPageQueries = {
-  termTypeId?: PostTermTypeId;
-  postTypeId?: PostTypeId;
+  termTypeId: PostTermTypeId;
+  postTypeId: PostTypeId;
 };
 
 export default function PagePostTermList() {
@@ -122,12 +122,20 @@ export default function PagePostTermList() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
-  let queries = router.query as IPageQueries;
+  const getQueries = () => {
+    return {
+      ...router.query,
+      termTypeId: Number(router.query.termTypeId ?? PostTermTypeId.Category),
+      postTypeId: Number(router.query.postTypeId ?? PostTypeId.Blog)
+    } as IPageQueries
+  }
+
+  let queries = getQueries();
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
-    typeId: Number(queries.termTypeId ?? PostTermTypeId.Category),
-    postTypeId: Number(queries.postTypeId ?? PostTypeId.Blog),
+    typeId: queries.termTypeId,
+    postTypeId: queries.postTypeId,
   });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
@@ -145,7 +153,7 @@ export default function PagePostTermList() {
   }, [isPageLoaded]);
 
   useEffectAfterDidMount(() => {
-    queries = router.query as IPageQueries;
+    queries = getQueries();
     dispatch({
       type: ActionTypes.SET_TYPE_ID,
       payload: Number(queries.termTypeId),

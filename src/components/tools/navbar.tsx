@@ -25,7 +25,7 @@ const initialState: IComponentState = {
   isDarkTheme: false,
 };
 
-export default function ComponentToolNavbar() {
+const ComponentToolNavbar = React.memo(() => {
   const abortController = new AbortController();
 
   const router = useRouter();
@@ -33,13 +33,15 @@ export default function ComponentToolNavbar() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
-  const [isDarkTheme, setIsDarkTheme] = useState(LocalStorageUtil.getTheme() == 'dark');
+  const [isDarkTheme, setIsDarkTheme] = useState(
+    LocalStorageUtil.getTheme() == 'dark'
+  );
 
   useDidMount(() => {
     return () => {
       abortController.abort();
     };
-  })
+  });
 
   const toggleOffCanvas = () => {
     (
@@ -49,7 +51,7 @@ export default function ComponentToolNavbar() {
 
   const onChangeTheme = () => {
     let theme: IThemeKeys = 'default';
-    setIsDarkTheme(state => {
+    setIsDarkTheme((state) => {
       theme = !state ? 'dark' : 'default';
       return !state;
     });
@@ -278,4 +280,6 @@ export default function ComponentToolNavbar() {
       </div>
     </nav>
   );
-}
+});
+
+export default ComponentToolNavbar;

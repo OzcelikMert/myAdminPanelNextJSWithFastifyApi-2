@@ -24,7 +24,7 @@ type IComponentProps = {
   children: React.ReactNode;
 };
 
-export default function ComponentProviderAuth({ children }: IComponentProps) {
+const ComponentProviderAuth = (props: IComponentProps) => {
   const abortController = new AbortController();
 
   const appDispatch = useAppDispatch();
@@ -89,5 +89,7 @@ export default function ComponentProviderAuth({ children }: IComponentProps) {
     return null;
   }
 
-  return children;
+  return props.children;
 }
+
+export default ComponentProviderAuth;

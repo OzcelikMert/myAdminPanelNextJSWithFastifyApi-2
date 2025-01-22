@@ -6,23 +6,23 @@ type IComponentState = {
 };
 
 const initialState: IComponentState = {
-  isDidMount: false
+  isDidMount: false,
 };
 
 type IComponentProps = {
   children: React.ReactNode;
 };
 
-export default function ComponentProviderNoSSR( { children } : IComponentProps ) {
+const ComponentProviderNoSSR = (props: IComponentProps) => {
   const [isDidMount, setIsDidMount] = React.useState(initialState.isDidMount);
 
   useDidMount(() => {
     setIsDidMount(true);
-  })
+  });
 
   return (
-    <div suppressHydrationWarning>
-      {isDidMount ? children : null}
-    </div>
+    <div suppressHydrationWarning>{isDidMount ? props.children : null}</div>
   );
-}
+};
+
+export default ComponentProviderNoSSR;

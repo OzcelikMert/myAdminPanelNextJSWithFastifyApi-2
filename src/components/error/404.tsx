@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ComponentError404() {
+const ComponentError404 = React.memo(() => {
   return (
     <div>
       <h3>Aradiginiz Sayfa Bulunamadi!</h3>
@@ -9,4 +9,6 @@ export default function ComponentError404() {
       </a>
     </div>
   );
-}
+});
+
+export default ComponentError404;

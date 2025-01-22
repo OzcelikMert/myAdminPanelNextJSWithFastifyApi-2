@@ -1,3 +1,4 @@
+import React from 'react';
 import { useAccordionButton } from 'react-bootstrap/AccordionButton';
 
 type IComponentProps = {
@@ -6,8 +7,10 @@ type IComponentProps = {
   onClick?: () => void;
 };
 
-export default function ComponentAccordionToggle({ children, eventKey, onClick }: IComponentProps) {
-  const decoratedOnClick = useAccordionButton(eventKey, onClick);
+const ComponentAccordionToggle = React.memo((props: IComponentProps) => {
+  const decoratedOnClick = useAccordionButton(props.eventKey, props.onClick);
 
-  return <div onClick={decoratedOnClick}>{children}</div>;
-}
+  return <div onClick={decoratedOnClick}>{props.children}</div>;
+});
+
+export default ComponentAccordionToggle;

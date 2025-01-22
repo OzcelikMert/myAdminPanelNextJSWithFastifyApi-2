@@ -30,7 +30,7 @@ const nextConfig = {
             },
             /* E Commerce */
             {
-                source: "/e-commerce/product/:path*",
+                source: "/e-commerce/post/:path*",
                 destination: "/post/:path*"
             },
             /* Component */

@@ -6,6 +6,8 @@ import { IPostECommercePricingModel } from 'types/models/post.model';
 
 type IComponentProps = {
   pricing?: IPostECommercePricingModel;
+  isECommerceVariation?: boolean;
+  index?: number;
 };
 
 const ComponentPagePostAddECommerceTabPricing = React.memo(
@@ -19,28 +21,44 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
             <div className="col-md-6 mb-3">
               <ComponentFormInput
                 title={t('taxIncludedPrice')}
-                name="eCommerce.pricing.taxIncluded"
+                name={
+                  props.isECommerceVariation
+                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.taxIncluded`
+                    : `eCommerce.pricing.taxIncluded`
+                }
                 type="number"
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormInput
                 title={t('taxExcludedPrice')}
-                name="eCommerce.pricing.taxExcluded"
+                name={
+                  props.isECommerceVariation
+                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.taxExcluded`
+                    : `eCommerce.pricing.taxExcluded`
+                }
                 type="number"
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormInput
                 title={t('taxRate')}
-                name="eCommerce.pricing.taxRate"
+                name={
+                  props.isECommerceVariation
+                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.taxRate`
+                    : `eCommerce.pricing.taxRate`
+                }
                 type="number"
               />
             </div>
             <div className="col-md-6 mb-3">
               <ComponentFormInput
                 title={t('comparedPrice')}
-                name="eCommerce.pricing.compared"
+                name={
+                  props.isECommerceVariation
+                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.compared`
+                    : `eCommerce.pricing.compared`
+                }
                 type="number"
               />
             </div>

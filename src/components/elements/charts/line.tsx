@@ -12,7 +12,7 @@ import {
   ChartData,
 } from 'chart.js';
 import Spinner from 'react-bootstrap/Spinner';
-import { useReducer } from 'react';
+import React, { useReducer } from 'react';
 import { useDidMount } from '@library/react/customHooks';
 
 ChartJS.register(
@@ -86,7 +86,7 @@ type IComponentProps = {
   toolTipLabel?: string;
 };
 
-export default function ComponentChartLine(props: IComponentProps) {
+const ComponentChartLine = React.memo((props: IComponentProps) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useDidMount(() => {
@@ -126,4 +126,6 @@ export default function ComponentChartLine(props: IComponentProps) {
       redraw={true}
     />
   );
-}
+});
+
+export default ComponentChartLine;

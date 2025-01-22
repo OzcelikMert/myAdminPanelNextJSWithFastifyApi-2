@@ -1,38 +1,8 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { status, StatusId } from '@constants/status';
 import ComponentToolTip from '@components/elements/tooltip';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-
-type IComponentProps = {
-  statusId: StatusId;
-  className?: string;
-  date?: string;
-};
-
-export default function ComponentThemeBadgeStatus(props: IComponentProps) {
-  const t = useAppSelector(selectTranslation);
-
-  const langKey =
-    status.findSingle('id', props.statusId)?.langKey ?? '[noLangAdd]';
-
-  return (
-    <ComponentToolTip
-      message={
-        props.statusId == StatusId.Pending && props.date
-          ? `${t('pending')}: ${new Date(props.date).toLocaleDateString()}`
-          : t(langKey)
-      }
-    >
-      <label
-        className={`badge badge-gradient-${getStatusColor(props.statusId)} text-start ${props.className ?? ''}`}
-      >
-        <i className={`${getStatusIcon(props.statusId)} me-2`}></i>
-        {t(langKey)}
-      </label>
-    </ComponentToolTip>
-  );
-}
 
 export function getStatusColor(statusId: number): string {
   let className = ``;
@@ -79,3 +49,35 @@ export function getStatusIcon(statusId: number): string {
   }
   return className;
 }
+
+type IComponentProps = {
+  statusId: StatusId;
+  className?: string;
+  date?: string;
+};
+
+const ComponentThemeBadgeStatus = React.memo((props: IComponentProps) => {
+  const t = useAppSelector(selectTranslation);
+
+  const langKey =
+    status.findSingle('id', props.statusId)?.langKey ?? '[noLangAdd]';
+
+  return (
+    <ComponentToolTip
+      message={
+        props.statusId == StatusId.Pending && props.date
+          ? `${t('pending')}: ${new Date(props.date).toLocaleDateString()}`
+          : t(langKey)
+      }
+    >
+      <label
+        className={`badge badge-gradient-${getStatusColor(props.statusId)} text-start ${props.className ?? ''}`}
+      >
+        <i className={`${getStatusIcon(props.statusId)} me-2`}></i>
+        {t(langKey)}
+      </label>
+    </ComponentToolTip>
+  );
+});
+
+export default ComponentThemeBadgeStatus;

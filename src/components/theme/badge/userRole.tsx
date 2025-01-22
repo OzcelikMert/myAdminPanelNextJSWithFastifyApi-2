@@ -3,25 +3,6 @@ import { UserRoleId, userRoles } from '@constants/userRoles';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 
-type IComponentProps = {
-  userRoleId: UserRoleId;
-  className?: string;
-};
-
-export default function ComponentThemeBadgeUserRole(props: IComponentProps) {
-  const t = useAppSelector(selectTranslation);
-
-  return (
-    <label
-      className={`badge badge-gradient-${getUserRoleColor(props.userRoleId)} text-start ${props.className ?? ''}`}
-    >
-      {t(
-        userRoles.findSingle('id', props.userRoleId)?.langKey ?? '[noLangAdd]'
-      )}
-    </label>
-  );
-}
-
 export function getUserRoleColor(roleId: UserRoleId): string {
   let className = ``;
   switch (roleId) {
@@ -43,3 +24,24 @@ export function getUserRoleColor(roleId: UserRoleId): string {
   }
   return className;
 }
+
+type IComponentProps = {
+  userRoleId: UserRoleId;
+  className?: string;
+};
+
+const ComponentThemeBadgeUserRole = React.memo((props: IComponentProps) => {
+  const t = useAppSelector(selectTranslation);
+
+  return (
+    <label
+      className={`badge badge-gradient-${getUserRoleColor(props.userRoleId)} text-start ${props.className ?? ''}`}
+    >
+      {t(
+        userRoles.findSingle('id', props.userRoleId)?.langKey ?? '[noLangAdd]'
+      )}
+    </label>
+  );
+});
+
+export default ComponentThemeBadgeUserRole;

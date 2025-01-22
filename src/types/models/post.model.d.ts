@@ -92,12 +92,10 @@ export interface IPostECommerceAttributeModel<T = string, P = string[]> {
 }
 
 export interface IPostECommerceVariationModel<T = string> {
-  _id?: string;
+  _id: string;
   rank: number;
   selectedVariations: IPostECommerceVariationSelectedModel<T>[];
   itemId: IPostECommerceVariationItemModel;
-  isWarningForIsThereOther?: boolean;
-  isDefault?: boolean;
 }
 
 export interface IPostECommerceVariationItemModel {

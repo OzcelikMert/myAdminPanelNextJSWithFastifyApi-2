@@ -6,15 +6,15 @@ type IComponentProps = {
   children: React.ReactNode;
 };
 
-export default function ComponentFieldSet(props: IComponentProps) {
+const ComponentFieldSet = React.memo((props: IComponentProps) => {
   return (
     <div className="theme-input static">
       <span className="label">
         {props.legend} {props.legendElement}
       </span>
-      <div className="field row d-flex m-0 pb-3 pt-3">
-        {props.children}
-      </div>
+      <div className="field row d-flex m-0 pb-3 pt-3">{props.children}</div>
     </div>
   );
-}
+});
+
+export default ComponentFieldSet;

@@ -60,6 +60,7 @@ import ComponentPagePostAddTabContent from '@components/pages/post/add/tabConten
 import ComponentPagePostAddTabOptions from '@components/pages/post/add/tabOptions';
 import ComponentThemeModalPostTerm from '@components/theme/modal/postTerm';
 import { IPagePostTermAddFormState } from './term/add';
+import Swal from 'sweetalert2';
 
 export type IPagePostAddState = {
   authors: IThemeFormSelectData<string>[];
@@ -282,7 +283,7 @@ export default function PagePostAdd() {
 
   const queries = {
     ...router.query,
-    postTypeId: router.query.postTypeId ?? PostTypeId.Blog,
+    postTypeId: Number(router.query.postTypeId ?? PostTypeId.Blog),
   } as IPageQueries;
 
   const [state, dispatch] = useReducer(reducer, {
@@ -293,7 +294,7 @@ export default function PagePostAdd() {
   const form = useForm<IPagePostAddFormState>({
     defaultValues: {
       ...initialFormState,
-      typeId: Number(queries.postTypeId),
+      typeId: queries.postTypeId,
       _id: queries._id ?? '',
     },
     resolver: zodResolver(PostUtil.getSchema(queries.postTypeId, queries._id)),
@@ -463,7 +464,7 @@ export default function PagePostAdd() {
         payload: newItems.map((author) => {
           return {
             value: author._id,
-            label: author.email,
+            label: `${author.name} (${author.email})`,
           };
         }),
       });
@@ -775,11 +776,168 @@ export default function PagePostAdd() {
     }
   };
 
+  const checkSameVariation = (attributeId: string, variationId: string) => {
+    const variations = form.getValues().eCommerce?.variations ?? [];
+    const filteredVariations = variations.findMulti(
+      'selectedVariations.attributeId',
+      attributeId
+    );
+    return filteredVariations.some((filteredVariation) =>
+      filteredVariation.selectedVariations.some(
+        (selectedVariation) => selectedVariation.variationId == variationId
+      )
+    );
+  };
+
+  const onClickAddNewAttribute = () => {
+    const _id = String.createId();
+
+    let newAttributes = form.getValues().eCommerce?.attributes ?? [];
+    newAttributes.push({
+      _id: _id,
+      attributeId: '',
+      typeId: AttributeTypeId.Text,
+      variations: [],
+    });
+
+    form.setValue('eCommerce.attributes', newAttributes);
+  };
+
+  const onClickDeleteAttribute = (_id: string) => {
+    form.setValue(
+      'eCommerce.attributes',
+      form.getValues().eCommerce?.attributes?.filter((item) => item._id != _id)
+    );
+  };
+
+  const onChangeAttribute = (mainId: string, attributeId: string) => {
+    let newAttributes = form.getValues().eCommerce?.attributes ?? [];
+    const index = newAttributes?.indexOfKey('_id', mainId);
+    if (index > -1) {
+      newAttributes[index].attributeId = attributeId;
+      newAttributes[index].variations = [];
+    }
+    form.setValue('eCommerce.attributes', newAttributes);
+  };
+
+  const onClickAddNewVariation = () => {
+    const _id = String.createId();
+
+    const formValues = form.getValues();
+
+    let newVariations = formValues.eCommerce?.variations ?? [];
+    newVariations.push({
+      _id: _id,
+      selectedVariations: [],
+      rank: formValues.eCommerce?.variations?.length ?? 0,
+      itemId: {
+        _id: String.createId(),
+        statusId: StatusId.Active,
+        contents: {
+          title: '',
+          langId: formValues.contents.langId,
+        },
+        eCommerce: {
+          images: [],
+          pricing: {
+            taxIncluded: 0,
+            compared: 0,
+            shipping: 0,
+            taxExcluded: 0,
+            taxRate: 0,
+          },
+          shipping: {
+            width: '',
+            height: '',
+            depth: '',
+            weight: '',
+          },
+          inventory: {
+            sku: '',
+            quantity: 0,
+            isManageStock: false,
+          },
+        },
+      },
+    });
+
+    form.setValue('eCommerce.variations', newVariations);
+  };
+
+  const onClickDeleteVariation = async (_id: string) => {
+    const result = await Swal.fire({
+      title: t('deleteAction'),
+      html: `${t('deleteSelectedItemsQuestion')}`,
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
+      icon: 'question',
+      showCancelButton: true,
+    });
+
+    if (result.isConfirmed) {
+      form.setValue(
+        'eCommerce.variations',
+        form
+          .getValues()
+          .eCommerce?.variations?.filter((item) => item._id != _id)
+      );
+    }
+  };
+
+  const onChangeVariation = (
+    mainId: string,
+    attributeId: string,
+    variationId: string
+  ) => {
+    if (!checkSameVariation(attributeId, variationId)) {
+      const newVariations = form.getValues().eCommerce?.variations ?? [];
+      const variation = newVariations.findSingle('_id', mainId);
+      if (variation) {
+        const index = variation.selectedVariations.indexOfKey(
+          'attributeId',
+          attributeId
+        );
+        if (index > -1) {
+          variation.selectedVariations[index].variationId = variationId;
+        } else {
+          variation.selectedVariations.push({
+            attributeId: attributeId,
+            variationId: variationId,
+          });
+        }
+      }
+
+      form.setValue('eCommerce.variations', newVariations);
+    }
+  };
+
+  const onChangeDefaultVariation = (
+    attributeId: string,
+    variationId: string
+  ) => {
+    const formValues = form.getValues();
+    let newDefaultVariation = formValues.eCommerce?.variationDefaults ?? [];
+
+    const index = newDefaultVariation.indexOfKey('attributeId', attributeId);
+
+    if (index > -1) {
+      newDefaultVariation[index].variationId = variationId;
+    } else {
+      newDefaultVariation.push({
+        attributeId: attributeId,
+        variationId: variationId,
+      });
+    }
+  };
+
   const formValues = form.getValues();
   const isUserSuperAdmin = PermissionUtil.checkPermissionRoleRank(
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
+
+  console.log("page post add", state, formValues);
+  
 
   return isPageLoading ? null : (
     <div className="page-post">
@@ -843,7 +1001,6 @@ export default function PagePostAdd() {
                     >
                       <Tab eventKey="general" title={t('general')}>
                         <ComponentPagePostAddTabGeneral
-                          item={state.item}
                           categories={state.categories}
                           tags={state.tags}
                           icon={formValues.contents.icon}
@@ -974,7 +1131,24 @@ export default function PagePostAdd() {
             ) : null}
             {[PostTypeId.Product].includes(formValues.typeId) ? (
               <ComponentPagePostAddECommerce
-                
+                variations={state.variations}
+                attributes={state.attributes}
+                attributeTypes={state.attributeTypes}
+                productTypes={state.productTypes}
+                eCommerce={formValues.eCommerce}
+                onClickAddNewAttribute={() => onClickAddNewAttribute()}
+                onClickDeleteAttribute={(_id) => onClickDeleteAttribute(_id)}
+                onClickAddNewVariation={() => onClickAddNewVariation()}
+                onClickDeleteVariation={(_id) => onClickDeleteVariation(_id)}
+                onChangeAttribute={(mainId, attributeId) =>
+                  onChangeAttribute(mainId, attributeId)
+                }
+                onChangeVariation={(mainId, attributeId, variationId) =>
+                  onChangeVariation(mainId, attributeId, variationId)
+                }
+                onChangeDefaultVariation={(attributeId, variationId) =>
+                  onChangeDefaultVariation(attributeId, variationId)
+                }
               />
             ) : null}
           </ComponentForm>

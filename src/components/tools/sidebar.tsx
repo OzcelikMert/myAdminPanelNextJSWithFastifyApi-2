@@ -19,7 +19,7 @@ const initialState: IComponentState = {
   activeItems: {},
 };
 
-export default function ComponentToolSidebar() {
+const ComponentToolSidebar = React.memo(() => {
   const [activeItems, setActiveItems] = useState(initialState.activeItems);
 
   const router = useRouter();
@@ -147,4 +147,6 @@ export default function ComponentToolSidebar() {
       </ul>
     </nav>
   );
-}
+});
+
+export default ComponentToolSidebar;

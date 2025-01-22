@@ -16,9 +16,9 @@ type IComponentProps<T = any[]> = {
   isActive?: boolean;
 };
 
-export default function ComponentTableFilterButton<T>(
+const ComponentTableFilterButton = React.memo(<T,>(
   props: IComponentProps<T>
-) {
+) => {
   return (
     <button
       type="button"
@@ -35,4 +35,8 @@ export default function ComponentTableFilterButton<T>(
       {props.item.title}
     </button>
   );
-}
+}) as <T,>(
+  props: IComponentProps<T>
+) => React.ReactNode;
+
+export default ComponentTableFilterButton;
