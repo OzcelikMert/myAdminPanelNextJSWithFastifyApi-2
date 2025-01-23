@@ -8,7 +8,7 @@ import {
 import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { UserEndPointPermission } from '@constants/endPointPermissions/user.endPoint.permission';
 import { PermissionUtil } from '@utils/permission.util';
-import { ComponentUtil } from '@utils/component.util';
+import { SelectUtil } from '@utils/select.util';
 import { StatusId } from '@constants/status';
 import { UserRoleId, userRoles } from '@constants/userRoles';
 import { EndPoints } from '@constants/endPoints';
@@ -108,9 +108,9 @@ const reducer = (
   }
 };
 
-export type IPageUserAddFormState = IUserUpdateWithIdParamService;
+export type IPageFormState = IUserUpdateWithIdParamService;
 
-const initialFormState: IPageUserAddFormState = {
+const initialFormState: IPageFormState = {
   _id: '',
   name: '',
   email: '',
@@ -138,7 +138,7 @@ export default function PageUserAdd() {
   const queries = router.query as IPageQueries;
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const form = useForm<IPageUserAddFormState>({
+  const form = useForm<IPageFormState>({
     defaultValues: {
       ...initialFormState,
       _id: queries._id ?? '',
@@ -215,7 +215,7 @@ export default function PageUserAdd() {
   const getStatus = () => {
     dispatch({
       type: ActionTypes.SET_STATUS,
-      payload: ComponentUtil.getStatusForSelect(
+      payload: SelectUtil.getStatus(
         [StatusId.Active, StatusId.Disabled, StatusId.Banned],
         t
       ),
@@ -226,7 +226,7 @@ export default function PageUserAdd() {
     const findUserRole = userRoles.findSingle('id', sessionAuth?.user.roleId);
     dispatch({
       type: ActionTypes.SET_USER_ROLES,
-      payload: ComponentUtil.getUserRolesForSelect(
+      payload: SelectUtil.getUserRoles(
         userRoles
           .map((userRole) =>
             findUserRole && findUserRole.rank > userRole.rank ? userRole.id : 0
@@ -300,7 +300,7 @@ export default function PageUserAdd() {
     await RouteUtil.change({ router, path });
   };
 
-  const onSubmit = async (data: IPageUserAddFormState) => {
+  const onSubmit = async (data: IPageFormState) => {
     const params = data;
 
     const serviceResult = await (params._id

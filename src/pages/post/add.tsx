@@ -1,29 +1,22 @@
-import { FormEvent, useEffect, useReducer, useRef, useState } from 'react';
+import { FormEvent, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
-import moment from 'moment';
-import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import { PostTermService } from '@services/postTerm.service';
 import { PostService } from '@services/post.service';
 import {
   IPostGetResultService,
   IPostUpdateWithIdParamService,
 } from 'types/services/post.service';
-import ComponentToolTip from '@components/elements/tooltip';
-import dynamic from 'next/dynamic';
 import { ProductTypeId, productTypes } from '@constants/productTypes';
-import ComponentFormSelect, {
-  IThemeFormSelectData,
-} from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import ComponentPagePostAddECommerce from '@components/pages/post/add/eCommerce';
 import ComponentPagePostAddButtons from '@components/pages/post/add/buttons';
 import ComponentPagePostAddBeforeAndAfter from '@components/pages/post/add/beforeAndAfter';
-import ComponentPagePostAddChooseTag from '@components/theme/modal/postTerm';
 import { PermissionUtil, PostPermissionMethod } from '@utils/permission.util';
 import { PostTypeId } from '@constants/postTypes';
 import { PostUtil } from '@utils/post.util';
 import { AttributeTypeId, attributeTypes } from '@constants/attributeTypes';
 import { PageTypeId, pageTypes } from '@constants/pageTypes';
-import { ComponentUtil } from '@utils/component.util';
+import { SelectUtil } from '@utils/select.util';
 import { StatusId } from '@constants/status';
 import { PostTermTypeId } from '@constants/postTermTypes';
 import { ComponentService } from '@services/component.service';
@@ -36,24 +29,19 @@ import ComponentToast from '@components/elements/toast';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useFormReducer } from '@library/react/handles/form';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import ComponentFormInput from '@components/elements/form/input/input';
-import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
-import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { PostSchema } from 'schemas/post.schema';
 import ComponentPagePostAddHeader from '@components/pages/post/add/header';
 import ComponentPagePostAddTabGeneral from '@components/pages/post/add/tabGeneral';
 import ComponentPagePostAddTabContent from '@components/pages/post/add/tabContent';
@@ -252,9 +240,9 @@ const reducer = (
   }
 };
 
-export type IPagePostAddFormState = IPostUpdateWithIdParamService;
+export type IPageFormState = IPostUpdateWithIdParamService;
 
-const initialFormState: IPagePostAddFormState = {
+const initialFormState: IPageFormState = {
   _id: '',
   typeId: PostTypeId.Blog,
   statusId: StatusId.Active,
@@ -291,7 +279,7 @@ export default function PagePostAdd() {
     langId: mainLangId,
   });
 
-  const form = useForm<IPagePostAddFormState>({
+  const form = useForm<IPageFormState>({
     defaultValues: {
       ...initialFormState,
       typeId: queries.postTypeId,
@@ -433,7 +421,7 @@ export default function PagePostAdd() {
   const getStatus = () => {
     dispatch({
       type: ActionTypes.SET_STATUS,
-      payload: ComponentUtil.getStatusForSelect(
+      payload: SelectUtil.getStatus(
         [StatusId.Active, StatusId.InProgress, StatusId.Pending],
         t
       ),
@@ -565,7 +553,7 @@ export default function PagePostAdd() {
 
         const formValues = form.getValues();
 
-        let newFormState: IPagePostAddFormState = {
+        let newFormState: IPageFormState = {
           ...formValues,
           ...(item as IPostUpdateWithIdParamService),
           contents: {
@@ -936,8 +924,7 @@ export default function PagePostAdd() {
     UserRoleId.SuperAdmin
   );
 
-  console.log("page post add", state, formValues);
-  
+  console.log('page post add', state, formValues);
 
   return isPageLoading ? null : (
     <div className="page-post">

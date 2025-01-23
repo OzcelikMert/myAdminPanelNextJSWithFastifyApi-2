@@ -8,7 +8,7 @@ import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { PermissionUtil } from '@utils/permission.util';
 import { LanguageEndPointPermission } from '@constants/endPointPermissions/language.endPoint.permission';
 import { StatusId } from '@constants/status';
-import { ComponentUtil } from '@utils/component.util';
+import { SelectUtil } from '@utils/select.util';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
@@ -81,9 +81,9 @@ const reducer = (
   }
 };
 
-export type IPageLanguageAddFormState = ILanguageUpdateWithIdParamService;
+export type IPageFormState = ILanguageUpdateWithIdParamService;
 
-const initialFormState: IPageLanguageAddFormState = {
+const initialFormState: IPageFormState = {
   _id: '',
   statusId: StatusId.Active,
   locale: '',
@@ -110,7 +110,7 @@ export default function PageSettingLanguageAdd() {
   const queries = router.query as IPageQueries;
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const form = useForm<IPageLanguageAddFormState>({
+  const form = useForm<IPageFormState>({
     defaultValues: {
       ...initialFormState,
       _id: queries._id ?? '',
@@ -174,7 +174,7 @@ export default function PageSettingLanguageAdd() {
   const getStatus = () => {
     dispatch({
       type: ActionTypes.SET_STATUS,
-      payload: ComponentUtil.getStatusForSelect(
+      payload: SelectUtil.getStatus(
         [StatusId.Active, StatusId.Disabled],
         t
       ),
@@ -222,7 +222,7 @@ export default function PageSettingLanguageAdd() {
     }
   };
 
-  const onSubmit = async (data: IPageLanguageAddFormState) => {
+  const onSubmit = async (data: IPageFormState) => {
     const params = data;
     const serviceResult = await (params._id
       ? LanguageService.updateWithId(params, abortController.signal)

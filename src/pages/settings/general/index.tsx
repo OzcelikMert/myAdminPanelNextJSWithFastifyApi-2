@@ -1,48 +1,44 @@
 import { SettingService } from '@services/setting.service';
 import { ServerInfoService } from '@services/serverInfo.service';
 import ComponentToast from '@components/elements/toast';
-import ComponentThemeChooseImage from '@components/theme/chooseImage';
-import {
-  ISettingGetResultService,
-  ISettingUpdateGeneralParamService,
-} from 'types/services/setting.service';
+import { ISettingUpdateGeneralParamService } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
-import ComponentFormSelect, {
-  IThemeFormSelectData,
-} from '@components/elements/form/input/select';
+import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { IServerInfoGetResultService } from 'types/services/serverInfo.service';
 import { LocalStorageUtil } from '@utils/localStorage.util';
 import { PermissionUtil } from '@utils/permission.util';
 import { SettingsEndPointPermission } from '@constants/endPointPermissions/settings.endPoint.permission';
 import { SettingProjectionKeys } from '@constants/settingProjections';
-import { panelLanguages } from '@constants/panelLanguages';
-import { ComponentUtil } from '@utils/component.util';
+import { PanelLanguageId, panelLanguages } from '@constants/panelLanguages';
+import { SelectUtil } from '@utils/select.util';
 import { UserRoleId } from '@constants/userRoles';
-import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useEffect, useReducer, useState } from 'react';
-import { useFormReducer } from '@library/react/handles/form';
+import { useReducer, useState } from 'react';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
-import { EndPoints } from '@constants/endPoints';
-import ComponentFormInput from '@components/elements/form/input/input';
-import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SettingSchema } from 'schemas/setting.schema';
+import ComponentPageSettingsGeneralTabGeneral from '@components/pages/settings/general/tabGeneral';
+import ComponentPageSettingsGeneralTabContact from '@components/pages/settings/general/tabContact';
+import ComponentPageSettingsGeneralTabTools from '@components/pages/settings/general/tabTools';
+import ComponentPageSettingsGeneralServerInfo from '@components/pages/settings/general/serverInfo';
 
-type IComponentState = {
+export type IPageSettingsGeneralState = {
   panelLanguages: IThemeFormSelectData[];
   serverInfo: IServerInfoGetResultService;
   mainTabActiveKey: string;
   isServerInfoLoading: boolean;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageSettingsGeneralState = {
   panelLanguages: [],
   serverInfo: {
     cpu: '0',
@@ -63,22 +59,25 @@ enum ActionTypes {
 type IAction =
   | {
       type: ActionTypes.SET_PANEL_LANGUAGES;
-      payload: IComponentState['panelLanguages'];
+      payload: IPageSettingsGeneralState['panelLanguages'];
     }
   | {
       type: ActionTypes.SET_SERVER_INFO;
-      payload: IComponentState['serverInfo'];
+      payload: IPageSettingsGeneralState['serverInfo'];
     }
   | {
       type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IComponentState['mainTabActiveKey'];
+      payload: IPageSettingsGeneralState['mainTabActiveKey'];
     }
   | {
       type: ActionTypes.SET_IS_SERVER_INFO_LOADING;
-      payload: IComponentState['isServerInfoLoading'];
+      payload: IPageSettingsGeneralState['isServerInfoLoading'];
     };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (
+  state: IPageSettingsGeneralState,
+  action: IAction
+): IPageSettingsGeneralState => {
   switch (action.type) {
     case ActionTypes.SET_PANEL_LANGUAGES:
       return { ...state, panelLanguages: action.payload };
@@ -93,13 +92,13 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentFormState = ISettingUpdateGeneralParamService & {
-  panelLangId: string;
+type IPageFormState = ISettingUpdateGeneralParamService & {
+  panelLangId: number;
 };
 
-const initialFormState: IComponentFormState = {
+const initialFormState: IPageFormState = {
   contact: {},
-  panelLangId: '',
+  panelLangId: PanelLanguageId.English,
 };
 
 export default function PageSettingsGeneral() {
@@ -111,12 +110,17 @@ export default function PageSettingsGeneral() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput, onChangeSelect } =
-    useFormReducer({
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    panelLanguages: SelectUtil.getPanelLanguages(),
+  });
+  const form = useForm<IPageFormState>({
+    defaultValues: {
       ...initialFormState,
-      panelLangId: LocalStorageUtil.getLanguageId().toString(),
-    });
+      panelLangId: LocalStorageUtil.getLanguageId(),
+    },
+    resolver: zodResolver(SettingSchema.putGeneral),
+  });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -146,7 +150,6 @@ export default function PageSettingsGeneral() {
     ) {
       setPageTitle();
       getServerDetails();
-      getPanelLanguages();
       await getSettings();
       setIsPageLoaded(true);
     }
@@ -172,18 +175,11 @@ export default function PageSettingsGeneral() {
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
-      setFormState({
-        ...formState,
+      form.reset({
+        ...form.getValues(),
         ...setting,
       });
     }
-  };
-
-  const getPanelLanguages = () => {
-    dispatch({
-      type: ActionTypes.SET_PANEL_LANGUAGES,
-      payload: ComponentUtil.getPanelLanguageForSelect(panelLanguages),
-    });
   };
 
   const getServerDetails = async () => {
@@ -200,8 +196,8 @@ export default function PageSettingsGeneral() {
     }
   };
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    let params = formState;
+  const onSubmit = async (data: IPageFormState) => {
+    let params = data;
 
     const serviceResult = await SettingService.updateGeneral(
       params,
@@ -215,232 +211,16 @@ export default function PageSettingsGeneral() {
       });
     }
 
-    if (formState.panelLangId != LocalStorageUtil.getLanguageId().toString()) {
-      const panelLanguage = panelLanguages.findSingle(
-        'id',
-        Number(formState.panelLangId)
-      );
+    if (params.panelLangId != LocalStorageUtil.getLanguageId()) {
+      const panelLanguage = panelLanguages.findSingle('id', params.panelLangId);
       if (panelLanguage) {
-        LocalStorageUtil.setLanguageId(Number(formState.panelLangId));
+        LocalStorageUtil.setLanguageId(params.panelLangId);
         window.location.reload();
       }
     }
   };
 
-  const TabTools = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={t('head')}
-            name="head"
-            type="textarea"
-            value={formState.head}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={t('script')}
-            name="script"
-            type="textarea"
-            value={formState.script}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={t('googleAnalyticURL')}
-            name="googleAnalyticURL"
-            type="url"
-            value={formState.googleAnalyticURL}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const TabContact = () => {
-    return (
-      <div className="row">
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={t('email')}
-            name="contact.email"
-            type="email"
-            value={formState.contact?.email}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={t('phone')}
-            name="contact.phone"
-            type="tel"
-            value={formState.contact?.phone}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={t('address')}
-            name="contact.address"
-            type="text"
-            value={formState.contact?.address}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormInput
-            title={t('addressMap')}
-            name="contact.addressMap"
-            type="text"
-            value={formState.contact?.addressMap}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const TabGeneral = () => {
-    return (
-      <div className="row">
-        <div className="col-md-4 mb-3">
-          <ComponentFieldSet legend={t('logo')}>
-            <ComponentThemeChooseImage
-              onSelected={(images) =>
-                setFormState({
-                  ...formState,
-                  logo: images[0],
-                })
-              }
-              isMulti={false}
-              isShowReviewImage={true}
-              reviewImage={formState.logo}
-              reviewImageClassName={'post-image'}
-            />
-          </ComponentFieldSet>
-        </div>
-        <div className="col-md-4 mb-3">
-          <ComponentFieldSet legend={t('logo') + ' - 2'}>
-            <ComponentThemeChooseImage
-              onSelected={(images) =>
-                setFormState({
-                  ...formState,
-                  logoTwo: images[0],
-                })
-              }
-              isMulti={false}
-              isShowReviewImage={true}
-              reviewImage={formState.logoTwo}
-              reviewImageClassName={'post-image'}
-            />
-          </ComponentFieldSet>
-        </div>
-        <div className="col-md-4 mb-3">
-          <ComponentFieldSet legend={t('icon')}>
-            <ComponentThemeChooseImage
-              onSelected={(images) =>
-                setFormState({
-                  ...formState,
-                  icon: images[0],
-                })
-              }
-              isMulti={false}
-              isShowReviewImage={true}
-              reviewImage={formState.icon}
-              reviewImageClassName={'post-image'}
-            />
-          </ComponentFieldSet>
-        </div>
-        <div className="col-md-7 mb-3">
-          <ComponentFormSelect
-            title={t('adminPanelLanguage').toCapitalizeCase()}
-            name="panelLangId"
-            isMulti={false}
-            isSearchable={false}
-            options={state.panelLanguages}
-            value={state.panelLanguages.findSingle(
-              'value',
-              formState.panelLangId
-            )}
-            onChange={(item: any, e) => onChangeSelect(e.name, item.value)}
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const ServerInfo = () => {
-    return (
-      <div className="col-12 grid-margin">
-        <div className="card card-statistics">
-          <div className="row">
-            <div className="card-col col-xl-4 col-lg-4 col-md-4 col-6">
-              <div className="card-body">
-                <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row ">
-                  <i className="mdi mdi-harddisk text-primary ms-0 me-sm-4 icon-lg"></i>
-                  <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">{t('storage')}</p>
-                    <div className="fluid-container position-relative">
-                      {state.isServerInfoLoading ? (
-                        <ComponentSpinnerDonut />
-                      ) : (
-                        <h3 className="mb-0 font-weight-medium text-dark">
-                          {state.serverInfo.storage}%
-                        </h3>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="card-col col-xl-4 col-lg-4 col-md-4 col-6">
-              <div className="card-body">
-                <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row">
-                  <i className="mdi mdi-memory text-primary ms-0 me-sm-4 icon-lg"></i>
-                  <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">{t('memory')}</p>
-                    <div className="fluid-container position-relative">
-                      {state.isServerInfoLoading ? (
-                        <ComponentSpinnerDonut />
-                      ) : (
-                        <h3 className="mb-0 font-weight-medium text-dark">
-                          {state.serverInfo.memory}%
-                        </h3>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="card-col col-xl-4 col-lg-4 col-md-4 col-6">
-              <div className="card-body">
-                <div className="d-flex align-items-center justify-content-center flex-column flex-sm-row">
-                  <i className="fa fa-microchip text-primary ms-0 me-sm-4 icon-lg"></i>
-                  <div className="wrapper text-center text-sm-end">
-                    <p className="card-text mb-0 text-dark">{t('processor')}</p>
-                    <div className="fluid-container position-relative">
-                      {state.isServerInfoLoading ? (
-                        <ComponentSpinnerDonut />
-                      ) : (
-                        <h3 className="mb-0 font-weight-medium text-dark">
-                          {state.serverInfo.cpu}%
-                        </h3>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
+  const formValues = form.getValues();
   const isUserSuperAdmin = PermissionUtil.checkPermissionRoleRank(
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
@@ -449,14 +229,18 @@ export default function PageSettingsGeneral() {
   return isPageLoading ? null : (
     <div className="page-settings">
       <div className="row">
-        <ServerInfo />
+        <ComponentPageSettingsGeneralServerInfo
+          info={state.serverInfo}
+          isLoading={state.isServerInfoLoading}
+        />
       </div>
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
+            formMethods={form}
             submitButtonText={t('save')}
             submitButtonSubmittingText={t('loading')}
-            onSubmit={(event) => onSubmit(event)}
+            onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">
@@ -474,14 +258,22 @@ export default function PageSettingsGeneral() {
                       transition={false}
                     >
                       <Tab eventKey="general" title={t('general')}>
-                        <TabGeneral />
+                        <ComponentPageSettingsGeneralTabGeneral
+                          panelLanguages={state.panelLanguages}
+                          panelLangId={formValues.panelLangId}
+                          icon={formValues.icon}
+                          logo={formValues.logo}
+                          logoTwo={formValues.logoTwo}
+                        />
                       </Tab>
                       <Tab eventKey="contact" title={t('contact')}>
-                        <TabContact />
+                        <ComponentPageSettingsGeneralTabContact
+                          contact={formValues.contact}
+                        />
                       </Tab>
                       {isUserSuperAdmin ? (
                         <Tab eventKey="tools" title={t('tools')}>
-                          <TabTools />
+                          <ComponentPageSettingsGeneralTabTools />
                         </Tab>
                       ) : null}
                     </Tabs>

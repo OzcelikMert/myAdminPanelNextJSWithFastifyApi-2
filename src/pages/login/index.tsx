@@ -57,11 +57,11 @@ const reducer = (state: IPageLoginState, action: IAction): IPageLoginState => {
   }
 };
 
-export type IPageLoginFormState = {
+export type IPageFormState = {
   keepMe: boolean;
 } & IAuthLoginParamService;
 
-const initialFormState: IPageLoginFormState = {
+const initialFormState: IPageFormState = {
   email: '',
   password: '',
   keepMe: false,
@@ -76,7 +76,7 @@ export default function PageLogin() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const form = useForm<IPageLoginFormState>({
+  const form = useForm<IPageFormState>({
     defaultValues: initialFormState,
     resolver: zodResolver(AuthSchema.post),
   });
@@ -107,7 +107,7 @@ export default function PageLogin() {
     appDispatch(setBreadCrumbState([{ title: t('login') }]));
   };
 
-  const onSubmit = async (data: IPageLoginFormState) => {
+  const onSubmit = async (data: IPageFormState) => {
     dispatch({ type: AcitonTypes.SET_IS_WRONG, payload: false });
 
     const serviceResult = await AuthService.login(data, abortController.signal);

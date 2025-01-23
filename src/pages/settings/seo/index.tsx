@@ -25,14 +25,18 @@ import {
 } from '@library/react/customHooks';
 import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SettingSchema } from 'schemas/setting.schema';
+import ComponentPageSettingsSEOHeader from '@components/pages/settings/seo/header';
 
-type IComponentState = {
+export type IPageSettingsSEOState = {
   langId: string;
   item?: ISettingGetResultService;
   isItemLoading: boolean;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageSettingsSEOState = {
   langId: '',
   item: undefined,
   isItemLoading: false,
@@ -45,14 +49,17 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_ITEM; payload: IComponentState['item'] }
+  | { type: ActionTypes.SET_ITEM; payload: IPageSettingsSEOState['item'] }
   | {
       type: ActionTypes.SET_IS_ITEM_LOADING;
-      payload: IComponentState['isItemLoading'];
+      payload: IPageSettingsSEOState['isItemLoading'];
     }
-  | { type: ActionTypes.SET_LANG_ID; payload: IComponentState['langId'] };
+  | { type: ActionTypes.SET_LANG_ID; payload: IPageSettingsSEOState['langId'] };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (
+  state: IPageSettingsSEOState,
+  action: IAction
+): IPageSettingsSEOState => {
   switch (action.type) {
     case ActionTypes.SET_ITEM:
       return { ...state, item: action.payload };
@@ -63,9 +70,9 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentFormState = ISettingUpdateSEOParamService;
+type IPageFormState = ISettingUpdateSEOParamService;
 
-const initialFormState: IComponentFormState = {
+const initialFormState: IPageFormState = {
   seoContents: {
     langId: '',
     title: '',
@@ -84,9 +91,14 @@ export default function PageSettingsSEO() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { formState, setFormState, onChangeInput, onChangeSelect } =
-    useFormReducer<IComponentFormState>(initialFormState);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialState,
+    langId: mainLangId,
+  });
+  const form = useForm<IPageFormState>({
+    defaultValues: initialFormState,
+    resolver: zodResolver(SettingSchema.putSeo),
+  });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -142,7 +154,7 @@ export default function PageSettingsSEO() {
   };
 
   const getSeo = async (_langId?: string) => {
-    _langId = _langId ?? state.langId;
+    _langId = _langId || state.langId;
     const serviceResult = await SettingService.get(
       {
         langId: _langId,
@@ -153,9 +165,9 @@ export default function PageSettingsSEO() {
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
       dispatch({ type: ActionTypes.SET_ITEM, payload: setting });
-      setFormState({
+      form.reset({
         seoContents: {
-          ...formState.seoContents,
+          ...form.getValues().seoContents,
           ...setting.seoContents,
           langId: _langId,
         },
@@ -163,8 +175,8 @@ export default function PageSettingsSEO() {
     }
   };
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    let params = formState;
+  const onSubmit = async (data: IPageFormState) => {
+    let params = data;
 
     const serviceResult = await SettingService.updateSeo(
       params,
@@ -176,7 +188,7 @@ export default function PageSettingsSEO() {
         (state.item?.seoContentAlternates?.indexOfKey('langId', state.langId) ??
           -1) < 0
       ) {
-        const newItem: IComponentState['item'] = {
+        const newItem: IPageSettingsSEOState['item'] = {
           ...state.item!,
           seoContentAlternates: [
             ...(state.item?.seoContentAlternates ?? []),
@@ -199,42 +211,29 @@ export default function PageSettingsSEO() {
     }
   };
 
-  const Header = () => {
-    return (
-      <div className="col-md-12">
-        <div className="row">
-          <div className="col-md-6 align-content-center"></div>
-          <div className="col-md-6">
-            <ComponentThemeLanguageSelector
-              onChange={(item) => onChangeLanguage(item.value._id)}
-              selectedLangId={state.langId}
-              showMissingMessage
-              ownedLanguages={state.item?.seoContentAlternates}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   return isPageLoading ? null : (
     <div className="page-settings">
       <div className="row mb-3">
-        <Header />
+        <ComponentPageSettingsSEOHeader
+          item={state.item}
+          langId={state.langId}
+          onChangeLanguage={(langId) => onChangeLanguage(langId)}
+        />
       </div>
       <div className="row position-relative">
         {state.isItemLoading ? (
           <ComponentSpinnerDonut customClass="page-spinner" />
         ) : null}
         <div className="col-md-12">
-          <ComponentForm
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
-            onSubmit={(event) => onSubmit(event)}
-          >
-            <div className="grid-margin stretch-card">
-              <div className="card">
-                <div className="card-body">
+          <div className="grid-margin stretch-card">
+            <div className="card">
+              <div className="card-body">
+                <ComponentForm
+                  formMethods={form}
+                  submitButtonText={t('save')}
+                  submitButtonSubmittingText={t('loading')}
+                  onSubmit={(event) => onSubmit(event)}
+                >
                   <div className="row">
                     <div className="col-md-7 mb-3">
                       <ComponentFormInput
@@ -243,8 +242,6 @@ export default function PageSettingsSEO() {
                         name="seoContents.title"
                         required={true}
                         maxLength={50}
-                        value={formState.seoContents.title}
-                        onChange={(event) => onChangeInput(event)}
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -254,8 +251,6 @@ export default function PageSettingsSEO() {
                         name="seoContents.content"
                         required={true}
                         maxLength={120}
-                        value={formState.seoContents.content}
-                        onChange={(event) => onChangeInput(event)}
                       />
                     </div>
                     <div className="col-md-7">
@@ -263,15 +258,13 @@ export default function PageSettingsSEO() {
                         title={t('websiteTags')}
                         placeHolder={t('writeAndPressEnter')}
                         name="seoContents.tags"
-                        value={formState.seoContents.tags ?? []}
-                        onChange={(value, name) => onChangeSelect(name, value)}
                       />
                     </div>
                   </div>
-                </div>
+                </ComponentForm>
               </div>
             </div>
-          </ComponentForm>
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
-import { TableColumn } from 'react-data-table-component';
+import React, { useReducer, useState } from 'react';
 import Swal from 'sweetalert2';
 import { PostService } from '@services/post.service';
 import { IPostGetManyResultService } from 'types/services/post.service';
@@ -26,7 +25,6 @@ import { PageTypeId, pageTypes } from '@constants/pageTypes';
 import { PostTermTypeId } from '@constants/postTermTypes';
 import { RouteUtil } from '@utils/route.util';
 import { UserRoleId } from '@constants/userRoles';
-import ComponentToolTip from '@components/elements/tooltip';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
@@ -44,7 +42,7 @@ import {
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 
-type IComponentState = {
+type IPageState = {
   typeId: PostTypeId;
   items: IPostGetManyResultService[];
   selectedItems: IPostGetManyResultService[];
@@ -53,7 +51,7 @@ type IComponentState = {
   listMode: 'list' | 'deleted';
 };
 
-const initialState: IComponentState = {
+const initialState: IPageState = {
   typeId: PostTypeId.Blog,
   items: [],
   selectedItems: [],
@@ -72,23 +70,23 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_TYPE_ID; payload: IComponentState['typeId'] }
-  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | { type: ActionTypes.SET_TYPE_ID; payload: IPageState['typeId'] }
+  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
   | {
       type: ActionTypes.SET_SELECTED_ITEMS;
-      payload: IComponentState['selectedItems'];
+      payload: IPageState['selectedItems'];
     }
   | {
       type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IComponentState['selectedItemId'];
+      payload: IPageState['selectedItemId'];
     }
   | {
       type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
-      payload: IComponentState['isShowModalUpdateRank'];
+      payload: IPageState['isShowModalUpdateRank'];
     }
-  | { type: ActionTypes.SET_LIST_MODE; payload: IComponentState['listMode'] };
+  | { type: ActionTypes.SET_LIST_MODE; payload: IPageState['listMode'] };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
     case ActionTypes.SET_TYPE_ID:
       return { ...state, typeId: action.payload };
@@ -210,7 +208,7 @@ export default function PagePostList() {
   };
 
   const onChangeStatus = async (
-    selectedRows: IComponentState['items'],
+    selectedRows: IPageState['items'],
     statusId: number
   ) => {
     const selectedItemId = selectedRows.map((row) => row._id); //state.selectedItems.map((item) => item._id);
@@ -353,7 +351,7 @@ export default function PagePostList() {
   };
 
   const getTableFilterButtons = (): IComponentTableFilterButton<
-    IComponentState['items']
+    IPageState['items']
   >[] => {
     return [
       {
@@ -376,7 +374,7 @@ export default function PagePostList() {
   };
 
   const getTableColumns = (): IComponentDataTableColumn<
-    IComponentState['items'][0]
+    IPageState['items'][0]
   >[] => {
     return [
       {

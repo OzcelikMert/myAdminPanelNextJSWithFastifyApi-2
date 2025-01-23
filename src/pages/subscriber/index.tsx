@@ -22,12 +22,12 @@ import {
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 
-type IComponentState = {
+type IPageState = {
   items: ISubscriberGetResultService[];
   selectedItems: ISubscriberGetResultService[];
 };
 
-const initialState: IComponentState = {
+const initialState: IPageState = {
   items: [],
   selectedItems: [],
 };
@@ -41,11 +41,11 @@ export default function PageSubscribers() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
-  const [items, setItems] = useState<IComponentState['items']>(
+  const [items, setItems] = useState<IPageState['items']>(
     initialState.items
   );
   const [selectedItems, setSelectedItems] = useState<
-    IComponentState['selectedItems']
+    IPageState['selectedItems']
   >(initialState.selectedItems);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
@@ -152,7 +152,7 @@ export default function PageSubscribers() {
     }));
   };
 
-  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): TableColumn<IPageState['items'][0]>[] => {
     return [
       {
         name: t('email'),

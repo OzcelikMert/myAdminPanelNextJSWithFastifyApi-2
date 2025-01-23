@@ -11,7 +11,7 @@ import { PostTermTypeId } from '@constants/postTermTypes';
 import { PermissionUtil, PostPermissionMethod } from '@utils/permission.util';
 import { PostUtil } from '@utils/post.util';
 import { StatusId } from '@constants/status';
-import { ComponentUtil } from '@utils/component.util';
+import { SelectUtil } from '@utils/select.util';
 import { RouteUtil } from '@utils/route.util';
 import ComponentToast from '@components/elements/toast';
 import { useRouter } from 'next/router';
@@ -124,7 +124,7 @@ const initialFormState: IPagePostTermAddFormState = {
   },
 };
 
-type IComponentProps = {
+type IPageProps = {
   isModal?: boolean;
   _id?: string;
   postTypeId?: PostTypeId;
@@ -139,7 +139,7 @@ type IPageQueries = {
   postTypeId: PostTypeId;
 };
 
-export default function PagePostTermAdd(props: IComponentProps) {
+export default function PagePostTermAdd(props: IPageProps) {
   const abortController = new AbortController();
 
   const router = useRouter();
@@ -259,7 +259,7 @@ export default function PagePostTermAdd(props: IComponentProps) {
   const getStatus = () => {
     dispatch({
       type: ActionTypes.SET_STATUS,
-      payload: ComponentUtil.getStatusForSelect(
+      payload: SelectUtil.getStatus(
         [StatusId.Active, StatusId.InProgress],
         t
       ),

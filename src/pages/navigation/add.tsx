@@ -8,7 +8,7 @@ import { NavigationService } from '@services/navigation.service';
 import { IThemeFormSelectData } from '@components/elements/form/input/select';
 import { PermissionUtil } from '@utils/permission.util';
 import { NavigationEndPointPermission } from '@constants/endPointPermissions/navigation.endPoint.permission';
-import { ComponentUtil } from '@utils/component.util';
+import { SelectUtil } from '@utils/select.util';
 import { StatusId } from '@constants/status';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
@@ -117,9 +117,9 @@ const reducer = (
   }
 };
 
-export type IPageNavigationAddFormState = INavigationUpdateWithIdParamService;
+export type IPageFormState = INavigationUpdateWithIdParamService;
 
-const initialFormState: IPageNavigationAddFormState = {
+const initialFormState: IPageFormState = {
   _id: '',
   statusId: StatusId.Active,
   rank: 0,
@@ -150,7 +150,7 @@ export default function PageNavigationAdd() {
     ...initialState,
     langId: mainLangId,
   });
-  const form = useForm<IPageNavigationAddFormState>({
+  const form = useForm<IPageFormState>({
     defaultValues: {
       ...initialFormState,
       _id: queries._id ?? '',
@@ -227,7 +227,7 @@ export default function PageNavigationAdd() {
   const getStatus = () => {
     dispatch({
       type: ActionTypes.SET_STATUS,
-      payload: ComponentUtil.getStatusForSelect(
+      payload: SelectUtil.getStatus(
         [StatusId.Active, StatusId.InProgress],
         t
       ),
@@ -293,7 +293,7 @@ export default function PageNavigationAdd() {
     await RouteUtil.change({ router, path });
   };
 
-  const onSubmit = async (data: IPageNavigationAddFormState) => {
+  const onSubmit = async (data: IPageFormState) => {
     const params = data;
     const serviceResult = await (params._id
       ? NavigationService.updateWithId(params, abortController.signal)

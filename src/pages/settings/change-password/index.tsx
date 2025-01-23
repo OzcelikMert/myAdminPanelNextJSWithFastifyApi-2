@@ -1,9 +1,8 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import ComponentToast from '@components/elements/toast';
 import { UserService } from '@services/user.service';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useFormReducer } from '@library/react/handles/form';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentForm from '@components/elements/form';
@@ -13,14 +12,17 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { UserSchema } from 'schemas/user.schema';
 
-type IComponentFormState = {
+type IPageFormState = {
   password: string;
   newPassword: string;
   confirmPassword: string;
 };
 
-const initialFormState: IComponentFormState = {
+const initialFormState: IPageFormState = {
   password: '',
   newPassword: '',
   confirmPassword: '',
@@ -33,8 +35,10 @@ export default function PageChangePassword() {
   const appDispatch = useAppDispatch();
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
-  const { formState, setFormState, onChangeInput } =
-    useFormReducer<IComponentFormState>(initialFormState);
+  const form = useForm<IPageFormState>({
+    defaultValues: initialFormState,
+    resolver: zodResolver(UserSchema.putPassword),
+  });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -73,7 +77,8 @@ export default function PageChangePassword() {
   };
 
   const onSubmit = async (event: FormEvent) => {
-    if (formState.newPassword !== formState.confirmPassword) {
+    const params = form.getValues();
+    if (params.newPassword !== params.confirmPassword) {
       new ComponentToast({
         type: 'error',
         title: t('error'),
@@ -81,8 +86,6 @@ export default function PageChangePassword() {
       });
       return;
     }
-
-    let params = formState;
     const serviceResult = await UserService.updatePassword(
       params,
       abortController.signal
@@ -107,6 +110,7 @@ export default function PageChangePassword() {
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
+            formMethods={form}
             submitButtonText={t('save')}
             submitButtonSubmittingText={t('loading')}
             onSubmit={(event) => onSubmit(event)}
@@ -120,10 +124,7 @@ export default function PageChangePassword() {
                         title={`${t('password')}*`}
                         name="password"
                         type="password"
-                        autoComplete={'new-password'}
                         required={true}
-                        value={formState.password}
-                        onChange={(e) => onChangeInput(e)}
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -131,10 +132,7 @@ export default function PageChangePassword() {
                         title={`${t('newPassword')}*`}
                         name="newPassword"
                         type="password"
-                        autoComplete={'new-password'}
                         required={true}
-                        value={formState.newPassword}
-                        onChange={(e) => onChangeInput(e)}
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -142,10 +140,7 @@ export default function PageChangePassword() {
                         title={`${t('confirmPassword')}*`}
                         name="confirmPassword"
                         type="password"
-                        autoComplete={'new-password'}
                         required={true}
-                        value={formState.confirmPassword}
-                        onChange={(e) => onChangeInput(e)}
                       />
                     </div>
                   </div>

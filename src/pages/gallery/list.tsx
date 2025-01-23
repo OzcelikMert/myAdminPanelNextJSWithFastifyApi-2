@@ -16,13 +16,13 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/customHooks';
 
-type IComponentState = {
+type IPageState = {
   items: IGalleryGetResultService[];
   selectedItems: IGalleryGetResultService[];
   isListLoading: boolean;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageState = {
   items: [],
   selectedItems: [],
   isListLoading: true,
@@ -35,11 +35,11 @@ enum ActionTypes {
 } 
 
 type IAction =
-  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
-  | { type: ActionTypes.SET_SELECTED_ITEMS; payload: IComponentState['selectedItems'] }
-  | { type: ActionTypes.SET_IS_LIST_LOADING; payload: IComponentState['isListLoading'] };
+  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
+  | { type: ActionTypes.SET_SELECTED_ITEMS; payload: IPageState['selectedItems'] }
+  | { type: ActionTypes.SET_IS_LIST_LOADING; payload: IPageState['isListLoading'] };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
     case ActionTypes.SET_ITEMS:
       return {
@@ -61,7 +61,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentProps = {
+type IPageProps = {
   isModal?: boolean;
   isMulti?: boolean;
   onSubmit?: (images: string[]) => void;
@@ -69,7 +69,7 @@ type IComponentProps = {
   selectedImages?: string[];
 };
 
-export default function PageGalleryList(props: IComponentProps) {
+export default function PageGalleryList(props: IPageProps) {
   let toast: null | ComponentToast = null;
   const abortController = new AbortController();
 

@@ -1,5 +1,6 @@
 import { array, boolean, number, object, string, z } from 'zod';
 import { CurrencyId } from '@constants/currencyTypes';
+import { PanelLanguageId } from '@constants/panelLanguages';
 
 const schemaPathContent = object({
   _id: string().optional(),
@@ -61,6 +62,7 @@ const putGeneralSchema = object({
   script: string().optional(),
   googleAnalyticURL: string().optional(),
   contact: schemaContact,
+  panelLangId: z.nativeEnum(PanelLanguageId),
 });
 
 const putSeoSchema = object({

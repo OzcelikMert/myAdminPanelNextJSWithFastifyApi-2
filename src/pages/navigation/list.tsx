@@ -29,7 +29,7 @@ import {
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 
-type IComponentState = {
+type IPageState = {
   items: INavigationGetResultService[];
   selectedItems: INavigationGetResultService[];
   selectedItemId: string;
@@ -37,7 +37,7 @@ type IComponentState = {
   listMode?: 'list' | 'deleted';
 };
 
-const initialState: IComponentState = {
+const initialState: IPageState = {
   items: [],
   selectedItems: [],
   selectedItemId: '',
@@ -54,22 +54,22 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
   | {
       type: ActionTypes.SET_SELECTED_ITEMS;
-      payload: IComponentState['selectedItems'];
+      payload: IPageState['selectedItems'];
     }
   | {
       type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IComponentState['selectedItemId'];
+      payload: IPageState['selectedItemId'];
     }
-  | { type: ActionTypes.SET_LIST_MODE; payload: IComponentState['listMode'] }
+  | { type: ActionTypes.SET_LIST_MODE; payload: IPageState['listMode'] }
   | {
       type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
-      payload: IComponentState['isShowModalUpdateRank'];
+      payload: IPageState['isShowModalUpdateRank'];
     };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
     case ActionTypes.SET_ITEMS:
       return { ...state, items: action.payload };
@@ -271,7 +271,7 @@ export default function PageNavigationList() {
   };
 
   const getTableFilterButtons = (): IComponentTableFilterButton<
-    IComponentState['items']
+    IPageState['items']
   >[] => {
     return [
       {
@@ -290,7 +290,7 @@ export default function PageNavigationList() {
     ];
   };
 
-  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): TableColumn<IPageState['items'][0]>[] => {
     return [
       {
         name: t('title'),

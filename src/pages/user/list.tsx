@@ -28,13 +28,13 @@ import {
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 
-type IComponentState = {
+type IPageState = {
   items: IUserGetResultService[];
   isShowItemModal: boolean;
   selectedItemId: string;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageState = {
   items: [],
   isShowItemModal: false,
   selectedItemId: '',
@@ -47,17 +47,17 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
+  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
   | {
       type: ActionTypes.SET_IS_SHOW_ITEM_MODAL;
-      payload: IComponentState['isShowItemModal'];
+      payload: IPageState['isShowItemModal'];
     }
   | {
       type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IComponentState['selectedItemId'];
+      payload: IPageState['selectedItemId'];
     };
 
-const reducer = (state: IComponentState, action: IAction): IComponentState => {
+const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
     case ActionTypes.SET_ITEMS:
       return { ...state, items: action.payload };
@@ -188,7 +188,7 @@ export default function PageUserList() {
     RouteUtil.change({ router, path });
   };
 
-  const getTableColumns = (): TableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): TableColumn<IPageState['items'][0]>[] => {
     return [
       {
         name: t('image'),

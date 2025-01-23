@@ -37,6 +37,7 @@ import ComponentPageComponentAddElementEditModal from '@components/pages/compone
 import ComponentPageComponentAddTabGeneral from '@components/pages/component/add/tabGeneral';
 import ComponentPageComponentAddTabElements from '@components/pages/component/add/tabElements';
 import ComponentPageComponentAddHeader from '@components/pages/component/add/header';
+import { SelectUtil } from '@utils/select.util';
 
 export type IPageComponentAddState = {
   elementTypes: IThemeFormSelectData<ElementTypeId>[];
@@ -128,9 +129,9 @@ const reducer = (
   }
 };
 
-export type IPageComponentAddFormState = IComponentUpdateWithIdParamService;
+export type IPageFormState = IComponentUpdateWithIdParamService;
 
-const initialFormState: IPageComponentAddFormState = {
+const initialFormState: IPageFormState = {
   _id: '',
   elements: [],
   key: '',
@@ -163,8 +164,10 @@ export default function PageComponentAdd() {
     )
       ? 'general'
       : 'elements',
+    componentTypes: SelectUtil.getComponentTypes(t),
+    elementTypes: SelectUtil.getElementTypes(t),
   });
-  const form = useForm<IPageComponentAddFormState>({
+  const form = useForm<IPageFormState>({
     defaultValues: {
       ...initialFormState,
       _id: queries._id ?? '',
@@ -204,8 +207,6 @@ export default function PageComponentAdd() {
         t,
       })
     ) {
-      getElementTypes();
-      getComponentTypes();
       if (queries._id) {
         await getItem();
       }
@@ -237,26 +238,6 @@ export default function PageComponentAdd() {
       });
     }
     appDispatch(setBreadCrumbState(titles));
-  };
-
-  const getComponentTypes = () => {
-    dispatch({
-      type: ActionTypes.SET_COMPONENT_TYPES,
-      payload: componentTypes.map((type) => ({
-        label: t(type.langKey),
-        value: type.id,
-      })),
-    });
-  };
-
-  const getElementTypes = () => {
-    dispatch({
-      type: ActionTypes.SET_ELEMENT_TYPES,
-      payload: elementTypes.map((type) => ({
-        label: t(type.langKey),
-        value: type.id,
-      })),
-    });
   };
 
   const getItem = async (_langId?: string) => {
@@ -297,7 +278,7 @@ export default function PageComponentAdd() {
     await RouteUtil.change({ path, router });
   };
 
-  const onSubmit = async (data: IPageComponentAddFormState) => {
+  const onSubmit = async (data: IPageFormState) => {
     const params = data;
     const serviceResult = await (params._id
       ? ComponentService.updateWithId(params, abortController.signal)
@@ -361,16 +342,17 @@ export default function PageComponentAdd() {
     if (foundIndex > -1) {
       newElements[foundIndex] = newElement;
       form.setValue('elements', newElements);
+      return true;
     }
-    return true;
+    return false;
   };
 
   const onEdit = (_id: string) => {
+    dispatch({ type: ActionTypes.SET_SELECTED_ELEMENT_ID, payload: _id });
     dispatch({
       type: ActionTypes.SET_IS_SHOW_MODAL_EDIT_ELEMENT,
       payload: true,
     });
-    dispatch({ type: ActionTypes.SET_SELECTED_ELEMENT_ID, payload: _id });
   };
 
   const onDelete = async (_id: string) => {
@@ -397,11 +379,12 @@ export default function PageComponentAdd() {
   const selectedElement = formValues.elements.findSingle(
     '_id',
     state.selectedElementId
-  ) as IComponentElementModel;
+  );
 
   return isPageLoading ? null : (
     <div className="page-post">
       <ComponentPageComponentAddElementEditModal
+        elementTypes={state.elementTypes}
         isShow={state.isShowModalEditElement}
         onHide={() =>
           dispatch({

@@ -13,3 +13,5 @@ Things to do:
     - add value to checkboxes
     - rename eCommerce.variations.itemId to eCommerce.variations.item
     - add name to inputs which doesn't have a name attr
+    - change onSubmit's event param to data param
+    - add key for every loop component

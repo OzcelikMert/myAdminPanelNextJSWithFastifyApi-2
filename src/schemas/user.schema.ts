@@ -36,6 +36,7 @@ const putProfileImageSchema = object({
 const putPasswordSchema = object({
   password: string().min(1),
   newPassword: string().min(1),
+  confirmPassword: string().min(1),
 });
 
 export type IUserPostSchema = z.infer<typeof postSchema>;

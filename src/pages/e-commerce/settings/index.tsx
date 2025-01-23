@@ -78,10 +78,10 @@ const reducer = (
   }
 };
 
-export type IPageECommerceSettingsFormState =
+export type IPageFormState =
   ISettingUpdateECommerceParamService;
 
-const initialFormState: IPageECommerceSettingsFormState = {
+const initialFormState: IPageFormState = {
   eCommerce: {
     currencyId: CurrencyId.Dollar,
   },
@@ -97,7 +97,7 @@ export default function PageECommerceSettings() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const form = useForm<IPageECommerceSettingsFormState>({
+  const form = useForm<IPageFormState>({
     defaultValues: initialFormState,
     resolver: zodResolver(SettingSchema.putECommerce),
   });
@@ -172,7 +172,7 @@ export default function PageECommerceSettings() {
     });
   };
 
-  const onSubmit = async (data: IPageECommerceSettingsFormState) => {
+  const onSubmit = async (data: IPageFormState) => {
     const params = data;
     const serviceResult = await SettingService.updateECommerce(
       params,

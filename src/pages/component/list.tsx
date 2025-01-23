@@ -24,11 +24,11 @@ import {
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 
-type IComponentState = {
+type IPageState = {
   items: IComponentGetResultService[];
 };
 
-const initialState: IComponentState = {
+const initialState: IPageState = {
   items: [],
 };
 
@@ -149,7 +149,7 @@ export default function PageComponentList() {
     }
   };
 
-  const getTableColumns = (): IComponentDataTableColumn<IComponentState['items'][0]>[] => {
+  const getTableColumns = (): IComponentDataTableColumn<IPageState['items'][0]>[] => {
     return [
       {
         name: t('title'),

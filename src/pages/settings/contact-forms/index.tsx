@@ -1,3 +1,4 @@
+import { useReducer, useState } from 'react';
 import { SettingService } from '@services/setting.service';
 import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateContactFormParamService } from 'types/services/setting.service';
@@ -6,39 +7,72 @@ import { SettingProjectionKeys } from '@constants/settingProjections';
 import { UserRoleId } from '@constants/userRoles';
 import { PermissionUtil } from '@utils/permission.util';
 import { SettingsEndPointPermission } from '@constants/endPointPermissions/settings.endPoint.permission';
-import { cloneDeepWith } from 'lodash';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useEffect, useState } from 'react';
-import { useFormReducer } from '@library/react/handles/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
-import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentForm from '@components/elements/form';
 import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SettingSchema } from 'schemas/setting.schema';
+import ComponentPageSettingsContactFormsItem from '@components/pages/settings/contact-forms/item';
+import ComponentPageSettingsContactFormsEditModal from '@components/pages/settings/contact-forms/editModal';
 
-type IComponentState = {
+type IPageState = {
   items: ISettingContactFormModel[];
+  isShowModalEdit: boolean;
+  selectedItemId: string;
 };
 
-const initialState: IComponentState = {
+const initialState: IPageState = {
   items: [],
+  isShowModalEdit: false,
+  selectedItemId: '',
 };
 
-type IComponentSelectedItemFormState = ISettingContactFormModel | undefined;
+enum ActionTypes {
+  SET_ITEMS,
+  SET_IS_SHOW_MODAL_EDIT,
+  SET_SELECTED_ITEM_ID,
+}
 
-const initialSelectedItemFormState: IComponentSelectedItemFormState = undefined;
+type IAction =
+  | {
+      type: ActionTypes.SET_ITEMS;
+      payload: IPageState['items'];
+    }
+  | {
+      type: ActionTypes.SET_IS_SHOW_MODAL_EDIT;
+      payload: IPageState['isShowModalEdit'];
+    }
+  | {
+      type: ActionTypes.SET_SELECTED_ITEM_ID;
+      payload: IPageState['selectedItemId'];
+    };
 
-type IComponentFormState = ISettingUpdateContactFormParamService;
+const reducer = (state: IPageState, action: IAction): IPageState => {
+  switch (action.type) {
+    case ActionTypes.SET_ITEMS:
+      return { ...state, items: action.payload };
+    case ActionTypes.SET_IS_SHOW_MODAL_EDIT:
+      return { ...state, isShowModalEdit: action.payload };
+    case ActionTypes.SET_SELECTED_ITEM_ID:
+      return { ...state, selectedItemId: action.payload };
+    default:
+      return state;
+  }
+};
 
-const initialFormState: IComponentFormState = {
+type IPageFormState = ISettingUpdateContactFormParamService;
+
+const initialFormState: IPageFormState = {
   contactForms: [],
 };
 
@@ -51,9 +85,11 @@ export default function PageSettingsContactForms() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
-  const [items, setItems] = useState(initialState.items);
-  const selectedItemFormReducer = useFormReducer(initialSelectedItemFormState);
-  const formReducer = useFormReducer(initialFormState);
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const form = useForm<IPageFormState>({
+    defaultValues: initialFormState,
+    resolver: zodResolver(SettingSchema.putContactForm),
+  });
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -109,13 +145,13 @@ export default function PageSettingsContactForms() {
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
       const contactForms = setting.contactForms ?? [];
-      setItems(contactForms);
-      formReducer.setFormState({ contactForms });
+      form.setValue('contactForms', contactForms);
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: contactForms });
     }
   };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    let params = formReducer.formState;
+    let params = form.getValues();
     const serviceResult = await SettingService.updateContactForm(
       params,
       abortController.signal
@@ -131,7 +167,7 @@ export default function PageSettingsContactForms() {
 
   const onCreate = () => {
     let _id = String.createId();
-    let newContactForms = formReducer.formState.contactForms;
+    let newContactForms = form.getValues().contactForms;
     newContactForms.push({
       _id: _id,
       title: '',
@@ -145,36 +181,32 @@ export default function PageSettingsContactForms() {
       hasSSL: true,
     });
 
-    formReducer.setFormState({
-      contactForms: newContactForms,
-    });
-
-    onEdit(newContactForms.length - 1);
+    form.setValue('contactForms', newContactForms);
+    onEdit(_id);
   };
 
-  const onAccept = (index: number) => {
-    let newContactForms = formReducer.formState.contactForms;
-    newContactForms[index] = selectedItemFormReducer.formState!;
-    formReducer.setFormState({
-      contactForms: newContactForms,
-    });
-    selectedItemFormReducer.setFormState(undefined);
+  const onAccept = async (newItem: ISettingContactFormModel) => {
+    let newContactForms = form.getValues().contactForms;
+    let index = newContactForms.indexOfKey('_id', state.selectedItemId);
+    if (index > -1) {
+      newContactForms[index] = newItem;
+      form.setValue('contactForms', newContactForms);
+      return true;
+    }
+    return false;
   };
 
-  const onEdit = (index: number) => {
-    selectedItemFormReducer.setFormState(
-      cloneDeepWith(formReducer.formState.contactForms[index])
-    );
+  const onEdit = (_id: string) => {
+    dispatch({ type: ActionTypes.SET_SELECTED_ITEM_ID, payload: _id });
+    dispatch({ type: ActionTypes.SET_IS_SHOW_MODAL_EDIT, payload: true });
   };
 
-  const onCancelEdit = () => {
-    selectedItemFormReducer.setFormState(undefined);
-  };
-
-  const onDelete = async (index: number) => {
+  const onDelete = async (_id: string) => {
+    const newContactForms = form.getValues().contactForms;
+    const index = newContactForms.indexOfKey('_id', _id);
     const result = await Swal.fire({
       title: t('deleteAction'),
-      html: `<b>'${formReducer.formState.contactForms[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+      html: `<b>'${newContactForms[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
       confirmButtonText: t('yes'),
       cancelButtonText: t('no'),
       icon: 'question',
@@ -182,171 +214,38 @@ export default function PageSettingsContactForms() {
     });
 
     if (result.isConfirmed) {
-      let newContactForms = formReducer.formState.contactForms;
       newContactForms.splice(index, 1);
-      formReducer.setFormState({
-        contactForms: newContactForms,
-      });
+      form.setValue('contactForms', newContactForms);
     }
   };
 
-  const ContactForm = (props: ISettingContactFormModel, index: number) => {
-    return (
-      <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
-        <ComponentFieldSet
-          legend={`${props.title} (#${props.key})`}
-          legendElement={
-            PermissionUtil.checkPermissionRoleRank(
-              sessionAuth!.user.roleId,
-              UserRoleId.SuperAdmin
-            ) ? (
-              <span>
-                <i
-                  className="mdi mdi-pencil-box text-warning fs-1 cursor-pointer ms-2"
-                  onClick={() => onEdit(index)}
-                ></i>
-                <i
-                  className="mdi mdi-minus-box text-danger fs-1 cursor-pointer ms-2"
-                  onClick={() => onDelete(index)}
-                ></i>
-              </span>
-            ) : undefined
-          }
-        >
-          <div className="row">
-            <div className="col-md-12 mt-4">
-              <ComponentFormInput
-                type="text"
-                name={`contactForms.${index}.name`}
-                title={t('name')}
-                value={props.name}
-                onChange={(e) => formReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-4">
-              <ComponentFormInput
-                type="email"
-                name={`contactForms.${index}.targetEmail`}
-                title={t('targetEmail')}
-                value={props.targetEmail}
-                onChange={(e) => formReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-4">
-              <ComponentFormInput
-                type="email"
-                name={`contactForms.${index}.email`}
-                title={t('email')}
-                value={props.email}
-                onChange={(e) => formReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-4">
-              <ComponentFormInput
-                type="password"
-                name={`contactForms.${index}.password`}
-                title={t('password')}
-                value={props.password}
-                onChange={(e) => formReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-4">
-              <ComponentFormInput
-                type="text"
-                name={`contactForms.${index}.host`}
-                title={t('host')}
-                value={props.host}
-                onChange={(e) => formReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-4">
-              <ComponentFormInput
-                type="number"
-                name={`contactForms.${index}.port`}
-                title={t('port')}
-                value={props.port}
-                onChange={(e) => formReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-7 mt-4">
-              <div className="form-switch">
-                <input
-                  name={`contactForms.${index}.hasSSL`}
-                  checked={props.hasSSL}
-                  className="form-check-input"
-                  type="checkbox"
-                  id="hasSSL"
-                  onChange={(e) => formReducer.onChangeInput(e)}
-                />
-                <label className="form-check-label ms-2" htmlFor="hasSSL">
-                  {t('hasSSL')}
-                </label>
-              </div>
-            </div>
-          </div>
-        </ComponentFieldSet>
-      </div>
-    );
-  };
-
-  const ContactFormEdit = (props: ISettingContactFormModel, index: number) => {
-    return (
-      <div className={`col-md-12 ${index > 0 ? 'mt-5' : ''}`}>
-        <ComponentFieldSet legend={t('newContactForm')}>
-          <div className="row mt-3">
-            <div className="col-md-12">
-              <ComponentFormInput
-                title={`${t('title')}*`}
-                name="title"
-                type="text"
-                required={true}
-                value={props.title}
-                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-4">
-              <ComponentFormInput
-                title={`${t('key')}*`}
-                name="key"
-                type="text"
-                required={true}
-                value={props.key}
-                onChange={(e) => selectedItemFormReducer.onChangeInput(e)}
-              />
-            </div>
-            <div className="col-md-12 mt-3">
-              <div className="row">
-                <div className="col-md-6">
-                  <button
-                    type="button"
-                    className="btn btn-gradient-success btn-lg"
-                    onClick={() => onAccept(index)}
-                  >
-                    {t('okay')}
-                  </button>
-                </div>
-                <div className="col-md-6 text-end">
-                  <button
-                    type="button"
-                    className="btn btn-gradient-dark btn-lg"
-                    onClick={() => onCancelEdit()}
-                  >
-                    {t('cancel')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </ComponentFieldSet>
-      </div>
-    );
-  };
+  const formValues = form.getValues();
+  const selectedItem = formValues.contactForms.findSingle(
+    '_id',
+    state.selectedItemId
+  );
+  const isSuperAdmin = PermissionUtil.checkPermissionRoleRank(
+    sessionAuth!.user.roleId,
+    UserRoleId.SuperAdmin
+  );
 
   return isPageLoading ? null : (
     <div className="page-settings">
+      <ComponentPageSettingsContactFormsEditModal
+        isShow={state.isShowModalEdit}
+        onHide={() =>
+          dispatch({
+            type: ActionTypes.SET_IS_SHOW_MODAL_EDIT,
+            payload: false,
+          })
+        }
+        onSubmit={(newItem) => onAccept(newItem)}
+        item={selectedItem}
+      />
       <div className="row">
         <div className="col-md-12">
           <ComponentForm
+            formMethods={form}
             submitButtonText={t('save')}
             submitButtonSubmittingText={t('loading')}
             onSubmit={(event) => onSubmit(event)}
@@ -357,24 +256,20 @@ export default function PageSettingsContactForms() {
                   <div className="row">
                     <div className="col-md-7 mt-2">
                       <div className="row">
-                        {formReducer.formState.contactForms?.map(
-                          (item, index) =>
-                            selectedItemFormReducer.formState &&
-                            selectedItemFormReducer.formState._id == item._id
-                              ? ContactFormEdit(
-                                  selectedItemFormReducer.formState,
-                                  index
-                                )
-                              : ContactForm(item, index)
-                        )}
+                        {formValues.contactForms.map((item, index) => (
+                          <ComponentPageSettingsContactFormsItem
+                            index={index}
+                            item={item}
+                            showEditAndDeleteButton={isSuperAdmin}
+                            onDelete={(_id) => onDelete(_id)}
+                            onEdit={(_id) => onEdit(_id)}
+                          />
+                        ))}
                       </div>
                     </div>
-                    {PermissionUtil.checkPermissionRoleRank(
-                      sessionAuth!.user.roleId,
-                      UserRoleId.SuperAdmin
-                    ) ? (
+                    {isSuperAdmin ? (
                       <div
-                        className={`col-md-7 text-start ${formReducer.formState.contactForms.length > 0 ? 'mt-4' : ''}`}
+                        className={`col-md-7 text-start ${formValues.contactForms.length > 0 ? 'mt-4' : ''}`}
                       >
                         <button
                           type={'button'}

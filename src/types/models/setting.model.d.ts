@@ -27,14 +27,14 @@ export interface ISettingContactModel {
 }
 
 export interface ISettingSocialMediaModel {
-  _id?: string;
+  _id: string;
   key: string;
   title: string;
   url: string;
 }
 
 export interface ISettingContactFormModel {
-  _id?: string;
+  _id: string;
   title: string;
   name: string;
   key: string;

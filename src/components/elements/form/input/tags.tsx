@@ -18,8 +18,8 @@ const initialState: IComponentState = {
 };
 
 type IComponentProps = {
-  value: string[];
-  onChange: (value: string[], name?: string) => void;
+  value?: string[];
+  onChange?: (value: string[], name?: string) => void;
   name?: string;
   title?: string;
   placeHolder?: string;
@@ -39,7 +39,7 @@ const ComponentFormTags = React.memo((props: IComponentProps) => {
   }
 
   useEffectAfterDidMount(() => {
-    setTags(props.value);
+    setTags(props.value ?? []);
   }, [props.value]);
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -52,11 +52,13 @@ const ComponentFormTags = React.memo((props: IComponentProps) => {
       if (!tags.includes(newTag)) {
         const newTags = [...tags, newTag];
         setTags(newTags);
-        if (form && props.name) {
+        if (registeredInput && props.name) {
           form.setValue(props.name, newTags);
         }
         inputRef.current.value = '';
-        props.onChange(newTags, props.name);
+        if(props.onChange){
+          props.onChange(newTags, props.name);
+        }
       }
     }
   };
@@ -64,10 +66,12 @@ const ComponentFormTags = React.memo((props: IComponentProps) => {
   const onRemove = (tag: string) => {
     const newTags = tags.filter((item) => item != tag);
     setTags(newTags);
-    if (form && props.name) {
+    if (registeredInput && props.name) {
       form.setValue(props.name, newTags);
     }
-    props.onChange(newTags, props.name);
+    if(props.onChange){
+      props.onChange(newTags, props.name);
+    }
   };
 
   const Tag = (props: { title: string }) => (

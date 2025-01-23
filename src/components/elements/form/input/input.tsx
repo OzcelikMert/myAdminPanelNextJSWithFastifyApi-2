@@ -73,7 +73,7 @@ const ComponentFormInput = React.memo((props: IComponentProps) => {
   return (
     <div className="theme-input">
       {inputRef.current}
-      <label className="label" htmlFor={idRef.current}>
+      <label className="label" htmlFor={props.id ?? idRef.current}>
         {props.title} {props.titleElement}
       </label>
       {form &&

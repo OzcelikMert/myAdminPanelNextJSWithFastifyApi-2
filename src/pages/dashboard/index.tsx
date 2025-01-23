@@ -1,4 +1,3 @@
-import dynamic from 'next/dynamic';
 import { TableColumn } from 'react-data-table-component';
 import { IPostGetManyResultService } from 'types/services/post.service';
 import { PostService } from '@services/post.service';
@@ -18,7 +17,7 @@ import { PostSortTypeId } from '@constants/postSortTypes';
 import { ISettingGetResultService } from 'types/services/setting.service';
 import { SettingService } from '@services/setting.service';
 import { SettingProjectionKeys } from '@constants/settingProjections';
-import { useEffect, useReducer, useState } from 'react';
+import { useReducer, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
@@ -31,8 +30,6 @@ import {
 import ComponentPageDashboardLastPosts from '@components/pages/dashboard/lastPosts';
 import ComponentPageDashboardReportOne from '@components/pages/dashboard/reportOne';
 import ComponentPageDashboardReportTwo from '@components/pages/dashboard/reportTwo';
-
-const WorldMap = dynamic(() => import('react-svg-worldmap'), { ssr: false });
 
 export type IPageDashboardState = {
   lastPosts: IPostGetManyResultService[];
