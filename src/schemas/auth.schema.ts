@@ -6,8 +6,13 @@ const postSchema = object({
   keepMe: boolean().optional()
 });
 
+const postLockSchema = object({
+  password: string().min(1),
+});
+
 export type IAuthPostSchema = z.infer<typeof postSchema>;
 
 export const AuthSchema = {
   post: postSchema,
+  postLock: postLockSchema
 };

@@ -14,6 +14,7 @@ import { NextRouter, useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useEffectAfterDidMount } from '@library/react/customHooks';
+import ComponentToolHeader from '@components/tools/header';
 
 type ICurrentPath = {
   pathname: string;
@@ -74,18 +75,6 @@ const ComponentApp = React.memo((props: IComponentProps) => {
     return breadCrumb.map((item) => item.title).join(' - ');
   };
 
-  const PageHeader = () => {
-    return (
-      <div className="page-header">
-        <div className="row w-100 m-0">
-          <div className="col-md-8 p-0">
-            <ComponentThemeBreadCrumb />
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   const fullPageLayoutRoutes = [EndPoints.LOGIN];
 
   const isFullPageLayout =
@@ -113,7 +102,7 @@ const ComponentApp = React.memo((props: IComponentProps) => {
                 {isPageLoading ? (
                   <ComponentSpinnerDonut customClass="page-spinner" />
                 ) : null}
-                {!isFullPageLayout ? <PageHeader /> : null}
+                {!isFullPageLayout ? <ComponentToolHeader /> : null}
                 {isEqualRouterAndCurrentPath ? (
                   <ComponentProviderAuth>
                     {props.children}

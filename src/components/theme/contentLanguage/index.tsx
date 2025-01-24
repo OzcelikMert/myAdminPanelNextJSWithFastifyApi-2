@@ -10,6 +10,43 @@ import Select from 'react-select';
 import { ILanguageModel } from 'types/models/language.model';
 import { useEffectAfterDidMount } from '@library/react/customHooks';
 
+const MissingWarning = () => {
+  const t = useAppSelector(selectTranslation);
+  
+  return (
+    <ComponentToolTip message={t('warningAboutMissingLanguage')}>
+      <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>
+    </ComponentToolTip>
+  );
+};
+
+type IComponentItemProps = {
+  isSelected?: boolean, 
+  isMissing?: boolean
+} & IThemeFormSelectData<ILanguageGetResultService>
+
+const Item = React.memo((props: IComponentItemProps) => {
+  return (
+    <div className={`row p-0 ${!props.isSelected ? 'my-2' : ''}`}>
+      <div className="col-2">{props.isMissing ? <MissingWarning /> : null}</div>
+      <div className="col-4 text-end">
+        <Image
+          className="img-fluid"
+          width={35}
+          height={45}
+          src={PathUtil.getFlagURL(props.value.image)}
+          alt={props.value.shortKey}
+        />
+      </div>
+      <div className="col-6 text-start content-language-title align-content-center">
+        <h6 className="mb-0">
+          {props.value.title} ({props.value.locale.toUpperCase()})
+        </h6>
+      </div>
+    </div>
+  );
+});
+
 type IOwnedLanguage = {
   langId: string;
 };
@@ -48,49 +85,17 @@ const ComponentThemeLanguageSelector = React.memo((props: IComponentProps) => {
     return isMissing;
   };
 
-  const MissingWarning = () => {
-    return (
-      <ComponentToolTip message={t('warningAboutMissingLanguage')}>
-        <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>
-      </ComponentToolTip>
-    );
-  };
-
-  const Item = (itemProp: IThemeFormSelectData<ILanguageGetResultService>) => {
-    const isSelectedItem =
-      itemProp.value._id == selectedLanguageRef.current?._id;
-    const isMissing =
-      props.showMissingMessage && checkMissingLanguage(itemProp.value._id);
-    return (
-      <div className={`row p-0 ${!isSelectedItem ? 'my-2' : ''}`}>
-        <div className="col-2">{isMissing ? <MissingWarning /> : null}</div>
-        <div className="col-4 text-end">
-          <Image
-            className="img-fluid"
-            width={35}
-            height={45}
-            src={PathUtil.getFlagURL(itemProp.value.image)}
-            alt={itemProp.value.shortKey}
-          />
-        </div>
-        <div className="col-6 text-start content-language-title align-content-center">
-          <h6 className="mb-0">
-            {itemProp.value.title} ({itemProp.value.locale.toUpperCase()})
-          </h6>
-        </div>
-      </div>
-    );
-  };
-
   if (!selectedLanguageRef.current) {
     return null;
   }
 
-  const options = languages
+  const options: IComponentItemProps[] = languages
     .filter((item) => item._id != selectedLanguageRef.current?._id)
     .map((item) => ({
       label: item.title,
       value: item,
+      isMissing:  props.showMissingMessage && checkMissingLanguage(item._id),
+      isSelected: item._id == selectedLanguageRef.current?._id
     }));
 
   return (

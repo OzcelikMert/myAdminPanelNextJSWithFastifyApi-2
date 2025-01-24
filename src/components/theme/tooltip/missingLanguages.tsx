@@ -8,6 +8,10 @@ import {
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 
+const Icon = () => {
+  return <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>;
+};
+
 type IComponentState = {
   missingLanguages: ILanguageGetResultService[];
 };
@@ -56,10 +60,6 @@ const ComponentThemeToolTipMissingLanguages = React.memo(
       );
 
       return missingLanguages;
-    };
-
-    const Icon = () => {
-      return <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>;
     };
 
     if (missingLanguages.length == 0) {

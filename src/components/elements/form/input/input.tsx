@@ -7,50 +7,15 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
 
-type IComponentProps = {
-  title?: string;
-  titleElement?: React.ReactNode;
-  valueAsNumber?: boolean;
-  valueAsDate?: boolean;
-} & React.InputHTMLAttributes<HTMLInputElement> &
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>;
-
-const ComponentFormInput = React.memo((props: IComponentProps) => {
-  const t = useAppSelector(selectTranslation);
-  const form = useFormContext();
-
-  const idRef = React.useRef<string>(String.createId());
-  const typeRef = React.useRef<string>(props.type);
-  const registeredInput =
-    form && props.name
-      ? form.register(props.name, {
-          required: props.required,
-          setValueAs: value => {
-            if(props.valueAsNumber || props.type == 'number'){
-              return Number(value);
-            }else if(props.valueAsDate || props.type == 'date') {
-              return moment(value).format('YYYY-MM-DD');
-            }
-
-            return value;
-          },
-        })
-      : undefined;
-
-  useEffectAfterDidMount(() => {
-    if (props.type != typeRef.current) {
-      inputRef.current = <Input />;
-      typeRef.current = props.type;
-    }
-  }, [props.type]);
-
-  const Input = () => {
+const Input = React.memo(
+  (
+    props: React.InputHTMLAttributes<HTMLInputElement> &
+      React.TextareaHTMLAttributes<HTMLTextAreaElement>
+  ) => {
     switch (props.type) {
       case `textarea`:
         return (
           <textarea
-            id={idRef.current}
-            {...registeredInput}
             {...props}
             className={`field textarea ${typeof props.className !== 'undefined' ? props.className : ``}`}
           ></textarea>
@@ -58,21 +23,47 @@ const ComponentFormInput = React.memo((props: IComponentProps) => {
       default:
         return (
           <input
-            id={idRef.current}
-            {...registeredInput}
             {...props}
             className={`field ${typeof props.className !== 'undefined' ? props.className : ``}`}
             placeholder=" "
           />
         );
     }
-  };
+  }
+);
 
-  const inputRef = React.useRef<React.ReactNode>(<Input />);
+export type IComponentFormInputProps = {
+  title?: string;
+  titleElement?: React.ReactNode;
+  valueAsNumber?: boolean;
+  valueAsDate?: boolean;
+} & React.InputHTMLAttributes<HTMLInputElement> &
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>;
+
+const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
+  const t = useAppSelector(selectTranslation);
+  const form = useFormContext();
+
+  const registeredInput =
+    form && props.name
+      ? form.register(props.name, {
+          required: props.required,
+          setValueAs: (value) => {
+            if (props.valueAsNumber || props.type == 'number') {
+              return Number(value);
+            } else if (props.valueAsDate || props.type == 'date') {
+              return moment(value).format('YYYY-MM-DD');
+            }
+
+            return value;
+          },
+        })
+      : undefined;
+  const idRef = React.useRef<string>(String.createId());
 
   return (
     <div className="theme-input">
-      {inputRef.current}
+      <Input {...registeredInput} id={idRef.current} {...props} />
       <label className="label" htmlFor={props.id ?? idRef.current}>
         {props.title} {props.titleElement}
       </label>

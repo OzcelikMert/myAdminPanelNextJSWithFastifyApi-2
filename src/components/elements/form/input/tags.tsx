@@ -7,6 +7,21 @@ import { useFormContext } from 'react-hook-form';
 import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
 import { ZodUtil } from '@utils/zod.util';
 
+const Tag = React.memo(
+  (props: { title: string; onClickRemove: (tag: string) => void }) => (
+    <span className="tag">
+      {props.title}
+      <button
+        type="button"
+        className="btn btn-gradient-danger delete"
+        onClick={() => props.onClickRemove(props.title)}
+      >
+        <i className="mdi mdi-close"></i>
+      </button>
+    </span>
+  )
+);
+
 type IComponentState = {
   tags: string[];
   currentTags: string;
@@ -23,15 +38,20 @@ type IComponentProps = {
   name?: string;
   title?: string;
   placeHolder?: string;
-  valueAsNumber?: boolean
+  valueAsNumber?: boolean;
 };
 
 const ComponentFormTags = React.memo((props: IComponentProps) => {
   const form = useFormContext();
-  const registeredInput = form && props.name && form.register(props.name, {valueAsNumber: props.valueAsNumber});
+  const registeredInput =
+    form &&
+    props.name &&
+    form.register(props.name, { valueAsNumber: props.valueAsNumber });
   const t = useAppSelector(selectTranslation);
 
-  const [tags, setTags] = React.useState<string[]>(props.value ?? initialState.tags);
+  const [tags, setTags] = React.useState<string[]>(
+    props.value ?? initialState.tags
+  );
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   if (form && props.name) {
@@ -56,43 +76,34 @@ const ComponentFormTags = React.memo((props: IComponentProps) => {
           form.setValue(props.name, newTags);
         }
         inputRef.current.value = '';
-        if(props.onChange){
+        if (props.onChange) {
           props.onChange(newTags, props.name);
         }
       }
     }
   };
 
-  const onRemove = (tag: string) => {
+  const onClickRemove = (tag: string) => {
     const newTags = tags.filter((item) => item != tag);
     setTags(newTags);
     if (registeredInput && props.name) {
       form.setValue(props.name, newTags);
     }
-    if(props.onChange){
+    if (props.onChange) {
       props.onChange(newTags, props.name);
     }
   };
-
-  const Tag = (props: { title: string }) => (
-    <span className="tag">
-      {props.title}
-      <button
-        type="button"
-        className="btn btn-gradient-danger delete"
-        onClick={() => onRemove(props.title)}
-      >
-        <i className="mdi mdi-close"></i>
-      </button>
-    </span>
-  );
 
   return (
     <div className="theme-input static">
       <span className="label">{props.title}</span>
       <div className="tags field">
         {tags.map((tag, index: any) => (
-          <Tag title={tag} key={index} />
+          <Tag
+            title={tag}
+            key={index}
+            onClickRemove={(tag) => onClickRemove(tag)}
+          />
         ))}
         <input
           type="text"
@@ -102,7 +113,8 @@ const ComponentFormTags = React.memo((props: IComponentProps) => {
           placeholder={props.placeHolder}
         />
       </div>
-      {form && props.name &&
+      {form &&
+        props.name &&
         form.formState.errors &&
         form.formState.errors[props.name] &&
         form.formState.errors[props.name]?.message && (

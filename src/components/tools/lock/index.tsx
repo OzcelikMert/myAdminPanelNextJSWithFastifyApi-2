@@ -1,31 +1,30 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AuthService } from '@services/auth.service';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
-import ComponentForm from '@components/elements/form';
-import ThemeInputType from '@components/elements/form/input/input';
-import { useFormReducer } from '@library/react/handles/form';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { setIsLockState } from '@redux/features/appSlice';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useDidMount } from '@library/react/customHooks';
+import ComponentToolLockForm from './form';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AuthSchema } from 'schemas/auth.schema';
 
 type IComponentState = {
-  isSubmitting: boolean;
   isWrong: boolean;
 };
 
 const initialState: IComponentState = {
-  isSubmitting: false,
   isWrong: false,
 };
 
-type IComponentFormState = {
+export type IComponentToolLockFormState = {
   password: string;
 };
 
-const initialFormState: IComponentFormState = {
+const initialFormState: IComponentToolLockFormState = {
   password: '',
 };
 
@@ -36,25 +35,23 @@ const ComponentToolLock = React.memo(() => {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
-  const [isSubmitting, setIsSubmitting] = React.useState(
-    initialState.isSubmitting
-  );
   const [isWrong, setIsWrong] = React.useState(initialState.isWrong);
-  const { formState, onChangeInput, setFormState } =
-    useFormReducer<IComponentFormState>(initialFormState);
+  const form = useForm<IComponentToolLockFormState>({
+    defaultValues: initialFormState,
+    resolver: zodResolver(AuthSchema.postLock),
+  });
 
   useDidMount(() => {
     return () => {
       abortController.abort();
     };
-  })
+  });
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    setIsSubmitting(true);
-
+  const onSubmit = async (data: IComponentToolLockFormState) => {
+    const params = data;
     const serviceResult = await AuthService.login(
       {
-        password: formState.password,
+        password: params.password,
         email: sessionAuth?.user.email ?? '',
       },
       abortController.signal
@@ -65,57 +62,16 @@ const ComponentToolLock = React.memo(() => {
         abortController.signal
       );
       if (resultSession.status && resultSession.data) {
-        setIsSubmitting(false);
         setIsWrong(false);
-        setFormState(initialFormState);
+        form.reset(initialFormState);
         appDispatch(setSessionAuthState(resultSession.data));
         appDispatch(setIsLockState(false));
         return;
       }
     }
 
-    setIsSubmitting(false);
     setIsWrong(true);
   };
-
-  const Form = () => (
-    <ComponentForm
-      hideSubmitButton={true}
-      onSubmit={(event) => onSubmit(event)}
-    >
-      <div className="row">
-        <div className="col-md-12 mb-3">
-          <ThemeInputType
-            title={t('password')}
-            type="password"
-            name="password"
-            required={true}
-            value={formState.password}
-            onChange={(e) => onChangeInput(e)}
-          />
-        </div>
-        <div className="col-md-12">
-          {isSubmitting ? (
-            <button
-              className="btn btn-outline-light btn-lg font-weight-medium auth-form-btn w-100"
-              disabled={true}
-              type={'button'}
-            >
-              <i className="fa fa-spinner fa-spin me-1"></i>
-              {t('loading') + '...'}
-            </button>
-          ) : (
-            <button
-              type="submit"
-              className={`btn btn-outline-${isWrong ? 'danger' : 'info'} btn-lg font-weight-medium auth-form-btn w-100`}
-            >
-              {t('login')}
-            </button>
-          )}
-        </div>
-      </div>
-    </ComponentForm>
-  );
 
   return (
     <div className="component-tool-lock">
@@ -135,7 +91,11 @@ const ComponentToolLock = React.memo(() => {
               <h4 className="text-center text-light mb-3 mt-3">
                 {sessionAuth?.user.name}
               </h4>
-              <Form />
+              <ComponentToolLockForm
+                form={form}
+                onSubmit={(data) => onSubmit(data)}
+                isWrong={isWrong}
+              />
             </div>
           </div>
         </div>

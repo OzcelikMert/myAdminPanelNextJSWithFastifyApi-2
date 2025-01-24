@@ -1,12 +1,22 @@
-import React, { ActionDispatch, useState } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
+import React from 'react';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import Image from 'next/image';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { IUseFormReducer } from '@library/react/handles/form';
+
+const GalleryItem = React.memo((props: { image: string }) => (
+  <div className="col-md-3 mb-3">
+    <Image
+      src={ImageSourceUtil.getUploadedImageSrc(props.image)}
+      alt="Empty Image"
+      className="post-image img-fluid"
+      width={100}
+      height={100}
+    />
+  </div>
+));
 
 type IComponentState = {
   mainTabActiveKey: string;
@@ -28,18 +38,6 @@ type IComponentProps = {
 const ComponentPagePostAddBeforeAndAfter = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
-
-    const _Image = (image: string) => (
-      <div className="col-md-3 mb-3">
-        <Image
-          src={ImageSourceUtil.getUploadedImageSrc(image)}
-          alt="Empty Image"
-          className="post-image img-fluid"
-          width={100}
-          height={100}
-        />
-      </div>
-    );
 
     return (
       <div className="grid-margin stretch-card">
@@ -89,7 +87,7 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
               </div>
               <div className="col-md-12 mb-3">
                 <div className="row">
-                  {props.images?.map((image) => _Image(image))}
+                  {props.images?.map((image) => <GalleryItem image={image} />)}
                 </div>
               </div>
             </div>

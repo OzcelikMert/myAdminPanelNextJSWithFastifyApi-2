@@ -5,6 +5,22 @@ import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 
+const Item = React.memo((imageProps: { item: string; index: number }) => {
+  return (
+    <div className="col-md-3 mb-3">
+      <Image
+        src={ImageSourceUtil.getUploadedImageSrc(imageProps.item)}
+        alt={imageProps.item}
+        className="post-image img-fluid"
+        layout="responsive"
+        objectFit="contain"
+        width={0}
+        height={0}
+      />
+    </div>
+  );
+});
+
 type IComponentProps = {
   images?: string[];
   isECommerceVariation?: boolean;
@@ -14,22 +30,6 @@ type IComponentProps = {
 const ComponentPagePostAddECommerceTabGallery = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
-
-    const Item = React.memo((imageProps: { item: string; index: number }) => {
-      return (
-        <div className="col-md-3 mb-3">
-          <Image
-            src={ImageSourceUtil.getUploadedImageSrc(imageProps.item)}
-            alt={imageProps.item}
-            className="post-image img-fluid"
-            layout="responsive"
-            objectFit="contain"
-            width={0}
-            height={0}
-          />
-        </div>
-      );
-    });
 
     return (
       <div className="row">
