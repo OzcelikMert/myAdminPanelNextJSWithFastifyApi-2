@@ -13,6 +13,7 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IComponentDataTableColumn<T> = {
   isSearchable?: boolean;
@@ -46,21 +47,21 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_SELECTED_ITEMS;
-      payload: IComponentState['selectedItems'];
-    }
-  | { type: ActionTypes.SET_SEARCH_KEY; payload: IComponentState['searchKey'] }
-  | { type: ActionTypes.SET_CLEAR_SELECTED_ROWS; payload: boolean }
-  | {
-      type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX;
-      payload: IComponentState['activeFilterButtonIndex'];
-    }
-  | { type: ActionTypes.SET_ITEMS; payload: IComponentState['items'] }
-  | {
-      type: ActionTypes.SET_SHOWING_ITEMS;
-      payload: IComponentState['showingItems'];
-    };
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEMS,
+      IComponentState['selectedItems']
+    >
+  | IActionWithPayload<ActionTypes.SET_SEARCH_KEY, IComponentState['searchKey']>
+  | IActionWithPayload<ActionTypes.SET_CLEAR_SELECTED_ROWS, boolean>
+  | IActionWithPayload<
+      ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX,
+      IComponentState['activeFilterButtonIndex']
+    >
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IComponentState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_SHOWING_ITEMS,
+      IComponentState['showingItems']
+    >;
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
@@ -84,6 +85,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
 type IComponentPropI18 = {
   search?: string;
   noRecords?: string;
+  toggleMenuTitle?: string;
 };
 
 type IComponentProps<T = any> = {
@@ -147,7 +149,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
     );
   };
 
-  const isCheckedSelectAll = () => {
+  const checkAllSelected = () => {
     const items = getItemListForPage();
     return (
       props.data.length > 0 &&
@@ -157,9 +159,10 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
 
   const onSelectAll = () => {
     const items = getItemListForPage();
-    for (const item of items) {
-      onSelect(item, isCheckedSelectAll());
-    }
+    dispatch({
+      type: ActionTypes.SET_SELECTED_ITEMS,
+      payload: checkAllSelected() ? [] : items,
+    });
   };
 
   const onSelect = (item: T, remove: boolean = true) => {
@@ -262,6 +265,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
           state.selectedItems.length > 0 ? (
             <ComponentTableToggleMenu
               items={props.toggleMenuItems ?? []}
+              title={props.i18?.toggleMenuTitle}
               onChange={(value) =>
                 props.onClickToggleMenuItem
                   ? props.onClickToggleMenuItem(state.selectedItems, value)
@@ -282,7 +286,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
           name: !props.isAllSelectable ? null : (
             <div>
               <ComponentFormCheckBox
-                checked={isCheckedSelectAll()}
+                checked={checkAllSelected()}
                 onChange={(e) => onSelectAll()}
               />
             </div>
@@ -310,7 +314,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
         <div className="row pt-2 pb-2 m-0">
           <div className="col-md-8"></div>
           <div className="col-md-4">
-            <ComponentFormInput 
+            <ComponentFormInput
               title={`${props.i18?.search ?? 'Search'}`}
               onChange={(event: any) => onSearch(event)}
               value={state.searchKey}
@@ -375,6 +379,6 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
       </div>
     </div>
   );
-}) as <T,>(props: IComponentProps<T>) => React.ReactNode;
+}) as <T>(props: IComponentProps<T>) => React.ReactNode;
 
 export default ComponentDataTable;

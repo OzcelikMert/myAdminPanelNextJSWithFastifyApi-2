@@ -30,6 +30,7 @@ import ComponentPageSettingsGeneralTabGeneral from '@components/pages/settings/g
 import ComponentPageSettingsGeneralTabContact from '@components/pages/settings/general/tabContact';
 import ComponentPageSettingsGeneralTabTools from '@components/pages/settings/general/tabTools';
 import ComponentPageSettingsGeneralServerInfo from '@components/pages/settings/general/serverInfo';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageSettingsGeneralState = {
   panelLanguages: IThemeFormSelectData[];
@@ -57,22 +58,22 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_PANEL_LANGUAGES;
-      payload: IPageSettingsGeneralState['panelLanguages'];
-    }
-  | {
-      type: ActionTypes.SET_SERVER_INFO;
-      payload: IPageSettingsGeneralState['serverInfo'];
-    }
-  | {
-      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IPageSettingsGeneralState['mainTabActiveKey'];
-    }
-  | {
-      type: ActionTypes.SET_IS_SERVER_INFO_LOADING;
-      payload: IPageSettingsGeneralState['isServerInfoLoading'];
-    };
+  | IActionWithPayload<
+      ActionTypes.SET_PANEL_LANGUAGES,
+      IPageSettingsGeneralState['panelLanguages']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SERVER_INFO,
+      IPageSettingsGeneralState['serverInfo']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+      IPageSettingsGeneralState['mainTabActiveKey']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_SERVER_INFO_LOADING,
+      IPageSettingsGeneralState['isServerInfoLoading']
+    >;
 
 const reducer = (
   state: IPageSettingsGeneralState,
@@ -238,8 +239,10 @@ export default function PageSettingsGeneral() {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">

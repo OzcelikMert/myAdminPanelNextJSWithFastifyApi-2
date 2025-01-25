@@ -49,6 +49,7 @@ import ComponentPagePostAddTabOptions from '@components/pages/post/add/tabOption
 import ComponentThemeModalPostTerm from '@components/theme/modal/postTerm';
 import { IPagePostTermAddFormState } from './term/add';
 import Swal from 'sweetalert2';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPagePostAddState = {
   authors: IThemeFormSelectData<string>[];
@@ -118,75 +119,60 @@ export enum ActionTypes {
 }
 
 export type IAction =
-  | {
-      type: ActionTypes.SET_AUTHORS;
-      payload: IPagePostAddState['authors'];
-    }
-  | {
-      type: ActionTypes.SET_PAGE_TYPES;
-      payload: IPagePostAddState['pageTypes'];
-    }
-  | {
-      type: ActionTypes.SET_ATTRIBUTE_TYPES;
-      payload: IPagePostAddState['attributeTypes'];
-    }
-  | {
-      type: ActionTypes.SET_PRODUCT_TYPES;
-      payload: IPagePostAddState['productTypes'];
-    }
-  | {
-      type: ActionTypes.SET_COMPONENTS;
-      payload: IPagePostAddState['components'];
-    }
-  | {
-      type: ActionTypes.SET_CATEGORIES;
-      payload: IPagePostAddState['categories'];
-    }
-  | {
-      type: ActionTypes.SET_TAGS;
-      payload: IPagePostAddState['tags'];
-    }
-  | {
-      type: ActionTypes.SET_ATTRIBUTES;
-      payload: IPagePostAddState['attributes'];
-    }
-  | {
-      type: ActionTypes.SET_VARIATIONS;
-      payload: IPagePostAddState['variations'];
-    }
-  | {
-      type: ActionTypes.SET_STATUS;
-      payload: IPagePostAddState['status'];
-    }
-  | {
-      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IPagePostAddState['mainTabActiveKey'];
-    }
-  | {
-      type: ActionTypes.SET_ITEM;
-      payload: IPagePostAddState['item'];
-    }
-  | {
-      type: ActionTypes.SET_LANG_ID;
-      payload: IPagePostAddState['langId'];
-    }
-  | { type: ActionTypes.SET_TERMS; payload: IActionPayloadSetTerms }
-  | {
-      type: ActionTypes.SET_IS_ICON_ACTIVE;
-      payload: IPagePostAddState['isIconActive'];
-    }
-  | {
-      type: ActionTypes.SET_SHOW_TERM_MODAL;
-      payload: IPagePostAddState['showTermModal'];
-    }
-  | {
-      type: ActionTypes.SET_TERM_TYPE_ID_FOR_MODAL;
-      payload: IPagePostAddState['termTypeIdForModal'];
-    }
-  | {
-      type: ActionTypes.SET_IS_ITEM_LOADING;
-      payload: IPagePostAddState['isItemLoading'];
-    };
+  | IActionWithPayload<ActionTypes.SET_AUTHORS, IPagePostAddState['authors']>
+  | IActionWithPayload<
+      ActionTypes.SET_PAGE_TYPES,
+      IPagePostAddState['pageTypes']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_ATTRIBUTE_TYPES,
+      IPagePostAddState['attributeTypes']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_PRODUCT_TYPES,
+      IPagePostAddState['productTypes']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_COMPONENTS,
+      IPagePostAddState['components']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_CATEGORIES,
+      IPagePostAddState['categories']
+    >
+  | IActionWithPayload<ActionTypes.SET_TAGS, IPagePostAddState['tags']>
+  | IActionWithPayload<
+      ActionTypes.SET_ATTRIBUTES,
+      IPagePostAddState['attributes']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_VARIATIONS,
+      IPagePostAddState['variations']
+    >
+  | IActionWithPayload<ActionTypes.SET_STATUS, IPagePostAddState['status']>
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+      IPagePostAddState['mainTabActiveKey']
+    >
+  | IActionWithPayload<ActionTypes.SET_ITEM, IPagePostAddState['item']>
+  | IActionWithPayload<ActionTypes.SET_LANG_ID, IPagePostAddState['langId']>
+  | IActionWithPayload<ActionTypes.SET_TERMS, IActionPayloadSetTerms>
+  | IActionWithPayload<
+      ActionTypes.SET_IS_ICON_ACTIVE,
+      IPagePostAddState['isIconActive']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SHOW_TERM_MODAL,
+      IPagePostAddState['showTermModal']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_TERM_TYPE_ID_FOR_MODAL,
+      IPagePostAddState['termTypeIdForModal']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_ITEM_LOADING,
+      IPagePostAddState['isItemLoading']
+    >;
 
 const reducer = (
   state: IPagePostAddState,
@@ -956,6 +942,7 @@ export default function PagePostAdd() {
               ].includes(formValues.typeId)
           )}
           views={formValues.contents.views}
+          showLanguageSelector={formValues._id ? true : false}
           onNavigatePage={() => navigatePage()}
           onChangeLanguage={(_id) => onChangeLanguage(_id)}
         />
@@ -967,8 +954,10 @@ export default function PagePostAdd() {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
             onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">
@@ -1111,7 +1100,6 @@ export default function PagePostAdd() {
             [PostTypeId.Page].includes(formValues.typeId) ? (
               <ComponentPagePostAddComponents
                 components={state.components}
-                selectedComponents={formValues.components}
                 onClickAddNew={() => onClickAddNewComponent()}
                 onClickDelete={(_id) => onClickDeleteComponent(_id)}
               />

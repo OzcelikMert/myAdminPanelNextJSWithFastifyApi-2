@@ -12,7 +12,6 @@ type IComponentProps = {
   activeItems: { [key: string]: boolean };
   checkPathActive: (path: string) => boolean;
   onToggleItemState: (stateKey: string) => void;
-  onClickNavigate: (path: string) => void;
 };
 
 const ComponentToolSidebarChildren = React.memo((props: IComponentProps) => {
@@ -49,7 +48,7 @@ const ComponentToolSidebarChildren = React.memo((props: IComponentProps) => {
         <Collapse in={state}>
           <ul className="nav flex-column sub-menu">
             {props.item.subPaths?.map((item, index) => {
-              return props.item.subPaths ? (
+              return item.subPaths ? (
                 <ComponentToolSidebarChildren
                   {...props}
                   item={item}

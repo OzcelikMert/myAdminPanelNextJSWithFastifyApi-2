@@ -21,6 +21,7 @@ import ComponentPageProfileForm from '@components/pages/settings/profile/form';
 import ComponentPageProfileImage from '@components/pages/settings/profile/image';
 import ComponentPageProfileMainInfo from '@components/pages/settings/profile/mainInfo';
 import ComponentPageProfilePermissions from '@components/pages/settings/profile/permissions';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageProfileState = {
   isImageChanging: boolean;
@@ -40,15 +41,15 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_IS_IMAGE_CHANGING;
-      payload: IPageProfileState['isImageChanging'];
-    }
-  | { type: ActionTypes.SET_ITEM; payload: IPageProfileState['item'] }
-  | {
-      type: ActionTypes.SET_PROFILE_IMAGE;
-      payload: IPageProfileState['profileImage'];
-    };
+  | IActionWithPayload<
+      ActionTypes.SET_IS_IMAGE_CHANGING,
+      IPageProfileState['isImageChanging']
+    >
+  | IActionWithPayload<ActionTypes.SET_ITEM, IPageProfileState['item']>
+  | IActionWithPayload<
+      ActionTypes.SET_PROFILE_IMAGE,
+      IPageProfileState['profileImage']
+    >;
 
 const reducer = (
   state: IPageProfileState,

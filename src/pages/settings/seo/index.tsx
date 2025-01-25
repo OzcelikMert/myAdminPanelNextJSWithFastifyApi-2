@@ -7,12 +7,10 @@ import {
 import { PermissionUtil } from '@utils/permission.util';
 import { SettingsEndPointPermission } from '@constants/endPointPermissions/settings.endPoint.permission';
 import { SettingProjectionKeys } from '@constants/settingProjections';
-import { ISettingSeoContentModel } from 'types/models/setting.model';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useReducer, useState } from 'react';
-import { useFormReducer } from '@library/react/handles/form';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
@@ -23,12 +21,12 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
-import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
 import ComponentPageSettingsSEOHeader from '@components/pages/settings/seo/header';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageSettingsSEOState = {
   langId: string;
@@ -49,12 +47,15 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_ITEM; payload: IPageSettingsSEOState['item'] }
-  | {
-      type: ActionTypes.SET_IS_ITEM_LOADING;
-      payload: IPageSettingsSEOState['isItemLoading'];
-    }
-  | { type: ActionTypes.SET_LANG_ID; payload: IPageSettingsSEOState['langId'] };
+  | IActionWithPayload<ActionTypes.SET_ITEM, IPageSettingsSEOState['item']>
+  | IActionWithPayload<
+      ActionTypes.SET_IS_ITEM_LOADING,
+      IPageSettingsSEOState['isItemLoading']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_LANG_ID,
+      IPageSettingsSEOState['langId']
+    >;
 
 const reducer = (
   state: IPageSettingsSEOState,
@@ -230,8 +231,10 @@ export default function PageSettingsSEO() {
               <div className="card-body">
                 <ComponentForm
                   formMethods={form}
-                  submitButtonText={t('save')}
-                  submitButtonSubmittingText={t('loading')}
+                  i18={{
+                    submitButtonText: t('save'),
+                    submitButtonSubmittingText: t('loading'),
+                  }}
                   onSubmit={(event) => onSubmit(event)}
                 >
                   <div className="row">

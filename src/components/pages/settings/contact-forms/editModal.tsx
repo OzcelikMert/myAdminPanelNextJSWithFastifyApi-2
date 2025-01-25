@@ -75,6 +75,12 @@ const ComponentPageSettingsContactFormsEditModal = React.memo(
               <div className="row mt-4">
                 <ComponentForm
                   formMethods={form}
+                  i18={
+                    {
+                      submitButtonText: t('save'),
+                      submitButtonSubmittingText: t('loading'),
+                    }
+                  }
                   onSubmit={(data) => onSubmit(data)}
                 >
                   <div className="row mt-3">

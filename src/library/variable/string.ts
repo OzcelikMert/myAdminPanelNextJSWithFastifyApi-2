@@ -3,6 +3,7 @@ declare global {
     replaceAll(find: string, replace: string): string;
     replaceArray(find: Array<string>, replace: Array<string>): string;
     removeLastChar(remove_count?: number): string;
+    removeFirstChar(remove_count?: number): string;
     encode(): string;
     decode(): string;
     convertKey(): string;
@@ -37,7 +38,12 @@ String.prototype.replaceArray = function (find, replace) {
   return replaceString.toString();
 };
 String.prototype.removeLastChar = function (remove_count = 1) {
+  remove_count = remove_count <= 0 ? 1 : remove_count;
   return this.slice(0, remove_count * -1);
+};
+String.prototype.removeFirstChar = function (remove_count = 1) {
+  remove_count = remove_count <= 0 ? 1 : remove_count;
+  return this.slice(remove_count);
 };
 String.prototype.encode = function () {
   return encodeURIComponent(this.toString());

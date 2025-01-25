@@ -41,6 +41,8 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import ComponentThemeWebsiteLinkPost from '@components/theme/websiteLink/post';
+import { IActionWithPayload } from 'types/hooks';
 
 type IPageState = {
   typeId: PostTypeId;
@@ -70,21 +72,21 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_TYPE_ID; payload: IPageState['typeId'] }
-  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEMS;
-      payload: IPageState['selectedItems'];
-    }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IPageState['selectedItemId'];
-    }
-  | {
-      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
-      payload: IPageState['isShowModalUpdateRank'];
-    }
-  | { type: ActionTypes.SET_LIST_MODE; payload: IPageState['listMode'] };
+  | IActionWithPayload<ActionTypes.SET_TYPE_ID, IPageState['typeId']>
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPageState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEMS,
+      IPageState['selectedItems']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEM_ID,
+      IPageState['selectedItemId']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+      IPageState['isShowModalUpdateRank']
+    >
+  | IActionWithPayload<ActionTypes.SET_LIST_MODE, IPageState['listMode']>;
 
 const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
@@ -126,7 +128,7 @@ export default function PagePostList() {
       ...router.query,
       postTypeId: Number(router.query.postTypeId ?? PostTypeId.Blog),
     } as IPageQueries;
-  }
+  };
 
   let queries = getQueries();
 
@@ -409,7 +411,11 @@ export default function PagePostList() {
                   itemLanguages={row.alternates ?? []}
                 />
               }
-              {row.contents?.title || t('[noLangAdd]')}
+              <ComponentThemeWebsiteLinkPost
+                typeId={row.typeId}
+                text={row.contents?.title || t('[noLangAdd]')}
+                url={row.contents?.url}
+              />
             </div>
             <div className="col-md-4">
               {row.isFixed ? (

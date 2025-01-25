@@ -21,7 +21,7 @@ import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/mis
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useEffect, useReducer, useState } from 'react';
+import { useReducer, useState } from 'react';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
@@ -34,6 +34,8 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import ComponentThemeWebsiteLinkPostTerm from '@components/theme/websiteLink/postTerm';
+import { IActionWithPayload } from 'types/hooks';
 
 type IPageState = {
   typeId: PostTermTypeId;
@@ -66,25 +68,22 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_TYPE_ID; payload: IPageState['typeId'] }
-  | {
-      type: ActionTypes.SET_POST_TYPE_ID;
-      payload: IPageState['postTypeId'];
-    }
-  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEMS;
-      payload: IPageState['selectedItems'];
-    }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IPageState['selectedItemId'];
-    }
-  | {
-      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
-      payload: IPageState['isShowModalUpdateRank'];
-    }
-  | { type: ActionTypes.SET_LIST_MODE; payload: IPageState['listMode'] };
+  | IActionWithPayload<ActionTypes.SET_TYPE_ID, IPageState['typeId']>
+  | IActionWithPayload<ActionTypes.SET_POST_TYPE_ID, IPageState['postTypeId']>
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPageState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEMS,
+      IPageState['selectedItems']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEM_ID,
+      IPageState['selectedItemId']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+      IPageState['isShowModalUpdateRank']
+    >
+  | IActionWithPayload<ActionTypes.SET_LIST_MODE, IPageState['listMode']>;
 
 const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
@@ -126,9 +125,9 @@ export default function PagePostTermList() {
     return {
       ...router.query,
       termTypeId: Number(router.query.termTypeId ?? PostTermTypeId.Category),
-      postTypeId: Number(router.query.postTypeId ?? PostTypeId.Blog)
-    } as IPageQueries
-  }
+      postTypeId: Number(router.query.postTypeId ?? PostTypeId.Blog),
+    } as IPageQueries;
+  };
 
   let queries = getQueries();
 
@@ -217,7 +216,10 @@ export default function PagePostTermList() {
     }
   };
 
-  const onChangeStatus = async (selectedRows: IPostTermGetResultService[], statusId: number) => {
+  const onChangeStatus = async (
+    selectedRows: IPostTermGetResultService[],
+    statusId: number
+  ) => {
     const selectedItemId = selectedRows.map((item) => item._id);
 
     if (statusId === StatusId.Deleted && state.listMode === 'deleted') {
@@ -409,7 +411,12 @@ export default function PagePostTermList() {
                   itemLanguages={row.alternates ?? []}
                 />
               }
-              {row.contents?.title || t('[noLangAdd]')}
+              <ComponentThemeWebsiteLinkPostTerm
+                postTypeId={row.postTypeId}
+                typeId={row.typeId}
+                text={row.contents?.title || t('[noLangAdd]')}
+                url={row.contents?.url}
+              />
             </div>
           </div>
         ),
@@ -590,7 +597,9 @@ export default function PagePostTermList() {
                 isAllSelectable={true}
                 isSearchable={true}
                 toggleMenuItems={getToggleMenuItems()}
-                onClickToggleMenuItem={(selectedRows, value) => onChangeStatus(selectedRows, value)}
+                onClickToggleMenuItem={(selectedRows, value) =>
+                  onChangeStatus(selectedRows, value)
+                }
                 filterButtons={getTableFilterButtons()}
                 onClickFilterButton={(item) => onClickTableFilterButton(item)}
               />

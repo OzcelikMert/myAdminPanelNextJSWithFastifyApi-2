@@ -28,6 +28,7 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { IActionWithPayload } from 'types/hooks';
 
 type IPageState = {
   items: INavigationGetResultService[];
@@ -54,20 +55,20 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEMS;
-      payload: IPageState['selectedItems'];
-    }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IPageState['selectedItemId'];
-    }
-  | { type: ActionTypes.SET_LIST_MODE; payload: IPageState['listMode'] }
-  | {
-      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
-      payload: IPageState['isShowModalUpdateRank'];
-    };
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPageState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEMS,
+      IPageState['selectedItems']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEM_ID,
+      IPageState['selectedItemId']
+    >
+  | IActionWithPayload<ActionTypes.SET_LIST_MODE, IPageState['listMode']>
+  | IActionWithPayload<
+      ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+      IPageState['isShowModalUpdateRank']
+    >;
 
 const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
@@ -149,7 +150,10 @@ export default function PageNavigationList() {
     }
   };
 
-  const onChangeStatus = async (selectedRows: INavigationGetResultService[], statusId: number) => {
+  const onChangeStatus = async (
+    selectedRows: INavigationGetResultService[],
+    statusId: number
+  ) => {
     const selectedItemId = selectedRows.map((item) => item._id);
     if (statusId === StatusId.Deleted && state.listMode === 'deleted') {
       const result = await Swal.fire({
@@ -238,7 +242,7 @@ export default function PageNavigationList() {
       return true;
     }
   };
-  
+
   const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
     dispatch({ type: ActionTypes.SET_LIST_MODE, payload: item.key });
   };
@@ -424,7 +428,9 @@ export default function PageNavigationList() {
                 isAllSelectable={true}
                 isSearchable={true}
                 toggleMenuItems={getToggleMenuItems()}
-                onClickToggleMenuItem={(selectedRows, value) => onChangeStatus(selectedRows, value)}
+                onClickToggleMenuItem={(selectedRows, value) =>
+                  onChangeStatus(selectedRows, value)
+                }
                 filterButtons={getTableFilterButtons()}
                 onClickFilterButton={(item) => onClickTableFilterButton(item)}
               />

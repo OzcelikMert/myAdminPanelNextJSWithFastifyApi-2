@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
+import ComponentThemeLanguageSelector from '@components/theme/languageSelector';
 import ComponentToolTip from '@components/elements/tooltip';
 import { IPagePostAddState } from '@pages/post/add';
 
@@ -10,6 +10,7 @@ type IComponentProps = {
   item: IPagePostAddState['item'];
   showTotalView?: boolean;
   views?: number;
+  showLanguageSelector?: boolean;
   onNavigatePage: () => void;
   onChangeLanguage: (_id: string) => void;
 };
@@ -42,12 +43,14 @@ const ComponentPagePostAddHeader = React.memo((props: IComponentProps) => {
           </div>
         </div>
         <div className="col-md-6">
-          <ComponentThemeLanguageSelector
-            onChange={(item) => props.onChangeLanguage(item.value._id)}
-            selectedLangId={props.langId}
-            showMissingMessage
-            ownedLanguages={props.item?.alternates}
-          />
+          {props.showLanguageSelector ? (
+            <ComponentThemeLanguageSelector
+              onChange={(item) => props.onChangeLanguage(item.value._id)}
+              selectedLangId={props.langId}
+              showMissingMessage
+              ownedLanguages={props.item?.alternates}
+            />
+          ) : null}
         </div>
       </div>
     </div>

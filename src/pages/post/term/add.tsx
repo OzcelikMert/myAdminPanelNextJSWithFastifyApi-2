@@ -35,6 +35,7 @@ import { IPostTermModel } from 'types/models/postTerm.model';
 import ComponentPagePostTermAddHeader from '@components/pages/post/term/add/header';
 import ComponentPagePostTermAddTabGeneral from '@components/pages/post/term/add/tabGeneral';
 import ComponentPagePostTermAddTabOptions from '@components/pages/post/term/add/tabOptions';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPagePostTermAddState = {
   mainTabActiveKey: string;
@@ -66,22 +67,22 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IPagePostTermAddState['mainTabActiveKey'];
-    }
-  | { type: ActionTypes.SET_ITEMS; payload: IPagePostTermAddState['items'] }
-  | { type: ActionTypes.SET_STATUS; payload: IPagePostTermAddState['status'] }
-  | {
-      type: ActionTypes.SET_MAIN_TITLE;
-      payload: IPagePostTermAddState['mainTitle'];
-    }
-  | { type: ActionTypes.SET_LANG_ID; payload: IPagePostTermAddState['langId'] }
-  | { type: ActionTypes.SET_ITEM; payload: IPagePostTermAddState['item'] }
-  | {
-      type: ActionTypes.SET_IS_ITEM_LOADING;
-      payload: IPagePostTermAddState['isItemLoading'];
-    };
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+      IPagePostTermAddState['mainTabActiveKey']
+    >
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPagePostTermAddState['items']>
+  | IActionWithPayload<ActionTypes.SET_STATUS, IPagePostTermAddState['status']>
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TITLE,
+      IPagePostTermAddState['mainTitle']
+    >
+  | IActionWithPayload<ActionTypes.SET_LANG_ID, IPagePostTermAddState['langId']>
+  | IActionWithPayload<ActionTypes.SET_ITEM, IPagePostTermAddState['item']>
+  | IActionWithPayload<
+      ActionTypes.SET_IS_ITEM_LOADING,
+      IPagePostTermAddState['isItemLoading']
+    >;
 
 const reducer = (
   state: IPagePostTermAddState,
@@ -151,9 +152,12 @@ export default function PagePostTermAdd(props: IPageProps) {
 
   const queries = {
     ...router.query,
-    postTypeId: Number(router.query.postTypeId ?? props.postTypeId ?? PostTypeId.Blog),
-    termTypeId:
-    Number(router.query.termTypeId ?? props.termTypeId ?? PostTermTypeId.Category),
+    postTypeId: Number(
+      router.query.postTypeId ?? props.postTypeId ?? PostTypeId.Blog
+    ),
+    termTypeId: Number(
+      router.query.termTypeId ?? props.termTypeId ?? PostTermTypeId.Category
+    ),
   } as IPageQueries;
 
   const [state, dispatch] = useReducer(reducer, {
@@ -259,10 +263,7 @@ export default function PagePostTermAdd(props: IPageProps) {
   const getStatus = () => {
     dispatch({
       type: ActionTypes.SET_STATUS,
-      payload: SelectUtil.getStatus(
-        [StatusId.Active, StatusId.InProgress],
-        t
-      ),
+      payload: SelectUtil.getStatus([StatusId.Active, StatusId.InProgress], t),
     });
   };
 
@@ -406,9 +407,10 @@ export default function PagePostTermAdd(props: IPageProps) {
           <ComponentPagePostTermAddHeader
             item={state.item}
             langId={state.langId}
+            views={formValues.contents.views}
+            showLanguageSelector={formValues._id ? true : false}
             onChangeLanguage={(_id) => onChangeLanguage(_id)}
             onNavigatePage={() => navigatePage()}
-            views={formValues.contents.views}
           />
         ) : null}
       </div>
@@ -419,8 +421,10 @@ export default function PagePostTermAdd(props: IPageProps) {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
             onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">

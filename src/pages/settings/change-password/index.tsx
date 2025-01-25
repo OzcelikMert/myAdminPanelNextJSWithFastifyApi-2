@@ -111,8 +111,12 @@ export default function PageChangePassword() {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
+            i18={
+              {
+                submitButtonText: t('save'),
+                submitButtonSubmittingText: t('loading'),
+              }
+            }
             onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">

@@ -1,5 +1,5 @@
 import React from 'react';
-import ComponentThemeLanguageSelector from '@components/theme/contentLanguage';
+import ComponentThemeLanguageSelector from '@components/theme/languageSelector';
 import { IPageSettingsSEOState } from '@pages/settings/seo';
 
 type IComponentProps = {

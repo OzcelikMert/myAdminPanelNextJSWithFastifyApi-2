@@ -39,6 +39,7 @@ import ComponentPageUserAddHeader from '@components/pages/user/add/header';
 import ComponentPageUserAddTabGeneral from '@components/pages/user/add/tabGeneral';
 import ComponentPageUserAddTabOptions from '@components/pages/user/add/tabOptions';
 import ComponentPageUserAddTabPermissions from '@components/pages/user/add/tabPermissions';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageUserAddState = {
   mainTabActiveKey: string;
@@ -67,24 +68,24 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IPageUserAddState['mainTabActiveKey'];
-    }
-  | {
-      type: ActionTypes.SET_USER_ROLES;
-      payload: IPageUserAddState['userRoles'];
-    }
-  | { type: ActionTypes.SET_STATUS; payload: IPageUserAddState['status'] }
-  | {
-      type: ActionTypes.SET_PERMISSIONS;
-      payload: IPageUserAddState['permissions'];
-    }
-  | {
-      type: ActionTypes.SET_PERMISSION_GROUPS;
-      payload: IPageUserAddState['permissionGroups'];
-    }
-  | { type: ActionTypes.SET_ITEM; payload: IPageUserAddState['item'] };
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+      IPageUserAddState['mainTabActiveKey']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_USER_ROLES,
+      IPageUserAddState['userRoles']
+    >
+  | IActionWithPayload<ActionTypes.SET_STATUS, IPageUserAddState['status']>
+  | IActionWithPayload<
+      ActionTypes.SET_PERMISSIONS,
+      IPageUserAddState['permissions']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_PERMISSION_GROUPS,
+      IPageUserAddState['permissionGroups']
+    >
+  | IActionWithPayload<ActionTypes.SET_ITEM, IPageUserAddState['item']>;
 
 const reducer = (
   state: IPageUserAddState,
@@ -355,8 +356,10 @@ export default function PageUserAdd() {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">

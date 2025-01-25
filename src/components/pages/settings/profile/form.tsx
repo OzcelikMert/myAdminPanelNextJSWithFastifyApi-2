@@ -23,8 +23,12 @@ const ComponentPageProfileForm = React.memo(
             <div className="col-md-12">
               <ComponentForm
                 formMethods={props.form}
-                submitButtonText={t('save')}
-                submitButtonSubmittingText={t('loading')}
+                i18={
+                  {
+                    submitButtonText: t('save'),
+                    submitButtonSubmittingText: t('loading'),
+                  }
+                }
                 onSubmit={(event) => props.onSubmit(event)}
               >
                 <div className="row">

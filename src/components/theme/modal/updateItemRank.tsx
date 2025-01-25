@@ -2,10 +2,12 @@ import ComponentFormLoadingButton from '@components/elements/form/button/loading
 import ComponentFormInput from '@components/elements/form/input/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
-import { useFormReducer } from '@library/react/handles/form';
-import React, { Component, useEffect } from 'react';
+import React from 'react';
 import { Modal } from 'react-bootstrap';
 import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import ComponentForm from '@components/elements/form';
 
 type IComponentState = {
   isSubmitting: boolean;
@@ -16,11 +18,11 @@ const initialState: IComponentState = {
 };
 
 type IComponentFormState = {
-  newRank: number;
+  rank: number;
 };
 
 const initialFormState: IComponentFormState = {
-  newRank: 0,
+  rank: 0,
 };
 
 type IComponentProps = {
@@ -38,24 +40,24 @@ const ComponentThemeModalUpdateItemRank = React.memo(
     const [isSubmitting, setIsSubmitting] = React.useState(
       initialState.isSubmitting
     );
-    const { formState, setFormState, onChangeInput } =
-      useFormReducer<IComponentFormState>({
+    const form = useForm<IComponentFormState>({
+      defaultValues: {
         ...initialFormState,
-        newRank: props.rank ?? 0,
-      });
+        rank: props.rank ?? initialFormState.rank,
+      },
+    });
 
     useEffectAfterDidMount(() => {
       if (props.isShow) {
-        setFormState({
-          newRank: props.rank ?? 0,
+        form.reset({
+          rank: props.rank ?? initialFormState.rank,
         });
       }
     }, [props.isShow]);
 
-    const onSubmit = async () => {
-      setIsSubmitting(true);
-      const submitResult = await props.onSubmit(formState.newRank);
-      setIsSubmitting(false);
+    const onSubmit = async (data: IComponentFormState) => {
+      const params = data;
+      const submitResult = await props.onSubmit(params.rank);
       if (submitResult) {
         props.onHide();
       }
@@ -80,29 +82,26 @@ const ComponentThemeModalUpdateItemRank = React.memo(
                 {t('rank')} {props.title ? `(${props.title})` : ''}
               </h4>
               <div className="row mt-4">
-                <div className="col-md-12">
-                  <ComponentFormInput
-                    title={`${t('rank')}`}
-                    name="newRank"
-                    type="number"
-                    required={true}
-                    value={formState.newRank}
-                    onChange={(e) => onChangeInput(e)}
-                  />
-                </div>
-                <div className="col-md-12 mt-4 text-end submit">
-                  {isSubmitting ? (
-                    <ComponentFormLoadingButton text={t('loading')} />
-                  ) : (
-                    <button
-                      type={'button'}
-                      className="btn btn-gradient-success"
-                      onClick={() => onSubmit()}
-                    >
-                      {t('update')}
-                    </button>
-                  )}
-                </div>
+                <ComponentForm
+                  formMethods={form}
+                  submitButtonExtraClassName='mt-4'
+                  i18={
+                    {
+                      submitButtonText: t('update'),
+                      submitButtonSubmittingText: t('loading'),
+                    }
+                  }
+                  onSubmit={(data) => onSubmit(data)}
+                >
+                  <div className="col-md-12">
+                    <ComponentFormInput
+                      title={`${t('rank')}`}
+                      name="rank"
+                      type="number"
+                      required={true}
+                    />
+                  </div>
+                </ComponentForm>
               </div>
             </div>
           </div>

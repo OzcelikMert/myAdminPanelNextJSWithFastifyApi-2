@@ -7,6 +7,7 @@ import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IJodit } from 'jodit/types/types';
 import { useDidMount } from '@library/react/customHooks';
 import { useFormContext } from 'react-hook-form';
+import { IActionWithPayload } from 'types/hooks';
 
 type IComponentState = {
   value: string;
@@ -27,9 +28,15 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_VALUE; payload: IComponentState['value'] }
-  | { type: ActionTypes.SET_IS_GALLERY_SHOW; payload: IComponentState['isGalleryShow'] }
-  | { type: ActionTypes.SET_IS_LOADING; payload: IComponentState['isLoading'] };
+  | IActionWithPayload<ActionTypes.SET_VALUE, IComponentState['value']>
+  | IActionWithPayload<
+      ActionTypes.SET_IS_GALLERY_SHOW,
+      IComponentState['isGalleryShow']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_LOADING,
+      IComponentState['isLoading']
+    >;
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {
@@ -45,7 +52,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
 };
 
 type IComponentProps = {
-  name?: string
+  name?: string;
   value?: string;
   onChange?: (newContent: string) => void;
 };
@@ -88,7 +95,8 @@ const ComponentThemeRichTextBox = React.memo((props: IComponentProps) => {
   };
 
   const form = useFormContext();
-  const registeredInput = props.name && form ? form.register(props.name) : undefined;
+  const registeredInput =
+    props.name && form ? form.register(props.name) : undefined;
 
   const [state, dispatch] = useReducer(reducer, {
     ...initialState,
@@ -124,13 +132,13 @@ const ComponentThemeRichTextBox = React.memo((props: IComponentProps) => {
   };
 
   const onChange = (newValue: string) => {
-    if(registeredInput && props.name){
+    if (registeredInput && props.name) {
       form.setValue(props.name, newValue);
     }
-    if(props.onChange){
+    if (props.onChange) {
       props.onChange(newValue);
     }
-  }
+  };
 
   return state.isLoading ? (
     <Spinner animation="border" />

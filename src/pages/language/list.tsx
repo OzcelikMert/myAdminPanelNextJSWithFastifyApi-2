@@ -1,5 +1,7 @@
 import { TableColumn } from 'react-data-table-component';
-import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';
+import ComponentDataTable, {
+  IComponentDataTableColumn,
+} from '@components/elements/table/dataTable';
 import { ILanguageGetResultService } from 'types/services/language.service';
 import { LanguageService } from '@services/language.service';
 import Image from 'next/image';
@@ -22,6 +24,7 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { IActionWithPayload } from 'types/hooks';
 
 type IPageState = {
   items: ILanguageGetResultService[];
@@ -42,15 +45,15 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IPageState['selectedItemId'];
-    }
-  | {
-      type: ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK;
-      payload: IPageState['isShowModalUpdateRank'];
-    };
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPageState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEM_ID,
+      IPageState['selectedItemId']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_SHOW_MODAL_UPDATE_RANK,
+      IPageState['isShowModalUpdateRank']
+    >;
 
 const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
@@ -157,7 +160,9 @@ export default function PageSettingLanguageList() {
     }
   };
 
-  const getTableColumns = (): IComponentDataTableColumn<IPageState['items'][0]>[] => {
+  const getTableColumns = (): IComponentDataTableColumn<
+    IPageState['items'][0]
+  >[] => {
     return [
       {
         name: t('image'),
@@ -186,7 +191,7 @@ export default function PageSettingLanguageList() {
         ),
         width: '250px',
         sortable: true,
-        isSearchable: true
+        isSearchable: true,
       },
       {
         name: t('status'),

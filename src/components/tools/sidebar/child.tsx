@@ -3,12 +3,12 @@ import { ISidebarPath } from 'types/constants/sidebarNavs';
 import { PermissionUtil } from '@utils/permission.util';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
+import Link from 'next/link';
 
 type IComponentProps = {
   item: ISidebarPath;
   index: number;
   checkPathActive: (path: string) => boolean;
-  onClickNavigate: (path: string) => void;
 };
 
 const ComponentToolSidebarChild = React.memo((props: IComponentProps) => {
@@ -25,11 +25,11 @@ const ComponentToolSidebarChild = React.memo((props: IComponentProps) => {
 
   return (
     <li className={`nav-item ${isPathActive ? 'active' : ''}`}>
-      <span
+      <Link
         className={`nav-link ${isPathActive ? 'active' : ''}`}
-        onClick={() =>
-          isPathActive ? null : props.onClickNavigate(props.item.path)
-        }
+        href={isPathActive ? '#' : props.item.path}
+        referrerPolicy="no-referrer"
+        shallow={true}
       >
         <span
           className={`menu-title text-capitalize ${isPathActive ? 'active' : ''}`}
@@ -37,7 +37,7 @@ const ComponentToolSidebarChild = React.memo((props: IComponentProps) => {
           {t(props.item.title)}
         </span>
         <i className={`mdi mdi-${props.item.icon} menu-icon`}></i>
-      </span>
+      </Link>
     </li>
   );
 });

@@ -24,6 +24,7 @@ import ComponentPageECommerceSettingsTabGeneral from '@components/pages/e-commer
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageECommerceSettingsState = {
   currencyTypes: IThemeFormSelectData[];
@@ -43,15 +44,18 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_CURRENCY_TYPES;
-      payload: IPageECommerceSettingsState['currencyTypes'];
-    }
-  | { type: ActionTypes.SET_ITEM; payload: IPageECommerceSettingsState['item'] }
-  | {
-      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IPageECommerceSettingsState['mainTabActiveKey'];
-    };
+  | IActionWithPayload<
+      ActionTypes.SET_CURRENCY_TYPES,
+      IPageECommerceSettingsState['currencyTypes']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_ITEM,
+      IPageECommerceSettingsState['item']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+      IPageECommerceSettingsState['mainTabActiveKey']
+    >;
 
 const reducer = (
   state: IPageECommerceSettingsState,
@@ -78,8 +82,7 @@ const reducer = (
   }
 };
 
-export type IPageFormState =
-  ISettingUpdateECommerceParamService;
+export type IPageFormState = ISettingUpdateECommerceParamService;
 
 const initialFormState: IPageFormState = {
   eCommerce: {
@@ -197,8 +200,10 @@ export default function PageECommerceSettings() {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">

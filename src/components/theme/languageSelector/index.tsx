@@ -25,7 +25,7 @@ type IComponentItemProps = {
   isMissing?: boolean
 } & IThemeFormSelectData<ILanguageGetResultService>
 
-const Item = React.memo((props: IComponentItemProps) => {
+const Item = (props: IComponentItemProps) => {
   return (
     <div className={`row p-0 ${!props.isSelected ? 'my-2' : ''}`}>
       <div className="col-2">{props.isMissing ? <MissingWarning /> : null}</div>
@@ -45,7 +45,7 @@ const Item = React.memo((props: IComponentItemProps) => {
       </div>
     </div>
   );
-});
+};
 
 type IOwnedLanguage = {
   langId: string;

@@ -7,16 +7,18 @@ import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
 
-const Input = React.memo(
+const Input = React.memo(React.forwardRef<any>(
   (
     props: React.InputHTMLAttributes<HTMLInputElement> &
-      React.TextareaHTMLAttributes<HTMLTextAreaElement>
+      React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+      ref
   ) => {
     switch (props.type) {
       case `textarea`:
         return (
           <textarea
             {...props}
+            ref={ref}
             className={`field textarea ${typeof props.className !== 'undefined' ? props.className : ``}`}
           ></textarea>
         );
@@ -24,13 +26,14 @@ const Input = React.memo(
         return (
           <input
             {...props}
+            ref={ref}
             className={`field ${typeof props.className !== 'undefined' ? props.className : ``}`}
             placeholder=" "
           />
         );
     }
   }
-);
+));
 
 export type IComponentFormInputProps = {
   title?: string;
@@ -60,7 +63,7 @@ const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
         })
       : undefined;
   const idRef = React.useRef<string>(String.createId());
-
+  
   return (
     <div className="theme-input">
       <Input {...registeredInput} id={idRef.current} {...props} />

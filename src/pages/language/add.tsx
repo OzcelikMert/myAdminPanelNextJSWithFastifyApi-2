@@ -32,6 +32,7 @@ import { LanguageSchema } from 'schemas/language.schema';
 import ComponentPageLanguageAddHeader from '@components/pages/language/add/header';
 import ComponentPageLanguageAddTabGeneral from '@components/pages/language/add/tabGeneral';
 import ComponentPageLanguageAddTabOptions from '@components/pages/language/add/tabOptions';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageLanguageAddState = {
   mainTabActiveKey: string;
@@ -55,13 +56,13 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_STATUS; payload: IPageLanguageAddState['status'] }
-  | { type: ActionTypes.SET_FLAGS; payload: IPageLanguageAddState['flags'] }
-  | {
-      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IPageLanguageAddState['mainTabActiveKey'];
-    }
-  | { type: ActionTypes.SET_ITEM; payload: IPageLanguageAddState['item'] };
+  | IActionWithPayload<ActionTypes.SET_STATUS, IPageLanguageAddState['status']>
+  | IActionWithPayload<ActionTypes.SET_FLAGS, IPageLanguageAddState['flags']>
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+      IPageLanguageAddState['mainTabActiveKey']
+    >
+  | IActionWithPayload<ActionTypes.SET_ITEM, IPageLanguageAddState['item']>;
 
 const reducer = (
   state: IPageLanguageAddState,
@@ -174,10 +175,7 @@ export default function PageSettingLanguageAdd() {
   const getStatus = () => {
     dispatch({
       type: ActionTypes.SET_STATUS,
-      payload: SelectUtil.getStatus(
-        [StatusId.Active, StatusId.Disabled],
-        t
-      ),
+      payload: SelectUtil.getStatus([StatusId.Active, StatusId.Disabled], t),
     });
   };
 
@@ -248,8 +246,10 @@ export default function PageSettingLanguageAdd() {
       <div className="row">
         <ComponentForm
           formMethods={form}
-          submitButtonText={t('save')}
-          submitButtonSubmittingText={t('loading')}
+          i18={{
+            submitButtonText: t('save'),
+            submitButtonSubmittingText: t('loading'),
+          }}
           onSubmit={(data) => onSubmit(data)}
         >
           <div className="grid-margin stretch-card">

@@ -19,8 +19,8 @@ export const makeStore = () => configureStore({
     breadCrumbState: breadCrumbReducer,
     routeState: routeReducer
   },
-  devTools: true,
-  //middleware: (gDM) => (isProduction ? gDM().concat(logger) : gDM())
+  devTools: !isProduction,
+  middleware: (gDM) => (isProduction ? gDM().concat(logger) : gDM())
 });
 
 

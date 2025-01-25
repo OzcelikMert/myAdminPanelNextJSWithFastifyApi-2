@@ -3,11 +3,11 @@ import { FormProvider, UseFormReturn } from 'react-hook-form';
 import React from 'react';
 
 const SubmitButton = React.memo(
-  (props: { text?: string; className?: string; isLoading?: boolean }) => {
+  (props: { text?: string; className?: string; extraClassName?: string, isLoading?: boolean }) => {
     return (
       <button
         type={'submit'}
-        className={`btn-save ${props.className ?? 'btn btn-gradient-success'}`}
+        className={`btn-save ${props.className ?? 'btn btn-gradient-success'} ${props.extraClassName}`}
         disabled={props.isLoading}
       >
         {props.text}
@@ -16,18 +16,23 @@ const SubmitButton = React.memo(
   }
 );
 
-type IComponentProps<T = any> = {
-  formMethods: UseFormReturn;
-  hideSubmitButton?: boolean;
-  submitButtonText?: string | React.ReactNode;
-  submitButtonSubmittingText?: string;
-  submitButtonClassName?: string;
+type IComponentPropsI18 = {
+  submitButtonSubmittingText?: string
+  submitButtonText?: string
+}
+
+type IComponentProps = {
   children: React.ReactNode;
+  formMethods: UseFormReturn<any>;
+  hideSubmitButton?: boolean;
+  submitButtonClassName?: string;
+  submitButtonExtraClassName?: string;
   enterToSubmit?: true;
-  onSubmit?: (data: T) => Promise<void> | void;
+  i18?: IComponentPropsI18
+  onSubmit?: (data: any) => Promise<void> | void;
 };
 
-const ComponentForm = React.memo(<T,>(props: IComponentProps<T>) => {
+const ComponentForm = React.memo((props: IComponentProps) => {
   return (
     <FormProvider {...props.formMethods}>
       <form
@@ -46,20 +51,21 @@ const ComponentForm = React.memo(<T,>(props: IComponentProps<T>) => {
           {props.hideSubmitButton ? null : !props.formMethods.formState
               .isSubmitting ? (
             <SubmitButton
-              text={props.submitButtonSubmittingText}
+              text={props.i18?.submitButtonText}
               className={props.submitButtonClassName}
+              extraClassName={props.submitButtonExtraClassName}
               isLoading={props.formMethods.formState.isSubmitting}
             />
           ) : (
             <ComponentFormLoadingButton
-              text={props.submitButtonSubmittingText}
-              className={props.submitButtonClassName}
+              text={props.i18?.submitButtonSubmittingText}
+              className={`${props.submitButtonClassName} ${props.submitButtonExtraClassName}`}
             />
           )}
         </div>
       </form>
     </FormProvider>
   );
-}) as <T>(props: IComponentProps<T>) => React.ReactNode;
+});
 
 export default ComponentForm;

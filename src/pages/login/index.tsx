@@ -21,6 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthSchema, IAuthPostSchema } from 'schemas/auth.schema';
 import ComponentPageLoginForm from '@components/pages/login/form';
 import { IAuthLoginParamService } from 'types/services/auth.service';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageLoginState = {
   isWrong: boolean;
@@ -37,8 +38,8 @@ enum AcitonTypes {
 }
 
 type IAction =
-  | { type: AcitonTypes.SET_IS_WRONG; payload: IPageLoginState['isWrong'] }
-  | { type: AcitonTypes.SET_USER; payload: IPageLoginState['user'] };
+  | IActionWithPayload<AcitonTypes.SET_IS_WRONG, IPageLoginState['isWrong']>
+  | IActionWithPayload<AcitonTypes.SET_USER, IPageLoginState['user']>;
 
 const reducer = (state: IPageLoginState, action: IAction): IPageLoginState => {
   switch (action.type) {
@@ -139,6 +140,8 @@ export default function PageLogin() {
     }
   };
 
+  const formValues = form.getValues();
+
   return isPageLoading ? null : (
     <div className="page-login">
       <div className="d-flex align-items-stretch auth-img-bg h-100">
@@ -147,11 +150,14 @@ export default function PageLogin() {
             <div className="auth-form-transparent text-left p-3">
               <h4 className="text-center">{t('loginPanel')}</h4>
               <ComponentForm
+                formMethods={form}
                 enterToSubmit={true}
                 submitButtonClassName="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn w-100"
-                submitButtonText={t('login')}
+                i18={{
+                  submitButtonText: t('login'),
+                  submitButtonSubmittingText: t('loading'),
+                }}
                 onSubmit={(data) => onSubmit(data)}
-                formMethods={form}
               >
                 <ComponentPageLoginForm
                   isWrong={state.isWrong}

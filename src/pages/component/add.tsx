@@ -38,6 +38,7 @@ import ComponentPageComponentAddTabGeneral from '@components/pages/component/add
 import ComponentPageComponentAddTabElements from '@components/pages/component/add/tabElements';
 import ComponentPageComponentAddHeader from '@components/pages/component/add/header';
 import { SelectUtil } from '@utils/select.util';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageComponentAddState = {
   elementTypes: IThemeFormSelectData<ElementTypeId>[];
@@ -73,35 +74,35 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_ELEMENT_TYPES;
-      payload: IPageComponentAddState['elementTypes'];
-    }
-  | {
-      type: ActionTypes.SET_COMPONENT_TYPES;
-      payload: IPageComponentAddState['componentTypes'];
-    }
-  | {
-      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IPageComponentAddState['mainTabActiveKey'];
-    }
-  | {
-      type: ActionTypes.SET_IS_ITEM_LOADING;
-      payload: IPageComponentAddState['isItemLoading'];
-    }
-  | {
-      type: ActionTypes.SET_ITEM;
-      payload: IPageComponentAddState['item'];
-    }
-  | { type: ActionTypes.SET_LANG_ID; payload: IPageComponentAddState['langId'] }
-  | {
-      type: ActionTypes.SET_IS_SHOW_MODAL_EDIT_ELEMENT;
-      payload: IPageComponentAddState['isShowModalEditElement'];
-    }
-  | {
-      type: ActionTypes.SET_SELECTED_ELEMENT_ID;
-      payload: IPageComponentAddState['selectedElementId'];
-    };
+  | IActionWithPayload<
+      ActionTypes.SET_ELEMENT_TYPES,
+      IPageComponentAddState['elementTypes']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_COMPONENT_TYPES,
+      IPageComponentAddState['componentTypes']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+      IPageComponentAddState['mainTabActiveKey']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_ITEM_LOADING,
+      IPageComponentAddState['isItemLoading']
+    >
+  | IActionWithPayload<ActionTypes.SET_ITEM, IPageComponentAddState['item']>
+  | IActionWithPayload<
+      ActionTypes.SET_LANG_ID,
+      IPageComponentAddState['langId']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_SHOW_MODAL_EDIT_ELEMENT,
+      IPageComponentAddState['isShowModalEditElement']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ELEMENT_ID,
+      IPageComponentAddState['selectedElementId']
+    >;
 
 const reducer = (
   state: IPageComponentAddState,
@@ -397,10 +398,11 @@ export default function PageComponentAdd() {
       />
       <div className="row mb-3">
         <ComponentPageComponentAddHeader
-          onChangeLanguage={(_id) => onChangeLanguage(_id)}
-          onNavigatePage={() => navigatePage()}
           item={state.item}
           langId={state.langId}
+          showLanguageSelector={formValues._id ? true : false}
+          onChangeLanguage={(_id) => onChangeLanguage(_id)}
+          onNavigatePage={() => navigatePage()}
         />
       </div>
       <div className="row position-relative">
@@ -409,10 +411,12 @@ export default function PageComponentAdd() {
         ) : null}
         <div className="col-md-12">
           <ComponentForm
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
-            onSubmit={(data) => onSubmit(data)}
             formMethods={form}
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
+            onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

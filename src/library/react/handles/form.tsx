@@ -1,5 +1,6 @@
 import { cloneDeepWith } from 'lodash';
 import React, { Component } from 'react';
+import { IActionWithPayload } from 'types/hooks';
 
 type ISetFormStateFuncParam<T> = (state: T) => T;
 
@@ -45,12 +46,12 @@ enum ActionTypes {
 }
 
 type IAction<T> =
-  | {
-      type: ActionTypes.SET_STATE;
-      payload: { value: Partial<T> | ISetFormStateFuncParam<T> };
-    }
-  | { type: ActionTypes.UPDATE_FIELD; payload: { name: string; value: any } }
-  | { type: ActionTypes.UPDATE_SELECT; payload: { name: string; value: any } };
+  | IActionWithPayload<
+      ActionTypes.SET_STATE,
+      { value: Partial<T> | ISetFormStateFuncParam<T> }
+    >
+  | IActionWithPayload<ActionTypes.UPDATE_FIELD, { name: string; value: any }>
+  | IActionWithPayload<ActionTypes.UPDATE_SELECT, { name: string; value: any }>;
 
 function formReducer<T>(state: T, action: IAction<T>): T {
   switch (action.type) {
@@ -99,7 +100,10 @@ export function useFormReducer<T>(initialState: T): IUseFormReducer<T> {
             ? Number(value) || 0
             : value;
 
-      dispatch({ type: ActionTypes.UPDATE_FIELD, payload: { name, value: newValue } });
+      dispatch({
+        type: ActionTypes.UPDATE_FIELD,
+        payload: { name, value: newValue },
+      });
     }
   };
 

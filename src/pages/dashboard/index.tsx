@@ -11,7 +11,7 @@ import ComponentThemeBadgeStatus from '@components/theme/badge/status';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
 import { PostUtil } from '@utils/post.util';
 import { ImageSourceUtil } from '@utils/imageSource.util';
-import { postTypes } from '@constants/postTypes';
+import { PostTypeId, postTypes } from '@constants/postTypes';
 import { RouteUtil } from '@utils/route.util';
 import { PostSortTypeId } from '@constants/postSortTypes';
 import { ISettingGetResultService } from 'types/services/setting.service';
@@ -30,6 +30,8 @@ import {
 import ComponentPageDashboardLastPosts from '@components/pages/dashboard/lastPosts';
 import ComponentPageDashboardReportOne from '@components/pages/dashboard/reportOne';
 import ComponentPageDashboardReportTwo from '@components/pages/dashboard/reportTwo';
+import ComponentThemeWebsiteLinkPost from '@components/theme/websiteLink/post';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageDashboardState = {
   lastPosts: IPostGetManyResultService[];
@@ -63,26 +65,26 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_LAST_POSTS;
-      payload: IPageDashboardState['lastPosts'];
-    }
-  | {
-      type: ActionTypes.SET_VIEWS_WITH_NUMBER;
-      payload: IPageDashboardState['viewsWithNumber'];
-    }
-  | {
-      type: ActionTypes.SET_VIEWS_WITH_STATISTICS;
-      payload: IPageDashboardState['viewsWithStatistics'];
-    }
-  | {
-      type: ActionTypes.SET_WORLD_MAP_SIZE;
-      payload: IPageDashboardState['worldMapSize'];
-    }
-  | {
-      type: ActionTypes.SET_SETTINGS;
-      payload: IPageDashboardState['settings'];
-    };
+  | IActionWithPayload<
+      ActionTypes.SET_LAST_POSTS,
+      IPageDashboardState['lastPosts']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_VIEWS_WITH_NUMBER,
+      IPageDashboardState['viewsWithNumber']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_VIEWS_WITH_STATISTICS,
+      IPageDashboardState['viewsWithStatistics']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_WORLD_MAP_SIZE,
+      IPageDashboardState['worldMapSize']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SETTINGS,
+      IPageDashboardState['settings']
+    >;
 
 const reducer = (
   state: IPageDashboardState,
@@ -266,6 +268,13 @@ export default function PageDashboard() {
         name: t('title'),
         selector: (row) => row.contents?.title || t('[noLangAdd]'),
         sortable: true,
+        cell: (row) => (
+          <ComponentThemeWebsiteLinkPost
+            typeId={row.typeId}
+            text={row.contents?.title || t('[noLangAdd]')}
+            url={row.contents?.url}
+          />
+        ),
       },
       {
         name: t('type'),

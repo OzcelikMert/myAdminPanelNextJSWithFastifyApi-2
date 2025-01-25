@@ -10,8 +10,9 @@ export interface IComponentTableToggleMenuItem {
 
 type IComponentProps = {
   items: IComponentTableToggleMenuItem[];
-  onChange: (value: any) => void;
   label?: string | any;
+  title?: string;
+  onChange: (value: any) => void;
 };
 
 const ComponentTableToggleMenu = React.memo((props: IComponentProps) => {
@@ -21,6 +22,11 @@ const ComponentTableToggleMenu = React.memo((props: IComponentProps) => {
         {props.label ?? <i className="mdi mdi-dots-horizontal"></i>}
       </Dropdown.Toggle>
       <Dropdown.Menu className="theme-table-toggle-menu">
+        {props.title ? (
+          <Dropdown.Header className="theme-table-toggle-title">
+            {props.title}
+          </Dropdown.Header>
+        ) : null}
         {props.items.map((item, index) => {
           return (
             <Dropdown.Item

@@ -57,13 +57,6 @@ const ComponentToolSidebar = React.memo(() => {
     return router.asPath.startsWith(path);
   };
 
-  const navigatePage = async (path: string) => {
-    await RouteUtil.change({
-      router,
-      path: path || EndPoints.DASHBOARD,
-    });
-  };
-
   return (
     <nav className="sidebar sidebar-offcanvas" id="sidebar">
       <ul className="nav pt-5">
@@ -75,14 +68,12 @@ const ComponentToolSidebar = React.memo(() => {
               activeItems={activeItems}
               checkPathActive={(path) => isPathActive(path)}
               onToggleItemState={(stateKey) => toggleItemState(stateKey)}
-              onClickNavigate={(path) => navigatePage(path)}
             />
           ) : (
             <ComponentToolSidebarChild
               item={item}
               index={index}
               checkPathActive={(path) => isPathActive(path)}
-              onClickNavigate={(path) => navigatePage(path)}
             />
           );
         })}

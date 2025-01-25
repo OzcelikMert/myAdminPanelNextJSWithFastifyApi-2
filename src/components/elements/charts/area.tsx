@@ -14,6 +14,8 @@ import {
 import Spinner from 'react-bootstrap/Spinner';
 import React, { useReducer } from 'react';
 import { useDidMount } from '@library/react/customHooks';
+import { PayloadAction } from '@reduxjs/toolkit';
+import { IActionWithPayload } from 'types/hooks';
 
 ChartJS.register(
   CategoryScale,
@@ -68,9 +70,12 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_OPTIONS; payload: IComponentState['options'] }
-  | { type: ActionTypes.SET_DATA; payload: IComponentState['data'] }
-  | { type: ActionTypes.SET_IS_LOADING; payload: IComponentState['isLoading'] };
+  | IActionWithPayload<ActionTypes.SET_OPTIONS, IComponentState['options']>
+  | IActionWithPayload<ActionTypes.SET_DATA, IComponentState['data']>
+  | IActionWithPayload<
+      ActionTypes.SET_IS_LOADING,
+      IComponentState['isLoading']
+    >;
 
 const reducer = (state: IComponentState, action: IAction): IComponentState => {
   switch (action.type) {

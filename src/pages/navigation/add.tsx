@@ -33,6 +33,7 @@ import { NavigationSchema } from 'schemas/navigation.schema';
 import ComponentPageNavigationAddHeader from '@components/pages/navigation/add/header';
 import ComponentPageNavigationAddTabGeneral from '@components/pages/navigation/add/tabGeneral';
 import ComponentPageNavigationAddTabOptions from '@components/pages/navigation/add/tabOptions';
+import { IActionWithPayload } from 'types/hooks';
 
 export type IPageNavigationAddState = {
   items: IThemeFormSelectData<string>[];
@@ -61,21 +62,24 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_ITEMS; payload: IPageNavigationAddState['items'] }
-  | { type: ActionTypes.SET_STATUS; payload: IPageNavigationAddState['status'] }
-  | {
-      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY;
-      payload: IPageNavigationAddState['mainTabActiveKey'];
-    }
-  | {
-      type: ActionTypes.SET_LANG_ID;
-      payload: IPageNavigationAddState['langId'];
-    }
-  | {
-      type: ActionTypes.SET_IS_ITEM_LOADING;
-      payload: IPageNavigationAddState['isItemLoading'];
-    }
-  | { type: ActionTypes.SET_ITEM; payload: IPageNavigationAddState['item'] };
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPageNavigationAddState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_STATUS,
+      IPageNavigationAddState['status']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+      IPageNavigationAddState['mainTabActiveKey']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_LANG_ID,
+      IPageNavigationAddState['langId']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_ITEM_LOADING,
+      IPageNavigationAddState['isItemLoading']
+    >
+  | IActionWithPayload<ActionTypes.SET_ITEM, IPageNavigationAddState['item']>;
 
 const reducer = (
   state: IPageNavigationAddState,
@@ -227,10 +231,7 @@ export default function PageNavigationAdd() {
   const getStatus = () => {
     dispatch({
       type: ActionTypes.SET_STATUS,
-      payload: SelectUtil.getStatus(
-        [StatusId.Active, StatusId.InProgress],
-        t
-      ),
+      payload: SelectUtil.getStatus([StatusId.Active, StatusId.InProgress], t),
     });
   };
 
@@ -338,6 +339,7 @@ export default function PageNavigationAdd() {
         <ComponentPageNavigationAddHeader
           langId={state.langId}
           item={state.item}
+          showLanguageSelector={formValues._id ? true : false}
           onNavigatePage={() => navigatePage()}
           onChangeLanguage={(_id) => onChangeLanguage(_id)}
         />
@@ -349,8 +351,10 @@ export default function PageNavigationAdd() {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">

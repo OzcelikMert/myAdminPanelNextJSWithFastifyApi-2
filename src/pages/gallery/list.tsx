@@ -3,7 +3,9 @@ import Swal from 'sweetalert2';
 import { GalleryService } from '@services/gallery.service';
 import { TableColumn } from 'react-data-table-component';
 import ComponentToast from '@components/elements/toast';
-import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';
+import ComponentDataTable, {
+  IComponentDataTableColumn,
+} from '@components/elements/table/dataTable';
 import Image from 'next/image';
 import { GalleryTypeId } from '@constants/galleryTypeId';
 import { ImageSourceUtil } from '@utils/imageSource.util';
@@ -14,7 +16,11 @@ import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import { useDidMount, useEffectAfterDidMount } from '@library/react/customHooks';
+import {
+  useDidMount,
+  useEffectAfterDidMount,
+} from '@library/react/customHooks';
+import { IActionWithPayload } from 'types/hooks';
 
 type IPageState = {
   items: IGalleryGetResultService[];
@@ -31,13 +37,19 @@ const initialState: IPageState = {
 enum ActionTypes {
   SET_ITEMS,
   SET_SELECTED_ITEMS,
-  SET_IS_LIST_LOADING
-} 
+  SET_IS_LIST_LOADING,
+}
 
 type IAction =
-  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
-  | { type: ActionTypes.SET_SELECTED_ITEMS; payload: IPageState['selectedItems'] }
-  | { type: ActionTypes.SET_IS_LIST_LOADING; payload: IPageState['isListLoading'] };
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPageState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEMS,
+      IPageState['selectedItems']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_IS_LIST_LOADING,
+      IPageState['isListLoading']
+    >;
 
 const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
@@ -78,7 +90,7 @@ export default function PageGalleryList(props: IPageProps) {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [isPageLoaded, setIsPageLoaded] = useState(false); 
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
     init();
@@ -90,7 +102,7 @@ export default function PageGalleryList(props: IPageProps) {
   });
 
   useEffectAfterDidMount(() => {
-    if(isPageLoaded){
+    if (isPageLoaded) {
       if (!props.isModal) {
         appDispatch(setIsPageLoadingState(false));
       }
@@ -107,7 +119,7 @@ export default function PageGalleryList(props: IPageProps) {
   }, [props.uploadedImages]);
 
   const init = async () => {
-    if(isPageLoaded){
+    if (isPageLoaded) {
       setIsPageLoaded(false);
     }
     await getItems();
@@ -226,69 +238,70 @@ export default function PageGalleryList(props: IPageProps) {
     }
   };
 
-  const getTableColumns = (): IComponentDataTableColumn<IGalleryGetResultService>[] => {
-    return [
-      {
-        name: t('image'),
-        width: '105px',
-        cell: (row) => (
-          <div className="image pt-2 pb-2">
-            <Image
-              className="img-fluid"
-              alt={row.name}
-              src={ImageSourceUtil.getUploadedImageSrc(row.name)}
-              width={100}
-              height={100}
-              loading={'lazy'}
-            />
-          </div>
-        ),
-      },
-      {
-        name: t('title'),
-        selector: (row) => row.name,
-        sortable: true,
-        isSearchable: true
-      },
-      {
-        name: t('createdDate'),
-        selector: (row) => new Date(row.createdAt).toLocaleDateString(),
-        sortable: true,
-        sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
-        cell: (row) => (
-          <ComponentTableUpdatedBy
-            name={row.authorId.name}
-            updatedAt={row.createdAt || ''}
-          />
-        ),
-      },
-      {
-        name: t('size'),
-        selector: (row) => `${row.sizeKB.toFixed(1)} KB`,
-        sortable: true,
-        sortFunction: (a, b) => {
-          return a.sizeKB > b.sizeKB ? 1 : -1;
+  const getTableColumns =
+    (): IComponentDataTableColumn<IGalleryGetResultService>[] => {
+      return [
+        {
+          name: t('image'),
+          width: '105px',
+          cell: (row) => (
+            <div className="image pt-2 pb-2">
+              <Image
+                className="img-fluid"
+                alt={row.name}
+                src={ImageSourceUtil.getUploadedImageSrc(row.name)}
+                width={100}
+                height={100}
+                loading={'lazy'}
+              />
+            </div>
+          ),
         },
-      },
-      {
-        name: t('show'),
-        width: '70px',
-        button: true,
-        cell: (row) => (
-          <a
-            className="btn btn-gradient-info btn-icon-text"
-            href={ImageSourceUtil.getUploadedImageSrc(row.name)}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <i className="mdi mdi-eye"></i>
-          </a>
-        ),
-      },
-    ];
-  };
+        {
+          name: t('title'),
+          selector: (row) => row.name,
+          sortable: true,
+          isSearchable: true,
+        },
+        {
+          name: t('createdDate'),
+          selector: (row) => new Date(row.createdAt).toLocaleDateString(),
+          sortable: true,
+          sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
+          cell: (row) => (
+            <ComponentTableUpdatedBy
+              name={row.authorId.name}
+              updatedAt={row.createdAt || ''}
+            />
+          ),
+        },
+        {
+          name: t('size'),
+          selector: (row) => `${row.sizeKB.toFixed(1)} KB`,
+          sortable: true,
+          sortFunction: (a, b) => {
+            return a.sizeKB > b.sizeKB ? 1 : -1;
+          },
+        },
+        {
+          name: t('show'),
+          width: '70px',
+          button: true,
+          cell: (row) => (
+            <a
+              className="btn btn-gradient-info btn-icon-text"
+              href={ImageSourceUtil.getUploadedImageSrc(row.name)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <i className="mdi mdi-eye"></i>
+            </a>
+          ),
+        },
+      ];
+    };
 
-  console.log("page gallery list", state)
+  console.log('page gallery list', state);
 
   return isPageLoading ? null : (
     <div className="page-gallery">

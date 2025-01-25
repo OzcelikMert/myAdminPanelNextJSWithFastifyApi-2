@@ -24,6 +24,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
 import ComponentPageSettingsContactFormsItem from '@components/pages/settings/contact-forms/item';
 import ComponentPageSettingsContactFormsEditModal from '@components/pages/settings/contact-forms/editModal';
+import { IActionWithPayload } from 'types/hooks';
 
 type IPageState = {
   items: ISettingContactFormModel[];
@@ -44,18 +45,15 @@ enum ActionTypes {
 }
 
 type IAction =
-  | {
-      type: ActionTypes.SET_ITEMS;
-      payload: IPageState['items'];
-    }
-  | {
-      type: ActionTypes.SET_IS_SHOW_MODAL_EDIT;
-      payload: IPageState['isShowModalEdit'];
-    }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IPageState['selectedItemId'];
-    };
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPageState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_IS_SHOW_MODAL_EDIT,
+      IPageState['isShowModalEdit']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEM_ID,
+      IPageState['selectedItemId']
+    >;
 
 const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
@@ -246,8 +244,10 @@ export default function PageSettingsContactForms() {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            submitButtonText={t('save')}
-            submitButtonSubmittingText={t('loading')}
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
             onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">

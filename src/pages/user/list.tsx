@@ -27,6 +27,7 @@ import {
   useDidMount,
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
+import { IActionWithPayload } from 'types/hooks';
 
 type IPageState = {
   items: IUserGetResultService[];
@@ -47,15 +48,15 @@ enum ActionTypes {
 }
 
 type IAction =
-  | { type: ActionTypes.SET_ITEMS; payload: IPageState['items'] }
-  | {
-      type: ActionTypes.SET_IS_SHOW_ITEM_MODAL;
-      payload: IPageState['isShowItemModal'];
-    }
-  | {
-      type: ActionTypes.SET_SELECTED_ITEM_ID;
-      payload: IPageState['selectedItemId'];
-    };
+  | IActionWithPayload<ActionTypes.SET_ITEMS, IPageState['items']>
+  | IActionWithPayload<
+      ActionTypes.SET_IS_SHOW_ITEM_MODAL,
+      IPageState['isShowItemModal']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEM_ID,
+      IPageState['selectedItemId']
+    >;
 
 const reducer = (state: IPageState, action: IAction): IPageState => {
   switch (action.type) {
