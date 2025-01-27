@@ -98,61 +98,67 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
           type="textarea"
         />
       </div>
+
       {props.showCategorySelect ? (
-        <div className="row">
-          <div className="col-md-10">
-            <ComponentFormSelect
-              title={t('category')}
-              name="categories"
-              placeholder={t('chooseCategory').toCapitalizeCase()}
-              isMulti
-              closeMenuOnSelect={false}
-              options={props.categories}
-              value={props.categories?.filter((item) =>
-                props.selectedCategories?.includes(item.value)
-              )}
-            />
-          </div>
-          <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">
-            <button
-              type={'button'}
-              className="btn btn-gradient-success btn-lg"
-              onClick={() =>
-                props.onClickShowTermModal &&
-                props.onClickShowTermModal(PostTermTypeId.Category)
-              }
-            >
-              <i className="mdi mdi-plus"></i> {t('addNew')}
-            </button>
+        <div className="col-md-7 mb-3">
+          <div className="row">
+            <div className="col-md-10">
+              <ComponentFormSelect
+                title={t('category')}
+                name="categories"
+                placeholder={t('chooseCategory').toCapitalizeCase()}
+                isMulti
+                closeMenuOnSelect={false}
+                options={props.categories}
+                value={props.categories?.filter((item) =>
+                  props.selectedCategories?.includes(item.value)
+                )}
+              />
+            </div>
+            <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">
+              <button
+                type={'button'}
+                className="btn btn-gradient-success btn-lg"
+                onClick={() =>
+                  props.onClickShowTermModal &&
+                  props.onClickShowTermModal(PostTermTypeId.Category)
+                }
+              >
+                <i className="mdi mdi-plus"></i> {t('addNew')}
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
+
       {props.showTagSelect ? (
-        <div className="row">
-          <div className="col-md-10">
-            <ComponentFormSelect
-              title={t('tag')}
-              name="tags"
-              placeholder={t('chooseTag').toCapitalizeCase()}
-              isMulti
-              closeMenuOnSelect={false}
-              options={props.tags}
-              value={props.tags?.filter((item) =>
-                props.selectedTags?.includes(item.value)
-              )}
-            />
-          </div>
-          <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">
-            <button
-              type={'button'}
-              className="btn btn-gradient-success btn-lg"
-              onClick={() =>
-                props.onClickShowTermModal &&
-                props.onClickShowTermModal(PostTermTypeId.Tag)
-              }
-            >
-              <i className="mdi mdi-plus"></i> {t('addNew')}
-            </button>
+        <div className="col-md-7 mb-3">
+          <div className="row">
+            <div className="col-md-10">
+              <ComponentFormSelect
+                title={t('tag')}
+                name="tags"
+                placeholder={t('chooseTag').toCapitalizeCase()}
+                isMulti
+                closeMenuOnSelect={false}
+                options={props.tags}
+                value={props.tags?.filter((item) =>
+                  props.selectedTags?.includes(item.value)
+                )}
+              />
+            </div>
+            <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">
+              <button
+                type={'button'}
+                className="btn btn-gradient-success btn-lg"
+                onClick={() =>
+                  props.onClickShowTermModal &&
+                  props.onClickShowTermModal(PostTermTypeId.Tag)
+                }
+              >
+                <i className="mdi mdi-plus"></i> {t('addNew')}
+              </button>
+            </div>
           </div>
         </div>
       ) : null}

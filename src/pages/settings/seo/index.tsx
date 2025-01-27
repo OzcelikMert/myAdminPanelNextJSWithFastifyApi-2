@@ -97,7 +97,13 @@ export default function PageSettingsSEO() {
     langId: mainLangId,
   });
   const form = useForm<IPageFormState>({
-    defaultValues: initialFormState,
+    defaultValues: {
+      ...initialFormState,
+      seoContents: {
+        ...initialFormState.seoContents,
+        langId: mainLangId,
+      },
+    },
     resolver: zodResolver(SettingSchema.putSeo),
   });
   const [isPageLoaded, setIsPageLoaded] = useState(false);

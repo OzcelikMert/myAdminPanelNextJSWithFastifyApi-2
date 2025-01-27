@@ -157,6 +157,8 @@ export default function PageSettingsProfile() {
   };
 
   const onChangeImage = async (image: string) => {
+    console.log(image);
+    
     dispatch({ type: ActionTypes.SET_IS_IMAGE_CHANGING, payload: true });
 
     const serviceResult = await UserService.updateProfileImage(

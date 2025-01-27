@@ -82,22 +82,24 @@ type IPageProps = {
 };
 
 export default function PageGalleryList(props: IPageProps) {
-  let toast: null | ComponentToast = null;
-  const abortController = new AbortController();
-
+  
   const appDispatch = useAppDispatch();
   const t = useAppSelector(selectTranslation);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
-
+  
   const [state, dispatch] = useReducer(reducer, initialState);
+  
+  const toast = useRef<ComponentToast>(null);
+  const abortController = useRef<AbortController>(new AbortController());
+  
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
     init();
 
     return () => {
-      abortController.abort();
-      toast?.hide();
+      abortController.current.abort();
+      toast.current?.hide();
     };
   });
 
@@ -146,7 +148,7 @@ export default function PageGalleryList(props: IPageProps) {
   const getItems = async () => {
     const serviceResult = await GalleryService.get(
       { typeId: GalleryTypeId.Image },
-      abortController.signal
+      abortController.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       dispatch({ type: ActionTypes.SET_ITEMS, payload: serviceResult.data });
@@ -156,8 +158,8 @@ export default function PageGalleryList(props: IPageProps) {
   const onSelect = (images: IGalleryGetResultService[]) => {
     dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: images });
     if (images.length > 0) {
-      if (!toast || !toast.isShow) {
-        toast = new ComponentToast({
+      if (!toast.current || !toast.current.isShow) {
+        toast.current = new ComponentToast({
           content: props.isModal ? (
             <button
               type="button"
@@ -181,7 +183,7 @@ export default function PageGalleryList(props: IPageProps) {
         });
       }
     } else {
-      toast?.hide();
+      toast.current?.hide();
     }
   };
 
@@ -195,7 +197,7 @@ export default function PageGalleryList(props: IPageProps) {
       showCancelButton: true,
     });
     if (result.isConfirmed) {
-      toast?.hide();
+      toast.current?.hide();
       const loadingToast = new ComponentToast({
         title: t('loading'),
         content: t('deleting'),
@@ -204,7 +206,7 @@ export default function PageGalleryList(props: IPageProps) {
 
       const serviceResult = await GalleryService.deleteMany(
         { _id: state.selectedItems.map((item) => item._id) },
-        abortController.signal
+        abortController.current.signal
       );
       loadingToast.hide();
       if (serviceResult.status) {
@@ -231,7 +233,7 @@ export default function PageGalleryList(props: IPageProps) {
         '_id',
         state.selectedItems
       );
-      toast?.hide();
+      toast.current?.hide();
       props.onSubmit(
         foundSelectedItems?.map((selectedItem) => selectedItem.name) ?? []
       );
@@ -300,8 +302,6 @@ export default function PageGalleryList(props: IPageProps) {
         },
       ];
     };
-
-  console.log('page gallery list', state);
 
   return isPageLoading ? null : (
     <div className="page-gallery">

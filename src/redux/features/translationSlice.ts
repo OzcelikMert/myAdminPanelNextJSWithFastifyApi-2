@@ -39,11 +39,17 @@ const translationSlice = createSlice({
       state.isLoading = true;
     });
     builder
-      .addCase(fetchTranslationState.fulfilled, (state, action: PayloadAction<Omit<ITranslationState, "isLoading">>) => {
-        state.isLoading = false;
-        state.resources = action.payload.resources;
-        state.langCode = action.payload.langCode;
-      })
+      .addCase(
+        fetchTranslationState.fulfilled,
+        (
+          state,
+          action: PayloadAction<Omit<ITranslationState, 'isLoading'>>
+        ) => {
+          state.isLoading = false;
+          state.resources = action.payload.resources;
+          state.langCode = action.payload.langCode;
+        }
+      )
       .addCase(fetchTranslationState.rejected, (state) => {
         state.isLoading = false;
       });
@@ -59,16 +65,19 @@ export const selectResources = (state: {
 export const selectTranslation = createSelector(
   [selectResources],
   (resources) =>
-    (key: IPanelLanguageKeys, variables?: string[] | { [key: string]: string }): string => {
+    (
+      key: IPanelLanguageKeys,
+      variables?: string[] | { [key: string]: string }
+    ): string => {
       let item = resources[key] || key;
-      if(variables){
-        if(Array.isArray(variables)){
+      if (variables) {
+        if (Array.isArray(variables)) {
           for (let index = 0; index < variables.length; index++) {
             item = item.replace(`{{${index}}}`, variables[index]);
-          } 
-        }else {
-          Object.keys(variables).forEach(variableKey => {
-            item = item.replace("{{${variableKey}}}", variables[variableKey]);
+          }
+        } else {
+          Object.keys(variables).forEach((variableKey) => {
+            item = item.replace('{{${variableKey}}}', variables[variableKey]);
           });
         }
       }

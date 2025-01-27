@@ -197,7 +197,7 @@ export default function PageSettingsSocialMedia() {
     const index = newSocialMedia.indexOfKey('_id', _id);
     const result = await Swal.fire({
       title: t('deleteAction'),
-      html: `<b>'${newSocialMedia[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+      html: t('deleteItemQuestionWithItemName', [newSocialMedia[index].key]),
       confirmButtonText: t('yes'),
       cancelButtonText: t('no'),
       icon: 'question',

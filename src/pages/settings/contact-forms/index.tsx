@@ -204,7 +204,7 @@ export default function PageSettingsContactForms() {
     const index = newContactForms.indexOfKey('_id', _id);
     const result = await Swal.fire({
       title: t('deleteAction'),
-      html: `<b>'${newContactForms[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+      html: t('deleteItemQuestionWithItemName', [newContactForms[index].key]),
       confirmButtonText: t('yes'),
       cancelButtonText: t('no'),
       icon: 'question',

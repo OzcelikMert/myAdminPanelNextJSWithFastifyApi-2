@@ -158,6 +158,10 @@ export default function PageNavigationAdd() {
     defaultValues: {
       ...initialFormState,
       _id: queries._id ?? '',
+      contents: {
+        ...initialFormState.contents,
+        langId: mainLangId,
+      }
     },
     resolver: zodResolver(
       queries._id ? NavigationSchema.putWithId : NavigationSchema.post

@@ -147,7 +147,7 @@ export default function PageUserList() {
     if (item) {
       const result = await Swal.fire({
         title: t('deleteAction'),
-        html: `<b>'${item.name}'</b> ${t('deleteItemQuestionWithItemName')}`,
+        html: t('deleteItemQuestionWithItemName', [item.name]),
         confirmButtonText: t('yes'),
         cancelButtonText: t('no'),
         icon: 'question',

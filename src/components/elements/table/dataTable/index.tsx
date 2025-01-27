@@ -14,6 +14,8 @@ import {
   useEffectAfterDidMount,
 } from '@library/react/customHooks';
 import { IActionWithPayload } from 'types/hooks';
+import ComponentToolTip from '@components/elements/tooltip';
+import { cloneDeepWith } from 'lodash';
 
 export type IComponentDataTableColumn<T> = {
   isSearchable?: boolean;
@@ -86,6 +88,7 @@ type IComponentPropI18 = {
   search?: string;
   noRecords?: string;
   toggleMenuTitle?: string;
+  selectAll?: string;
 };
 
 type IComponentProps<T = any> = {
@@ -96,9 +99,11 @@ type IComponentProps<T = any> = {
   toggleMenuItems?: IComponentTableToggleMenuItem[];
   filterButtons?: IComponentTableFilterButton[];
   i18?: IComponentPropI18;
-  onClickToggleMenuItem?: (selectedRows: T[], value: any) => void;
+  onClickToggleMenuItem?: (
+    selectedRows: T[],
+    value: any
+  ) => void | Promise<void>;
   onSelect?: (value: T[]) => void;
-  onClickFilterButton?: (button: IComponentTableFilterButton) => void;
   columns: IComponentDataTableColumn<T>[];
 } & Omit<TableProps<T>, 'columns'>;
 
@@ -108,7 +113,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
     items: props.data,
     showingItems: props.data,
     activeFilterButtonIndex:
-      props.filterButtons?.indexOfKey('isDefault', true) ?? -1,
+      props.filterButtons?.indexOfKey('isDefault', true) ?? 0,
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -116,7 +121,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
   const listPagePerCountRef = useRef<number>(10);
 
   useDidMount(() => {
-    if (state.activeFilterButtonIndex > -1) {
+    if (props.filterButtons && props.filterButtons.length > 0) {
       onFilter();
     } else {
       setIsLoading(false);
@@ -124,7 +129,15 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
   });
 
   useEffectAfterDidMount(() => {
-    resetTableList();
+    if (!isLoading) {
+      setIsLoading(true);
+    }
+    if (props.filterButtons && props.filterButtons.length > 0) {
+      onFilter();
+    } else {
+      dispatch({ type: ActionTypes.SET_ITEMS, payload: props.data });
+    }
+    setIsLoading(false);
   }, [props.data]);
 
   useEffectAfterDidMount(() => {
@@ -134,7 +147,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
     }
   }, [state.items]);
 
-  const resetTableList = (firstRender?: boolean) => {
+  const resetTableSelectedItems = (firstRender?: boolean) => {
     dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [] });
     dispatch({
       type: ActionTypes.SET_CLEAR_SELECTED_ROWS,
@@ -143,7 +156,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
   };
 
   const getItemListForPage = () => {
-    return props.data.slice(
+    return state.items.slice(
       listPagePerCountRef.current * listPageRef.current,
       (listPageRef.current + 1) * listPagePerCountRef.current
     );
@@ -152,7 +165,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
   const checkAllSelected = () => {
     const items = getItemListForPage();
     return (
-      props.data.length > 0 &&
+      state.items.length > 0 &&
       items.every((item) => state.selectedItems.includes(item))
     );
   };
@@ -167,30 +180,30 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
 
   const onSelect = (item: T, remove: boolean = true) => {
     const findIndex = state.selectedItems.indexOfKey('', item);
+    let newSelectedItems = state.selectedItems;
 
     if (findIndex > -1) {
       if (remove) {
-        dispatch({
-          type: ActionTypes.SET_SELECTED_ITEMS,
-          payload: state.selectedItems.filter(
-            (_, index) => index !== findIndex
-          ),
-        });
+        newSelectedItems = newSelectedItems.filter(
+          (_, index) => index !== findIndex
+        );
       }
     } else {
       if (props.isMultiSelectable === false) {
-        dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [item] });
+        newSelectedItems = [item];
       } else {
-        dispatch({
-          type: ActionTypes.SET_SELECTED_ITEMS,
-          payload: [...state.selectedItems, item],
-        });
+        newSelectedItems = [...state.selectedItems, item];
       }
     }
 
     if (props.onSelect) {
-      props.onSelect(state.selectedItems);
+      props.onSelect(newSelectedItems);
     }
+
+    dispatch({
+      type: ActionTypes.SET_SELECTED_ITEMS,
+      payload: newSelectedItems,
+    });
   };
 
   const onSearch = (event?: React.ChangeEvent<HTMLInputElement>) => {
@@ -220,8 +233,11 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
         });
       }
     }
+
     // Set Showing Items
-    dispatch({ type: ActionTypes.SET_SHOWING_ITEMS, payload: searchedItems });
+    if (JSON.stringify(searchedItems) !== JSON.stringify(state.showingItems)) {
+      dispatch({ type: ActionTypes.SET_SHOWING_ITEMS, payload: searchedItems });
+    }
   };
 
   const onFilter = async (filterButtonIndex: number = -1) => {
@@ -235,61 +251,64 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
           type: ActionTypes.SET_ACTIVE_FILTER_BUTTON_INDEX,
           payload: filterButtonIndex,
         });
-        resetTableList();
+        resetTableSelectedItems();
         index = filterButtonIndex;
       }
       const filterButton = props.filterButtons[index];
-      let filteredItems = props.data;
+      let filteredItems = cloneDeepWith(props.data);
       if (filterButton.onFilter) {
-        filteredItems = filterButton.onFilter(props.data);
-      } else if (filterButton.onFilterAsync) {
-        filteredItems = await filterButton.onFilterAsync();
+        filteredItems = await filterButton.onFilter(filteredItems);
       }
+
+      dispatch({ type: ActionTypes.SET_SEARCH_KEY, payload: '' });
       dispatch({ type: ActionTypes.SET_ITEMS, payload: filteredItems });
-      if (props.onClickFilterButton) {
-        props.onClickFilterButton(filterButton);
-      }
     }
   };
 
+  const onClickToggleMenuItem = async (value: any) => {
+    if (props.onClickToggleMenuItem) {
+      await props.onClickToggleMenuItem(state.selectedItems, value);
+    }
+    onFilter();
+    onSearch();
+  };
+
   const getColumns = () => {
-    let columns = [
-      ...props.columns.filter(
+    let newColumns = cloneDeepWith(
+      props.columns.filter(
         (column) => typeof column.name !== 'undefined' || column.name !== null
-      ),
-    ];
+      )
+    );
 
     if (props.toggleMenuItems && props.toggleMenuItems.length > 0) {
-      if (columns.length > 0) {
-        columns[0].name =
+      if (newColumns.length > 0) {
+        newColumns[0].name =
           state.selectedItems.length > 0 ? (
             <ComponentTableToggleMenu
               items={props.toggleMenuItems ?? []}
               title={props.i18?.toggleMenuTitle}
-              onChange={(value) =>
-                props.onClickToggleMenuItem
-                  ? props.onClickToggleMenuItem(state.selectedItems, value)
-                  : null
-              }
+              onChange={(value) => onClickToggleMenuItem(value)}
             />
           ) : (
-            columns[0].name
+            newColumns[0].name
           );
-        columns[0].sortable =
-          columns[0].sortable && state.selectedItems.length === 0;
+        newColumns[0].sortable =
+          newColumns[0].sortable && state.selectedItems.length === 0;
       }
     }
 
     if (props.isSelectable) {
-      columns = [
+      newColumns = [
         {
           name: !props.isAllSelectable ? null : (
-            <div>
-              <ComponentFormCheckBox
-                checked={checkAllSelected()}
-                onChange={(e) => onSelectAll()}
-              />
-            </div>
+            <ComponentToolTip message={props.i18?.selectAll ?? 'Select All'}>
+              <div>
+                <ComponentFormCheckBox
+                  checked={checkAllSelected()}
+                  onChange={(e) => onSelectAll()}
+                />
+              </div>
+            </ComponentToolTip>
           ),
           width: '55px',
           cell: (row: any) => (
@@ -301,11 +320,11 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
             </div>
           ),
         },
-        ...columns,
+        ...newColumns,
       ];
     }
 
-    return columns;
+    return newColumns;
   };
 
   return (
@@ -347,6 +366,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
           className="theme-data-table"
           columns={getColumns()}
           data={state.showingItems}
+          persistTableHead
           noHeader
           fixedHeader
           defaultSortAsc={false}
@@ -361,7 +381,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
           }}
           clearSelectedRows={state.clearSelectedRows}
           noDataComponent={
-            <h5>
+            <h5 className="p-5 text-center">
               {props.i18?.noRecords ?? 'There are no records to display'}
               <i className="mdi mdi-emoticon-sad-outline"></i>
             </h5>

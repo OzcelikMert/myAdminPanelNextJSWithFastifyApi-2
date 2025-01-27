@@ -68,12 +68,11 @@ const ComponentThemeToolTipMissingLanguages = React.memo(
 
     return (
       <ComponentToolTip
-        message={t('warningAboutMissingLanguagesWithVariable').replace(
-          '{{missingLanguages}}',
+        message={t('warningAboutMissingLanguagesWithVariable', [
           missingLanguages
             .map((missingLanguage) => missingLanguage.locale.toUpperCase())
-            .join(', ')
-        )}
+            .join(', '),
+        ])}
       >
         {props.div ? (
           <div className={`${props.divClass}`}>

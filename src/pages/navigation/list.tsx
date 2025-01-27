@@ -243,10 +243,6 @@ export default function PageNavigationList() {
     }
   };
 
-  const onClickTableFilterButton = (item: IComponentTableFilterButton) => {
-    dispatch({ type: ActionTypes.SET_LIST_MODE, payload: item.key });
-  };
-
   const onClickUpdateRank = (itemId: string) => {
     dispatch({ type: ActionTypes.SET_SELECTED_ITEM_ID, payload: itemId });
     dispatch({
@@ -282,14 +278,20 @@ export default function PageNavigationList() {
         title: `${t('list')} (${state.items.findMulti('statusId', StatusId.Deleted, false).length})`,
         className: 'btn-gradient-success',
         icon: 'mdi mdi-view-list',
-        onFilter: (items) =>
-          items.findMulti('statusId', StatusId.Deleted, false),
+        isDefault: true,
+        onFilter: (items) => {
+          dispatch({ type: ActionTypes.SET_LIST_MODE, payload: 'list' });
+          return items.findMulti('statusId', StatusId.Deleted, false);
+        },
       },
       {
         title: `${t('trash')} (${state.items.findMulti('statusId', StatusId.Deleted).length})`,
         className: 'btn-gradient-danger',
         icon: 'mdi mdi-delete',
-        onFilter: (items) => items.findMulti('statusId', StatusId.Deleted),
+        onFilter: (items) => {
+          dispatch({ type: ActionTypes.SET_LIST_MODE, payload: 'deleted' });
+          return items.findMulti('statusId', StatusId.Deleted);
+        },
       },
     ];
   };
@@ -432,7 +434,6 @@ export default function PageNavigationList() {
                   onChangeStatus(selectedRows, value)
                 }
                 filterButtons={getTableFilterButtons()}
-                onClickFilterButton={(item) => onClickTableFilterButton(item)}
               />
             </div>
           </div>

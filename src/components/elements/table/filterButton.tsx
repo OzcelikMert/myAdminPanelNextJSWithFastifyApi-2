@@ -4,8 +4,7 @@ export interface IComponentTableFilterButton<T = any[]> {
   title?: string;
   icon?: string | React.ReactNode;
   className?: string;
-  onFilter?: (items: T) => T;
-  onFilterAsync?: () => Promise<T>;
+  onFilter?: (items: T) => T | Promise<T>;
   key?: any
   isDefault?: boolean
 }

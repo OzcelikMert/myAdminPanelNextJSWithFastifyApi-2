@@ -108,7 +108,7 @@ export default function PageComponentList() {
     if (item) {
       const result = await Swal.fire({
         title: t('deleteAction'),
-        html: `<b>'${item.title}'</b> ${t('deleteItemQuestionWithItemName')}`,
+        html: t('deleteItemQuestionWithItemName', [item.title]),
         confirmButtonText: t('yes'),
         cancelButtonText: t('no'),
         icon: 'question',

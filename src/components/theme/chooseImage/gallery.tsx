@@ -68,6 +68,9 @@ const ComponentThemeChooseImageGallery = React.memo((props: IComponentProps) => 
                 <Tab eventKey="list" title={'List'}>
                   <PageGalleryList
                     isModal={true}
+                    isMulti={props.isMulti}
+                    onSubmit={images => props.onSubmit(images)}
+                    selectedImages={props.selectedImages}
                     uploadedImages={uploadedImages}
                   />
                 </Tab>

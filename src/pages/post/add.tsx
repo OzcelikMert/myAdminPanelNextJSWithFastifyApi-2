@@ -270,6 +270,10 @@ export default function PagePostAdd() {
       ...initialFormState,
       typeId: queries.postTypeId,
       _id: queries._id ?? '',
+      contents: {
+        ...initialFormState.contents,
+        langId: mainLangId,
+      }
     },
     resolver: zodResolver(PostUtil.getSchema(queries.postTypeId, queries._id)),
   });
@@ -633,8 +637,9 @@ export default function PagePostAdd() {
     await RouteUtil.change({ router, path });
   };
 
-  const onSubmit = async (event: FormEvent) => {
-    const params = form.getValues();
+  const onSubmit = async (data: IPageFormState) => {
+    const params = data;
+    
     let serviceResult = null;
 
     if (params.typeId == PostTypeId.Product) {
@@ -909,8 +914,8 @@ export default function PagePostAdd() {
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
-
-  console.log('page post add', state, formValues);
+  
+  console.log('page post add', state, formValues, form);
 
   return isPageLoading ? null : (
     <div className="page-post">
@@ -958,7 +963,7 @@ export default function PagePostAdd() {
               submitButtonText: t('save'),
               submitButtonSubmittingText: t('loading'),
             }}
-            onSubmit={(event) => onSubmit(event)}
+            onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

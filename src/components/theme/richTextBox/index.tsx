@@ -6,7 +6,7 @@ import Spinner from 'react-bootstrap/Spinner';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IJodit } from 'jodit/types/types';
 import { useDidMount } from '@library/react/customHooks';
-import { useFormContext } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { IActionWithPayload } from 'types/hooks';
 
 type IComponentState = {
@@ -52,9 +52,7 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
 };
 
 type IComponentProps = {
-  name?: string;
-  value?: string;
-  onChange?: (newContent: string) => void;
+  name: string;
 };
 
 const ComponentThemeRichTextBox = React.memo((props: IComponentProps) => {
@@ -95,12 +93,9 @@ const ComponentThemeRichTextBox = React.memo((props: IComponentProps) => {
   };
 
   const form = useFormContext();
-  const registeredInput =
-    props.name && form ? form.register(props.name) : undefined;
 
   const [state, dispatch] = useReducer(reducer, {
-    ...initialState,
-    value: props.value || initialState.value,
+    ...initialState
   });
 
   const ref = useRef<JoditReact>(null);
@@ -131,15 +126,6 @@ const ComponentThemeRichTextBox = React.memo((props: IComponentProps) => {
     dispatch({ type: ActionTypes.SET_IS_GALLERY_SHOW, payload: false });
   };
 
-  const onChange = (newValue: string) => {
-    if (registeredInput && props.name) {
-      form.setValue(props.name, newValue);
-    }
-    if (props.onChange) {
-      props.onChange(newValue);
-    }
-  };
-
   return state.isLoading ? (
     <Spinner animation="border" />
   ) : (
@@ -152,15 +138,20 @@ const ComponentThemeRichTextBox = React.memo((props: IComponentProps) => {
         hideShowModalButton={true}
       />
       <React.Fragment>
-        {
-          // @ts-ignore
-          <JoditEditor
-            ref={ref}
-            value={state.value}
-            config={config}
-            onBlur={(newContent) => onChange(ref.current?.value || '')}
-          />
-        }
+        <Controller
+          name={props.name || ''}
+          render={({ field }) => (
+            <JoditEditor
+              ref={(e) => {
+                field.ref(e);
+                ref.current = e;
+              }}
+              value={field.value}
+              config={config}
+              onChange={(newValue) => field.onChange(newValue || '')}
+            />
+          )}
+        />
       </React.Fragment>
     </div>
   );

@@ -362,7 +362,7 @@ export default function PageComponentAdd() {
     if (index > -1) {
       const result = await Swal.fire({
         title: t('deleteAction'),
-        html: `<b>'${newElements[index].key}'</b> ${t('deleteItemQuestionWithItemName')}`,
+        html: t('deleteItemQuestionWithItemName', [newElements[index].key]),
         confirmButtonText: t('yes'),
         cancelButtonText: t('no'),
         icon: 'question',

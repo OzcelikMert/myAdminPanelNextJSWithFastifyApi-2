@@ -170,6 +170,10 @@ export default function PagePostTermAdd(props: IPageProps) {
       typeId: queries.termTypeId,
       postTypeId: queries.postTypeId,
       _id: queries._id ?? props._id ?? '',
+      contents: {
+        ...initialFormState.contents,
+        langId: mainLangId,
+      }
     },
     resolver: zodResolver(
       queries._id ? PostTermSchema.putWithId : PostTermSchema.post
