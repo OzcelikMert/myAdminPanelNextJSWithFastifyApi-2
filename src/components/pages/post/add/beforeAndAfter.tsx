@@ -30,9 +30,6 @@ type IComponentProps = {
   imageBefore?: string;
   imageAfter?: string;
   images?: string[];
-  onChangeImageBefore: (image: string) => void;
-  onChangeImageAfter: (after: string) => void;
-  onChangeImages: (images: string[]) => void;
 };
 
 const ComponentPagePostAddBeforeAndAfter = React.memo(
@@ -50,9 +47,7 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
               <div className="col-md-7 mb-3">
                 <ComponentFieldSet legend={t('imageBefore')}>
                   <ComponentThemeChooseImage
-                    onSelected={(images) =>
-                      props.onChangeImageBefore(images[0])
-                    }
+                    name="beforeAndAfter.imageBefore"
                     isMulti={false}
                     selectedImages={
                       props.imageBefore ? [props.imageBefore] : undefined
@@ -66,7 +61,7 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
               <div className="col-md-7 mb-3">
                 <ComponentFieldSet legend={t('imageAfter')}>
                   <ComponentThemeChooseImage
-                    onSelected={(images) => props.onChangeImageAfter(images[0])}
+                    name="beforeAndAfter.imageAfter"
                     isMulti={false}
                     selectedImages={
                       props.imageAfter ? [props.imageAfter] : undefined
@@ -79,7 +74,7 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
               </div>
               <div className="col-md-7 mb-3">
                 <ComponentThemeChooseImage
-                  onSelected={(images) => props.onChangeImages(images)}
+                  name="beforeAndAfter.images"
                   isMulti
                   selectedImages={props.images}
                   showModalButtonText={t('gallery')}

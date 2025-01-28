@@ -1,6 +1,6 @@
 import React from 'react';
 import { VariableLibrary } from '@library/variable';
-import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { useFormContext } from 'react-hook-form';

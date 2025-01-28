@@ -3,7 +3,7 @@ import ComponentFormInput from '@components/elements/form/input/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { Modal } from 'react-bootstrap';
-import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import ComponentForm from '@components/elements/form';
 import { ISettingSocialMediaModel } from 'types/models/setting.model';

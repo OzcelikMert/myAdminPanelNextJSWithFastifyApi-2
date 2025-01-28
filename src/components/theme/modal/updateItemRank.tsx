@@ -4,7 +4,7 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import React from 'react';
 import { Modal } from 'react-bootstrap';
-import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ComponentForm from '@components/elements/form';

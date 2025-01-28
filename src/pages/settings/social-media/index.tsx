@@ -1,6 +1,5 @@
 import { useReducer, useState } from 'react';
 import { SettingService } from '@services/setting.service';
-import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateSocialMediaParamService } from 'types/services/setting.service';
 import { ISettingSocialMediaModel } from 'types/models/setting.model';
 import { PermissionUtil } from '@utils/permission.util';
@@ -15,16 +14,14 @@ import { EndPoints } from '@constants/endPoints';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
 import ComponentPageSettingsSocialMediaItem from '@components/pages/settings/social-media/item';
 import ComponentPageSettingsSocialMediaEditModal from '@components/pages/settings/social-media/editModal';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 type IPageState = {
   items: ISettingSocialMediaModel[];
@@ -88,6 +85,7 @@ export default function PageSettingsSocialMedia() {
     defaultValues: initialFormState,
     resolver: zodResolver(SettingSchema.putSocialMedia),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -113,6 +111,7 @@ export default function PageSettingsSocialMedia() {
         t,
         sessionAuth,
         minPermission: SettingsEndPointPermission.UPDATE_SOCIAL_MEDIA,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -155,7 +154,7 @@ export default function PageSettingsSocialMedia() {
       abortController.signal
     );
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: t('settingsUpdated'),

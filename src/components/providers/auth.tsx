@@ -8,7 +8,7 @@ import {
   setSessionAuthState,
 } from '@redux/features/sessionSlice';
 import { useRouter } from 'next/router';
-import { useDidMount } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/hooks';
 
 type IComponentState = {
   isAuth: boolean;

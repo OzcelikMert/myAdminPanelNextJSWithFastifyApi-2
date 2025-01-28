@@ -12,7 +12,7 @@ import ComponentTableFilterButton, {
 import {
   useDidMount,
   useEffectAfterDidMount,
-} from '@library/react/customHooks';
+} from '@library/react/hooks';
 import { IActionWithPayload } from 'types/hooks';
 import ComponentToolTip from '@components/elements/tooltip';
 import { cloneDeepWith } from 'lodash';

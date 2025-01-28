@@ -1,6 +1,5 @@
 import { useReducer, useState } from 'react';
 import { SettingService } from '@services/setting.service';
-import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateContactFormParamService } from 'types/services/setting.service';
 import { ISettingContactFormModel } from 'types/models/setting.model';
 import { SettingProjectionKeys } from '@constants/settingProjections';
@@ -15,16 +14,14 @@ import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentForm from '@components/elements/form';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
 import ComponentPageSettingsContactFormsItem from '@components/pages/settings/contact-forms/item';
 import ComponentPageSettingsContactFormsEditModal from '@components/pages/settings/contact-forms/editModal';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 type IPageState = {
   items: ISettingContactFormModel[];
@@ -88,6 +85,7 @@ export default function PageSettingsContactForms() {
     defaultValues: initialFormState,
     resolver: zodResolver(SettingSchema.putContactForm),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -113,6 +111,7 @@ export default function PageSettingsContactForms() {
         t,
         router,
         minPermission: SettingsEndPointPermission.UPDATE_CONTACT_FORM,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -155,7 +154,7 @@ export default function PageSettingsContactForms() {
       abortController.signal
     );
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: t('settingsUpdated'),

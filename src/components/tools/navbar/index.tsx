@@ -15,7 +15,7 @@ import { setIsLockState } from '@redux/features/appSlice';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useDidMount } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/hooks';
 import ComponentToolNavbarProfile, { NavbarProfileDropdownItems } from './profile';
 
 type IComponentState = {

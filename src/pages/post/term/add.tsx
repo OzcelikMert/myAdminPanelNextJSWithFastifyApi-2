@@ -13,7 +13,6 @@ import { PostUtil } from '@utils/post.util';
 import { StatusId } from '@constants/status';
 import { SelectUtil } from '@utils/select.util';
 import { RouteUtil } from '@utils/route.util';
-import ComponentToast from '@components/elements/toast';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -23,10 +22,7 @@ import {
 } from '@redux/features/breadCrumbSlice';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,6 +32,7 @@ import ComponentPagePostTermAddHeader from '@components/pages/post/term/add/head
 import ComponentPagePostTermAddTabGeneral from '@components/pages/post/term/add/tabGeneral';
 import ComponentPagePostTermAddTabOptions from '@components/pages/post/term/add/tabOptions';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 export type IPagePostTermAddState = {
   mainTabActiveKey: string;
@@ -173,12 +170,13 @@ export default function PagePostTermAdd(props: IPageProps) {
       contents: {
         ...initialFormState.contents,
         langId: mainLangId,
-      }
+      },
     },
     resolver: zodResolver(
       queries._id ? PostTermSchema.putWithId : PostTermSchema.post
     ),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
 
@@ -220,6 +218,7 @@ export default function PagePostTermAdd(props: IPageProps) {
         router,
         sessionAuth,
         t,
+        showToast,
       })
     ) {
       if (
@@ -380,7 +379,7 @@ export default function PagePostTermAdd(props: IPageProps) {
         }
       }
 
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,
@@ -457,9 +456,6 @@ export default function PagePostTermAdd(props: IPageProps) {
                             PostTermTypeId.Category,
                             PostTermTypeId.Variations,
                           ].includes(formValues.typeId)}
-                          onChangeImage={(image) =>
-                            form.setValue('contents.image', image)
-                          }
                         />
                       </Tab>
                       <Tab eventKey="options" title={t('options')}>

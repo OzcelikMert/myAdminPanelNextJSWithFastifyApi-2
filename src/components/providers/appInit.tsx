@@ -14,7 +14,7 @@ import { setIsAppLoadingState } from '@redux/features/appSlice';
 import { PanelLanguageCodes, panelLanguages } from '@constants/panelLanguages';
 import { fetchTranslationState } from '@redux/features/translationSlice';
 import { LocalStorageUtil } from '@utils/localStorage.util';
-import { useDidMount } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/hooks';
 
 type IComponentProps = {
   children: React.ReactNode;

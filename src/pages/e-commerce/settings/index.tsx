@@ -1,5 +1,4 @@
 import { SettingService } from '@services/setting.service';
-import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateECommerceParamService } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
 import { CurrencyId, currencyTypes } from '@constants/currencyTypes';
@@ -16,15 +15,13 @@ import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { setCurrencyIdState } from '@redux/features/settingSlice';
 import ComponentForm from '@components/elements/form';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentPageECommerceSettingsTabGeneral from '@components/pages/e-commerce/settings/tabGeneral';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from 'hooks/toast';
 
 export type IPageECommerceSettingsState = {
   currencyTypes: IThemeFormSelectData[];
@@ -104,6 +101,7 @@ export default function PageECommerceSettings() {
     defaultValues: initialFormState,
     resolver: zodResolver(SettingSchema.putECommerce),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -130,6 +128,7 @@ export default function PageECommerceSettings() {
         t,
         sessionAuth,
         minPermission: ECommerceEndPointPermission.SETTINGS,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -184,7 +183,7 @@ export default function PageECommerceSettings() {
 
     if (serviceResult.status) {
       appDispatch(setCurrencyIdState(params.eCommerce.currencyId));
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: t('settingsUpdated'),

@@ -5,7 +5,7 @@ import { Config } from 'jodit/types/config';
 import Spinner from 'react-bootstrap/Spinner';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { IJodit } from 'jodit/types/types';
-import { useDidMount } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/hooks';
 import { Controller, useFormContext } from 'react-hook-form';
 import { IActionWithPayload } from 'types/hooks';
 

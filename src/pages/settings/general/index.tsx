@@ -1,6 +1,5 @@
 import { SettingService } from '@services/setting.service';
 import { ServerInfoService } from '@services/serverInfo.service';
-import ComponentToast from '@components/elements/toast';
 import { ISettingUpdateGeneralParamService } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
 import { IThemeFormSelectData } from '@components/elements/form/input/select';
@@ -19,10 +18,7 @@ import { useReducer, useState } from 'react';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
@@ -31,6 +27,7 @@ import ComponentPageSettingsGeneralTabContact from '@components/pages/settings/g
 import ComponentPageSettingsGeneralTabTools from '@components/pages/settings/general/tabTools';
 import ComponentPageSettingsGeneralServerInfo from '@components/pages/settings/general/serverInfo';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 export type IPageSettingsGeneralState = {
   panelLanguages: IThemeFormSelectData[];
@@ -122,6 +119,7 @@ export default function PageSettingsGeneral() {
     },
     resolver: zodResolver(SettingSchema.putGeneral),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -147,6 +145,7 @@ export default function PageSettingsGeneral() {
         sessionAuth,
         t,
         minPermission: SettingsEndPointPermission.UPDATE_GENERAL,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -205,7 +204,7 @@ export default function PageSettingsGeneral() {
       abortController.signal
     );
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: t('settingsUpdated'),

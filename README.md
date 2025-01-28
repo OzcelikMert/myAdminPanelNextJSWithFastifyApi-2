@@ -2,8 +2,8 @@
 myAdminPanelNextJSWithFastifyApi-2 with NextJS, Functional component and Redux
 
 Things to do:
+    - use Controller for form inputs
     - set all abortControllers as useRef<AbortController>
-    - fix update profile image
     - add value to checkboxes
     - add name to inputs which doesn't have a name attr
     - change onSubmit's event param to data param

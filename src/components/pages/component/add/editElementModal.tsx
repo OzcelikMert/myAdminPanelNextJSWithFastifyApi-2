@@ -4,7 +4,7 @@ import ComponentFormInput from '@components/elements/form/input/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { Modal } from 'react-bootstrap';
-import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 import { IComponentElementModel } from 'types/models/component.model';
 import { ElementTypeId, elementTypes } from '@constants/elementTypes';
 import { useForm } from 'react-hook-form';

@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import * as zod from 'zod';
-import { ZodUtil } from './zod.util';
+import { ZodUtil } from '@utils/zod.util';
 
-const useZodValidationResolver = <T = any>(
+export const useZodValidationResolver = <T = any>(
   validationSchema: zod.ZodSchema<T>
 ) =>
   useCallback(
@@ -33,7 +33,3 @@ const useZodValidationResolver = <T = any>(
     },
     [validationSchema]
   );
-
-export const CustomHookUtil = {
-  useZodValidationResolver: useZodValidationResolver,
-};

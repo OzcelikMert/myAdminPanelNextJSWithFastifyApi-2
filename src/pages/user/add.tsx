@@ -17,7 +17,6 @@ import { IPermissionGroup } from 'types/constants/permissionGroups';
 import { IPermission } from 'types/constants/permissions';
 import { permissionGroups } from '@constants/permissionGroups';
 import { RouteUtil } from '@utils/route.util';
-import ComponentToast from '@components/elements/toast';
 import { DateMask } from '@library/variable/date';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
@@ -28,10 +27,7 @@ import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserSchema } from 'schemas/user.schema';
@@ -40,6 +36,7 @@ import ComponentPageUserAddTabGeneral from '@components/pages/user/add/tabGenera
 import ComponentPageUserAddTabOptions from '@components/pages/user/add/tabOptions';
 import ComponentPageUserAddTabPermissions from '@components/pages/user/add/tabPermissions';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 export type IPageUserAddState = {
   mainTabActiveKey: string;
@@ -147,6 +144,7 @@ export default function PageUserAdd() {
     },
     resolver: zodResolver(queries._id ? UserSchema.putWithId : UserSchema.post),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
 
@@ -181,6 +179,7 @@ export default function PageUserAdd() {
         sessionAuth,
         t,
         minPermission,
+        showToast,
       })
     ) {
       getRoles();
@@ -312,7 +311,7 @@ export default function PageUserAdd() {
         ));
 
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,

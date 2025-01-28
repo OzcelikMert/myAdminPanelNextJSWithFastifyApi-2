@@ -14,7 +14,6 @@ type IComponentProps = {
   image?: string;
   showParentSelect?: boolean;
   isModal?: boolean
-  onChangeImage: (image: string) => void;
 };
 
 const ComponentPagePostTermAddTabGeneral = React.memo(
@@ -40,8 +39,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
       <div className="row">
         <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
           <ComponentThemeChooseImage
-            {...props}
-            onSelected={(images) => props.onChangeImage(images[0])}
+            name="contents.image"
             isMulti={false}
             selectedImages={props.image ? [props.image] : undefined}
             isShowReviewImage={true}

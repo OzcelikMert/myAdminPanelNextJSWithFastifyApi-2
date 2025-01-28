@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
 import {
   useDidMount,
   useEffectAfterDidMount,
-} from '@library/react/customHooks';
+} from '@library/react/hooks';
 import ComponentToolSidebarChildren from './children';
 import ComponentToolSidebarChild from './child';
 

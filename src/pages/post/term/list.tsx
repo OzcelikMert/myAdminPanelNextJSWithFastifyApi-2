@@ -2,7 +2,6 @@ import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import { IPostTermGetResultService } from 'types/services/postTerm.service';
 import { PostTermService } from '@services/postTerm.service';
-import ComponentToast from '@components/elements/toast';
 import ComponentDataTable from '@components/elements/table/dataTable';
 import Image from 'next/image';
 import ComponentThemeBadgeStatus, {
@@ -30,12 +29,10 @@ import { IComponentTableFilterButton } from '@components/elements/table/filterBu
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { SortUtil } from '@utils/sort.util';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentThemeWebsiteLinkPostTerm from '@components/theme/websiteLink/postTerm';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 type IPageState = {
   typeId: PostTermTypeId;
@@ -136,6 +133,7 @@ export default function PagePostTermList() {
     typeId: queries.termTypeId,
     postTypeId: queries.postTypeId,
   });
+  const { showToast, hideToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -178,6 +176,7 @@ export default function PagePostTermList() {
         router,
         sessionAuth,
         t,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -232,7 +231,7 @@ export default function PagePostTermList() {
         showCancelButton: true,
       });
       if (result.isConfirmed) {
-        const loadingToast = new ComponentToast({
+        const loadingToast = showToast({
           content: t('deleting'),
           type: 'loading',
         });
@@ -246,13 +245,13 @@ export default function PagePostTermList() {
           abortController.signal
         );
 
-        loadingToast.hide();
+        hideToast(loadingToast);
         if (serviceResult.status) {
           const newItems = state.items.filter(
             (item) => !selectedItemId.includes(item._id)
           );
           dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-          new ComponentToast({
+          showToast({
             type: 'success',
             title: t('successful'),
             content: t('itemDeleted'),
@@ -260,7 +259,7 @@ export default function PagePostTermList() {
         }
       }
     } else {
-      const loadingToast = new ComponentToast({
+      const loadingToast = showToast({
         content: t('updating'),
         type: 'loading',
       });
@@ -275,7 +274,7 @@ export default function PagePostTermList() {
         abortController.signal
       );
 
-      loadingToast.hide();
+      hideToast(loadingToast);
       if (serviceResult.status) {
         const newItems = state.items.map((item) => {
           if (selectedItemId.includes(item._id)) {
@@ -284,7 +283,7 @@ export default function PagePostTermList() {
           return item;
         });
         dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-        new ComponentToast({
+        showToast({
           type: 'success',
           title: t('successful'),
           content: t('statusUpdated'),
@@ -311,7 +310,7 @@ export default function PagePostTermList() {
         newItem.rank = rank;
       }
       dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `'${newItem?.contents?.title}' ${t('itemEdited')}`,

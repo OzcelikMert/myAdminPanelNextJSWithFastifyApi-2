@@ -1,4 +1,4 @@
-import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { ZodUtil } from '@utils/zod.util';

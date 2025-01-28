@@ -1,6 +1,7 @@
 import Swal from 'sweetalert2';
-import ComponentToast from '@components/elements/toast';
-import ComponentDataTable, { IComponentDataTableColumn } from '@components/elements/table/dataTable';
+import ComponentDataTable, {
+  IComponentDataTableColumn,
+} from '@components/elements/table/dataTable';
 import ComponentTableUpdatedBy from '@components/elements/table/updatedBy';
 import { PermissionUtil } from '@utils/permission.util';
 import { EndPoints } from '@constants/endPoints';
@@ -19,10 +20,8 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { SortUtil } from '@utils/sort.util';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
+import { useToast } from 'hooks/toast';
 
 type IPageState = {
   items: IComponentGetResultService[];
@@ -43,6 +42,8 @@ export default function PageComponentList() {
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
   const [items, setItems] = useState(initialState.items);
+
+  const { showToast, hideToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -69,6 +70,7 @@ export default function PageComponentList() {
         t,
         sessionAuth,
         minPermission: ComponentEndPointPermission.GET,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -115,7 +117,7 @@ export default function PageComponentList() {
         showCancelButton: true,
       });
       if (result.isConfirmed) {
-        const loadingToast = new ComponentToast({
+        const loadingToast = showToast({
           content: t('deleting'),
           type: 'loading',
         });
@@ -124,10 +126,10 @@ export default function PageComponentList() {
           { _id: [_id] },
           abortController.signal
         );
-        loadingToast.hide();
+        hideToast(loadingToast);
         if (serviceResult.status) {
           setItems(items.filter((item) => _id !== item._id));
-          new ComponentToast({
+          showToast({
             type: 'success',
             title: t('successful'),
             content: t('itemDeleted'),
@@ -149,7 +151,9 @@ export default function PageComponentList() {
     }
   };
 
-  const getTableColumns = (): IComponentDataTableColumn<IPageState['items'][0]>[] => {
+  const getTableColumns = (): IComponentDataTableColumn<
+    IPageState['items'][0]
+  >[] => {
     return [
       {
         name: t('title'),
@@ -160,9 +164,9 @@ export default function PageComponentList() {
               <div className="col-md-12">
                 {
                   <ComponentThemeToolTipMissingLanguages
-                    itemLanguages={
-                      row.elements.map((element) => element.alternates ?? [])
-                    }
+                    itemLanguages={row.elements.map(
+                      (element) => element.alternates ?? []
+                    )}
                   />
                 }
                 {row.title}
@@ -171,7 +175,7 @@ export default function PageComponentList() {
           );
         },
         sortable: true,
-        isSearchable: true
+        isSearchable: true,
       },
       PermissionUtil.checkPermissionRoleRank(
         sessionAuth!.user.roleId,

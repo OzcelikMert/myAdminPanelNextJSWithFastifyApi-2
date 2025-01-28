@@ -3,6 +3,7 @@ import ComponentThemeChooseImageGallery from './gallery';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { useFormContext } from 'react-hook-form';
+import { IGalleryGetResultService } from 'types/services/gallery.service';
 
 type IComponentState = {
   isShowModal: boolean;
@@ -16,7 +17,7 @@ type IComponentProps = {
   name?: string;
   isShow?: boolean;
   onHideModal?: () => void;
-  onSelected?: (images: string[]) => void;
+  onSelected?: (images: IGalleryGetResultService[]) => void;
   isMulti?: boolean;
   selectedImages?: string[];
   isShowReviewImage?: boolean;
@@ -39,7 +40,7 @@ const ComponentThemeChooseImage = React.memo((props: IComponentProps) => {
   );
   const $html = document.querySelector('html');
 
-  const onSelected = (images: string[]) => {
+  const onSelected = (images: IGalleryGetResultService[]) => {
     if (props.onSelected) {
       props.onSelected(images);
     }

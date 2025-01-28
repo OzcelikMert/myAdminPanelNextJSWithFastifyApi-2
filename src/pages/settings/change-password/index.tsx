@@ -1,5 +1,4 @@
 import { FormEvent, useState } from 'react';
-import ComponentToast from '@components/elements/toast';
 import { UserService } from '@services/user.service';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -8,13 +7,11 @@ import { EndPoints } from '@constants/endPoints';
 import ComponentForm from '@components/elements/form';
 import ComponentFormInput from '@components/elements/form/input/input';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserSchema } from 'schemas/user.schema';
+import { useToast } from '@hooks/toast';
 
 type IPageFormState = {
   password: string;
@@ -39,6 +36,7 @@ export default function PageChangePassword() {
     defaultValues: initialFormState,
     resolver: zodResolver(UserSchema.putPassword),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -79,7 +77,7 @@ export default function PageChangePassword() {
   const onSubmit = async (event: FormEvent) => {
     const params = form.getValues();
     if (params.newPassword !== params.confirmPassword) {
-      new ComponentToast({
+      showToast({
         type: 'error',
         title: t('error'),
         content: t('passwordsNotEqual'),
@@ -91,13 +89,13 @@ export default function PageChangePassword() {
       abortController.signal
     );
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: t('passwordUpdated'),
       });
     } else {
-      new ComponentToast({
+      showToast({
         type: 'error',
         title: t('error'),
         content: t('wrongPassword'),
@@ -111,12 +109,10 @@ export default function PageChangePassword() {
         <div className="col-md-12">
           <ComponentForm
             formMethods={form}
-            i18={
-              {
-                submitButtonText: t('save'),
-                submitButtonSubmittingText: t('loading'),
-              }
-            }
+            i18={{
+              submitButtonText: t('save'),
+              submitButtonSubmittingText: t('loading'),
+            }}
             onSubmit={(event) => onSubmit(event)}
           >
             <div className="grid-margin stretch-card">

@@ -4,7 +4,6 @@ import { PostTypeId } from '@constants/postTypes';
 import { PostEndPointPermission } from '@constants/endPointPermissions/post.endPoint.permission';
 import { IEndPointPermission } from 'types/constants/endPoint.permissions';
 import { EndPoints } from '@constants/endPoints';
-import ComponentToast from '@components/elements/toast';
 import { RouteUtil } from '@utils/route.util';
 import { ISessionAuthResultService } from 'types/services/auth.service';
 import { IPermissionCheckAndRedirectParamUtil } from 'types/utils/permission.util';
@@ -130,7 +129,7 @@ const checkAndRedirect = (
   if (props.sessionAuth) {
     if (!check(props.sessionAuth, props.minPermission)) {
       status = false;
-      new ComponentToast({
+      props.showToast({
         type: 'error',
         title: props.t('error'),
         content: props.t('noPerm'),
@@ -143,7 +142,7 @@ const checkAndRedirect = (
     }
   } else {
     status = false;
-    new ComponentToast({
+    props.showToast({
       type: 'error',
       title: props.t('error'),
       content: props.t('sessionRequired'),

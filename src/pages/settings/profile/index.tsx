@@ -1,6 +1,5 @@
 import { useReducer, useState } from 'react';
 import { UserService } from '@services/user.service';
-import ComponentToast from '@components/elements/toast';
 import {
   IUserGetResultService,
   IUserUpdateProfileParamService,
@@ -10,10 +9,7 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserSchema } from 'schemas/user.schema';
@@ -22,6 +18,8 @@ import ComponentPageProfileImage from '@components/pages/settings/profile/image'
 import ComponentPageProfileMainInfo from '@components/pages/settings/profile/mainInfo';
 import ComponentPageProfilePermissions from '@components/pages/settings/profile/permissions';
 import { IActionWithPayload } from 'types/hooks';
+import { IGalleryGetResultService } from 'types/services/gallery.service';
+import { useToast } from '@hooks/toast';
 
 export type IPageProfileState = {
   isImageChanging: boolean;
@@ -103,6 +101,7 @@ export default function PageSettingsProfile() {
     defaultValues: initialFormState,
     resolver: zodResolver(UserSchema.putProfile),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -156,30 +155,28 @@ export default function PageSettingsProfile() {
     }
   };
 
-  const onChangeImage = async (image: string) => {
-    console.log(image);
-    
+  const onChangeImage = async (image: IGalleryGetResultService) => {
     dispatch({ type: ActionTypes.SET_IS_IMAGE_CHANGING, payload: true });
 
     const serviceResult = await UserService.updateProfileImage(
-      { image: image },
+      { image: image.name },
       abortController.signal
     );
 
     if (serviceResult.status) {
-      dispatch({ type: ActionTypes.SET_PROFILE_IMAGE, payload: image });
+      dispatch({ type: ActionTypes.SET_PROFILE_IMAGE, payload: image.name });
       appDispatch(
         setSessionAuthState({
           ...sessionAuth,
           user: {
             ...sessionAuth!.user,
-            image: image,
+            image: image.name,
           },
         })
       );
-
-      dispatch({ type: ActionTypes.SET_IS_IMAGE_CHANGING, payload: false });
     }
+
+    dispatch({ type: ActionTypes.SET_IS_IMAGE_CHANGING, payload: false });
   };
 
   const onSubmit = async (data: IPageProfileFormState) => {
@@ -198,7 +195,7 @@ export default function PageSettingsProfile() {
           },
         })
       );
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: t('profileUpdated'),

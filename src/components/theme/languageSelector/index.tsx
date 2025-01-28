@@ -8,7 +8,7 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentToolTip from '@components/elements/tooltip';
 import Select from 'react-select';
 import { ILanguageModel } from 'types/models/language.model';
-import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 
 const MissingWarning = () => {
   const t = useAppSelector(selectTranslation);

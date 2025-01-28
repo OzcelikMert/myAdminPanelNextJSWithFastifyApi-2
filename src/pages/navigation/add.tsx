@@ -12,7 +12,6 @@ import { SelectUtil } from '@utils/select.util';
 import { StatusId } from '@constants/status';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
-import ComponentToast from '@components/elements/toast';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -22,10 +21,7 @@ import {
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
 import ComponentForm from '@components/elements/form';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,6 +30,7 @@ import ComponentPageNavigationAddHeader from '@components/pages/navigation/add/h
 import ComponentPageNavigationAddTabGeneral from '@components/pages/navigation/add/tabGeneral';
 import ComponentPageNavigationAddTabOptions from '@components/pages/navigation/add/tabOptions';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 export type IPageNavigationAddState = {
   items: IThemeFormSelectData<string>[];
@@ -161,12 +158,13 @@ export default function PageNavigationAdd() {
       contents: {
         ...initialFormState.contents,
         langId: mainLangId,
-      }
+      },
     },
     resolver: zodResolver(
       queries._id ? NavigationSchema.putWithId : NavigationSchema.post
     ),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
 
@@ -197,6 +195,7 @@ export default function PageNavigationAdd() {
         sessionAuth,
         t,
         minPermission,
+        showToast,
       })
     ) {
       await getItems();
@@ -305,7 +304,7 @@ export default function PageNavigationAdd() {
       : NavigationService.add(params, abortController.signal));
 
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,

@@ -26,7 +26,7 @@ import { useRouter } from 'next/router';
 import {
   useDidMount,
   useEffectAfterDidMount,
-} from '@library/react/customHooks';
+} from '@library/react/hooks';
 import ComponentPageDashboardLastPosts from '@components/pages/dashboard/lastPosts';
 import ComponentPageDashboardReportOne from '@components/pages/dashboard/reportOne';
 import ComponentPageDashboardReportTwo from '@components/pages/dashboard/reportTwo';

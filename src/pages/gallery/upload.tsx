@@ -1,19 +1,16 @@
 import { useState } from 'react';
 import { IUploadingFiles } from 'types/pages/gallery/upload';
 import { GalleryService } from '@services/gallery.service';
-import ComponentToast from '@components/elements/toast';
 import { IGalleryGetResultService } from 'types/services/gallery.service';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { EndPoints } from '@constants/endPoints';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentPageGalleryUploadUploadings from '@components/pages/gallery/upload/uploadings';
 import ComponentPageGalleryUploadContainer from '@components/pages/gallery/upload/container';
+import { useToast } from '@hooks/toast';
 
 export type IPageGalleryUploadState = {
   uploadingFiles: IUploadingFiles[];
@@ -25,7 +22,7 @@ const initialState: IPageGalleryUploadState = {
 
 export type IPageGalleryUploadProps = {
   isModal?: boolean;
-  uploadedImages?: (images: IGalleryGetResultService[]) => void;
+  onUploadImages?: (images: IGalleryGetResultService[]) => void;
 };
 
 export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
@@ -40,6 +37,7 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
   const [uploadingFiles, setUploadingFiles] = useState(
     initialState.uploadingFiles
   );
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -111,15 +109,15 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
       );
 
       if (serviceResult.status && serviceResult.data) {
-        new ComponentToast({
+        showToast({
           type: 'success',
           title: t('successful'),
           content: t('imageUploadedWithName', [uploadingFile.file.name]),
           position: 'top-right',
           timeOut: 5,
         });
-        if (props.uploadedImages) {
-          props.uploadedImages(
+        if (props.onUploadImages) {
+          props.onUploadImages(
             serviceResult.data.map((image) => ({
               ...image,
               authorId: {

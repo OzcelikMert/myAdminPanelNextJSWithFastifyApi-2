@@ -1,8 +1,6 @@
-import { useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import Swal from 'sweetalert2';
 import { GalleryService } from '@services/gallery.service';
-import { TableColumn } from 'react-data-table-component';
-import ComponentToast from '@components/elements/toast';
 import ComponentDataTable, {
   IComponentDataTableColumn,
 } from '@components/elements/table/dataTable';
@@ -16,11 +14,10 @@ import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
+import { Id } from 'react-toastify';
 
 type IPageState = {
   items: IGalleryGetResultService[];
@@ -76,30 +73,31 @@ const reducer = (state: IPageState, action: IAction): IPageState => {
 type IPageProps = {
   isModal?: boolean;
   isMulti?: boolean;
-  onSubmit?: (images: string[]) => void;
+  onSubmit?: (images: IGalleryGetResultService[]) => void;
   uploadedImages?: IGalleryGetResultService[];
   selectedImages?: string[];
 };
 
 export default function PageGalleryList(props: IPageProps) {
-  
+  const abortControllerRef = useRef<AbortController>(new AbortController());
+  const toastIdRef = useRef<Id>(null);
+
   const appDispatch = useAppDispatch();
   const t = useAppSelector(selectTranslation);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
-  
+
   const [state, dispatch] = useReducer(reducer, initialState);
-  
-  const toast = useRef<ComponentToast>(null);
-  const abortController = useRef<AbortController>(new AbortController());
-  
+
+  const { showToast, hideToast } = useToast();
+
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
     init();
 
     return () => {
-      abortController.current.abort();
-      toast.current?.hide();
+      abortControllerRef.current.abort();
+      hideToast();
     };
   });
 
@@ -119,6 +117,41 @@ export default function PageGalleryList(props: IPageProps) {
       });
     }
   }, [props.uploadedImages]);
+
+  useEffectAfterDidMount(() => {
+    if (state.selectedItems.length > 0) {
+      toastIdRef.current = showToast(
+        {
+          content: props.isModal ? (
+            <button
+              type="button"
+              className="btn btn-gradient-success btn-icon-text w-100"
+              onClick={() => onSubmit()}
+            >
+              <i className="mdi mdi-check btn-icon-prepend"></i> {t('okay')}
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-gradient-danger btn-icon-text w-100"
+              onClick={() => onDelete()}
+            >
+              <i className="mdi mdi-trash-can btn-icon-prepend"></i>{' '}
+              {t('delete')}
+            </button>
+          ),
+          borderColor: props.isModal ? 'success' : 'error',
+          position: 'bottom-center',
+        },
+        toastIdRef.current
+      );
+    } else {
+      if (toastIdRef.current) {
+        hideToast(toastIdRef.current);
+        toastIdRef.current = null;
+      }
+    }
+  }, [state.selectedItems]);
 
   const init = async () => {
     if (isPageLoaded) {
@@ -148,43 +181,15 @@ export default function PageGalleryList(props: IPageProps) {
   const getItems = async () => {
     const serviceResult = await GalleryService.get(
       { typeId: GalleryTypeId.Image },
-      abortController.current.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       dispatch({ type: ActionTypes.SET_ITEMS, payload: serviceResult.data });
     }
   };
 
-  const onSelect = (images: IGalleryGetResultService[]) => {
+  const onSelect = async (images: IGalleryGetResultService[]) => {
     dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: images });
-    if (images.length > 0) {
-      if (!toast.current || !toast.current.isShow) {
-        toast.current = new ComponentToast({
-          content: props.isModal ? (
-            <button
-              type="button"
-              className="btn btn-gradient-success btn-icon-text w-100"
-              onClick={() => onSubmit()}
-            >
-              <i className="mdi mdi-check btn-icon-prepend"></i> {t('okay')}
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn btn-gradient-danger btn-icon-text w-100"
-              onClick={() => onDelete()}
-            >
-              <i className="mdi mdi-trash-can btn-icon-prepend"></i>{' '}
-              {t('delete')}
-            </button>
-          ),
-          borderColor: props.isModal ? 'success' : 'error',
-          position: 'bottom-center',
-        });
-      }
-    } else {
-      toast.current?.hide();
-    }
   };
 
   const onDelete = async () => {
@@ -197,18 +202,22 @@ export default function PageGalleryList(props: IPageProps) {
       showCancelButton: true,
     });
     if (result.isConfirmed) {
-      toast.current?.hide();
-      const loadingToast = new ComponentToast({
+      if (toastIdRef.current) {
+        hideToast(toastIdRef.current);
+      }
+      const loadingToast = showToast({
         title: t('loading'),
         content: t('deleting'),
         type: 'loading',
       });
 
+      const _id = state.selectedItems.map((item) => item._id);
+
       const serviceResult = await GalleryService.deleteMany(
-        { _id: state.selectedItems.map((item) => item._id) },
-        abortController.current.signal
+        { _id: _id },
+        abortControllerRef.current.signal
       );
-      loadingToast.hide();
+      hideToast(loadingToast);
       if (serviceResult.status) {
         dispatch({
           type: ActionTypes.SET_ITEMS,
@@ -217,7 +226,7 @@ export default function PageGalleryList(props: IPageProps) {
           ),
         });
         dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [] });
-        new ComponentToast({
+        showToast({
           title: t('itemDeleted'),
           content: t('itemDeleted'),
           type: 'success',
@@ -229,14 +238,17 @@ export default function PageGalleryList(props: IPageProps) {
 
   const onSubmit = () => {
     if (props.onSubmit) {
-      const foundSelectedItems = state.items?.findMulti(
+      const selectedImages = state.selectedItems;
+      const foundSelectedItems = state.items.findMulti(
         '_id',
-        state.selectedItems
+        selectedImages.map((item) => item._id)
       );
-      toast.current?.hide();
-      props.onSubmit(
-        foundSelectedItems?.map((selectedItem) => selectedItem.name) ?? []
-      );
+      if (foundSelectedItems.length > 0) {
+        if (toastIdRef.current) {
+          hideToast(toastIdRef.current);
+        }
+        props.onSubmit(foundSelectedItems ?? []);
+      }
     }
   };
 

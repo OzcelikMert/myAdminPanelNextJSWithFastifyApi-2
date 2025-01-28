@@ -1,7 +1,6 @@
 import { useEffect, useReducer, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
-import ComponentToast from '@components/elements/toast';
 import ComponentDataTable from '@components/elements/table/dataTable';
 import { INavigationGetResultService } from 'types/services/navigation.service';
 import { NavigationService } from '@services/navigation.service';
@@ -24,11 +23,9 @@ import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
 import { SortUtil } from '@utils/sort.util';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 type IPageState = {
   items: INavigationGetResultService[];
@@ -98,6 +95,7 @@ export default function PageNavigationList() {
   const mainLangId = useAppSelector((state) => state.settingState.mainLangId);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { showToast, hideToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -123,6 +121,7 @@ export default function PageNavigationList() {
         sessionAuth,
         t,
         minPermission: NavigationEndPointPermission.GET,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -165,7 +164,7 @@ export default function PageNavigationList() {
         showCancelButton: true,
       });
       if (result.isConfirmed) {
-        const loadingToast = new ComponentToast({
+        const loadingToast = showToast({
           content: t('deleting'),
           type: 'loading',
         });
@@ -174,13 +173,13 @@ export default function PageNavigationList() {
           { _id: selectedItemId },
           abortController.signal
         );
-        loadingToast.hide();
+        hideToast(loadingToast);
         if (serviceResult.status) {
           const newItems = state.items.filter(
             (item) => !selectedItemId.includes(item._id)
           );
           dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-          new ComponentToast({
+          showToast({
             type: 'success',
             title: t('successful'),
             content: t('itemDeleted'),
@@ -188,7 +187,7 @@ export default function PageNavigationList() {
         }
       }
     } else {
-      const loadingToast = new ComponentToast({
+      const loadingToast = showToast({
         content: t('updating'),
         type: 'loading',
       });
@@ -199,7 +198,7 @@ export default function PageNavigationList() {
         },
         abortController.signal
       );
-      loadingToast.hide();
+      hideToast(loadingToast);
       if (serviceResult.status) {
         const newItems = state.items.map((item) => {
           if (selectedItemId.includes(item._id)) {
@@ -208,7 +207,7 @@ export default function PageNavigationList() {
           return item;
         });
         dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-        new ComponentToast({
+        showToast({
           type: 'success',
           title: t('successful'),
           content: t('statusUpdated'),
@@ -233,7 +232,7 @@ export default function PageNavigationList() {
         newItem.rank = rank;
       }
       dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `'${newItem?.contents?.title}' ${t('itemEdited')}`,

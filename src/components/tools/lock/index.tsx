@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { setIsLockState } from '@redux/features/appSlice';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useDidMount } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/hooks';
 import ComponentToolLockForm from './form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';

@@ -1,5 +1,4 @@
 import { SettingService } from '@services/setting.service';
-import ComponentToast from '@components/elements/toast';
 import {
   ISettingGetResultService,
   ISettingUpdateSEOParamService,
@@ -17,16 +16,14 @@ import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import ComponentForm from '@components/elements/form';
 import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentFormTags from '@components/elements/form/input/tags';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
 import ComponentPageSettingsSEOHeader from '@components/pages/settings/seo/header';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 export type IPageSettingsSEOState = {
   langId: string;
@@ -106,6 +103,7 @@ export default function PageSettingsSEO() {
     },
     resolver: zodResolver(SettingSchema.putSeo),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -131,6 +129,7 @@ export default function PageSettingsSEO() {
         sessionAuth,
         t,
         minPermission: SettingsEndPointPermission.UPDATE_SEO,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -210,7 +209,7 @@ export default function PageSettingsSEO() {
           payload: newItem,
         });
       }
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: t('seoUpdated'),

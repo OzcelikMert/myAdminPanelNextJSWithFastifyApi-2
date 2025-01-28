@@ -15,7 +15,7 @@ import ComponentForm from '@components/elements/form';
 import {
   useDidMount,
   useEffectAfterDidMount,
-} from '@library/react/customHooks';
+} from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthSchema, IAuthPostSchema } from 'schemas/auth.schema';

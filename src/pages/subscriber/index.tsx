@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
-import ComponentToast from '@components/elements/toast';
 import { ISubscriberGetResultService } from 'types/services/subscriber.service';
 import { SubscriberService } from '@services/subscriber.service';
 import ComponentDataTable from '@components/elements/table/dataTable';
@@ -17,10 +16,8 @@ import { EndPoints } from '@constants/endPoints';
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { SortUtil } from '@utils/sort.util';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
+import { useToast } from '@hooks/toast';
 
 type IPageState = {
   items: ISubscriberGetResultService[];
@@ -41,12 +38,11 @@ export default function PageSubscribers() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
-  const [items, setItems] = useState<IPageState['items']>(
-    initialState.items
+  const [items, setItems] = useState<IPageState['items']>(initialState.items);
+  const [selectedItems, setSelectedItems] = useState(
+    initialState.selectedItems
   );
-  const [selectedItems, setSelectedItems] = useState<
-    IPageState['selectedItems']
-  >(initialState.selectedItems);
+  const { showToast, hideToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -72,6 +68,7 @@ export default function PageSubscribers() {
         t,
         sessionAuth,
         minPermission: SubscriberEndPointPermission.GET,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -103,7 +100,10 @@ export default function PageSubscribers() {
     }
   };
 
-  const onChangeStatus = async (selectedRows: ISubscriberGetResultService[], statusId: number) => {
+  const onChangeStatus = async (
+    selectedRows: ISubscriberGetResultService[],
+    statusId: number
+  ) => {
     const selectedItemId = selectedRows.map((item) => item._id);
 
     const result = await Swal.fire({
@@ -116,7 +116,7 @@ export default function PageSubscribers() {
     });
 
     if (result.isConfirmed) {
-      const loadingToast = new ComponentToast({
+      const loadingToast = showToast({
         content: t('deleting'),
         type: 'loading',
       });
@@ -128,14 +128,14 @@ export default function PageSubscribers() {
         abortController.signal
       );
 
-      loadingToast.hide();
+      hideToast(loadingToast);
 
       if (serviceResult.status) {
         let newItems = items.filter(
           (item) => !selectedItemId.includes(item._id)
         );
         setItems(newItems);
-        new ComponentToast({
+        showToast({
           type: 'success',
           title: t('successful'),
           content: t('itemDeleted'),
@@ -188,7 +188,9 @@ export default function PageSubscribers() {
                 isAllSelectable={true}
                 isSearchable={true}
                 toggleMenuItems={getToggleMenuItems()}
-                onClickToggleMenuItem={(selectedRows, value) => onChangeStatus(selectedRows, value)}
+                onClickToggleMenuItem={(selectedRows, value) =>
+                  onChangeStatus(selectedRows, value)
+                }
               />
             </div>
           </div>

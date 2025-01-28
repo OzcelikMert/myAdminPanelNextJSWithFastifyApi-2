@@ -4,7 +4,6 @@ import Swal from 'sweetalert2';
 import { IUserGetResultService } from 'types/services/user.service';
 import ComponentThemeUserProfileCard from '@components/theme/modal/userProfileCard';
 import { UserService } from '@services/user.service';
-import ComponentToast from '@components/elements/toast';
 import ComponentDataTable from '@components/elements/table/dataTable';
 import Image from 'next/image';
 import ComponentThemeBadgeStatus from '@components/theme/badge/status';
@@ -23,11 +22,9 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { SortUtil } from '@utils/sort.util';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 type IPageState = {
   items: IUserGetResultService[];
@@ -81,6 +78,7 @@ export default function PageUserList() {
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { showToast, hideToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -106,6 +104,7 @@ export default function PageUserList() {
         sessionAuth,
         t,
         minPermission: UserEndPointPermission.GET,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -154,7 +153,7 @@ export default function PageUserList() {
         showCancelButton: true,
       });
       if (result.isConfirmed) {
-        const loadingToast = new ComponentToast({
+        const loadingToast = showToast({
           content: t('deleting'),
           type: 'loading',
         });
@@ -163,13 +162,13 @@ export default function PageUserList() {
           { _id: userId },
           abortController.signal
         );
-        loadingToast.hide();
+        hideToast(loadingToast);
         if (serviceResult.status) {
           dispatch({
             type: ActionTypes.SET_ITEMS,
             payload: state.items.filter((item) => userId !== item._id),
           });
-          new ComponentToast({
+          showToast({
             type: 'success',
             title: t('successful'),
             content: t('itemDeleted'),

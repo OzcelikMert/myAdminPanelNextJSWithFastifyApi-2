@@ -7,7 +7,6 @@ import { LanguageService } from '@services/language.service';
 import Image from 'next/image';
 import ComponentThemeBadgeStatus from '@components/theme/badge/status';
 import ComponentThemeModalUpdateItemRank from '@components/theme/modal/updateItemRank';
-import ComponentToast from '@components/elements/toast';
 import { PermissionUtil } from '@utils/permission.util';
 import { LanguageEndPointPermission } from '@constants/endPointPermissions/language.endPoint.permission';
 import { EndPoints } from '@constants/endPoints';
@@ -20,11 +19,9 @@ import { useRouter } from 'next/router';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { SortUtil } from '@utils/sort.util';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 type IPageState = {
   items: ILanguageGetResultService[];
@@ -78,6 +75,7 @@ export default function PageSettingLanguageList() {
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -103,6 +101,7 @@ export default function PageSettingLanguageList() {
         sessionAuth,
         t,
         minPermission: LanguageEndPointPermission.GET,
+        showToast,
       })
     ) {
       setPageTitle();
@@ -141,7 +140,7 @@ export default function PageSettingLanguageList() {
         newItem.rank = rank;
       }
       dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `'${newItem?.title}' ${t('itemEdited')}`,

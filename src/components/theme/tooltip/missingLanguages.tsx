@@ -6,7 +6,7 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import {
   useDidMount,
   useEffectAfterDidMount,
-} from '@library/react/customHooks';
+} from '@library/react/hooks';
 
 const Icon = () => {
   return <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>;

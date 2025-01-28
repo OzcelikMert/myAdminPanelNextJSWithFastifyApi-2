@@ -15,7 +15,6 @@ import { EndPoints } from '@constants/endPoints';
 import { UserRoleId } from '@constants/userRoles';
 import { ComponentTypeId, componentTypes } from '@constants/componentTypes';
 import { RouteUtil } from '@utils/route.util';
-import ComponentToast from '@components/elements/toast';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';
@@ -25,10 +24,7 @@ import {
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
 import ComponentForm from '@components/elements/form';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -39,6 +35,7 @@ import ComponentPageComponentAddTabElements from '@components/pages/component/ad
 import ComponentPageComponentAddHeader from '@components/pages/component/add/header';
 import { SelectUtil } from '@utils/select.util';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from 'hooks/toast';
 
 export type IPageComponentAddState = {
   elementTypes: IThemeFormSelectData<ElementTypeId>[];
@@ -177,6 +174,7 @@ export default function PageComponentAdd() {
       queries._id ? ComponentSchema.putWithId : ComponentSchema.post
     ),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
 
@@ -206,6 +204,7 @@ export default function PageComponentAdd() {
         router,
         sessionAuth,
         t,
+        showToast,
       })
     ) {
       if (queries._id) {
@@ -286,7 +285,7 @@ export default function PageComponentAdd() {
       : ComponentService.add(params, abortController.signal));
 
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,

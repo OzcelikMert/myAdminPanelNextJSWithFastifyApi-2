@@ -20,7 +20,6 @@ type IComponentProps = {
   showTagSelect?: boolean;
   isECommerceVariation?: boolean;
   index?: number;
-  onChangeImage?: (image: string) => void;
   onChangeIsIconActive?: () => void;
   onClickShowTermModal?: (termTypeId: PostTermTypeId) => void;
 };

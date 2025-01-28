@@ -11,7 +11,6 @@ import { StatusId } from '@constants/status';
 import { SelectUtil } from '@utils/select.util';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
-import ComponentToast from '@components/elements/toast';
 import { FormEvent, useReducer, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -21,10 +20,7 @@ import {
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
 import ComponentForm from '@components/elements/form';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +29,7 @@ import ComponentPageLanguageAddHeader from '@components/pages/language/add/heade
 import ComponentPageLanguageAddTabGeneral from '@components/pages/language/add/tabGeneral';
 import ComponentPageLanguageAddTabOptions from '@components/pages/language/add/tabOptions';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 export type IPageLanguageAddState = {
   mainTabActiveKey: string;
@@ -120,6 +117,7 @@ export default function PageSettingLanguageAdd() {
       queries._id ? LanguageSchema.putWithId : LanguageSchema.post
     ),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
 
@@ -149,6 +147,7 @@ export default function PageSettingLanguageAdd() {
         sessionAuth,
         router,
         minPermission,
+        showToast,
       })
     ) {
       await getFlags();
@@ -227,7 +226,7 @@ export default function PageSettingLanguageAdd() {
       : LanguageService.add(params, abortController.signal));
 
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,

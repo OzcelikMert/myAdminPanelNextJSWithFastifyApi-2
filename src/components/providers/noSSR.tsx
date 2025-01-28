@@ -1,4 +1,4 @@
-import { useDidMount } from '@library/react/customHooks';
+import { useDidMount } from '@library/react/hooks';
 import React, { Component, useEffect } from 'react';
 
 type IComponentState = {

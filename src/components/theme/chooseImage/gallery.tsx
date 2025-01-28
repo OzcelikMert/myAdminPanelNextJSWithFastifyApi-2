@@ -17,7 +17,7 @@ const initialState: IComponentState = {
 type IComponentProps = {
   onClose: () => void;
   isShow: boolean;
-  onSubmit: (images: string[]) => void;
+  onSubmit: (images: IGalleryGetResultService[]) => void;
   isMulti?: boolean;
   selectedImages?: string[];
 };
@@ -61,7 +61,7 @@ const ComponentThemeChooseImageGallery = React.memo((props: IComponentProps) => 
               >
                 <Tab eventKey="upload" title={'Upload'}>
                   <PageGalleryUpload
-                    uploadedImages={(uploadedImages) => setUploadedImages(uploadedImages)}
+                    onUploadImages={(images) => setUploadedImages(images)}
                     isModal
                   />
                 </Tab>

@@ -13,7 +13,7 @@ import ComponentToolLock from '@components/tools/lock';
 import { NextRouter, useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import { useEffectAfterDidMount } from '@library/react/customHooks';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentToolHeader from '@components/tools/header';
 
 type ICurrentPath = {

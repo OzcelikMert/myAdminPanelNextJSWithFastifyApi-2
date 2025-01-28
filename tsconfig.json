@@ -26,6 +26,7 @@
       "@constants/*": ["constants/*"],
       "@library/*": ["library/*"],
       "@utils/*": ["utils/*"],
+      "@hooks/*": ["hooks/*"],
       "@redux/*": ["redux/*"]
     }
   },

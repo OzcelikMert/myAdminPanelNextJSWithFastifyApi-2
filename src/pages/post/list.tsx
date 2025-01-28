@@ -2,7 +2,6 @@ import React, { useReducer, useState } from 'react';
 import Swal from 'sweetalert2';
 import { PostService } from '@services/post.service';
 import { IPostGetManyResultService } from 'types/services/post.service';
-import ComponentToast from '@components/elements/toast';
 import ComponentDataTable, {
   IComponentDataTableColumn,
 } from '@components/elements/table/dataTable';
@@ -37,12 +36,10 @@ import {
 import { IComponentTableToggleMenuItem } from '@components/elements/table/toggleMenu';
 import { IComponentTableFilterButton } from '@components/elements/table/filterButton';
 import { SortUtil } from '@utils/sort.util';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentThemeWebsiteLinkPost from '@components/theme/websiteLink/post';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 type IPageState = {
   typeId: PostTypeId;
@@ -136,6 +133,7 @@ export default function PagePostList() {
     ...initialState,
     typeId: queries.postTypeId,
   });
+  const { showToast, hideToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -174,6 +172,7 @@ export default function PagePostList() {
         router,
         sessionAuth,
         t,
+        showToast,
       })
     ) {
       await getItems();
@@ -224,7 +223,7 @@ export default function PagePostList() {
         showCancelButton: true,
       });
       if (result.isConfirmed) {
-        const loadingToast = new ComponentToast({
+        const loadingToast = showToast({
           content: t('deleting'),
           type: 'loading',
         });
@@ -236,13 +235,13 @@ export default function PagePostList() {
           },
           abortController.signal
         );
-        loadingToast.hide();
+        hideToast(loadingToast);
         if (serviceResult.status) {
           const newItems = state.items.filter(
             (item) => !selectedItemId.includes(item._id)
           );
           dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-          new ComponentToast({
+          showToast({
             type: 'success',
             title: t('successful'),
             content: t('itemDeleted'),
@@ -250,7 +249,7 @@ export default function PagePostList() {
         }
       }
     } else {
-      const loadingToast = new ComponentToast({
+      const loadingToast = showToast({
         content: t('updating'),
         type: 'loading',
       });
@@ -263,7 +262,7 @@ export default function PagePostList() {
         },
         abortController.signal
       );
-      loadingToast.hide();
+      hideToast(loadingToast);
       if (serviceResult.status) {
         const newItems = state.items.map((item) => {
           if (selectedItemId.includes(item._id)) {
@@ -272,7 +271,7 @@ export default function PagePostList() {
           return item;
         });
         dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-        new ComponentToast({
+        showToast({
           type: 'success',
           title: t('successful'),
           content: t('statusUpdated'),
@@ -298,7 +297,7 @@ export default function PagePostList() {
         newItem.rank = rank;
       }
       dispatch({ type: ActionTypes.SET_ITEMS, payload: newItems });
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `'${newItem?.contents?.title}' ${t('itemEdited')}`,
@@ -358,7 +357,7 @@ export default function PagePostList() {
         icon: 'mdi mdi-view-list',
         isDefault: true,
         onFilter: (items) => {
-          dispatch({ type: ActionTypes.SET_LIST_MODE, payload: "list" });
+          dispatch({ type: ActionTypes.SET_LIST_MODE, payload: 'list' });
           return items.findMulti('statusId', StatusId.Deleted, false);
         },
       },
@@ -366,8 +365,8 @@ export default function PagePostList() {
         title: `${t('trash')} (${state.items.findMulti('statusId', StatusId.Deleted).length})`,
         className: 'btn-gradient-danger',
         icon: 'mdi mdi-delete',
-        onFilter: (items) => { 
-          dispatch({ type: ActionTypes.SET_LIST_MODE, payload: "deleted" });
+        onFilter: (items) => {
+          dispatch({ type: ActionTypes.SET_LIST_MODE, payload: 'deleted' });
           return items.findMulti('statusId', StatusId.Deleted);
         },
       },

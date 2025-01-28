@@ -25,7 +25,6 @@ import { ComponentTypeId } from '@constants/componentTypes';
 import { UserService } from '@services/user.service';
 import { UserRoleId } from '@constants/userRoles';
 import { RouteUtil } from '@utils/route.util';
-import ComponentToast from '@components/elements/toast';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -35,10 +34,7 @@ import {
 } from '@redux/features/breadCrumbSlice';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/customHooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -50,6 +46,7 @@ import ComponentThemeModalPostTerm from '@components/theme/modal/postTerm';
 import { IPagePostTermAddFormState } from './term/add';
 import Swal from 'sweetalert2';
 import { IActionWithPayload } from 'types/hooks';
+import { useToast } from '@hooks/toast';
 
 export type IPagePostAddState = {
   authors: IThemeFormSelectData<string>[];
@@ -273,10 +270,11 @@ export default function PagePostAdd() {
       contents: {
         ...initialFormState.contents,
         langId: mainLangId,
-      }
+      },
     },
     resolver: zodResolver(PostUtil.getSchema(queries.postTypeId, queries._id)),
   });
+  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
 
@@ -312,6 +310,7 @@ export default function PagePostAdd() {
         router,
         sessionAuth,
         t,
+        showToast,
       })
     ) {
       if (
@@ -639,7 +638,7 @@ export default function PagePostAdd() {
 
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
-    
+
     let serviceResult = null;
 
     if (params.typeId == PostTypeId.Product) {
@@ -653,7 +652,7 @@ export default function PagePostAdd() {
     }
 
     if (serviceResult.status) {
-      new ComponentToast({
+      showToast({
         type: 'success',
         title: t('successful'),
         content: `${t(params._id ? 'itemEdited' : 'itemAdded')}!`,
@@ -914,8 +913,6 @@ export default function PagePostAdd() {
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
-  
-  console.log('page post add', state, formValues, form);
 
   return isPageLoading ? null : (
     <div className="page-post">
@@ -1007,9 +1004,6 @@ export default function PagePostAdd() {
                               PostTypeId.Testimonial,
                             ].includes(formValues.typeId)
                           }
-                          onChangeImage={(image) =>
-                            form.setValue('contents.image', image)
-                          }
                           onChangeIsIconActive={() =>
                             dispatch({
                               type: ActionTypes.SET_IS_ICON_ACTIVE,
@@ -1081,15 +1075,6 @@ export default function PagePostAdd() {
                 imageAfter={formValues.beforeAndAfter?.imageAfter}
                 imageBefore={formValues.beforeAndAfter?.imageBefore}
                 images={formValues.beforeAndAfter?.images}
-                onChangeImageAfter={(image) =>
-                  form.setValue('beforeAndAfter.imageAfter', image)
-                }
-                onChangeImageBefore={(image) =>
-                  form.setValue('beforeAndAfter.imageBefore', image)
-                }
-                onChangeImages={(images) =>
-                  form.setValue('beforeAndAfter.images', images)
-                }
               />
             ) : null}
             {[PostTypeId.Slider, PostTypeId.Service].includes(
