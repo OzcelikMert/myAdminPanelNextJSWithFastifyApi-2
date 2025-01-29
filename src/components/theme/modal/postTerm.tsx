@@ -25,7 +25,7 @@ const ComponentThemeModalPostTerm = React.memo((props: IComponentProps) => {
   const selectedTerm = postTermTypes.findSingle("id", props.termTypeId);
 
   return (
-    <Modal className="form-modal" size="lg" centered show={props.isShow}>
+    <Modal className="form-modal" size="xl" centered show={props.isShow}>
       <Modal.Header className="border-bottom-0">
         <div className="w-100 text-end">
           <button

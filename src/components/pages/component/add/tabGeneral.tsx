@@ -33,7 +33,7 @@ const ComponentPageComponentAddTabGeneral = React.memo(
             name="typeId"
             placeholder={t('typeId')}
             options={props.componentTypes}
-            value={props.componentTypes.findSingle('value', props.typeId)}
+            valueAsNumber
           />
         </div>
       </div>

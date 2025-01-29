@@ -53,10 +53,10 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentProps = {} & Omit<IJoditEditorProps, 'config'>;
+type IComponentProps = {} & Omit<IJoditEditorProps, 'config' | 'onBlur'>;
 
 const ComponentInputRichTextbox = React.memo(
-  React.forwardRef((props: IComponentProps, ref: any) => {
+  React.forwardRef<JoditReact, IComponentProps>((props, ref) => {
     const config: Partial<Config> = {
       extraIcons: {
         gallery: `<i class="mdi mdi-folder-multiple-image"></i>`,
@@ -140,7 +140,15 @@ const ComponentInputRichTextbox = React.memo(
         <React.Fragment>
           {
             // @ts-ignore
-            <JoditEditor {...props} ref={ref} config={config} />
+            <JoditEditor
+              value={props.value}
+              className={props.className}
+              ref={ref}
+              config={config}
+              onBlur={(newValue) =>
+                props.onChange && props.onChange(newValue)
+              }
+            />
           }
         </React.Fragment>
       </div>

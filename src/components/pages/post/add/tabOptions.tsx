@@ -32,7 +32,8 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
             title={t('status')}
             name="statusId"
             options={props.status}
-            value={props.status?.findSingle('value', props.statusId)}
+            valueAsNumber
+            watch
           />
         </div>
       ) : null}
@@ -59,7 +60,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
             title={t('pageType')}
             name="pageTypeId"
             options={props.pageTypes}
-            value={props.pageTypes?.findSingle('value', props.pageTypeId || '')}
+            valueAsNumber
           />
         </div>
       ) : null}
@@ -71,9 +72,6 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
             isMulti
             closeMenuOnSelect={false}
             options={props.authors}
-            value={props.authors?.filter((selectAuthor) =>
-              props.selectedAuthors?.includes(selectAuthor.value)
-            )}
           />
         </div>
       ) : null}

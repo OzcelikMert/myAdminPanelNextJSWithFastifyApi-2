@@ -8,7 +8,7 @@ export type IComponentInputCheckboxProps = {
 >;
 
 const ComponentInputCheckbox = React.memo(
-  React.forwardRef((props: IComponentInputCheckboxProps, ref: any) => {
+  React.forwardRef<any, IComponentInputCheckboxProps>((props, ref) => {
     return (
       <div className="form-check form-check-primary d-inline-block">
         <label className="form-check-label">

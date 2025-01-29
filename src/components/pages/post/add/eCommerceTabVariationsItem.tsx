@@ -17,6 +17,7 @@ import ComponentPagePostAddECommerceTabGallery from './eCommerceTabGallery';
 import ComponentPagePostAddECommerceTabPricing from './eCommerceTabPricing';
 import ComponentPagePostAddECommerceTabInvertory from './eCommerceTabInventory';
 import ComponentPagePostAddECommerceTabShipping from './eCommerceTabShipping';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 
 type IComponentState = {
   tabKey: string;
@@ -62,9 +63,10 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                     <i className="mdi mdi-menu"></i>
                   </div>
                 </div>
-                {props.selectedAttributes?.map((attribute) => (
+                {props.selectedAttributes?.map((attribute, index) => (
                   <div className="col-md mt-3">
                     <ComponentFormInputSelect
+                      name={`eCommerce.variations.${index}.variationId`}
                       title={
                         props.attributes?.findSingle(
                           'value',
@@ -75,18 +77,11 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                         'value',
                         attribute.variations
                       )}
-                      value={props.variations?.findSingle(
-                        'value',
-                        props.item.selectedVariations.findSingle(
-                          'attributeId',
-                          attribute.attributeId
-                        )?.variationId
-                      )}
-                      onChange={(selectedItem: any, e) =>
+                      onChange={(selectedItem, e) =>
                         props.onChangeVariation(
                           props.item._id,
                           attribute.attributeId,
-                          selectedItem.value
+                          (selectedItem as IComponentInputSelectData).value
                         )
                       }
                     />

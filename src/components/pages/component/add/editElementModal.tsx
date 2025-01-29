@@ -108,10 +108,7 @@ const ComponentPageComponentAddElementEditModal = React.memo(
                         name="typeId"
                         placeholder={t('typeId')}
                         options={props.elementTypes}
-                        value={props.elementTypes.findSingle(
-                          'value',
-                          form.getValues().typeId
-                        )}
+                        valueAsNumber
                         required
                       />
                     </div>

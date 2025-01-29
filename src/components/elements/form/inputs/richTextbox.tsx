@@ -29,8 +29,8 @@ const ComponentFormInputRichTextbox = React.memo((props: IComponentProps) => {
         <div className="form-input">
           <ComponentInputRichTextbox
             {...field}
-            onChange={newValue => field.onChange(newValue)}
             ref={e => field.ref(e)}
+            onChange={newValue => field.onChange(newValue)}
           />
           {formState.errors &&
             formState.errors[props.name] &&

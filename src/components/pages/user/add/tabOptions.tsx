@@ -25,7 +25,8 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
           name="roleId"
           placeholder={t('chooseRole')}
           options={props.userRoles}
-          value={props.userRoles?.findSingle('value', props.roleId)}
+          valueAsNumber
+          watch
         />
       </div>
       <div className="col-md-7 mb-3">
@@ -33,7 +34,8 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
           title={t('status')}
           name="statusId"
           options={props.status}
-          value={props.status?.findSingle('value', props.statusId)}
+          valueAsNumber
+          watch
         />
       </div>
       {props.statusId == StatusId.Banned ? (

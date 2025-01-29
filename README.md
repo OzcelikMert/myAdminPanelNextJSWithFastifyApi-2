@@ -2,6 +2,7 @@
 myAdminPanelNextJSWithFastifyApi-2 with NextJS, Functional component and Redux
 
 Things to do:
+    - fill i18 props of required inputs for error
     - add value to checkboxes
     - add name to inputs which doesn't have a name attr
     - add key for every loop component
@@ -9,3 +10,4 @@ Things to do:
     - rename eCommerce.variations.itemId to eCommerce.variations.item
     - add total post views for users
     - show a warning if user changes anything on multilingual page when they try to select another language
+    - check all bugs and fix them

@@ -31,7 +31,7 @@ export type IComponentInputProps = {
   React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 const ComponentInput = React.memo(
-  React.forwardRef((props: IComponentInputProps, ref: any) => {
+  React.forwardRef<any, IComponentInputProps>((props, ref) => {
     const idRef = React.useRef<string>(String.createId());
 
     return (

@@ -916,6 +916,7 @@ export default function PagePostAdd() {
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
+  console.log(formValues);
 
   return isPageLoading ? null : (
     <div className="page-post">

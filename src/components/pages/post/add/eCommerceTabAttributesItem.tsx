@@ -6,6 +6,7 @@ import { Accordion, Card } from 'react-bootstrap';
 import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 
 type IComponentProps = {
   item: IPostECommerceAttributeModel;
@@ -34,14 +35,10 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                         title={t('attribute')}
                         name={`eCommerce.attributes.${props.index}.attributeId`}
                         options={props.attributes}
-                        value={props.attributes?.findSingle(
-                          'value',
-                          props.item.attributeId
-                        )}
-                        onChange={(selectedItem: any, e) =>
+                        onChange={(selectedItem, e) =>
                           props.onChangeAttribute(
                             props.item._id,
-                            selectedItem.value
+                            (selectedItem as IComponentInputSelectData).value
                           )
                         }
                       />
@@ -51,10 +48,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                         title={t('type')}
                         name={`eCommerce.attributes.${props.index}.typeId`}
                         options={props.attributeTypes}
-                        value={props.attributeTypes?.findSingle(
-                          'value',
-                          props.item.typeId
-                        )}
+                        valueAsNumber
                       />
                     </div>
                   </div>
@@ -106,10 +100,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                         'parentId',
                         props.item.attributeId
                       )}
-                      value={props.variations?.findMulti(
-                        'value',
-                        props.item.variations
-                      )}
+                      valueAsNumber
                     />
                   </div>
                 </div>

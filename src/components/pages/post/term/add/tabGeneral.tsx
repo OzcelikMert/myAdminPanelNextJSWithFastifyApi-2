@@ -66,7 +66,6 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
               name="parentId"
               placeholder={t('chooseMainCategory')}
               options={props.items}
-              value={props.items.findSingle('value', props.parentId || '')}
             />
           </div>
         ) : null}

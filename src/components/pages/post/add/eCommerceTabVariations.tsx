@@ -10,6 +10,7 @@ import {
 } from 'types/models/post.model';
 import { Accordion } from 'react-bootstrap';
 import ComponentPagePostAddECommerceTabVariationsItem from './eCommerceTabVariationsItem';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 
 type IComponentState = {
   accordionKey: string;
@@ -66,9 +67,10 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
         <div className="col-md-7">
           <h4>{t('default')}</h4>
           <div className="row">
-            {props.selectedAttributes?.map((item) => (
+            {props.selectedAttributes?.map((item, index) => (
               <div className="col-md-4 mt-3">
                 <ComponentFormInputSelect
+                  name={`eCommerce.variationDefaults.${index}.variations`}
                   title={
                     props.attributes?.findSingle('value', item.attributeId)
                       ?.label
@@ -77,17 +79,10 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
                     'value',
                     item.variations
                   )}
-                  value={props.variations?.findSingle(
-                    'value',
-                    props.variationDefaults?.findSingle(
-                      'attributeId',
-                      item.attributeId
-                    )?.variationId
-                  )}
-                  onChange={(selectedItem: any, e) =>
+                  onChange={(selectedItem, e) =>
                     props.onChangeVariationDefault(
                       item.attributeId,
-                      selectedItem.value
+                      (selectedItem as IComponentInputSelectData).value
                     )
                   }
                 />

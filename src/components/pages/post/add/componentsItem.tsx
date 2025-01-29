@@ -26,9 +26,6 @@ const ComponentPagePostAddComponentsItem = React.memo(
               title={t('component')}
               name={`components.${props.index}`}
               options={props.components}
-              value={props.components?.filter(
-                (item) => item.value == props._id
-              )}
             />
           </div>
           <div className="col-md-3 mt-2">

@@ -24,8 +24,9 @@ const ComponentFormInputSwitch = React.memo((props: IComponentProps) => {
       render={({ field, formState }) => (
         <div className="form-input">
           <ComponentInputSwitch
-            {...props}
             {...field}
+            onChange={e => field.onChange(Boolean(e.target.checked))}
+            {...props}
             ref={(e) => field.ref(e)}
           />
           {formState.errors &&

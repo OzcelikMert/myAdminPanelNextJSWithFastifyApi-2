@@ -107,9 +107,6 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
                 isMulti
                 closeMenuOnSelect={false}
                 options={props.categories}
-                value={props.categories?.filter((item) =>
-                  props.selectedCategories?.includes(item.value)
-                )}
               />
             </div>
             <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">
@@ -139,9 +136,6 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
                 isMulti
                 closeMenuOnSelect={false}
                 options={props.tags}
-                value={props.tags?.filter((item) =>
-                  props.selectedTags?.includes(item.value)
-                )}
               />
             </div>
             <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">

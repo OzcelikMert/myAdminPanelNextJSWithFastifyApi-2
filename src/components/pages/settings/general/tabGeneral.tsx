@@ -54,7 +54,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
             isMulti={false}
             isSearchable={false}
             options={props.panelLanguages}
-            value={props.panelLanguages.findSingle('value', props.panelLangId)}
+            valueAsNumber
           />
         </div>
       </div>

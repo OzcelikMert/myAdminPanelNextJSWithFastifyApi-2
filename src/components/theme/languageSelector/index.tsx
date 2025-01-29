@@ -105,15 +105,13 @@ const ComponentThemeLanguageSelector = React.memo((props: IComponentProps) => {
     <ComponentInputSelect
       mainDivCustomClassName="content-language"
       title={t('contentLanguage')}
-      isSearchable={false}
-      isMulti={false}
       formatOptionLabel={Item}
       options={options}
       value={{
         label: selectedLanguageRef.current.title,
         value: selectedLanguageRef.current,
       }}
-      onChange={(item) => props.onChange(item)}
+      onChange={(item) => props.onChange(item as IComponentInputSelectData)}
     />
   );
 });

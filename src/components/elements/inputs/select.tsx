@@ -10,16 +10,17 @@ export interface IComponentInputSelectData<T = any> {
 export type IComponentInputSelectProps<T = any> = {
   title?: string;
   mainDivCustomClassName?: string;
+  options?: IComponentInputSelectData<T>[];
   onChange?: (
-    newValue: IComponentInputSelectData<T>,
+    newValue: IComponentInputSelectData<T> | IComponentInputSelectData<T>[],
     action: ActionMeta<T>
-  ) => void
-} & Omit<StateManagerProps<T>, "onChange">;
+  ) => void;
+} & Omit<StateManagerProps<T>, 'onChange' | 'options'>;
 
 const ComponentInputSelect = React.memo(
-  React.forwardRef((props: IComponentInputSelectProps, ref: any) => {
+  React.forwardRef<any, IComponentInputSelectProps>((props, ref) => {
     const onChange = (
-      newValue: IComponentInputSelectData,
+      newValue: IComponentInputSelectData | IComponentInputSelectData[],
       action: ActionMeta<any>
     ) => {
       if (props.onChange) {

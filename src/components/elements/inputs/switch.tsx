@@ -8,7 +8,7 @@ export type IComponentInputSwitchProps = {
 >;
 
 const ComponentInputSwitch = React.memo(
-  React.forwardRef((props: IComponentInputSwitchProps, ref: any) => {
+  React.forwardRef<any, IComponentInputSwitchProps>((props, ref) => {
     const idRef = React.useRef<string>(String.createId());
 
     return (

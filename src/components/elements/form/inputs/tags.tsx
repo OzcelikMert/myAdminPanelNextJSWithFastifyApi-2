@@ -24,9 +24,9 @@ const ComponentFormInputTags = React.memo((props: IComponentProps) => {
       render={({ field, formState }) => (
         <div className="form-input">
           <ComponentInputTags
-            {...props}
             {...field}
             onChange={(value) => field.onChange(value)}
+            {...props}
             ref={(e) => field.ref(e)}
           />
           {formState.errors &&

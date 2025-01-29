@@ -19,11 +19,9 @@ const ComponentPageECommerceSettingsTabGeneral = React.memo(
         <div className="col-md-7 mb-3">
           <ComponentFormInputSelect
             title={t('currencyType')}
-            isMulti={false}
             name="eCommerce.currencyId"
-            isSearchable={false}
             options={props.currencyTypes}
-            value={props.currencyTypes.findSingle('value', props.currencyId)}
+            valueAsNumber
           />
         </div>
       </div>

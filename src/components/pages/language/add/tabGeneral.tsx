@@ -34,7 +34,6 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
                 title={t('image')}
                 name="image"
                 options={props.flags}
-                value={props.flags.findSingle('value', props.image || '')}
               />
             </div>
           </div>

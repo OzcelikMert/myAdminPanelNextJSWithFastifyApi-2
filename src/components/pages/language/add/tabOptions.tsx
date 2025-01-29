@@ -21,9 +21,9 @@ const ComponentPageLanguageAddTabOptions = React.memo(
         <div className="col-md-7 mb-3">
           <ComponentFormInputSelect
             title={t('status')}
-            options={props.status}
             name="statusId"
-            value={props.status?.findSingle('value', props.statusId)}
+            options={props.status}
+            valueAsNumber
           />
         </div>
         <div className="col-md-7 mb-3">

@@ -23,7 +23,7 @@ const ComponentPagePostTermAddTabOptions = React.memo(
             title={t('status')}
             name="statusId"
             options={props.status}
-            value={props.status?.findSingle('value', props.statusId)}
+            valueAsNumber
           />
         </div>
         <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>

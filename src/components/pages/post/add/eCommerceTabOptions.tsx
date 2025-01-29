@@ -20,10 +20,8 @@ const ComponentPagePostAddECommerceTabOptions = React.memo((props: IComponentPro
           title={t('productType')}
           name="eCommerce.typeId"
           options={props.productTypes}
-          value={props.productTypes?.findSingle(
-            'value',
-            props.productTypeId || ''
-          )}
+          valueAsNumber
+          watch
         />
       </div>
     </div>

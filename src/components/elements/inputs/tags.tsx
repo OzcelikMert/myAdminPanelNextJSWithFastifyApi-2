@@ -38,7 +38,7 @@ export type IComponentInputTagsProps = {
 };
 
 const ComponentInputTags = React.memo(
-  React.forwardRef((props: IComponentInputTagsProps, ref: any) => {
+  React.forwardRef<any, IComponentInputTagsProps>((props, ref) => {
     const [tags, setTags] = React.useState<string[]>(
       props.value ?? initialState.tags
     );

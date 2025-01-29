@@ -25,7 +25,7 @@ const ComponentPageNavigationAddTabOptions = React.memo(
             title={t('status')}
             name="statusId"
             options={props.status}
-            value={props.status?.findSingle('value', props.statusId)}
+            valueAsNumber
           />
         </div>
         <div className="col-md-7 mb-3">

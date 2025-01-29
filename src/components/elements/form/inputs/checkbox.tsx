@@ -11,13 +11,25 @@ type IComponentPropsI18 = {
 
 type IComponentProps = {
   valueAsNumber?: boolean;
-  valueAsBoolean?: boolean
+  valueAsBoolean?: boolean;
   name: string;
   control?: Control<any>;
   i18?: IComponentPropsI18;
 } & Omit<IComponentInputCheckboxProps, 'name'>;
 
 const ComponentFormInputCheckbox = React.memo((props: IComponentProps) => {
+  const setValue = (value: any, isSelected: boolean) => {
+    if (Array.isArray(value)) {
+      return value.map((item) => (props.valueAsNumber ? Number(item) : item));
+    } else {
+      return props.valueAsNumber
+        ? Number(value)
+        : props.valueAsBoolean || !props.value
+          ? Boolean(isSelected)
+          : value;
+    }
+  };
+
   return (
     <Controller
       name={props.name}
@@ -26,9 +38,10 @@ const ComponentFormInputCheckbox = React.memo((props: IComponentProps) => {
       render={({ field, formState }) => (
         <div className="form-input">
           <ComponentInputCheckbox
-            {...props}
             {...field}
-            ref={e => field.ref(e)}
+            {...props}
+            onChange={(e) => field.onChange(setValue(field.value, e.target.checked))}
+            ref={(e) => field.ref(e)}
           />
           {formState.errors &&
             formState.errors[props.name] &&

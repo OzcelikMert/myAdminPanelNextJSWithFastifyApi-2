@@ -19,7 +19,7 @@ export type IComponentFormInputProps = {
 } & Omit<IComponentInputProps, 'name'>;
 
 const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
-  const getValue = (value: any) => {
+  const setValue = (value: any) => {
     if (props.valueAsNumber || props.type == 'number') {
       return Number(value);
     } else if (props.valueAsDate || props.type == 'date') {
@@ -37,9 +37,9 @@ const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
       render={({ field, formState }) => (
         <div className="form-input">
           <ComponentInput
-            {...props}
             {...field}
-            onChange={(e) => field.onChange(getValue(e.target.value))}
+            {...props}
+            onChange={(e) => field.onChange(setValue(e.target.value))}
             ref={(e) => field.ref(e)}
           />
           {formState.errors &&

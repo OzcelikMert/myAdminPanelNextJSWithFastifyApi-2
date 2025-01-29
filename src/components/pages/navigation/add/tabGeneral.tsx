@@ -38,7 +38,6 @@ const ComponentPageNavigationAddTabGeneral = React.memo(
             name="parentId"
             placeholder={t('chooseMain')}
             options={props.items}
-            value={props.items.findSingle('value', props.parentId || '')}
           />
         </div>
       </div>
