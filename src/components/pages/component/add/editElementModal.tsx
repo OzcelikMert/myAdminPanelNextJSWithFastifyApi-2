@@ -1,6 +1,5 @@
 import React from 'react';
-import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { Modal } from 'react-bootstrap';
@@ -9,7 +8,7 @@ import { IComponentElementModel } from 'types/models/component.model';
 import { ElementTypeId, elementTypes } from '@constants/elementTypes';
 import { useForm } from 'react-hook-form';
 import ComponentForm from '@components/elements/form';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPageComponentAddState } from '@pages/component/add';
 
 type IComponentFormState = {} & IComponentElementModel;
@@ -104,7 +103,7 @@ const ComponentPageComponentAddElementEditModal = React.memo(
                       />
                     </div>
                     <div className="col-md-12 mt-3">
-                      <ComponentFormSelect
+                      <ComponentFormInputSelect
                         title={t('typeId')}
                         name="typeId"
                         placeholder={t('typeId')}

@@ -29,7 +29,7 @@ const initialFormState: IComponentToolLockFormState = {
 };
 
 const ComponentToolLock = React.memo(() => {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
@@ -43,7 +43,7 @@ const ComponentToolLock = React.memo(() => {
 
   useDidMount(() => {
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -54,12 +54,12 @@ const ComponentToolLock = React.memo(() => {
         password: params.password,
         email: sessionAuth?.user.email ?? '',
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status && serviceResult.data) {
       const resultSession = await AuthService.getSession(
-        abortController.signal
+        abortControllerRef.current.signal
       );
       if (resultSession.status && resultSession.data) {
         setIsWrong(false);

@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { StatusId } from '@constants/status';
 import { IPagePostTermAddState } from '@pages/post/term/add';
 
@@ -19,7 +19,7 @@ const ComponentPagePostTermAddTabOptions = React.memo(
     return (
       <div className="row">
         <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
-          <ComponentFormSelect
+          <ComponentFormInputSelect
             title={t('status')}
             name="statusId"
             options={props.status}

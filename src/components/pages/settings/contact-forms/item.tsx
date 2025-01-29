@@ -2,9 +2,9 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { ISettingContactFormModel } from 'types/models/setting.model';
-import ComponentFormSwitch from '@components/elements/form/input/switch';
+import ComponentFormInputSwitch from '@components/elements/form/inputs/switch';
 
 type IComponentProps = {
   item: ISettingContactFormModel;
@@ -83,7 +83,7 @@ const ComponentPageSettingsContactFormsItem = React.memo(
               />
             </div>
             <div className="col-md-7 mt-4">
-              <ComponentFormSwitch
+              <ComponentFormInputSwitch
                 title={t('hasSSL')}
                 name={`contactForms.${props.index}.hasSSL`}
               />

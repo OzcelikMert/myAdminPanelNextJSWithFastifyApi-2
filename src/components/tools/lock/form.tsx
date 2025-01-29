@@ -1,6 +1,6 @@
 import React from 'react';
 import ComponentForm from '@components/elements/form';
-import ThemeInputType from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { UseFormReturn } from 'react-hook-form';
@@ -23,7 +23,7 @@ const ComponentToolLockForm = React.memo((props: IComponentProps) => {
     >
       <div className="row">
         <div className="col-md-12 mb-3">
-          <ThemeInputType
+          <ComponentFormInput
             title={t('password')}
             type="password"
             name="password"

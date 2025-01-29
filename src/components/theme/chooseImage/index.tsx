@@ -2,8 +2,6 @@ import React from 'react';
 import ComponentThemeChooseImageGallery from './gallery';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
-import { useFormContext } from 'react-hook-form';
-import { IGalleryGetResultService } from 'types/services/gallery.service';
 
 type IComponentState = {
   isShowModal: boolean;
@@ -13,11 +11,8 @@ const initialState: IComponentState = {
   isShowModal: false,
 };
 
-type IComponentProps = {
-  name?: string;
+export type IComponentThemeChooseImageProps = {
   isShow?: boolean;
-  onHideModal?: () => void;
-  onSelected?: (images: IGalleryGetResultService[]) => void;
   isMulti?: boolean;
   selectedImages?: string[];
   isShowReviewImage?: boolean;
@@ -26,36 +21,28 @@ type IComponentProps = {
   reviewImageWidth?: number;
   reviewImageHeight?: number;
   showModalButtonText?: string | React.ReactNode;
-  showModalButtonOnClick?: () => void;
   hideShowModalButton?: boolean;
+  onChange?: (images: string[]) => void;
+  onClickShowModal?: () => void;
+  onHideModal?: () => void;
 };
 
-const ComponentThemeChooseImage = React.memo((props: IComponentProps) => {
-  const form = useFormContext();
-  const registeredInput =
-    props.name && form ? form.register(props.name) : undefined;
-
+const ComponentThemeChooseImage = React.memo(React.forwardRef((props: IComponentThemeChooseImageProps, ref: any) => {
   const [isShowModal, setIsShowModal] = React.useState(
     initialState.isShowModal
   );
   const $html = document.querySelector('html');
 
-  const onSelected = (images: IGalleryGetResultService[]) => {
-    if (props.onSelected) {
-      props.onSelected(images);
-    }
-    if (registeredInput && props.name) {
-      form.setValue(props.name, props.isMulti ? images : images[0]);
+  const onSelected = (images: string[]) => {
+    if (props.onChange) {
+      props.onChange(images);
     }
     onHide();
   };
 
   const onClickClear = () => {
-    if (props.onSelected) {
-      props.onSelected([]);
-    }
-    if (registeredInput && props.name) {
-      form.setValue(props.name, props.isMulti ? [] : '');
+    if (props.onChange) {
+      props.onChange([]);
     }
   };
 
@@ -71,8 +58,8 @@ const ComponentThemeChooseImage = React.memo((props: IComponentProps) => {
 
   const onClickShow = () => {
     setIsShowModal(true);
-    if (props.showModalButtonOnClick) {
-      props.showModalButtonOnClick();
+    if (props.onClickShowModal) {
+      props.onClickShowModal();
     }
     if ($html) {
       $html.style.overflow = 'hidden';
@@ -121,6 +108,6 @@ const ComponentThemeChooseImage = React.memo((props: IComponentProps) => {
       </div>
     </div>
   );
-});
+}));
 
 export default ComponentThemeChooseImage;

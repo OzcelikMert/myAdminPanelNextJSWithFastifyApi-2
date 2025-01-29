@@ -1,8 +1,8 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import Image from 'next/image';
 import { IPageLanguageAddState } from '@pages/language/add';
 import { ImageSourceUtil } from '@utils/imageSource.util';
@@ -30,7 +30,7 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
               />
             </div>
             <div className="col-11">
-              <ComponentFormSelect
+              <ComponentFormInputSelect
                 title={t('image')}
                 name="image"
                 options={props.flags}

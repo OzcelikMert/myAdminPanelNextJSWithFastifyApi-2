@@ -6,4 +6,12 @@
       padding: 15px 40px 15px 40px;
     }
   }
+
+  .form-input {
+    .error {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--bs-pink);
+    }
+  }
 }

@@ -4,14 +4,14 @@ import {
   ILanguageUpdateWithIdParamService,
 } from 'types/services/language.service';
 import { LanguageService } from '@services/language.service';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { PermissionUtil } from '@utils/permission.util';
 import { LanguageEndPointPermission } from '@constants/endPointPermissions/language.endPoint.permission';
 import { StatusId } from '@constants/status';
 import { SelectUtil } from '@utils/select.util';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
-import { FormEvent, useReducer, useRef, useState } from 'react';
+import React, { FormEvent, useReducer, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';
@@ -33,8 +33,8 @@ import { useToast } from '@hooks/toast';
 
 export type IPageLanguageAddState = {
   mainTabActiveKey: string;
-  status: IThemeFormSelectData[];
-  flags: IThemeFormSelectData[];
+  status: IComponentInputSelectData[];
+  flags: IComponentInputSelectData[];
   item?: ILanguageGetResultService;
 };
 
@@ -97,7 +97,7 @@ type IPageQueries = {
 };
 
 export default function PageSettingLanguageAdd() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const appDispatch = useAppDispatch();
   const router = useRouter();
@@ -124,7 +124,7 @@ export default function PageSettingLanguageAdd() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -181,7 +181,7 @@ export default function PageSettingLanguageAdd() {
   const getFlags = async () => {
     const serviceResult = await LanguageService.getFlags(
       {},
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       dispatch({
@@ -198,7 +198,7 @@ export default function PageSettingLanguageAdd() {
     if (queries._id) {
       const serviceResult = await LanguageService.getWithId(
         { _id: queries._id },
-        abortController.signal
+        abortControllerRef.current.signal
       );
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
@@ -222,8 +222,8 @@ export default function PageSettingLanguageAdd() {
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
     const serviceResult = await (params._id
-      ? LanguageService.updateWithId(params, abortController.signal)
-      : LanguageService.add(params, abortController.signal));
+      ? LanguageService.updateWithId(params, abortControllerRef.current.signal)
+      : LanguageService.add(params, abortControllerRef.current.signal));
 
     if (serviceResult.status) {
       showToast({

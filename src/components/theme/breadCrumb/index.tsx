@@ -15,7 +15,7 @@ const ComponentThemeBreadCrumb = () => {
       </Link>
       {breadCrumbs.map((item, index) => (
         <span>
-          <Link href={item.url ?? 'javascript:void(0);'}>
+          <Link href={item.url ?? '#'}>
             <span className="badge badge-gradient-dark ms-2">
               {item.title}
             </span>

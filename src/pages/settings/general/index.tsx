@@ -2,7 +2,7 @@ import { SettingService } from '@services/setting.service';
 import { ServerInfoService } from '@services/serverInfo.service';
 import { ISettingUpdateGeneralParamService } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { IServerInfoGetResultService } from 'types/services/serverInfo.service';
 import { LocalStorageUtil } from '@utils/localStorage.util';
 import { PermissionUtil } from '@utils/permission.util';
@@ -14,7 +14,7 @@ import { UserRoleId } from '@constants/userRoles';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
@@ -30,7 +30,7 @@ import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
 
 export type IPageSettingsGeneralState = {
-  panelLanguages: IThemeFormSelectData[];
+  panelLanguages: IComponentInputSelectData[];
   serverInfo: IServerInfoGetResultService;
   mainTabActiveKey: string;
   isServerInfoLoading: boolean;
@@ -100,7 +100,7 @@ const initialFormState: IPageFormState = {
 };
 
 export default function PageSettingsGeneral() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -125,7 +125,7 @@ export default function PageSettingsGeneral() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -171,7 +171,7 @@ export default function PageSettingsGeneral() {
   const getSettings = async () => {
     const serviceResult = await SettingService.get(
       { projection: SettingProjectionKeys.General },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
@@ -183,7 +183,9 @@ export default function PageSettingsGeneral() {
   };
 
   const getServerDetails = async () => {
-    const serviceResult = await ServerInfoService.get(abortController.signal);
+    const serviceResult = await ServerInfoService.get(
+      abortControllerRef.current.signal
+    );
     if (serviceResult.status && serviceResult.data) {
       dispatch({
         type: ActionTypes.SET_SERVER_INFO,
@@ -201,7 +203,7 @@ export default function PageSettingsGeneral() {
 
     const serviceResult = await SettingService.updateGeneral(
       params,
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status) {
       showToast({

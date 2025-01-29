@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import ComponentDataTable from '@components/elements/table/dataTable';
@@ -85,7 +85,7 @@ const reducer = (state: IPageState, action: IAction): IPageState => {
 };
 
 export default function PageNavigationList() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -101,7 +101,7 @@ export default function PageNavigationList() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -141,7 +141,7 @@ export default function PageNavigationList() {
       {
         langId: mainLangId,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (result.status && result.data) {
@@ -171,7 +171,7 @@ export default function PageNavigationList() {
 
         const serviceResult = await NavigationService.deleteMany(
           { _id: selectedItemId },
-          abortController.signal
+          abortControllerRef.current.signal
         );
         hideToast(loadingToast);
         if (serviceResult.status) {
@@ -196,7 +196,7 @@ export default function PageNavigationList() {
           _id: selectedItemId,
           statusId: statusId,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
       hideToast(loadingToast);
       if (serviceResult.status) {
@@ -222,7 +222,7 @@ export default function PageNavigationList() {
         _id: state.selectedItemId,
         rank: rank,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status) {

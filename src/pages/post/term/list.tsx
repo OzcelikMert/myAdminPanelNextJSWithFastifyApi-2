@@ -20,7 +20,7 @@ import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/mis
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import {
   IBreadCrumbData,
   setBreadCrumbState,
@@ -109,7 +109,7 @@ type IPageQueries = {
 };
 
 export default function PagePostTermList() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -139,7 +139,7 @@ export default function PagePostTermList() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -207,7 +207,7 @@ export default function PagePostTermList() {
         langId: mainLangId,
         withPostCount: [PostTermTypeId.Category].includes(state.typeId),
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (result.status && result.data) {
@@ -242,7 +242,7 @@ export default function PagePostTermList() {
             typeId: state.typeId,
             postTypeId: state.postTypeId,
           },
-          abortController.signal
+          abortControllerRef.current.signal
         );
 
         hideToast(loadingToast);
@@ -271,7 +271,7 @@ export default function PagePostTermList() {
           postTypeId: state.postTypeId,
           statusId: statusId,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
 
       hideToast(loadingToast);
@@ -300,7 +300,7 @@ export default function PagePostTermList() {
         postTypeId: state.postTypeId,
         typeId: state.typeId,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status) {

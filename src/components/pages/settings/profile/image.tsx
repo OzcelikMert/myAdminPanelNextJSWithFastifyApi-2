@@ -4,12 +4,11 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { IPageProfileState } from '@pages/settings/profile';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
-import { IGalleryGetResultService } from 'types/services/gallery.service';
 
 type IComponentProps = {
   isLoading?: IPageProfileState["isImageChanging"];
   image?: string
-  onChange: (image: IGalleryGetResultService) => void;
+  onChange: (image: string) => void;
 };
 
 const ComponentPageProfileImage = React.memo(
@@ -25,7 +24,7 @@ const ComponentPageProfileImage = React.memo(
               <ComponentSpinnerDonut customClass="profile-image-spinner" />
             ) : (
               <ComponentThemeChooseImage
-                onSelected={(images) => props.onChange(images[0])}
+                onChange={(images) => props.onChange(images[0])}
                 isMulti={false}
                 isShowReviewImage={true}
                 reviewImage={props.image}

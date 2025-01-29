@@ -50,16 +50,16 @@
 /* === Components === */
 /* elements */
 @import "components/elements/spinners/donut";
-@import "components/elements/table/dataTable/index";
+@import "components/elements/table/dataTable";
 @import "components/elements/table/toggleMenu";
-@import "components/elements/form/input/index";
+@import "components/elements/inputs";
 @import "components/elements/toast";
 @import "components/elements/form";
 /* theme */
-@import "components/theme/badge/index";
+@import "components/theme/badge";
 @import "components/theme/users/profileCard";
-@import "components/theme/languageSelector/index";
-@import "components/theme/chooseImage/index";
+@import "components/theme/languageSelector";
+@import "components/theme/chooseImage";
 @import "components/theme/modal";
 /* providers */
 @import "components/tools/lock";
@@ -87,4 +87,4 @@
 @import "components/tools/spinner";
 
 /* === Theme Colors === */
-@import "theme/index";
+@import "theme";

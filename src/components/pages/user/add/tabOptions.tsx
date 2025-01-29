@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { IPageUserAddState } from '@pages/user/add';
 import { StatusId } from '@constants/status';
 import { UserRoleId } from '@constants/userRoles';
@@ -20,7 +20,7 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
   return (
     <div className="row">
       <div className="col-md-7 mb-3">
-        <ComponentFormSelect
+        <ComponentFormInputSelect
           title={t('role')}
           name="roleId"
           placeholder={t('chooseRole')}
@@ -29,7 +29,7 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
         />
       </div>
       <div className="col-md-7 mb-3">
-        <ComponentFormSelect
+        <ComponentFormInputSelect
           title={t('status')}
           name="statusId"
           options={props.status}

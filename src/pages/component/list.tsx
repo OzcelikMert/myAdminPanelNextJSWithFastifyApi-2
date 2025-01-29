@@ -13,7 +13,7 @@ import ComponentThemeBadgeComponentType from '@components/theme/badge/componentT
 import { ComponentTypeId } from '@constants/componentTypes';
 import { RouteUtil } from '@utils/route.util';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -32,7 +32,7 @@ const initialState: IPageState = {
 };
 
 export default function PageComponentList() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const appDispatch = useAppDispatch();
@@ -50,7 +50,7 @@ export default function PageComponentList() {
     init();
 
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -97,7 +97,7 @@ export default function PageComponentList() {
       {
         langId: mainLangId,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (result.status && result.data) {
@@ -124,7 +124,7 @@ export default function PageComponentList() {
 
         const serviceResult = await ComponentService.deleteMany(
           { _id: [_id] },
-          abortController.signal
+          abortControllerRef.current.signal
         );
         hideToast(loadingToast);
         if (serviceResult.status) {

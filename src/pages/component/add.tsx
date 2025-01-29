@@ -1,7 +1,7 @@
-import { useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import {
   IComponentGetResultService,
   IComponentUpdateWithIdParamService,
@@ -38,8 +38,8 @@ import { IActionWithPayload } from 'types/hooks';
 import { useToast } from 'hooks/toast';
 
 export type IPageComponentAddState = {
-  elementTypes: IThemeFormSelectData<ElementTypeId>[];
-  componentTypes: IThemeFormSelectData<ComponentTypeId>[];
+  elementTypes: IComponentInputSelectData<ElementTypeId>[];
+  componentTypes: IComponentInputSelectData<ComponentTypeId>[];
   mainTabActiveKey: string;
   isItemLoading: boolean;
   item?: IComponentGetResultService;
@@ -142,7 +142,7 @@ type IPageQueries = {
 };
 
 export default function PageComponentAdd() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const appDispatch = useAppDispatch();
@@ -181,7 +181,7 @@ export default function PageComponentAdd() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -248,7 +248,7 @@ export default function PageComponentAdd() {
           _id: queries._id,
           langId: _langId,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
@@ -281,8 +281,8 @@ export default function PageComponentAdd() {
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
     const serviceResult = await (params._id
-      ? ComponentService.updateWithId(params, abortController.signal)
-      : ComponentService.add(params, abortController.signal));
+      ? ComponentService.updateWithId(params, abortControllerRef.current.signal)
+      : ComponentService.add(params, abortControllerRef.current.signal));
 
     if (serviceResult.status) {
       showToast({

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React from 'react';
 import { LanguageService } from '@services/language.service';
 import { SettingService } from '@services/setting.service';
 import { StatusId } from '@constants/status';
@@ -21,7 +21,7 @@ type IComponentProps = {
 };
 
 const ComponentProviderAppInit = (props: IComponentProps) => {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const appDispatch = useAppDispatch();
   const isAppLoading = useAppSelector((state) => state.appState.isLoading);
@@ -29,7 +29,7 @@ const ComponentProviderAppInit = (props: IComponentProps) => {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -45,7 +45,7 @@ const ComponentProviderAppInit = (props: IComponentProps) => {
       {
         statusId: StatusId.Active,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       let foundDefaultLanguage = serviceResult.data.findSingle(
@@ -65,7 +65,7 @@ const ComponentProviderAppInit = (props: IComponentProps) => {
       {
         projection: SettingProjectionKeys.ECommerce,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       appDispatch(
@@ -93,6 +93,6 @@ const ComponentProviderAppInit = (props: IComponentProps) => {
   }
 
   return props.children;
-}
+};
 
 export default ComponentProviderAppInit;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { IUploadingFiles } from 'types/pages/gallery/upload';
 import { GalleryService } from '@services/gallery.service';
 import { IGalleryGetResultService } from 'types/services/gallery.service';
@@ -26,7 +26,8 @@ export type IPageGalleryUploadProps = {
 };
 
 export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
+
   const maxFileSize: number = Number(process.env.UPLOAD_FILE_SIZE ?? 1524000);
 
   const appDispatch = useAppDispatch();
@@ -44,7 +45,7 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
     init();
 
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -105,7 +106,7 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
             return state;
           });
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
 
       if (serviceResult.status && serviceResult.data) {

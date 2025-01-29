@@ -1,6 +1,6 @@
 import React from 'react';
 import { EndPoints } from '@constants/endPoints';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { IPagePostAddState } from '@pages/post/add';
@@ -22,7 +22,7 @@ const ComponentPagePostAddComponentsItem = React.memo(
       <div className={`col-md-12 ${props.index > 0 ? 'mt-5' : ''}`}>
         <div className="row">
           <div className="col-md-9">
-            <ComponentFormSelect
+            <ComponentFormInputSelect
               title={t('component')}
               name={`components.${props.index}`}
               options={props.components}

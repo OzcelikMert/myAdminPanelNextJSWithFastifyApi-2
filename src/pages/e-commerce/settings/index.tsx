@@ -2,14 +2,14 @@ import { SettingService } from '@services/setting.service';
 import { ISettingUpdateECommerceParamService } from 'types/services/setting.service';
 import { Tab, Tabs } from 'react-bootstrap';
 import { CurrencyId, currencyTypes } from '@constants/currencyTypes';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { SettingProjectionKeys } from '@constants/settingProjections';
 import { PermissionUtil } from '@utils/permission.util';
 import { ECommerceEndPointPermission } from '@constants/endPointPermissions/eCommerce.endPoint.permission';
 import { ISettingECommerceModel } from 'types/models/setting.model';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { useRouter } from 'next/router';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
@@ -24,7 +24,7 @@ import { IActionWithPayload } from 'types/hooks';
 import { useToast } from 'hooks/toast';
 
 export type IPageECommerceSettingsState = {
-  currencyTypes: IThemeFormSelectData[];
+  currencyTypes: IComponentInputSelectData[];
   item?: ISettingECommerceModel;
   mainTabActiveKey: string;
 };
@@ -88,7 +88,7 @@ const initialFormState: IPageFormState = {
 };
 
 export default function PageECommerceSettings() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const appDispatch = useAppDispatch();
   const router = useRouter();
@@ -108,7 +108,7 @@ export default function PageECommerceSettings() {
     init();
 
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -154,7 +154,7 @@ export default function PageECommerceSettings() {
   const getSettings = async () => {
     const serviceResult = await SettingService.get(
       { projection: SettingProjectionKeys.ECommerce },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
@@ -178,7 +178,7 @@ export default function PageECommerceSettings() {
     const params = data;
     const serviceResult = await SettingService.updateECommerce(
       params,
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status) {

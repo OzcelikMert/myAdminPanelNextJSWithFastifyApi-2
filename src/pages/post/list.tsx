@@ -110,7 +110,7 @@ type IPageQueries = {
 };
 
 export default function PagePostList() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -139,7 +139,7 @@ export default function PagePostList() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -200,7 +200,7 @@ export default function PagePostList() {
         typeId: [state.typeId],
         langId: mainLangId,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (result.status && result.data) {
@@ -233,7 +233,7 @@ export default function PagePostList() {
             _id: selectedItemId,
             typeId: state.typeId,
           },
-          abortController.signal
+          abortControllerRef.current.signal
         );
         hideToast(loadingToast);
         if (serviceResult.status) {
@@ -260,7 +260,7 @@ export default function PagePostList() {
           typeId: state.typeId,
           statusId: statusId,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
       hideToast(loadingToast);
       if (serviceResult.status) {
@@ -287,7 +287,7 @@ export default function PagePostList() {
         typeId: state.typeId,
         rank: rank,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status) {

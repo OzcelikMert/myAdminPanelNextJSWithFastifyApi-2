@@ -9,13 +9,13 @@ import { SettingProjectionKeys } from '@constants/settingProjections';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import ComponentForm from '@components/elements/form';
-import ComponentFormInput from '@components/elements/form/input/input';
-import ComponentFormTags from '@components/elements/form/input/tags';
+import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentFormInputTags from '@components/elements/form/inputs/tags';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
@@ -80,7 +80,7 @@ const initialFormState: IPageFormState = {
 };
 
 export default function PageSettingsSEO() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -109,7 +109,7 @@ export default function PageSettingsSEO() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -166,7 +166,7 @@ export default function PageSettingsSEO() {
         langId: _langId,
         projection: SettingProjectionKeys.SEO,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
@@ -186,7 +186,7 @@ export default function PageSettingsSEO() {
 
     const serviceResult = await SettingService.updateSeo(
       params,
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status) {
@@ -262,7 +262,7 @@ export default function PageSettingsSEO() {
                       />
                     </div>
                     <div className="col-md-7">
-                      <ComponentFormTags
+                      <ComponentFormInputTags
                         title={t('websiteTags')}
                         placeHolder={t('writeAndPressEnter')}
                         name="seoContents.tags"

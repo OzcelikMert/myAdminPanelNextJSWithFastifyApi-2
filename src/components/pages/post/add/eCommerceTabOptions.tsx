@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
 import { ProductTypeId } from '@constants/productTypes';
 
@@ -16,7 +16,7 @@ const ComponentPagePostAddECommerceTabOptions = React.memo((props: IComponentPro
   return (
     <div className="row">
       <div className="col-md-7 mb-3">
-        <ComponentFormSelect
+        <ComponentFormInputSelect
           title={t('productType')}
           name="eCommerce.typeId"
           options={props.productTypes}

@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { SettingService } from '@services/setting.service';
 import { ISettingUpdateContactFormParamService } from 'types/services/setting.service';
 import { ISettingContactFormModel } from 'types/models/setting.model';
@@ -72,7 +72,7 @@ const initialFormState: IPageFormState = {
 };
 
 export default function PageSettingsContactForms() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -91,7 +91,7 @@ export default function PageSettingsContactForms() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -137,7 +137,7 @@ export default function PageSettingsContactForms() {
   const getSettings = async () => {
     const serviceResult = await SettingService.get(
       { projection: SettingProjectionKeys.ContactForm },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const setting = serviceResult.data;
@@ -147,11 +147,11 @@ export default function PageSettingsContactForms() {
     }
   };
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    let params = form.getValues();
+  const onSubmit = async (data: IPageFormState) => {
+    let params = data;
     const serviceResult = await SettingService.updateContactForm(
       params,
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status) {
       showToast({
@@ -247,7 +247,7 @@ export default function PageSettingsContactForms() {
               submitButtonText: t('save'),
               submitButtonSubmittingText: t('loading'),
             }}
-            onSubmit={(event) => onSubmit(event)}
+            onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

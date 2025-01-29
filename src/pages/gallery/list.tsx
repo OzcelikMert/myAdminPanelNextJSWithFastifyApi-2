@@ -73,7 +73,7 @@ const reducer = (state: IPageState, action: IAction): IPageState => {
 type IPageProps = {
   isModal?: boolean;
   isMulti?: boolean;
-  onSubmit?: (images: IGalleryGetResultService[]) => void;
+  onSubmit?: (images: string[]) => void;
   uploadedImages?: IGalleryGetResultService[];
   selectedImages?: string[];
 };
@@ -247,7 +247,7 @@ export default function PageGalleryList(props: IPageProps) {
         if (toastIdRef.current) {
           hideToast(toastIdRef.current);
         }
-        props.onSubmit(foundSelectedItems ?? []);
+        props.onSubmit(foundSelectedItems.map(item => item.name));
       }
     }
   };

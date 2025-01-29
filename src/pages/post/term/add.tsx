@@ -1,11 +1,11 @@
-import { FormEvent, useReducer, useRef, useState } from 'react';
+import React, { FormEvent, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import { PostTermService } from '@services/postTerm.service';
 import {
   IPostTermGetResultService,
   IPostTermUpdateWithIdParamService,
 } from 'types/services/postTerm.service';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { PostTypeId } from '@constants/postTypes';
 import { PostTermTypeId } from '@constants/postTermTypes';
 import { PermissionUtil, PostPermissionMethod } from '@utils/permission.util';
@@ -36,8 +36,8 @@ import { useToast } from '@hooks/toast';
 
 export type IPagePostTermAddState = {
   mainTabActiveKey: string;
-  items: IThemeFormSelectData<string>[];
-  status: IThemeFormSelectData[];
+  items: IComponentInputSelectData<string>[];
+  status: IComponentInputSelectData[];
   mainTitle: string;
   langId: string;
   item?: IPostTermGetResultService;
@@ -138,7 +138,7 @@ type IPageQueries = {
 };
 
 export default function PagePostTermAdd(props: IPageProps) {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -183,7 +183,7 @@ export default function PagePostTermAdd(props: IPageProps) {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -290,7 +290,7 @@ export default function PagePostTermAdd(props: IPageProps) {
           statusId: StatusId.Active,
           ignoreTermId: state.items.map((item) => item.value),
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
       if (serviceResult.status && serviceResult.data) {
         const newItems: IPagePostTermAddState['items'] = [
@@ -321,7 +321,7 @@ export default function PagePostTermAdd(props: IPageProps) {
           postTypeId: queries.postTypeId,
           langId: _langId,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
 
       if (serviceResult.status && serviceResult.data) {
@@ -352,11 +352,11 @@ export default function PagePostTermAdd(props: IPageProps) {
     RouteUtil.change({ router, path });
   };
 
-  const onSubmit = async (event: FormEvent) => {
-    const params = form.getValues();
+  const onSubmit = async (data: IPagePostTermAddFormState) => {
+    const params = data;
     const serviceResult = await (params._id
-      ? PostTermService.updateWithId(params, abortController.signal)
-      : PostTermService.add(params, abortController.signal));
+      ? PostTermService.updateWithId(params, abortControllerRef.current.signal)
+      : PostTermService.add(params, abortControllerRef.current.signal));
 
     if (serviceResult.status) {
       if (
@@ -428,7 +428,7 @@ export default function PagePostTermAdd(props: IPageProps) {
               submitButtonText: t('save'),
               submitButtonSubmittingText: t('loading'),
             }}
-            onSubmit={(event) => onSubmit(event)}
+            onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

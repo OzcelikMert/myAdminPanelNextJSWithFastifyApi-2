@@ -1,5 +1,5 @@
 import React from 'react';
-import ComponentThemeChooseImage from '@components/theme/chooseImage';
+import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import Image from 'next/image';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import { ImageSourceUtil } from '@utils/imageSource.util';
@@ -46,37 +46,26 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
             <div className="row">
               <div className="col-md-7 mb-3">
                 <ComponentFieldSet legend={t('imageBefore')}>
-                  <ComponentThemeChooseImage
+                  <ComponentThemeChooseImageForm
                     name="beforeAndAfter.imageBefore"
-                    isMulti={false}
-                    selectedImages={
-                      props.imageBefore ? [props.imageBefore] : undefined
-                    }
                     isShowReviewImage={true}
-                    reviewImage={props.imageBefore}
                     reviewImageClassName={'post-image'}
                   />
                 </ComponentFieldSet>
               </div>
               <div className="col-md-7 mb-3">
                 <ComponentFieldSet legend={t('imageAfter')}>
-                  <ComponentThemeChooseImage
+                  <ComponentThemeChooseImageForm
                     name="beforeAndAfter.imageAfter"
-                    isMulti={false}
-                    selectedImages={
-                      props.imageAfter ? [props.imageAfter] : undefined
-                    }
                     isShowReviewImage={true}
-                    reviewImage={props.imageAfter}
                     reviewImageClassName={'post-image'}
                   />
                 </ComponentFieldSet>
               </div>
               <div className="col-md-7 mb-3">
-                <ComponentThemeChooseImage
+                <ComponentThemeChooseImageForm
                   name="beforeAndAfter.images"
                   isMulti
-                  selectedImages={props.images}
                   showModalButtonText={t('gallery')}
                 />
               </div>

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
-import ComponentFormInput from '@components/elements/form/input/input';
-import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentFormInputCheckbox from '@components/elements/form/inputs/checkbox';
 import { StatusId } from '@constants/status';
 import { IPagePostAddState } from '@pages/post/add';
 import { PageTypeId } from '@constants/pageTypes';
@@ -28,7 +28,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
     <div className="row">
       {props.showStatusSelect ? (
         <div className="col-md-7 mb-3">
-          <ComponentFormSelect
+          <ComponentFormInputSelect
             title={t('status')}
             name="statusId"
             options={props.status}
@@ -55,7 +55,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
       </div>
       {props.showPageTypeSelect ? (
         <div className="col-md-7 mb-3">
-          <ComponentFormSelect
+          <ComponentFormInputSelect
             title={t('pageType')}
             name="pageTypeId"
             options={props.pageTypes}
@@ -65,7 +65,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
       ) : null}
       {props.showAuthorsSelect ? (
         <div className="col-md-7 mb-3">
-          <ComponentFormSelect
+          <ComponentFormInputSelect
             title={t('authors')}
             name="authors"
             isMulti
@@ -78,11 +78,11 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
         </div>
       ) : null}
       <div className="col-md-7 mb-3">
-        <ComponentFormCheckBox title={t('isFixed')} name="isFixed" />
+        <ComponentFormInputCheckbox title={t('isFixed')} name="isFixed" />
       </div>
       {props.showNoIndexCheckBox ? (
         <div className="col-md-7">
-          <ComponentFormCheckBox title={t('noIndex')} name="isNoIndex" />
+          <ComponentFormInputCheckbox title={t('noIndex')} name="isNoIndex" />
         </div>
       ) : null}
     </div>

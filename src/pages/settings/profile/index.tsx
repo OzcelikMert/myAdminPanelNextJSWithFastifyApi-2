@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { UserService } from '@services/user.service';
 import {
   IUserGetResultService,
@@ -18,7 +18,6 @@ import ComponentPageProfileImage from '@components/pages/settings/profile/image'
 import ComponentPageProfileMainInfo from '@components/pages/settings/profile/mainInfo';
 import ComponentPageProfilePermissions from '@components/pages/settings/profile/permissions';
 import { IActionWithPayload } from 'types/hooks';
-import { IGalleryGetResultService } from 'types/services/gallery.service';
 import { useToast } from '@hooks/toast';
 
 export type IPageProfileState = {
@@ -86,7 +85,7 @@ const initialFormState: IPageProfileFormState = {
 };
 
 export default function PageSettingsProfile() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const t = useAppSelector(selectTranslation);
   const appDispatch = useAppDispatch();
@@ -107,7 +106,7 @@ export default function PageSettingsProfile() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -139,7 +138,7 @@ export default function PageSettingsProfile() {
   const getUser = async () => {
     const serviceResult = await UserService.getWithId(
       { _id: sessionAuth!.user.userId },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const user = serviceResult.data;
@@ -155,22 +154,22 @@ export default function PageSettingsProfile() {
     }
   };
 
-  const onChangeImage = async (image: IGalleryGetResultService) => {
+  const onChangeImage = async (image: string) => {
     dispatch({ type: ActionTypes.SET_IS_IMAGE_CHANGING, payload: true });
 
     const serviceResult = await UserService.updateProfileImage(
-      { image: image.name },
-      abortController.signal
+      { image: image },
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status) {
-      dispatch({ type: ActionTypes.SET_PROFILE_IMAGE, payload: image.name });
+      dispatch({ type: ActionTypes.SET_PROFILE_IMAGE, payload: image });
       appDispatch(
         setSessionAuthState({
           ...sessionAuth,
           user: {
             ...sessionAuth!.user,
-            image: image.name,
+            image: image,
           },
         })
       );
@@ -183,7 +182,7 @@ export default function PageSettingsProfile() {
     let params = data;
     const serviceResult = await UserService.updateProfile(
       params,
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status) {
       appDispatch(

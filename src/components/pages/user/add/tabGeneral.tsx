@@ -1,5 +1,5 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 

@@ -1,11 +1,11 @@
-import { FormEvent, useState } from 'react';
+import React, { FormEvent, useState } from 'react';
 import { UserService } from '@services/user.service';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import ComponentForm from '@components/elements/form';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
@@ -26,7 +26,7 @@ const initialFormState: IPageFormState = {
 };
 
 export default function PageChangePassword() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const t = useAppSelector(selectTranslation);
   const appDispatch = useAppDispatch();
@@ -42,7 +42,7 @@ export default function PageChangePassword() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -74,8 +74,8 @@ export default function PageChangePassword() {
     );
   };
 
-  const onSubmit = async (event: FormEvent) => {
-    const params = form.getValues();
+  const onSubmit = async (data: IPageFormState) => {
+    const params = data;
     if (params.newPassword !== params.confirmPassword) {
       showToast({
         type: 'error',
@@ -86,7 +86,7 @@ export default function PageChangePassword() {
     }
     const serviceResult = await UserService.updatePassword(
       params,
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status) {
       showToast({
@@ -113,7 +113,7 @@ export default function PageChangePassword() {
               submitButtonText: t('save'),
               submitButtonSubmittingText: t('loading'),
             }}
-            onSubmit={(event) => onSubmit(event)}
+            onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
               <div className="card">

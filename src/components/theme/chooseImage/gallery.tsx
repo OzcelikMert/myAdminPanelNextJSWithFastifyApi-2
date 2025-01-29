@@ -17,7 +17,7 @@ const initialState: IComponentState = {
 type IComponentProps = {
   onClose: () => void;
   isShow: boolean;
-  onSubmit: (images: IGalleryGetResultService[]) => void;
+  onSubmit: (images: string[]) => void;
   isMulti?: boolean;
   selectedImages?: string[];
 };

@@ -30,7 +30,7 @@ const initialState: IPageState = {
 };
 
 export default function PageSubscribers() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -48,7 +48,7 @@ export default function PageSubscribers() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -92,7 +92,10 @@ export default function PageSubscribers() {
   };
 
   const getItems = async () => {
-    const result = await SubscriberService.getMany({}, abortController.signal);
+    const result = await SubscriberService.getMany(
+      {},
+      abortControllerRef.current.signal
+    );
 
     if (result.status && result.data) {
       const items = result.data;
@@ -125,7 +128,7 @@ export default function PageSubscribers() {
         {
           _id: selectedItemId,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
 
       hideToast(loadingToast);

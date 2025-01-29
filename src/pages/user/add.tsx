@@ -1,11 +1,11 @@
-import { useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import { UserService } from '@services/user.service';
 import {
   IUserGetResultService,
   IUserUpdateWithIdParamService,
 } from 'types/services/user.service';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { UserEndPointPermission } from '@constants/endPointPermissions/user.endPoint.permission';
 import { PermissionUtil } from '@utils/permission.util';
 import { SelectUtil } from '@utils/select.util';
@@ -40,8 +40,8 @@ import { useToast } from '@hooks/toast';
 
 export type IPageUserAddState = {
   mainTabActiveKey: string;
-  userRoles: IThemeFormSelectData<UserRoleId>[];
-  status: IThemeFormSelectData<StatusId>[];
+  userRoles: IComponentInputSelectData<UserRoleId>[];
+  status: IComponentInputSelectData<StatusId>[];
   permissions: IPermission[];
   permissionGroups: IPermissionGroup[];
   item?: IUserGetResultService;
@@ -125,7 +125,7 @@ type IPageQueries = {
 };
 
 export default function PageUserAdd() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -151,7 +151,7 @@ export default function PageUserAdd() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -243,7 +243,7 @@ export default function PageUserAdd() {
         {
           _id: queries._id,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
 
       if (serviceResult.status && serviceResult.data) {
@@ -304,10 +304,10 @@ export default function PageUserAdd() {
     const params = data;
 
     const serviceResult = await (params._id
-      ? UserService.updateWithId(params, abortController.signal)
+      ? UserService.updateWithId(params, abortControllerRef.current.signal)
       : UserService.add(
           { ...params, password: params.password || '' },
-          abortController.signal
+          abortControllerRef.current.signal
         ));
 
     if (serviceResult.status) {

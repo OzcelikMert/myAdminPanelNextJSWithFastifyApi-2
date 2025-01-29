@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
 import {
   IPostECommerceAttributeModel,
@@ -64,7 +64,7 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                 </div>
                 {props.selectedAttributes?.map((attribute) => (
                   <div className="col-md mt-3">
-                    <ComponentFormSelect
+                    <ComponentFormInputSelect
                       title={
                         props.attributes?.findSingle(
                           'value',

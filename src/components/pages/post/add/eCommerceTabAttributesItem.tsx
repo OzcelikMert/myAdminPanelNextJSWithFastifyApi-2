@@ -3,7 +3,7 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { IPostECommerceAttributeModel } from 'types/models/post.model';
 import { Accordion, Card } from 'react-bootstrap';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 
@@ -30,7 +30,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                 <div className="col-9">
                   <div className="row">
                     <div className="col-md-6 mt-2 mt-md-0">
-                      <ComponentFormSelect
+                      <ComponentFormInputSelect
                         title={t('attribute')}
                         name={`eCommerce.attributes.${props.index}.attributeId`}
                         options={props.attributes}
@@ -47,7 +47,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                       />
                     </div>
                     <div className="col-md-6 mt-2 mt-md-0">
-                      <ComponentFormSelect
+                      <ComponentFormInputSelect
                         title={t('type')}
                         name={`eCommerce.attributes.${props.index}.typeId`}
                         options={props.attributeTypes}
@@ -97,7 +97,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
               <Card.Body>
                 <div className="row">
                   <div className="col-md-12">
-                    <ComponentFormSelect
+                    <ComponentFormInputSelect
                       title={t('variations')}
                       name={`eCommerce.attributes.${props.index}.variations`}
                       isMulti

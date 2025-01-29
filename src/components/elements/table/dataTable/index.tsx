@@ -4,8 +4,6 @@ import ComponentTableToggleMenu, {
   IComponentTableToggleMenuItem,
 } from '@components/elements/table/toggleMenu';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
-import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
-import ComponentFormInput from '@components/elements/form/input/input';
 import ComponentTableFilterButton, {
   IComponentTableFilterButton,
 } from '../filterButton';
@@ -16,6 +14,8 @@ import {
 import { IActionWithPayload } from 'types/hooks';
 import ComponentToolTip from '@components/elements/tooltip';
 import { cloneDeepWith } from 'lodash';
+import ComponentInputCheckbox from '@components/elements/inputs/checkbox';
+import ComponentInput from '@components/elements/inputs/input';
 
 export type IComponentDataTableColumn<T> = {
   isSearchable?: boolean;
@@ -303,7 +303,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
           name: !props.isAllSelectable ? null : (
             <ComponentToolTip message={props.i18?.selectAll ?? 'Select All'}>
               <div>
-                <ComponentFormCheckBox
+                <ComponentInputCheckbox
                   checked={checkAllSelected()}
                   onChange={(e) => onSelectAll()}
                 />
@@ -313,7 +313,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
           width: '55px',
           cell: (row: any) => (
             <div>
-              <ComponentFormCheckBox
+              <ComponentInputCheckbox
                 checked={state.selectedItems.includes(row)}
                 onChange={(e) => onSelect(row)}
               />
@@ -333,7 +333,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
         <div className="row pt-2 pb-2 m-0">
           <div className="col-md-8"></div>
           <div className="col-md-4">
-            <ComponentFormInput
+            <ComponentInput
               title={`${props.i18?.search ?? 'Search'}`}
               onChange={(event: any) => onSearch(event)}
               value={state.searchKey}

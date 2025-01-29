@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInput from '@components/elements/form/input/input';
-import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
+import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentFormInputCheckbox from '@components/elements/form/inputs/checkbox';
 import { IPostECommerceInventoryModel } from 'types/models/post.model';
 
 type IComponentProps = {
@@ -43,7 +43,7 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
               />
             </div>
             <div className="col-md-7">
-              <ComponentFormCheckBox
+              <ComponentFormInputCheckbox
                 title={t('isManageStock')}
                 name={
                   props.isECommerceVariation

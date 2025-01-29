@@ -1,4 +1,4 @@
-import { FormEvent, useReducer, useRef, useState } from 'react';
+import React, { FormEvent, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import { PostTermService } from '@services/postTerm.service';
 import { PostService } from '@services/post.service';
@@ -7,7 +7,7 @@ import {
   IPostUpdateWithIdParamService,
 } from 'types/services/post.service';
 import { ProductTypeId, productTypes } from '@constants/productTypes';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import ComponentPagePostAddECommerce from '@components/pages/post/add/eCommerce';
 import ComponentPagePostAddButtons from '@components/pages/post/add/buttons';
 import ComponentPagePostAddBeforeAndAfter from '@components/pages/post/add/beforeAndAfter';
@@ -49,16 +49,16 @@ import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
 
 export type IPagePostAddState = {
-  authors: IThemeFormSelectData<string>[];
-  pageTypes: IThemeFormSelectData<PageTypeId>[];
-  attributeTypes: IThemeFormSelectData<AttributeTypeId>[];
-  productTypes: IThemeFormSelectData<ProductTypeId>[];
-  components: IThemeFormSelectData<string>[];
-  categories: IThemeFormSelectData<string>[];
-  tags: IThemeFormSelectData<string>[];
-  attributes: IThemeFormSelectData<string>[];
-  variations: (IThemeFormSelectData<string> & { parentId: string })[];
-  status: IThemeFormSelectData<StatusId>[];
+  authors: IComponentInputSelectData<string>[];
+  pageTypes: IComponentInputSelectData<PageTypeId>[];
+  attributeTypes: IComponentInputSelectData<AttributeTypeId>[];
+  productTypes: IComponentInputSelectData<ProductTypeId>[];
+  components: IComponentInputSelectData<string>[];
+  categories: IComponentInputSelectData<string>[];
+  tags: IComponentInputSelectData<string>[];
+  attributes: IComponentInputSelectData<string>[];
+  variations: (IComponentInputSelectData<string> & { parentId: string })[];
+  status: IComponentInputSelectData<StatusId>[];
   mainTabActiveKey: string;
   item?: IPostGetResultService;
   langId: string;
@@ -243,7 +243,7 @@ type IPageQueries = {
 };
 
 export default function PagePostAdd() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -281,7 +281,7 @@ export default function PagePostAdd() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -427,7 +427,7 @@ export default function PagePostAdd() {
           ).permissionId,
         ],
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       let newItems = serviceResult.data;
@@ -454,7 +454,7 @@ export default function PagePostAdd() {
         langId: mainLangId,
         typeId: ComponentTypeId.Private,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       dispatch({
@@ -476,7 +476,7 @@ export default function PagePostAdd() {
         langId: mainLangId,
         statusId: StatusId.Active,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status && serviceResult.data) {
@@ -531,7 +531,7 @@ export default function PagePostAdd() {
           typeId: queries.postTypeId,
           langId: _langId,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
@@ -643,12 +643,15 @@ export default function PagePostAdd() {
 
     if (params.typeId == PostTypeId.Product) {
       serviceResult = await (params._id
-        ? PostService.updateProductWithId(params, abortController.signal)
-        : PostService.addProduct(params, abortController.signal));
+        ? PostService.updateProductWithId(
+            params,
+            abortControllerRef.current.signal
+          )
+        : PostService.addProduct(params, abortControllerRef.current.signal));
     } else {
       serviceResult = await (params._id
-        ? PostService.updateWithId(params, abortController.signal)
-        : PostService.add(params, abortController.signal));
+        ? PostService.updateWithId(params, abortControllerRef.current.signal)
+        : PostService.add(params, abortControllerRef.current.signal));
     }
 
     if (serviceResult.status) {

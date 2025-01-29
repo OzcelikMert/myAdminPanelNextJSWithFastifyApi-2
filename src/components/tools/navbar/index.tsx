@@ -16,7 +16,9 @@ import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useDidMount } from '@library/react/hooks';
-import ComponentToolNavbarProfile, { NavbarProfileDropdownItems } from './profile';
+import ComponentToolNavbarProfile, {
+  NavbarProfileDropdownItems,
+} from './profile';
 
 type IComponentState = {
   isDarkTheme: boolean;
@@ -27,7 +29,7 @@ const initialState: IComponentState = {
 };
 
 const ComponentToolNavbar = React.memo(() => {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const appDispatch = useAppDispatch();
@@ -40,7 +42,7 @@ const ComponentToolNavbar = React.memo(() => {
 
   useDidMount(() => {
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -77,13 +79,17 @@ const ComponentToolNavbar = React.memo(() => {
         });
         break;
       case NavbarProfileDropdownItems.Lock:
-        const resultLock = await AuthService.logOut(abortController.signal);
+        const resultLock = await AuthService.logOut(
+          abortControllerRef.current.signal
+        );
         if (resultLock.status) {
           appDispatch(setIsLockState(true));
         }
         break;
       case NavbarProfileDropdownItems.SignOut:
-        const resultSignOut = await AuthService.logOut(abortController.signal);
+        const resultSignOut = await AuthService.logOut(
+          abortControllerRef.current.signal
+        );
         if (resultSignOut.status) {
           await RouteUtil.change({
             router,
@@ -129,7 +135,7 @@ const ComponentToolNavbar = React.memo(() => {
           />
           <li className="nav-item nav-profile">
             <ComponentToolNavbarProfile
-              onClickDropdownItem={item => onClickProfileDropdownItem(item)}
+              onClickDropdownItem={(item) => onClickProfileDropdownItem(item)}
             />
           </li>
         </ul>

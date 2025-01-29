@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { SettingService } from '@services/setting.service';
 import { ISettingUpdateSocialMediaParamService } from 'types/services/setting.service';
 import { ISettingSocialMediaModel } from 'types/models/setting.model';
@@ -72,7 +72,7 @@ const initialFormState: IPageFormState = {
 };
 
 export default function PageSettingsSocialMedia() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -91,7 +91,7 @@ export default function PageSettingsSocialMedia() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -137,7 +137,7 @@ export default function PageSettingsSocialMedia() {
   const getSettings = async () => {
     const serviceResult = await SettingService.get(
       { projection: SettingProjectionKeys.SocialMedia },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       const socialMedia = serviceResult.data.socialMedia || [];
@@ -151,7 +151,7 @@ export default function PageSettingsSocialMedia() {
 
     const serviceResult = await SettingService.updateSocialMedia(
       params,
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status) {
       showToast({

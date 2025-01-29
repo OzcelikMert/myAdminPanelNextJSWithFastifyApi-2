@@ -17,16 +17,13 @@ import { PostSortTypeId } from '@constants/postSortTypes';
 import { ISettingGetResultService } from 'types/services/setting.service';
 import { SettingService } from '@services/setting.service';
 import { SettingProjectionKeys } from '@constants/settingProjections';
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { useRouter } from 'next/router';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/hooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentPageDashboardLastPosts from '@components/pages/dashboard/lastPosts';
 import ComponentPageDashboardReportOne from '@components/pages/dashboard/reportOne';
 import ComponentPageDashboardReportTwo from '@components/pages/dashboard/reportTwo';
@@ -107,7 +104,7 @@ const reducer = (
 };
 
 export default function PageDashboard() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -122,7 +119,7 @@ export default function PageDashboard() {
     init();
 
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -155,7 +152,9 @@ export default function PageDashboard() {
   };
 
   const getViewNumber = async () => {
-    const serviceResult = await ViewService.getNumber(abortController.signal);
+    const serviceResult = await ViewService.getNumber(
+      abortControllerRef.current.signal
+    );
 
     if (serviceResult.status && serviceResult.data) {
       if (
@@ -172,7 +171,7 @@ export default function PageDashboard() {
 
   const getViewStatistics = async () => {
     const serviceResult = await ViewService.getStatistics(
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status && serviceResult.data) {
@@ -188,7 +187,7 @@ export default function PageDashboard() {
       {
         projection: SettingProjectionKeys.General,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status && serviceResult.data) {
@@ -206,7 +205,7 @@ export default function PageDashboard() {
         count: 10,
         sortTypeId: PostSortTypeId.Newest,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       dispatch({

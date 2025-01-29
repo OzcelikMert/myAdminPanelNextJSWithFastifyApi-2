@@ -1,5 +1,5 @@
 import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import React from 'react';

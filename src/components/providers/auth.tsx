@@ -3,10 +3,8 @@ import { ApiErrorCodes } from '@library/api/errorCodes';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
-import { useState } from 'react';
-import {
-  setSessionAuthState,
-} from '@redux/features/sessionSlice';
+import React, { useState } from 'react';
+import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useRouter } from 'next/router';
 import { useDidMount } from '@library/react/hooks';
 
@@ -25,7 +23,7 @@ type IComponentProps = {
 };
 
 const ComponentProviderAuth = (props: IComponentProps) => {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const appDispatch = useAppDispatch();
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
@@ -38,7 +36,7 @@ const ComponentProviderAuth = (props: IComponentProps) => {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -49,11 +47,12 @@ const ComponentProviderAuth = (props: IComponentProps) => {
     await checkSession();
     setIsLoading(false);
   };
-  
 
   const checkSession = async () => {
-    const serviceResult = await AuthService.getSession(abortController.signal);
-    
+    const serviceResult = await AuthService.getSession(
+      abortControllerRef.current.signal
+    );
+
     if (
       serviceResult.status &&
       serviceResult.errorCode == ApiErrorCodes.success
@@ -69,7 +68,7 @@ const ComponentProviderAuth = (props: IComponentProps) => {
     }
   };
 
-  if (isLoading || abortController.signal.aborted) {
+  if (isLoading || abortControllerRef.current.signal.aborted) {
     return null;
   }
 
@@ -90,6 +89,6 @@ const ComponentProviderAuth = (props: IComponentProps) => {
   }
 
   return props.children;
-}
+};
 
 export default ComponentProviderAuth;

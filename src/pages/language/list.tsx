@@ -12,7 +12,7 @@ import { LanguageEndPointPermission } from '@constants/endPointPermissions/langu
 import { EndPoints } from '@constants/endPoints';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 import { RouteUtil } from '@utils/route.util';
-import { use, useEffect, useReducer, useState } from 'react';
+import React, { use, useEffect, useReducer, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';
@@ -66,7 +66,7 @@ const reducer = (state: IPageState, action: IAction): IPageState => {
 };
 
 export default function PageSettingLanguageList() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -81,7 +81,7 @@ export default function PageSettingLanguageList() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -117,7 +117,10 @@ export default function PageSettingLanguageList() {
   };
 
   const getItems = async () => {
-    const result = await LanguageService.getMany({}, abortController.signal);
+    const result = await LanguageService.getMany(
+      {},
+      abortControllerRef.current.signal
+    );
 
     if (result.status && result.data) {
       dispatch({ type: ActionTypes.SET_ITEMS, payload: result.data });
@@ -130,7 +133,7 @@ export default function PageSettingLanguageList() {
         _id: state.selectedItemId,
         rank: rank,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
 
     if (serviceResult.status) {

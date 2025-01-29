@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentThemeChooseImage from '@components/theme/chooseImage';
+import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import { IPageSettingsGeneralState } from '@pages/settings/general';
 
 type IComponentProps = {
@@ -22,39 +22,33 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
       <div className="row">
         <div className="col-md-4 mb-3">
           <ComponentFieldSet legend={t('logo')}>
-            <ComponentThemeChooseImage
+            <ComponentThemeChooseImageForm
               name="logo"
-              isMulti={false}
               isShowReviewImage={true}
-              reviewImage={props.logo}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>
         </div>
         <div className="col-md-4 mb-3">
           <ComponentFieldSet legend={t('logo') + ' - 2'}>
-            <ComponentThemeChooseImage
+            <ComponentThemeChooseImageForm
               name="logoTwo"
-              isMulti={false}
               isShowReviewImage={true}
-              reviewImage={props.logoTwo}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>
         </div>
         <div className="col-md-4 mb-3">
           <ComponentFieldSet legend={t('icon')}>
-            <ComponentThemeChooseImage
+            <ComponentThemeChooseImageForm
               name="icon"
-              isMulti={false}
               isShowReviewImage={true}
-              reviewImage={props.icon}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormSelect
+          <ComponentFormInputSelect
             title={t('adminPanelLanguage').toCapitalizeCase()}
             name="panelLangId"
             isMulti={false}

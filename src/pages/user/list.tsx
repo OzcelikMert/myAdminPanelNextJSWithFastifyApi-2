@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import { IUserGetResultService } from 'types/services/user.service';
@@ -69,7 +69,7 @@ const reducer = (state: IPageState, action: IAction): IPageState => {
 };
 
 export default function PageUserList() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -84,7 +84,7 @@ export default function PageUserList() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -127,7 +127,10 @@ export default function PageUserList() {
   };
 
   const getItems = async () => {
-    const result = await UserService.getMany({}, abortController.signal);
+    const result = await UserService.getMany(
+      {},
+      abortControllerRef.current.signal
+    );
     if (result.status && result.data) {
       const items = result.data.orderBy('roleId', 'desc');
       dispatch({
@@ -160,7 +163,7 @@ export default function PageUserList() {
 
         const serviceResult = await UserService.deleteWithId(
           { _id: userId },
-          abortController.signal
+          abortControllerRef.current.signal
         );
         hideToast(loadingToast);
         if (serviceResult.status) {

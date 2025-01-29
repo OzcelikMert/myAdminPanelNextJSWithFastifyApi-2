@@ -1,18 +1,19 @@
 import React from 'react';
 import Image from 'next/image';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import ComponentInputSelect, {
+  IComponentInputSelectData,
+} from '@components/elements/inputs/select';
 import { PathUtil } from '@utils/path.util';
 import { ILanguageGetResultService } from 'types/services/language.service';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentToolTip from '@components/elements/tooltip';
-import Select from 'react-select';
 import { ILanguageModel } from 'types/models/language.model';
 import { useEffectAfterDidMount } from '@library/react/hooks';
 
 const MissingWarning = () => {
   const t = useAppSelector(selectTranslation);
-  
+
   return (
     <ComponentToolTip message={t('warningAboutMissingLanguage')}>
       <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>
@@ -21,9 +22,9 @@ const MissingWarning = () => {
 };
 
 type IComponentItemProps = {
-  isSelected?: boolean, 
-  isMissing?: boolean
-} & IThemeFormSelectData<ILanguageGetResultService>
+  isSelected?: boolean;
+  isMissing?: boolean;
+} & IComponentInputSelectData<ILanguageGetResultService>;
 
 const Item = (props: IComponentItemProps) => {
   return (
@@ -53,7 +54,9 @@ type IOwnedLanguage = {
 
 type IComponentProps = {
   selectedLangId: string;
-  onChange: (item: IThemeFormSelectData<ILanguageGetResultService>) => void;
+  onChange: (
+    item: IComponentInputSelectData<ILanguageGetResultService>
+  ) => void;
   ownedLanguages?: IOwnedLanguage[] | IOwnedLanguage[][];
   showMissingMessage?: boolean;
 };
@@ -94,29 +97,24 @@ const ComponentThemeLanguageSelector = React.memo((props: IComponentProps) => {
     .map((item) => ({
       label: item.title,
       value: item,
-      isMissing:  props.showMissingMessage && checkMissingLanguage(item._id),
-      isSelected: item._id == selectedLanguageRef.current?._id
+      isMissing: props.showMissingMessage && checkMissingLanguage(item._id),
+      isSelected: item._id == selectedLanguageRef.current?._id,
     }));
 
   return (
-    <div className={`theme-input static content-language`}>
-      <span className="label">{t('contentLanguage')}</span>
-      <label className="field">
-        <Select
-          className="custom-select"
-          classNamePrefix="custom-select"
-          isSearchable={false}
-          isMulti={false}
-          formatOptionLabel={Item}
-          options={options}
-          value={{
-            label: selectedLanguageRef.current.title,
-            value: selectedLanguageRef.current,
-          }}
-          onChange={(item: any) => props.onChange(item)}
-        />
-      </label>
-    </div>
+    <ComponentInputSelect
+      mainDivCustomClassName="content-language"
+      title={t('contentLanguage')}
+      isSearchable={false}
+      isMulti={false}
+      formatOptionLabel={Item}
+      options={options}
+      value={{
+        label: selectedLanguageRef.current.title,
+        value: selectedLanguageRef.current,
+      }}
+      onChange={(item) => props.onChange(item)}
+    />
   );
 });
 

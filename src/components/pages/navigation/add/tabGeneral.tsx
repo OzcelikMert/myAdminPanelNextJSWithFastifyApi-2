@@ -1,8 +1,8 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPageNavigationAddState } from '@pages/navigation/add';
 
 type IComponentProps = {
@@ -33,7 +33,7 @@ const ComponentPageNavigationAddTabGeneral = React.memo(
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormSelect
+          <ComponentFormInputSelect
             title={t('main')}
             name="parentId"
             placeholder={t('chooseMain')}

@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
-import ComponentFormInput from '@components/elements/form/input/input';
-import ComponentFormCheckBox from '@components/elements/form/input/checkbox';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentFormInputCheckbox from '@components/elements/form/inputs/checkbox';
 import { IPageLanguageAddState } from '@pages/language/add';
 import { StatusId } from '@constants/status';
 
@@ -19,7 +19,7 @@ const ComponentPageLanguageAddTabOptions = React.memo(
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
-          <ComponentFormSelect
+          <ComponentFormInputSelect
             title={t('status')}
             options={props.status}
             name="statusId"
@@ -35,7 +35,7 @@ const ComponentPageLanguageAddTabOptions = React.memo(
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormCheckBox title={t('default')} name="isDefault" />
+          <ComponentFormInputCheckbox title={t('default')} name="isDefault" />
         </div>
       </div>
     );

@@ -1,10 +1,10 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
-import ComponentThemeChooseImage from '@components/theme/chooseImage';
+import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import { PostTermTypeId } from '@constants/postTermTypes';
 
 type IComponentProps = {
@@ -61,15 +61,13 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
       ) : null}
       {!props.isIconActive ? (
         <div className="col-md-7 mb-3">
-          <ComponentThemeChooseImage
+          <ComponentThemeChooseImageForm
             name={
               props.isECommerceVariation
                 ? `eCommerce.variations.${props.index}.itemId.contents.image`
                 : `contents.image`
             }
-            selectedImages={props.image ? [props.image] : undefined}
             isShowReviewImage={true}
-            reviewImage={props.image}
             reviewImageClassName={'post-image'}
           />
         </div>
@@ -102,7 +100,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         <div className="col-md-7 mb-3">
           <div className="row">
             <div className="col-md-10">
-              <ComponentFormSelect
+              <ComponentFormInputSelect
                 title={t('category')}
                 name="categories"
                 placeholder={t('chooseCategory').toCapitalizeCase()}
@@ -134,7 +132,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         <div className="col-md-7 mb-3">
           <div className="row">
             <div className="col-md-10">
-              <ComponentFormSelect
+              <ComponentFormInputSelect
                 title={t('tag')}
                 name="tags"
                 placeholder={t('chooseTag').toCapitalizeCase()}

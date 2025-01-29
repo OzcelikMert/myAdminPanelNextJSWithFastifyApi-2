@@ -1,6 +1,6 @@
 import React from 'react';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { IPostContentButtonModel } from 'types/models/post.model';

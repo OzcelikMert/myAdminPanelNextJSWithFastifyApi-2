@@ -2,6 +2,8 @@ import { VariableLibrary } from '@library/variable';
 import { PathUtil } from '@utils/path.util';
 
 const getUploadedImageSrc = (imageName?: string): string => {
+  console.log(imageName);
+  
   return imageName && !VariableLibrary.isEmpty(imageName)
     ? imageName.isUrl()
       ? imageName

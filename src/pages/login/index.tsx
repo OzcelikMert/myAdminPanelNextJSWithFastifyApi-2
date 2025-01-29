@@ -12,10 +12,7 @@ import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useRouter } from 'next/router';
 import ComponentForm from '@components/elements/form';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/hooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthSchema, IAuthPostSchema } from 'schemas/auth.schema';
@@ -69,7 +66,7 @@ const initialFormState: IPageFormState = {
 };
 
 export default function PageLogin() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -86,7 +83,7 @@ export default function PageLogin() {
   useDidMount(() => {
     init();
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -111,12 +108,15 @@ export default function PageLogin() {
   const onSubmit = async (data: IPageFormState) => {
     dispatch({ type: AcitonTypes.SET_IS_WRONG, payload: false });
 
-    const serviceResult = await AuthService.login(data, abortController.signal);
+    const serviceResult = await AuthService.login(
+      data,
+      abortControllerRef.current.signal
+    );
 
     if (serviceResult.data) {
       if (serviceResult.status) {
         const resultSession = await AuthService.getSession(
-          abortController.signal
+          abortControllerRef.current.signal
         );
 
         if (resultSession.status && resultSession.data) {

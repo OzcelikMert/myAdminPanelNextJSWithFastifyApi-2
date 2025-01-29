@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentForm from '@components/elements/form';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { IPageProfileFormState } from '@pages/settings/profile';
 import { UseFormReturn } from 'react-hook-form';
 

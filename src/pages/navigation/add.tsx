@@ -1,11 +1,11 @@
-import { FormEvent, useReducer, useRef, useState } from 'react';
+import React, { FormEvent, useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import {
   INavigationGetResultService,
   INavigationUpdateWithIdParamService,
 } from 'types/services/navigation.service';
 import { NavigationService } from '@services/navigation.service';
-import { IThemeFormSelectData } from '@components/elements/form/input/select';
+import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { PermissionUtil } from '@utils/permission.util';
 import { NavigationEndPointPermission } from '@constants/endPointPermissions/navigation.endPoint.permission';
 import { SelectUtil } from '@utils/select.util';
@@ -33,9 +33,9 @@ import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
 
 export type IPageNavigationAddState = {
-  items: IThemeFormSelectData<string>[];
+  items: IComponentInputSelectData<string>[];
   mainTabActiveKey: string;
-  status: IThemeFormSelectData<StatusId>[];
+  status: IComponentInputSelectData<StatusId>[];
   item?: INavigationGetResultService;
   langId: string;
   isItemLoading: boolean;
@@ -136,7 +136,7 @@ type IPageQueries = {
 };
 
 export default function PageNavigationAdd() {
-  const abortController = new AbortController();
+  const abortControllerRef = React.useRef(new AbortController());
 
   const router = useRouter();
   const t = useAppSelector(selectTranslation);
@@ -172,7 +172,7 @@ export default function PageNavigationAdd() {
     init();
 
     return () => {
-      abortController.abort();
+      abortControllerRef.current.abort();
     };
   });
 
@@ -244,7 +244,7 @@ export default function PageNavigationAdd() {
         langId: mainLangId,
         statusId: StatusId.Active,
       },
-      abortController.signal
+      abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
       let newItems: IPageNavigationAddState['items'] = [
@@ -270,7 +270,7 @@ export default function PageNavigationAdd() {
           _id: queries._id,
           langId: _langId,
         },
-        abortController.signal
+        abortControllerRef.current.signal
       );
       if (serviceResult.status && serviceResult.data) {
         const item = serviceResult.data;
@@ -300,8 +300,11 @@ export default function PageNavigationAdd() {
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
     const serviceResult = await (params._id
-      ? NavigationService.updateWithId(params, abortController.signal)
-      : NavigationService.add(params, abortController.signal));
+      ? NavigationService.updateWithId(
+          params,
+          abortControllerRef.current.signal
+        )
+      : NavigationService.add(params, abortControllerRef.current.signal));
 
     if (serviceResult.status) {
       showToast({

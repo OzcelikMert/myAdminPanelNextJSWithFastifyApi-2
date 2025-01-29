@@ -1,10 +1,10 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormSelect from '@components/elements/form/input/select';
+import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPageNavigationAddState } from '@pages/navigation/add';
-import ComponentThemeChooseImage from '@components/theme/chooseImage';
+import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import { PostTermTypeId } from '@constants/postTermTypes';
 
 type IComponentProps = {
@@ -38,12 +38,9 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
     return (
       <div className="row">
         <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
-          <ComponentThemeChooseImage
+          <ComponentThemeChooseImageForm
             name="contents.image"
-            isMulti={false}
-            selectedImages={props.image ? [props.image] : undefined}
             isShowReviewImage={true}
-            reviewImage={props.image}
             reviewImageClassName={'post-image'}
           />
         </div>
@@ -64,7 +61,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
         </div>
         {props.showParentSelect ? (
           <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
-            <ComponentFormSelect
+            <ComponentFormInputSelect
               title={getSelectMainInputTitle()}
               name="parentId"
               placeholder={t('chooseMainCategory')}

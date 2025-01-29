@@ -1,76 +1,67 @@
 import React from 'react';
-import ComponentThemeChooseImage from '@components/theme/chooseImage';
+import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import dynamic from 'next/dynamic';
 import { IComponentElementModel } from 'types/models/component.model';
 import { ElementTypeId } from '@constants/elementTypes';
-import ComponentFormInput, { IComponentFormInputProps } from '@components/elements/form/input/input';
+import ComponentFormInput from '@components/elements/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import { useFormContext } from 'react-hook-form';
 
-const ComponentThemeRichTextBox = dynamic(
-  () => import('@components/theme/richTextBox'),
+const ComponentFormInputRichTextbox = dynamic(
+  () => import('@components/elements/form/inputs/richTextbox'),
   { ssr: false }
 );
 
-const TextArea = React.memo((props: IComponentFormInputProps) => {
-  return (
-    <ComponentFormInput
-      type={'textarea'}
-      {...props}
-    />
-  );
+const TextArea = React.memo((props: { name: string }) => {
+  const t = useAppSelector(selectTranslation);
+
+  return <ComponentFormInput title={t('text')} type={'textarea'} {...props} />;
 });
 
-const RichText = React.memo((props: {value: string, onChange: (newValue: string) => void}) => {
-  return (
-    <ComponentThemeRichTextBox
-      value={props.value}
-      onChange={(e) => props.onChange(e)}
-    />
-  );
+const RichText = React.memo((props: { name: string }) => {
+  return <ComponentFormInputRichTextbox {...props} />;
 });
 
-const Image = React.memo((props: {value: string, onChange: (newValue: string) => void}) => {
+const Image = React.memo((props: { name: string }) => {
   return (
     <div>
-      <ComponentThemeChooseImage
-        onSelected={(images) => props.onChange(images[0])}
+      <ComponentThemeChooseImageForm
+        {...props}
         isMulti={false}
         isShowReviewImage={true}
-        reviewImage={props.value}
         reviewImageClassName={'post-image'}
       />
     </div>
   );
 });
 
-const Button = React.memo((props: {text: IComponentFormInputProps, url: IComponentFormInputProps}) => {
+const Button = React.memo((props: { nameText: string; nameUrl: string }) => {
+  const t = useAppSelector(selectTranslation);
+
   return (
     <div className="row">
       <div className="col-md-6">
         <ComponentFormInput
+          title={t('text')}
           type={'text'}
-          {...props.text}
+          name={props.nameText}
         />
       </div>
       <div className="col-md-6 mt-3 mt-lg-0">
         <ComponentFormInput
+          title={t('url')}
           type={'text'}
-          {...props.url}
+          name={props.nameUrl}
         />
       </div>
     </div>
   );
 });
 
-const Text = React.memo((props: IComponentFormInputProps) => {
-  return (
-    <ComponentFormInput
-      type={'text'}
-      {...props}
-    />
-  );
+const Text = React.memo((props: { name: string }) => {
+  const t = useAppSelector(selectTranslation);
+
+  return <ComponentFormInput title={t('text')} type={'text'} {...props} />;
 });
 
 type IComponentProps = {
@@ -83,25 +74,18 @@ const ComponentPageComponentAddElementTypeInput = React.memo(
     const contentInputName = `elements.${props.index}.contents.content`;
     const urlInputName = `elements.${props.index}.contents.url`;
     const t = useAppSelector(selectTranslation);
-    const form = useFormContext();
-    const registeredInputContent = form.register(contentInputName);
-    const registeredInputURL = form.register(urlInputName);
-
-    const onChangeContent = (text: string) => {
-      form.setValue(contentInputName, text);
-    };
 
     switch (props.data.typeId) {
       case ElementTypeId.TextArea:
-        return <TextArea title={t('text')} {...registeredInputContent} />;
+        return <TextArea name={contentInputName} />;
       case ElementTypeId.Image:
-        return <Image value={props.data.contents?.content ?? ""} onChange={newValue => onChangeContent(newValue)} />;
+        return <Image name={contentInputName} />;
       case ElementTypeId.Button:
-        return <Button text={{title: t('text'), ...registeredInputContent}} url={{title: t('url'), ...registeredInputURL}} />;
+        return <Button nameText={contentInputName} nameUrl={urlInputName} />;
       case ElementTypeId.RichText:
-        return <RichText value={props.data.contents?.content ?? ""} onChange={newValue => onChangeContent(newValue)} />;
+        return <RichText name={contentInputName} />;
       default:
-        return <Text title={t('text')} {...registeredInputContent} />;
+        return <Text name={contentInputName} />;
     }
   }
 );
