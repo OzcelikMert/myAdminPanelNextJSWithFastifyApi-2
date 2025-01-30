@@ -4,6 +4,7 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPageNavigationAddState } from '@pages/navigation/add';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   items: IPageNavigationAddState['items'];
@@ -21,7 +22,11 @@ const ComponentPageNavigationAddTabGeneral = React.memo(
             title={`${t('title')}*`}
             name="contents.title"
             type="text"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('title')]),
+            }}
+            required
           />
         </div>
         <div className="col-md-7 mb-3">
@@ -29,7 +34,11 @@ const ComponentPageNavigationAddTabGeneral = React.memo(
             title={`${t('url')}*`}
             name="contents.url"
             type="text"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('url')]),
+            }}
+            required
           />
         </div>
         <div className="col-md-7 mb-3">

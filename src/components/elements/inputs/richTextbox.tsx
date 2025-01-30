@@ -7,9 +7,10 @@ import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import { Config } from 'jodit/types/config';
 import Spinner from 'react-bootstrap/Spinner';
 import { ImageSourceUtil } from '@utils/imageSource.util';
-import { IJodit } from 'jodit/types/types';
+import { IJodit, IViewBased, IViewOptions } from 'jodit/types/types';
 import { useDidMount } from '@library/react/hooks';
 import { IActionWithPayload } from 'types/hooks';
+import { GSP_NO_RETURNED_VALUE } from 'next/dist/lib/constants';
 
 type IComponentState = {
   value: string;
@@ -57,7 +58,7 @@ type IComponentProps = {} & Omit<IJoditEditorProps, 'config' | 'onBlur'>;
 
 const ComponentInputRichTextbox = React.memo(
   React.forwardRef<JoditReact, IComponentProps>((props, ref) => {
-    const config: Partial<Config> = {
+    const configRef = React.useRef<Partial<Config>>({
       extraIcons: {
         gallery: `<i class="mdi mdi-folder-multiple-image"></i>`,
       },
@@ -88,16 +89,15 @@ const ComponentInputRichTextbox = React.memo(
           icon: 'gallery',
           text: 'Gallery Images',
           tooltip: 'Choose a image in gallery',
-          exec: (_view) => onClickChooseImage(view),
+          exec: (_view) => onClickChooseImage(_view as IJodit),
         },
       },
-    };
+    });
+    const viewRef = React.useRef<IJodit>(null);
 
     const [state, dispatch] = useReducer(reducer, {
       ...initialState,
     });
-
-    let view: IJodit | null = null;
 
     useDidMount(() => {
       init();
@@ -107,15 +107,15 @@ const ComponentInputRichTextbox = React.memo(
       dispatch({ type: ActionTypes.SET_IS_LOADING, payload: false });
     };
 
-    const onClickChooseImage = async (_view: any) => {
-      view = _view;
+    const onClickChooseImage = async (_view: IJodit) => {
+      viewRef.current = _view;
       dispatch({ type: ActionTypes.SET_IS_GALLERY_SHOW, payload: true });
     };
 
     const onSelectedImage = (images: string[]) => {
-      if (view) {
+      if (viewRef.current) {
         for (const image of images) {
-          view.selection.insertImage(
+          viewRef.current.s.insertImage(
             ImageSourceUtil.getUploadedImageSrc(image)
           );
         }
@@ -131,11 +131,12 @@ const ComponentInputRichTextbox = React.memo(
     ) : (
       <div id={`themeRichTextBox_${String.createId()}`}>
         <ComponentThemeChooseImage
-          onChange={(images) => onSelectedImage(images)}
           isMulti={true}
           isShow={state.isGalleryShow}
+          hideShowModalButton
+          hideReviewImage
+          onChange={(images) => onSelectedImage(images)}
           onHideModal={() => onHideGalleryModal()}
-          hideShowModalButton={true}
         />
         <React.Fragment>
           {
@@ -144,10 +145,8 @@ const ComponentInputRichTextbox = React.memo(
               value={props.value}
               className={props.className}
               ref={ref}
-              config={config}
-              onBlur={(newValue) =>
-                props.onChange && props.onChange(newValue)
-              }
+              config={configRef.current}
+              onBlur={(newValue) => props.onChange && props.onChange(newValue)}
             />
           }
         </React.Fragment>

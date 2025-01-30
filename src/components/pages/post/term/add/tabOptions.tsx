@@ -5,11 +5,12 @@ import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import ComponentFormInput from '@components/elements/form/inputs/input';
 import { StatusId } from '@constants/status';
 import { IPagePostTermAddState } from '@pages/post/term/add';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
-  status: IPagePostTermAddState["status"]
+  status: IPagePostTermAddState['status'];
   statusId: StatusId;
-  isModal?: boolean
+  isModal?: boolean;
 };
 
 const ComponentPagePostTermAddTabOptions = React.memo(
@@ -18,7 +19,7 @@ const ComponentPagePostTermAddTabOptions = React.memo(
 
     return (
       <div className="row">
-        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
           <ComponentFormInputSelect
             title={t('status')}
             name="statusId"
@@ -26,12 +27,16 @@ const ComponentPagePostTermAddTabOptions = React.memo(
             valueAsNumber
           />
         </div>
-        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
           <ComponentFormInput
             title={t('rank')}
             name="rank"
             type="number"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('rank')]),
+            }}
+            required
           />
         </div>
       </div>

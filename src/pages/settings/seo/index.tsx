@@ -24,6 +24,7 @@ import { SettingSchema } from 'schemas/setting.schema';
 import ComponentPageSettingsSEOHeader from '@components/pages/settings/seo/header';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
+import { I18Util } from '@utils/i18.util';
 
 export type IPageSettingsSEOState = {
   langId: string;
@@ -248,8 +249,14 @@ export default function PageSettingsSEO() {
                         title={t('websiteTitle')}
                         type="text"
                         name="seoContents.title"
-                        required={true}
                         maxLength={50}
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('websiteTitle'),
+                            ]),
+                        }}
+                        required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -257,8 +264,14 @@ export default function PageSettingsSEO() {
                         title={t('websiteDescription')}
                         type="textarea"
                         name="seoContents.content"
-                        required={true}
                         maxLength={120}
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('websiteDescription'),
+                            ]),
+                        }}
+                        required
                       />
                     </div>
                     <div className="col-md-7">

@@ -6,6 +6,7 @@ import ComponentFormInput from '@components/elements/form/inputs/input';
 import ComponentFormInputCheckbox from '@components/elements/form/inputs/checkbox';
 import { IPageLanguageAddState } from '@pages/language/add';
 import { StatusId } from '@constants/status';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   status: IPageLanguageAddState['status'];
@@ -31,7 +32,11 @@ const ComponentPageLanguageAddTabOptions = React.memo(
             title={`${t('rank')}*`}
             name="rank"
             type="number"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('rank')]),
+            }}
+            required
           />
         </div>
         <div className="col-md-7 mb-3">

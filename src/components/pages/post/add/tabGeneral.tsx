@@ -6,6 +6,7 @@ import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import { PostTermTypeId } from '@constants/postTermTypes';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   categories?: IPagePostAddState['categories'];
@@ -67,7 +68,6 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
                 ? `eCommerce.variations.${props.index}.itemId.contents.image`
                 : `contents.image`
             }
-            isShowReviewImage={true}
             reviewImageClassName={'post-image'}
           />
         </div>
@@ -81,7 +81,11 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
               : `contents.title`
           }
           type="text"
-          required={true}
+          i18={{
+            setErrorText: (errorCode) =>
+              t(I18Util.getFormInputErrorText(errorCode), [t('title')]),
+          }}
+          required
         />
       </div>
       <div className="col-md-7 mb-3">

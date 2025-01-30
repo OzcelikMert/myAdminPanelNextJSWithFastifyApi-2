@@ -5,12 +5,13 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { UseFormReturn } from 'react-hook-form';
 import { IComponentToolLockFormState } from '.';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   form: UseFormReturn<IComponentToolLockFormState>;
   onSubmit: (data: IComponentToolLockFormState) => void;
   isWrong?: boolean;
-}
+};
 
 const ComponentToolLockForm = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
@@ -27,7 +28,11 @@ const ComponentToolLockForm = React.memo((props: IComponentProps) => {
             title={t('password')}
             type="password"
             name="password"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('password')]),
+            }}
+            required
           />
         </div>
         <div className="col-md-12">

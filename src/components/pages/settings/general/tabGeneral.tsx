@@ -24,7 +24,6 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
           <ComponentFieldSet legend={t('logo')}>
             <ComponentThemeChooseImageForm
               name="logo"
-              isShowReviewImage={true}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>
@@ -33,7 +32,6 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
           <ComponentFieldSet legend={t('logo') + ' - 2'}>
             <ComponentThemeChooseImageForm
               name="logoTwo"
-              isShowReviewImage={true}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>
@@ -42,7 +40,6 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
           <ComponentFieldSet legend={t('icon')}>
             <ComponentThemeChooseImageForm
               name="icon"
-              isShowReviewImage={true}
               reviewImageClassName={'post-image'}
             />
           </ComponentFieldSet>

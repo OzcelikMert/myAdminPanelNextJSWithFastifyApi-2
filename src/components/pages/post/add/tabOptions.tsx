@@ -7,6 +7,7 @@ import ComponentFormInputCheckbox from '@components/elements/form/inputs/checkbo
 import { StatusId } from '@constants/status';
 import { IPagePostAddState } from '@pages/post/add';
 import { PageTypeId } from '@constants/pageTypes';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   status: IPagePostAddState['status'];
@@ -51,7 +52,11 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
           title={t('rank')}
           name="rank"
           type="number"
-          required={true}
+          i18={{
+            setErrorText: (errorCode) =>
+              t(I18Util.getFormInputErrorText(errorCode), [t('rank')]),
+          }}
+          required
         />
       </div>
       {props.showPageTypeSelect ? (

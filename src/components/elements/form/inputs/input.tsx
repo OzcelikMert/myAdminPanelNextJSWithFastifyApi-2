@@ -1,13 +1,12 @@
 import ComponentInput, {
   IComponentInputProps,
 } from '@components/elements/inputs/input';
-import { ZodUtil } from '@utils/zod.util';
 import moment from 'moment';
 import React from 'react';
 import { Controller, Control } from 'react-hook-form';
 
 type IComponentPropsI18 = {
-  getError?: (text: string) => string;
+  setErrorText?: (errorCode: any) => string;
 };
 
 export type IComponentFormInputProps = {
@@ -46,10 +45,8 @@ const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
             formState.errors[props.name] &&
             formState.errors[props.name]?.message && (
               <div className="error">
-                {props.i18?.getError
-                  ? props.i18?.getError(
-                      ZodUtil.getErrorText(formState.errors[props.name]?.type)
-                    )
+                {props.i18?.setErrorText
+                  ? props.i18?.setErrorText(formState.errors[props.name]?.type)
                   : null}
               </div>
             )}

@@ -8,6 +8,7 @@ import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ComponentForm from '@components/elements/form';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentState = {
   isSubmitting: boolean;
@@ -84,13 +85,11 @@ const ComponentThemeModalUpdateItemRank = React.memo(
               <div className="row mt-4">
                 <ComponentForm
                   formMethods={form}
-                  submitButtonExtraClassName='mt-4'
-                  i18={
-                    {
-                      submitButtonText: t('update'),
-                      submitButtonSubmittingText: t('loading'),
-                    }
-                  }
+                  submitButtonExtraClassName="mt-4"
+                  i18={{
+                    submitButtonText: t('update'),
+                    submitButtonSubmittingText: t('loading'),
+                  }}
                   onSubmit={(data) => onSubmit(data)}
                 >
                   <div className="col-md-12">
@@ -98,7 +97,13 @@ const ComponentThemeModalUpdateItemRank = React.memo(
                       title={`${t('rank')}`}
                       name="rank"
                       type="number"
-                      required={true}
+                      i18={{
+                        setErrorText: (errorCode) =>
+                          t(I18Util.getFormInputErrorText(errorCode), [
+                            t('rank'),
+                          ]),
+                      }}
+                      required
                     />
                   </div>
                 </ComponentForm>

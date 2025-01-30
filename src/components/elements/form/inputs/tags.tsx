@@ -6,7 +6,7 @@ import ComponentInputTags, {
 } from '@components/elements/inputs/tags';
 
 type IComponentPropsI18 = {
-  getError?: (text: string) => string;
+  setErrorText?: (errorCode: any) => string;
 };
 
 type IComponentProps = {
@@ -33,9 +33,9 @@ const ComponentFormInputTags = React.memo((props: IComponentProps) => {
             formState.errors[props.name] &&
             formState.errors[props.name]?.message && (
               <div className="error">
-                {props.i18?.getError
-                  ? props.i18?.getError(
-                      ZodUtil.getErrorText(formState.errors[props.name]?.type)
+                {props.i18?.setErrorText
+                  ? props.i18?.setErrorText(
+                      formState.errors[props.name]?.type
                     )
                   : null}
               </div>

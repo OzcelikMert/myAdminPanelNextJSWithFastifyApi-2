@@ -5,6 +5,7 @@ import { IPostECommerceAttributeModel } from 'types/models/post.model';
 import { Accordion } from 'react-bootstrap';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentPagePostAddECommerceTabAttributesItem from './eCommerceTabAttributesItem';
+import { useDidMount } from '@library/react/hooks';
 
 type IComponentState = {
   accordionKey: string;
@@ -26,11 +27,16 @@ type IComponentProps = {
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
   (props: IComponentProps) => {
+    console.log("ComponentPagePostAddECommerceTabAttributes", props);
     const t = useAppSelector(selectTranslation);
 
     const [accordionKey, setAccordionKey] = React.useState(
       initialState.accordionKey
     );
+
+    useDidMount(() => {
+      console.log("ComponentPagePostAddECommerceTabAttributes didMount", props);
+    });
 
     const onClickAccordionToggle = (_id: string) => {
       setAccordionKey((state) =>
@@ -57,7 +63,10 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
                 index={index}
                 attributes={props.attributes}
                 attributeTypes={props.attributeTypes}
-                variations={props.variations}
+                variations={props.variations?.findMulti(
+                  'parentId',
+                  item.attributeId
+                )}
                 isSelected={accordionKey == item._id}
                 onClickDelete={(_id) => props.onClickDelete(_id)}
                 onChangeAttribute={(mainId, attributeId) =>

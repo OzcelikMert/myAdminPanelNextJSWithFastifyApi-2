@@ -48,7 +48,6 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
                 <ComponentFieldSet legend={t('imageBefore')}>
                   <ComponentThemeChooseImageForm
                     name="beforeAndAfter.imageBefore"
-                    isShowReviewImage={true}
                     reviewImageClassName={'post-image'}
                   />
                 </ComponentFieldSet>
@@ -57,7 +56,6 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
                 <ComponentFieldSet legend={t('imageAfter')}>
                   <ComponentThemeChooseImageForm
                     name="beforeAndAfter.imageAfter"
-                    isShowReviewImage={true}
                     reviewImageClassName={'post-image'}
                   />
                 </ComponentFieldSet>
@@ -67,6 +65,7 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
                   name="beforeAndAfter.images"
                   isMulti
                   showModalButtonText={t('gallery')}
+                  hideReviewImage
                 />
               </div>
               <div className="col-md-12 mb-3">

@@ -7,6 +7,7 @@ import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import ComponentForm from '@components/elements/form';
 import { ISettingSocialMediaModel } from 'types/models/setting.model';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentFormState = {} & ISettingSocialMediaModel;
 
@@ -69,12 +70,10 @@ const ComponentPageSettingsSocialMediaEditModal = React.memo(
               <div className="row mt-4">
                 <ComponentForm
                   formMethods={form}
-                  i18={
-                    {
-                      submitButtonText: t('save'),
-                      submitButtonSubmittingText: t('loading'),
-                    }
-                  }
+                  i18={{
+                    submitButtonText: t('save'),
+                    submitButtonSubmittingText: t('loading'),
+                  }}
                   onSubmit={(data) => onSubmit(data)}
                 >
                   <div className="row mt-3">
@@ -84,6 +83,12 @@ const ComponentPageSettingsSocialMediaEditModal = React.memo(
                         name="title"
                         placeholder={t('title')}
                         type="text"
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('title'),
+                            ]),
+                        }}
                         required
                       />
                     </div>
@@ -92,6 +97,12 @@ const ComponentPageSettingsSocialMediaEditModal = React.memo(
                         title={`${t('key')}*`}
                         name="key"
                         type="text"
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('key'),
+                            ]),
+                        }}
                         required
                       />
                     </div>

@@ -10,6 +10,8 @@ import { useForm } from 'react-hook-form';
 import ComponentForm from '@components/elements/form';
 import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPageComponentAddState } from '@pages/component/add';
+import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentFormState = {} & IComponentElementModel;
 
@@ -76,12 +78,10 @@ const ComponentPageComponentAddElementEditModal = React.memo(
               <div className="row mt-4">
                 <ComponentForm
                   formMethods={form}
-                  i18={
-                    {
-                      submitButtonText: t('save'),
-                      submitButtonSubmittingText: t('loading'),
-                    }
-                  }
+                  i18={{
+                    submitButtonText: t('save'),
+                    submitButtonSubmittingText: t('loading'),
+                  }}
                   onSubmit={(data) => onSubmit(data)}
                 >
                   <div className="row mt-3">
@@ -91,6 +91,12 @@ const ComponentPageComponentAddElementEditModal = React.memo(
                         name="title"
                         placeholder={t('title')}
                         type="text"
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('title'),
+                            ]),
+                        }}
                         required
                       />
                     </div>
@@ -99,6 +105,12 @@ const ComponentPageComponentAddElementEditModal = React.memo(
                         title={`${t('key')}*`}
                         name="key"
                         type="text"
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('key'),
+                            ]),
+                        }}
                         required
                       />
                     </div>
@@ -108,6 +120,12 @@ const ComponentPageComponentAddElementEditModal = React.memo(
                         name="typeId"
                         placeholder={t('typeId')}
                         options={props.elementTypes}
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('typeId'),
+                            ]),
+                        }}
                         valueAsNumber
                         required
                       />
@@ -117,6 +135,12 @@ const ComponentPageComponentAddElementEditModal = React.memo(
                         title={`${t('rank')}*`}
                         name="rank"
                         type="number"
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('rank'),
+                            ]),
+                        }}
                         required
                       />
                     </div>

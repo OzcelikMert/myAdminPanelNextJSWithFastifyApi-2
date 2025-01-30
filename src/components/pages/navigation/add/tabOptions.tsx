@@ -4,13 +4,12 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import ComponentFormInput from '@components/elements/form/inputs/input';
 import ComponentFormInputCheckbox from '@components/elements/form/inputs/checkbox';
-import {
-  IPageNavigationAddState,
-} from '@pages/navigation/add';
+import { IPageNavigationAddState } from '@pages/navigation/add';
 import { StatusId } from '@constants/status';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
-  status: IPageNavigationAddState["status"]
+  status: IPageNavigationAddState['status'];
   statusId: StatusId;
 };
 
@@ -33,14 +32,21 @@ const ComponentPageNavigationAddTabOptions = React.memo(
             title={t('rank')}
             name="rank"
             type="number"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('rank')]),
+            }}
+            required
           />
         </div>
         <div className="col-md-7">
           <ComponentFormInputCheckbox title={t('primary')} name="isPrimary" />
         </div>
         <div className="col-md-7">
-          <ComponentFormInputCheckbox title={t('secondary')} name="isSecondary" />
+          <ComponentFormInputCheckbox
+            title={t('secondary')}
+            name="isSecondary"
+          />
         </div>
       </div>
     );

@@ -22,18 +22,21 @@ import { Id } from 'react-toastify';
 type IPageState = {
   items: IGalleryGetResultService[];
   selectedItems: IGalleryGetResultService[];
+  selectedItemsAtInit: IGalleryGetResultService[];
   isListLoading: boolean;
 };
 
 const initialState: IPageState = {
   items: [],
   selectedItems: [],
+  selectedItemsAtInit: [],
   isListLoading: true,
 };
 
 enum ActionTypes {
   SET_ITEMS,
   SET_SELECTED_ITEMS,
+  SET_SELECTED_ITEMS_AT_INIT,
   SET_IS_LIST_LOADING,
 }
 
@@ -42,6 +45,10 @@ type IAction =
   | IActionWithPayload<
       ActionTypes.SET_SELECTED_ITEMS,
       IPageState['selectedItems']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_SELECTED_ITEMS_AT_INIT,
+      IPageState['selectedItemsAtInit']
     >
   | IActionWithPayload<
       ActionTypes.SET_IS_LIST_LOADING,
@@ -59,6 +66,11 @@ const reducer = (state: IPageState, action: IAction): IPageState => {
       return {
         ...state,
         selectedItems: action.payload,
+      };
+    case ActionTypes.SET_SELECTED_ITEMS_AT_INIT:
+      return {
+        ...state,
+        selectedItemsAtInit: action.payload,
       };
     case ActionTypes.SET_IS_LIST_LOADING:
       return {
@@ -113,10 +125,21 @@ export default function PageGalleryList(props: IPageProps) {
     if (props.uploadedImages && props.uploadedImages.length > 0) {
       dispatch({
         type: ActionTypes.SET_ITEMS,
-        payload: state.items.concat(props.uploadedImages || []),
+        payload: getSortedItems([...props.uploadedImages, ...state.items]),
       });
     }
   }, [props.uploadedImages]);
+
+  useEffectAfterDidMount(() => {
+    if (props.selectedImages && props.selectedImages.length > 0) {
+      dispatch({
+        type: ActionTypes.SET_SELECTED_ITEMS_AT_INIT,
+        payload: state.items.filter((item) =>
+          props.selectedImages?.includes(item.name)
+        ),
+      });
+    }
+  }, [props.selectedImages]);
 
   useEffectAfterDidMount(() => {
     if (state.selectedItems.length > 0) {
@@ -184,8 +207,30 @@ export default function PageGalleryList(props: IPageProps) {
       abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
-      dispatch({ type: ActionTypes.SET_ITEMS, payload: serviceResult.data });
+      const items = serviceResult.data;
+      dispatch({
+        type: ActionTypes.SET_ITEMS,
+        payload: getSortedItems(items),
+      });
+      if (props.selectedImages) {
+        dispatch({
+          type: ActionTypes.SET_SELECTED_ITEMS_AT_INIT,
+          payload: items.filter((item) =>
+            props.selectedImages?.includes(item.name)
+          ),
+        });
+      }
     }
+  };
+
+  const getSortedItems = (items: IGalleryGetResultService[]) => {
+    return items.sort((a, b) => {
+      if (props.selectedImages?.includes(a.name)) {
+        return -1;
+      } else {
+        return 0;
+      }
+    });
   };
 
   const onSelect = async (images: IGalleryGetResultService[]) => {
@@ -247,7 +292,7 @@ export default function PageGalleryList(props: IPageProps) {
         if (toastIdRef.current) {
           hideToast(toastIdRef.current);
         }
-        props.onSubmit(foundSelectedItems.map(item => item.name));
+        props.onSubmit(foundSelectedItems.map((item) => item.name));
       }
     }
   };
@@ -323,16 +368,17 @@ export default function PageGalleryList(props: IPageProps) {
             <ComponentDataTable
               columns={getTableColumns()}
               data={state.items}
-              onSelect={(rows) => onSelect(rows)}
+              selectedItemsAtInit={state.selectedItemsAtInit}
               i18={{
                 search: t('search'),
                 noRecords: t('noRecords'),
               }}
-              isSelectable={true}
               isAllSelectable={!(props.isModal && !props.isMulti)}
               isMultiSelectable={!(props.isModal && !props.isMulti)}
-              isSearchable={true}
               progressPending={state.isListLoading}
+              isSelectable
+              isSearchable
+              onSelect={(rows) => onSelect(rows)}
             />
           </div>
         </div>

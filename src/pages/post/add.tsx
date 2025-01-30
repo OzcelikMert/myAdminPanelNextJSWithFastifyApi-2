@@ -638,6 +638,9 @@ export default function PagePostAdd() {
 
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
+    console.log("onSubmit", data);
+    
+    return;
 
     let serviceResult = null;
 
@@ -792,13 +795,17 @@ export default function PagePostAdd() {
   };
 
   const onChangeAttribute = (mainId: string, attributeId: string) => {
-    let newAttributes = form.getValues().eCommerce?.attributes ?? [];
-    const index = newAttributes?.indexOfKey('_id', mainId);
+    let attributes = form.getValues().eCommerce?.attributes ?? [];
+    const index = attributes?.indexOfKey('_id', mainId);
     if (index > -1) {
-      newAttributes[index].attributeId = attributeId;
-      newAttributes[index].variations = [];
+      if(attributes[index].attributeId != attributeId){
+        form.setValue(`eCommerce.attributes.${index}`, {
+          ...attributes[index],
+          attributeId: attributeId,
+          variations: []
+        });
+      }
     }
-    form.setValue('eCommerce.attributes', newAttributes);
   };
 
   const onClickAddNewVariation = () => {
@@ -916,7 +923,7 @@ export default function PagePostAdd() {
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
-  console.log(formValues);
+  console.log("PagePostAdd", formValues);
 
   return isPageLoading ? null : (
     <div className="page-post">

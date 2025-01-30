@@ -7,15 +7,15 @@ import { ImageSourceUtil } from '@utils/imageSource.util';
 
 const Item = React.memo((imageProps: { item: string; index: number }) => {
   return (
-    <div className="col-md-3 mb-3">
+    <div className="col-md-2 mb-3">
       <Image
         src={ImageSourceUtil.getUploadedImageSrc(imageProps.item)}
         alt={imageProps.item}
         className="post-image img-fluid"
         layout="responsive"
         objectFit="contain"
-        width={0}
-        height={0}
+        width={100}
+        height={100}
       />
     </div>
   );
@@ -42,6 +42,8 @@ const ComponentPagePostAddECommerceTabGallery = React.memo(
             }
             isMulti={true}
             showModalButtonText={t('selectImages')}
+            hideReviewImage
+            watch
           />
         </div>
         <div className="col-md-12 mb-3">

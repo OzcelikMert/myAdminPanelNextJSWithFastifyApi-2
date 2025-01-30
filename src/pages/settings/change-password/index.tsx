@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { UserSchema } from 'schemas/user.schema';
 import { useToast } from '@hooks/toast';
+import { I18Util } from '@utils/i18.util';
 
 type IPageFormState = {
   password: string;
@@ -124,7 +125,13 @@ export default function PageChangePassword() {
                         title={`${t('password')}*`}
                         name="password"
                         type="password"
-                        required={true}
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('password'),
+                            ]),
+                        }}
+                        required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -132,7 +139,13 @@ export default function PageChangePassword() {
                         title={`${t('newPassword')}*`}
                         name="newPassword"
                         type="password"
-                        required={true}
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('newPassword'),
+                            ]),
+                        }}
+                        required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -140,7 +153,13 @@ export default function PageChangePassword() {
                         title={`${t('confirmPassword')}*`}
                         name="confirmPassword"
                         type="password"
-                        required={true}
+                        i18={{
+                          setErrorText: (errorCode) =>
+                            t(I18Util.getFormInputErrorText(errorCode), [
+                              t('confirmPassword'),
+                            ]),
+                        }}
+                        required
                       />
                     </div>
                   </div>

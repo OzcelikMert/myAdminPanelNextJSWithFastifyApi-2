@@ -1,12 +1,11 @@
 import ComponentInputCheckbox, {
   IComponentInputCheckboxProps,
 } from '@components/elements/inputs/checkbox';
-import { ZodUtil } from '@utils/zod.util';
 import React from 'react';
 import { Controller, Control } from 'react-hook-form';
 
 type IComponentPropsI18 = {
-  getError?: (text: string) => string;
+  setErrorText?: (errorCode: any) => string;
 };
 
 type IComponentProps = {
@@ -40,17 +39,17 @@ const ComponentFormInputCheckbox = React.memo((props: IComponentProps) => {
           <ComponentInputCheckbox
             {...field}
             {...props}
-            onChange={(e) => field.onChange(setValue(field.value, e.target.checked))}
+            onChange={(e) =>
+              field.onChange(setValue(field.value, e.target.checked))
+            }
             ref={(e) => field.ref(e)}
           />
           {formState.errors &&
             formState.errors[props.name] &&
             formState.errors[props.name]?.message && (
               <div className="error">
-                {props.i18?.getError
-                  ? props.i18?.getError(
-                      ZodUtil.getErrorText(formState.errors[props.name]?.type)
-                    )
+                {props.i18?.setErrorText
+                  ? props.i18?.setErrorText(formState.errors[props.name]?.type)
                   : null}
               </div>
             )}

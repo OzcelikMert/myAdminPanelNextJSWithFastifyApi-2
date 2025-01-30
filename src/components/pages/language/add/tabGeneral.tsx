@@ -6,6 +6,7 @@ import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import Image from 'next/image';
 import { IPageLanguageAddState } from '@pages/language/add';
 import { ImageSourceUtil } from '@utils/imageSource.util';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   flags: IPageLanguageAddState['flags'];
@@ -43,7 +44,11 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
             title={`${t('title')}*`}
             name="title"
             type="text"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('title')]),
+            }}
+            required
           />
         </div>
         <div className="col-md-7 mb-3">
@@ -51,7 +56,11 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
             title={`${t('shortKey')}*`}
             name="shortKey"
             type="text"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('shortKey')]),
+            }}
+            required
           />
         </div>
         <div className="col-md-7 mb-3">
@@ -59,7 +68,11 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
             title={`${t('locale')}*`}
             name="locale"
             type="text"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('locale')]),
+            }}
+            required
           />
         </div>
       </div>

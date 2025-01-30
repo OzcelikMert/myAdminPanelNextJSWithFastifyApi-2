@@ -1,12 +1,11 @@
 import ComponentInputSwitch, {
   IComponentInputSwitchProps,
 } from '@components/elements/inputs/switch';
-import { ZodUtil } from '@utils/zod.util';
 import React from 'react';
 import { Controller, Control } from 'react-hook-form';
 
 type IComponentPropsI18 = {
-  getError?: (text: string) => string;
+  setErrorText?: (errorCode: any) => string;
 };
 
 type IComponentProps = {
@@ -25,7 +24,7 @@ const ComponentFormInputSwitch = React.memo((props: IComponentProps) => {
         <div className="form-input">
           <ComponentInputSwitch
             {...field}
-            onChange={e => field.onChange(Boolean(e.target.checked))}
+            onChange={(e) => field.onChange(Boolean(e.target.checked))}
             {...props}
             ref={(e) => field.ref(e)}
           />
@@ -33,10 +32,8 @@ const ComponentFormInputSwitch = React.memo((props: IComponentProps) => {
             formState.errors[props.name] &&
             formState.errors[props.name]?.message && (
               <div className="error">
-                {props.i18?.getError
-                  ? props.i18?.getError(
-                      ZodUtil.getErrorText(formState.errors[props.name]?.type)
-                    )
+                {props.i18?.setErrorText
+                  ? props.i18?.setErrorText(formState.errors[props.name]?.type)
                   : null}
               </div>
             )}

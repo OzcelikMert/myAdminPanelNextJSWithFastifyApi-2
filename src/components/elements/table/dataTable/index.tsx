@@ -7,10 +7,7 @@ import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import ComponentTableFilterButton, {
   IComponentTableFilterButton,
 } from '../filterButton';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/hooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { IActionWithPayload } from 'types/hooks';
 import ComponentToolTip from '@components/elements/tooltip';
 import { cloneDeepWith } from 'lodash';
@@ -92,6 +89,8 @@ type IComponentPropI18 = {
 };
 
 type IComponentProps<T = any> = {
+  columns: IComponentDataTableColumn<T>[];
+  selectedItemsAtInit?: any[];
   isSearchable?: boolean;
   isSelectable?: boolean;
   isAllSelectable?: boolean;
@@ -104,7 +103,6 @@ type IComponentProps<T = any> = {
     value: any
   ) => void | Promise<void>;
   onSelect?: (value: T[]) => void;
-  columns: IComponentDataTableColumn<T>[];
 } & Omit<TableProps<T>, 'columns'>;
 
 const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
@@ -114,6 +112,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
     showingItems: props.data,
     activeFilterButtonIndex:
       props.filterButtons?.indexOfKey('isDefault', true) ?? 0,
+    selectedItems: props.selectedItemsAtInit ?? initialState.selectedItems,
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -146,6 +145,12 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
       setIsLoading(false);
     }
   }, [state.items]);
+
+  useEffectAfterDidMount(() => {
+    if(props.selectedItemsAtInit && props.selectedItemsAtInit.length > 0){
+      dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: props.selectedItemsAtInit });
+    }
+  }, [props.selectedItemsAtInit]);
 
   const resetTableSelectedItems = (firstRender?: boolean) => {
     dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [] });

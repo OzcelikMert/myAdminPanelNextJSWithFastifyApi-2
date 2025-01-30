@@ -6,6 +6,7 @@ import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPageNavigationAddState } from '@pages/navigation/add';
 import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import { PostTermTypeId } from '@constants/postTermTypes';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   termTypeId: PostTermTypeId;
@@ -13,7 +14,7 @@ type IComponentProps = {
   parentId?: string;
   image?: string;
   showParentSelect?: boolean;
-  isModal?: boolean
+  isModal?: boolean;
 };
 
 const ComponentPagePostTermAddTabGeneral = React.memo(
@@ -37,22 +38,25 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
 
     return (
       <div className="row">
-        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
           <ComponentThemeChooseImageForm
             name="contents.image"
-            isShowReviewImage={true}
             reviewImageClassName={'post-image'}
           />
         </div>
-        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
           <ComponentFormInput
             title={`${t('title')}*`}
             name="contents.title"
             type="text"
-            required={true}
+            i18={{
+              setErrorText: (errorCode) =>
+                t(I18Util.getFormInputErrorText(errorCode), [t('title')]),
+            }}
+            required
           />
         </div>
-        <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
           <ComponentFormInput
             title={t('shortContent').toCapitalizeCase()}
             name="contents.shortContent"
@@ -60,7 +64,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
           />
         </div>
         {props.showParentSelect ? (
-          <div className={`${props.isModal ? "col-md-12" : "col-md-7"} mb-3`}>
+          <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
             <ComponentFormInputSelect
               title={getSelectMainInputTitle()}
               name="parentId"

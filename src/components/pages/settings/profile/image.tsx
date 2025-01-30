@@ -26,7 +26,6 @@ const ComponentPageProfileImage = React.memo(
               <ComponentThemeChooseImage
                 onChange={(images) => props.onChange(images[0])}
                 isMulti={false}
-                isShowReviewImage={true}
                 reviewImage={props.image}
                 reviewImageClassName={'post-image'}
               />

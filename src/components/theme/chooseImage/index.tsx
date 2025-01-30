@@ -15,12 +15,12 @@ export type IComponentThemeChooseImageProps = {
   isShow?: boolean;
   isMulti?: boolean;
   selectedImages?: string[];
-  isShowReviewImage?: boolean;
   reviewImage?: string;
   reviewImageClassName?: string;
   reviewImageWidth?: number;
   reviewImageHeight?: number;
   showModalButtonText?: string | React.ReactNode;
+  hideReviewImage?: boolean;
   hideShowModalButton?: boolean;
   onChange?: (images: string[]) => void;
   onClickShowModal?: () => void;
@@ -35,10 +35,11 @@ const ComponentThemeChooseImage = React.memo(
     const $html = document.querySelector('html');
 
     const onSelected = (images: string[]) => {
+      onHide();
+      
       if (props.onChange) {
         props.onChange(images);
       }
-      onHide();
     };
 
     const onClickClear = () => {
@@ -73,10 +74,12 @@ const ComponentThemeChooseImage = React.memo(
           isShow={
             typeof props.isShow != 'undefined' ? props.isShow : isShowModal
           }
+          isMulti={props.isMulti}
+          selectedImages={props.selectedImages}
           onSubmit={(images) => onSelected(images)}
           onClose={() => onHide()}
         />
-        {props.isShowReviewImage ? (
+        {props.hideReviewImage ? null : (
           <Image
             src={ImageSourceUtil.getUploadedImageSrc(props.reviewImage)}
             alt="Review Image"
@@ -84,7 +87,7 @@ const ComponentThemeChooseImage = React.memo(
             width={props.reviewImageWidth ?? 150}
             height={props.reviewImageHeight ?? 150}
           />
-        ) : null}
+        )}
         <div className="buttons">
           {!props.hideShowModalButton ? (
             <button

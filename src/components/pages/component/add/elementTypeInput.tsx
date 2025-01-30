@@ -28,7 +28,6 @@ const Image = React.memo((props: { name: string }) => {
       <ComponentThemeChooseImageForm
         {...props}
         isMulti={false}
-        isShowReviewImage={true}
         reviewImageClassName={'post-image'}
       />
     </div>
