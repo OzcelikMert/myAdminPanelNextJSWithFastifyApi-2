@@ -36,7 +36,7 @@ import ComponentForm from '@components/elements/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ComponentPagePostAddHeader from '@components/pages/post/add/header';
 import ComponentPagePostAddTabGeneral from '@components/pages/post/add/tabGeneral';
@@ -274,6 +274,7 @@ export default function PagePostAdd() {
     },
     resolver: zodResolver(PostUtil.getSchema(queries.postTypeId, queries._id)),
   });
+
   const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
@@ -776,15 +777,23 @@ export default function PagePostAdd() {
   const onClickAddNewAttribute = () => {
     const _id = String.createId();
 
-    let newAttributes = form.getValues().eCommerce?.attributes ?? [];
-    newAttributes.push({
-      _id: _id,
-      attributeId: '',
-      typeId: AttributeTypeId.Text,
-      variations: [],
-    });
-
-    form.setValue('eCommerce.attributes', newAttributes);
+    if(state.attributes.length > 0){
+      let newAttributes = form.getValues().eCommerce?.attributes ?? [];
+      newAttributes.push({
+        _id: _id,
+        attributeId: state.attributes[0].value,
+        typeId: AttributeTypeId.Text,
+        variations: [],
+      });
+  
+      form.setValue('eCommerce.attributes', newAttributes);
+    }else {
+      showToast({
+        type: 'error',
+        title: t('error'),
+        content: t('eCommerceAttributeLengthError'),
+      });
+    }
   };
 
   const onClickDeleteAttribute = (_id: string) => {
@@ -792,20 +801,6 @@ export default function PagePostAdd() {
       'eCommerce.attributes',
       form.getValues().eCommerce?.attributes?.filter((item) => item._id != _id)
     );
-  };
-
-  const onChangeAttribute = (mainId: string, attributeId: string) => {
-    let attributes = form.getValues().eCommerce?.attributes ?? [];
-    const index = attributes?.indexOfKey('_id', mainId);
-    if (index > -1) {
-      if(attributes[index].attributeId != attributeId){
-        form.setValue(`eCommerce.attributes.${index}`, {
-          ...attributes[index],
-          attributeId: attributeId,
-          variations: []
-        });
-      }
-    }
   };
 
   const onClickAddNewVariation = () => {
@@ -896,25 +891,6 @@ export default function PagePostAdd() {
       }
 
       form.setValue('eCommerce.variations', newVariations);
-    }
-  };
-
-  const onChangeDefaultVariation = (
-    attributeId: string,
-    variationId: string
-  ) => {
-    const formValues = form.getValues();
-    let newDefaultVariation = formValues.eCommerce?.variationDefaults ?? [];
-
-    const index = newDefaultVariation.indexOfKey('attributeId', attributeId);
-
-    if (index > -1) {
-      newDefaultVariation[index].variationId = variationId;
-    } else {
-      newDefaultVariation.push({
-        attributeId: attributeId,
-        variationId: variationId,
-      });
     }
   };
 
@@ -1116,14 +1092,8 @@ export default function PagePostAdd() {
                 onClickDeleteAttribute={(_id) => onClickDeleteAttribute(_id)}
                 onClickAddNewVariation={() => onClickAddNewVariation()}
                 onClickDeleteVariation={(_id) => onClickDeleteVariation(_id)}
-                onChangeAttribute={(mainId, attributeId) =>
-                  onChangeAttribute(mainId, attributeId)
-                }
                 onChangeVariation={(mainId, attributeId, variationId) =>
                   onChangeVariation(mainId, attributeId, variationId)
-                }
-                onChangeDefaultVariation={(attributeId, variationId) =>
-                  onChangeDefaultVariation(attributeId, variationId)
                 }
               />
             ) : null}

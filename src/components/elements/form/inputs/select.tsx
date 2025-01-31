@@ -2,6 +2,7 @@ import ComponentInputSelect, {
   IComponentInputSelectData,
   IComponentInputSelectProps,
 } from '@components/elements/inputs/select';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 import { ZodUtil } from '@utils/zod.util';
 import React from 'react';
 import { useFormContext, Controller, Control } from 'react-hook-form';
@@ -24,6 +25,10 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
   if (props.watch) {
     form.watch(props.name);
   }
+
+  useEffectAfterDidMount(() => {
+    console.log(props.name, "ComponentFormInputSelect useEffectAfterDidMount[props.options]", props.options);
+  }, [props.options])
 
   const setValue = (
     newValue: IComponentInputSelectData | IComponentInputSelectData[]

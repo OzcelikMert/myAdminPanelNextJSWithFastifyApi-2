@@ -2,6 +2,7 @@
 myAdminPanelNextJSWithFastifyApi-2 with NextJS, Functional component and Redux
 
 Things to do:
+    - define new ecommerce model
     - update array fields using index
     - add value to checkboxes
     - add name to inputs which doesn't have a name attr

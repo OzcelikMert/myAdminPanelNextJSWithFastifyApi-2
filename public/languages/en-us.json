@@ -1,4 +1,5 @@
 {
+  "eCommerceAttributeLengthError": "Please add at least 1 attribute!",
   "updateStatus": "Update Status",
   "fillCorrectlyWithName": "Please make sure you have entered the '{{0}}' correctly!",
   "inputIsRequiredWithName": "'{{0}}' is required, it cannot be empty!",

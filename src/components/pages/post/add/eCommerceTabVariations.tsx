@@ -33,7 +33,6 @@ type IComponentProps = {
     attributeId: string,
     variationId: string
   ) => void;
-  onChangeVariationDefault: (attributeId: string, variationId: string) => void;
 };
 
 const ComponentPagePostAddECommerceTabVariations = React.memo(
@@ -51,15 +50,17 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
     };
 
     const checkIsVariationDefault = (item: IPostECommerceVariationModel) => {
-      return (
-        props.variationDefaults?.every((defaultVariation) =>
-          item.selectedVariations.some(
-            (selectedVariation) =>
-              selectedVariation.attributeId == defaultVariation.attributeId &&
-              selectedVariation.variationId == defaultVariation.variationId
+      return props.variationDefaults &&
+        item.selectedVariations &&
+        item.selectedVariations.length > 0
+        ? props.variationDefaults.every((defaultVariation) =>
+            item.selectedVariations.some(
+              (selectedVariation) =>
+                selectedVariation.attributeId == defaultVariation.attributeId &&
+                selectedVariation.variationId == defaultVariation.variationId
+            )
           )
-        ) || false
-      );
+        : false;
     };
 
     return (
@@ -70,7 +71,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
             {props.selectedAttributes?.map((item, index) => (
               <div className="col-md-4 mt-3">
                 <ComponentFormInputSelect
-                  name={`eCommerce.variationDefaults.${index}.variations`}
+                  name={`eCommerce.variationDefaults.${index}.variationId`}
                   title={
                     props.attributes?.findSingle('value', item.attributeId)
                       ?.label
@@ -79,12 +80,6 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
                     'value',
                     item.variations
                   )}
-                  onChange={(selectedItem, e) =>
-                    props.onChangeVariationDefault(
-                      item.attributeId,
-                      (selectedItem as IComponentInputSelectData).value
-                    )
-                  }
                 />
               </div>
             ))}

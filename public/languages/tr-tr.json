@@ -1,4 +1,5 @@
 {
+  "eCommerceAttributeLengthError": "Lütfen en az 1 nitelik ekliyin!",
   "updateStatus": "Durum Güncelle",
   "fillCorrectlyWithName": "Lütfen '{{0}}' alanını doğru bir şekilde girdiğinizden emin olunuz!",
   "inputIsRequiredWithName": "'{{0}}' alanı gereklidir! Lütfen boş bırakmayınız.",

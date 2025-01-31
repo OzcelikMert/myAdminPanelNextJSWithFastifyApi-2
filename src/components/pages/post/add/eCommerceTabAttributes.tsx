@@ -22,7 +22,6 @@ type IComponentProps = {
   selectedAttributes?: IPostECommerceAttributeModel[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
-  onChangeAttribute: (mainId: string, attributeId: string) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
@@ -59,7 +58,9 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
           <Accordion flush>
             {props.selectedAttributes?.map((item, index) => (
               <ComponentPagePostAddECommerceTabAttributesItem
+                key={item._id}
                 item={item}
+                attrId={item.attributeId}
                 index={index}
                 attributes={props.attributes}
                 attributeTypes={props.attributeTypes}
@@ -69,9 +70,6 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
                 )}
                 isSelected={accordionKey == item._id}
                 onClickDelete={(_id) => props.onClickDelete(_id)}
-                onChangeAttribute={(mainId, attributeId) =>
-                  props.onChangeAttribute(mainId, attributeId)
-                }
                 onClickAccordionToggle={(_id) => onClickAccordionToggle(_id)}
               />
             ))}

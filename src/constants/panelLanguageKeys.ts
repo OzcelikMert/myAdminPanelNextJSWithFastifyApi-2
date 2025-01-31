@@ -1,4 +1,5 @@
 export const panelLanguageKeys = [
+  'eCommerceAttributeLengthError',
   'updateStatus',
   'fillCorrectlyWithName',
   'inputIsRequiredWithName',

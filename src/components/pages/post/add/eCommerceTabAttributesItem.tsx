@@ -12,24 +12,18 @@ import { useDidMount } from '@library/react/hooks';
 type IComponentProps = {
   item: IPostECommerceAttributeModel;
   index: number;
+  attrId: string,
   attributes?: IPagePostAddState['attributes'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
   variations?: IPagePostAddState['variations'];
   isSelected?: boolean;
   onClickDelete: (_id: string) => void;
-  onChangeAttribute: (mainId: string, attributeId: string) => void;
   onClickAccordionToggle: (id: string) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
-    console.log("ComponentPagePostAddECommerceTabAttributesItem", props);
-    
-    useDidMount(() => {
-          console.log("ComponentPagePostAddECommerceTabAttributesItem didMount", props);
-        });
-    
 
     return (
       <Card>
@@ -43,12 +37,6 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                     name={`eCommerce.attributes.${props.index}.attributeId`}
                     options={props.attributes}
                     watch
-                    onChange={(selectedItem, e) =>
-                      props.onChangeAttribute(
-                        props.item._id,
-                        (selectedItem as IComponentInputSelectData).value
-                      )
-                    }
                   />
                 </div>
                 <div className="col-md-6 mt-2 mt-md-0">
@@ -101,7 +89,6 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                   options={props.variations}
                   isMulti
                   closeMenuOnSelect={false}
-                  valueAsNumber
                 />
               </div>
             </div>
