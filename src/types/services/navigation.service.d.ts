@@ -7,11 +7,7 @@ import { StatusId } from '@constants/status';
 
 export interface INavigatePopulateService {
   _id: string;
-  contents: {
-    langId: string;
-    title: string;
-    url: string;
-  };
+  contents: INavigationContentModel;
 }
 
 export interface INavigationAlternateService {
@@ -19,15 +15,12 @@ export interface INavigationAlternateService {
 }
 
 export type INavigationGetResultService = {
-  authorId: IUserPopulateService;
-  lastAuthorId: IUserPopulateService;
-  parentId?: INavigatePopulateService;
+  author?: IUserPopulateService;
+  lastAuthor?: IUserPopulateService;
+  parent?: INavigationPopulateService;
   contents?: INavigationContentModel;
   alternates?: INavigationAlternateService[];
-} & Omit<
-  INavigationModel,
-  'contents' | 'parentId' | 'authorId' | 'lastAuthorId'
->;
+} & Omit<INavigationModel, 'contents'>;
 
 export interface INavigationGetWithIdParamService {
   _id: string;

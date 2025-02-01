@@ -1,7 +1,10 @@
 import { ILanguageModel } from '../models/language.model';
 import { StatusId } from '@constants/status';
 
-export type ILanguageGetResultService = {} & ILanguageModel;
+export type ILanguageGetResultService = {
+  author?: IUserPopulateService;
+  lastAuthor?: IUserPopulateService;
+} & ILanguageModel;
 
 export interface ILanguageGetWithIdParamService {
   _id: string;

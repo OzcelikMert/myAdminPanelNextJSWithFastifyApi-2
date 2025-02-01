@@ -6,7 +6,7 @@ import { IPagePostAddState } from '@pages/post/add';
 import {
   IPostECommerceAttributeModel,
   IPostECommerceVariationModel,
-  IPostECommerceVariationSelectedModel,
+  IPostECommerceVariationOptionModel,
 } from 'types/models/post.model';
 import { Accordion } from 'react-bootstrap';
 import ComponentPagePostAddECommerceTabVariationsItem from './eCommerceTabVariationsItem';
@@ -25,7 +25,7 @@ type IComponentProps = {
   variations?: IPagePostAddState['variations'];
   selectedVariations?: IPostECommerceVariationModel[];
   selectedAttributes?: IPostECommerceAttributeModel[];
-  variationDefaults?: IPostECommerceVariationSelectedModel[];
+  variationDefaults?: IPostECommerceVariationOptionModel[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
   onChangeVariation: (

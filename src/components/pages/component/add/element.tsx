@@ -1,14 +1,14 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import { IComponentElementGetResultService } from 'types/services/component.service';
+import { IComponentGetResultServiceElement } from 'types/services/component.service';
 import { PermissionUtil } from '@utils/permission.util';
 import { UserRoleId } from '@constants/userRoles';
 import ComponentPageComponentAddElementTypeInput from './elementTypeInput';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 
 type IComponentProps = {
-  item: IComponentElementGetResultService;
+  item: IComponentGetResultServiceElement;
   index: number;
   onEdit: (_id: string) => void;
   onDelete: (_id: string) => void;

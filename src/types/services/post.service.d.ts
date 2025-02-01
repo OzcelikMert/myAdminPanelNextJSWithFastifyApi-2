@@ -5,6 +5,7 @@ import {
   IPostModel,
   IPostECommerceModel,
   IPostECommerceVariationModel,
+  IPostECommerceVariationOptionModel,
 } from '../models/post.model';
 import { PostTypeId } from '@constants/postTypes';
 import { PageTypeId } from '@constants/pageTypes';
@@ -17,38 +18,47 @@ export interface IPostAlternateService {
   url?: string;
 }
 
+export type IPostGetResultServiceECommerceVariationOption = {
+  variationTerm?: IPostTermPopulateService;
+} & IPostECommerceVariationOptionModel;
+
+export type IPostGetResultServiceECommerceVariation = {
+  product?: Omit<IPostModel, 'contents'> & {
+    alternates?: IPostAlternateService[];
+    contents?: IPostContentModel | IPostContentModel[];
+    author?: IUserPopulateService;
+    lastAuthor?: IUserPopulateService;
+  };
+  options: IPostGetResultServiceECommerceVariationOption[];
+} & Omit<IPostECommerceVariationModel, 'options'>;
+
+export type IPostGetResultServiceECommerceAttribute<T = string> = {
+  variationTerms: T[];
+  attributeTerm?: IPostTermPopulateService;
+} & Omit<IPostECommerceAttributeModel, 'variationTerms'>;
+
+export type IPostGetResultServiceECommerce<T = string> = {
+  variations: IPostGetResultServiceECommerceVariation[];
+  attributes: IPostGetResultServiceECommerceAttribute<T>[];
+} & Omit<IPostECommerceModel, 'variations' | 'attributes'>;
+
 export type IPostGetResultService = {
-  authorId: IUserPopulateService;
-  lastAuthorId: IUserPopulateService;
+  author?: IUserPopulateService;
+  lastAuthor?: IUserPopulateService;
   authors?: IUserPopulateService[];
   views?: number;
   categories?: IPostTermPopulateService[];
   tags?: IPostTermPopulateService[];
   contents?: IPostContentModel;
   alternates?: IPostAlternateService[];
-  eCommerce?: Omit<
-    IPostECommerceModel<IPostTermPopulateService, IPostTermPopulateService[]>,
-    'variations'
-  > & {
-    variations?: IPostECommerceVariationModel<IPostTermPopulateService>[];
-  };
+  eCommerce?: IPostGetResultServiceECommerce<IPostTermPopulateService>;
 } & Omit<
   IPostModel,
-  | 'contents'
-  | 'categories'
-  | 'tags'
-  | 'eCommerce'
-  | 'authorId'
-  | 'lastAuthorId'
-  | 'authors'
+  'contents' | 'categories' | 'tags' | 'eCommerce' | 'authors'
 >;
 
 export type IPostGetManyResultService = {
-  eCommerce?: Omit<IPostECommerceModel, 'variations'> & {
-    variations?: (Omit<IPostECommerceVariationModel, 'contents'> & {
-      alternates?: IPostAlternateService[];
-    })[];
-  };
+  eCommerce?: IPostGetResultServiceECommerce;
 } & Omit<IPostGetResultService, 'eCommerce'>;
 
 export interface IPostGetWithIdParamService {

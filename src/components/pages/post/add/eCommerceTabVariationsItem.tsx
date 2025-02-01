@@ -6,7 +6,7 @@ import { IPagePostAddState } from '@pages/post/add';
 import {
   IPostECommerceAttributeModel,
   IPostECommerceVariationModel,
-  IPostECommerceVariationSelectedModel,
+  IPostECommerceVariationOptionModel,
 } from 'types/models/post.model';
 import { Accordion, Card, Tab, Tabs } from 'react-bootstrap';
 import ComponentToolTip from '@components/elements/tooltip';
@@ -34,7 +34,7 @@ type IComponentProps = {
   variations?: IPagePostAddState['variations'];
   selectedVariations?: IPostECommerceVariationModel[];
   selectedAttributes?: IPostECommerceAttributeModel[];
-  variationDefaults?: IPostECommerceVariationSelectedModel[];
+  variationDefaults?: IPostECommerceVariationOptionModel[];
   isDefault?: boolean;
   isSelected?: boolean;
   onClickDelete: (_id: string) => void;

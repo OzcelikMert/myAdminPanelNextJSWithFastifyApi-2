@@ -11,4 +11,6 @@ export interface ILanguageModel {
   isDefault: boolean;
   createdAt?: string;
   updatedAt?: string;
+  authorId: string;
+  lastAuthorId: string;
 }

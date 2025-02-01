@@ -15,6 +15,8 @@ export interface IUserPopulateService {
 
 export type IUserGetResultService = {
   isOnline?: boolean;
+  author?: IUserPopulateService;
+  lastAuthor?: IUserPopulateService;
 } & IUserModel;
 
 export interface IUserGetWithIdParamService {

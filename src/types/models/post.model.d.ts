@@ -52,15 +52,15 @@ export interface IPostContentButtonModel {
   url?: string;
 }
 
-export interface IPostECommerceModel<T = string, P = string[]> {
+export interface IPostECommerceModel {
   typeId: ProductTypeId;
   images: string[];
   pricing?: IPostECommercePricingModel;
   inventory?: IPostECommerceInventoryModel;
   shipping?: IPostECommerceShippingModel;
-  attributes?: IPostECommerceAttributeModel<T, P>[];
-  variations?: IPostECommerceVariationModel<T>[];
-  variationDefaults?: IPostECommerceVariationSelectedModel<T>[];
+  attributes?: IPostECommerceAttributeModel[];
+  variations?: IPostECommerceVariationModel[];
+  defaultVariationOptions?: IPostECommerceVariationOptionModel[];
 }
 
 export interface IPostECommercePricingModel {
@@ -84,32 +84,22 @@ export interface IPostECommerceShippingModel {
   weight: string;
 }
 
-export interface IPostECommerceAttributeModel<T = string, P = string[]> {
+export interface IPostECommerceAttributeModel {
   _id: string;
-  attributeId: T;
-  variations: P;
+  attributeTermId: string;
+  variationTerms: string[];
   typeId: AttributeTypeId;
 }
 
-export interface IPostECommerceVariationModel<T = string> {
+export interface IPostECommerceVariationModel {
   _id: string;
   rank: number;
-  selectedVariations: IPostECommerceVariationSelectedModel<T>[];
-  itemId: IPostECommerceVariationItemModel;
+  options: IPostECommerceVariationOptionModel[];
+  productId: IPostECommerceVariationItemModel;
 }
 
-export interface IPostECommerceVariationItemModel {
-  _id: string;
-  statusId: StatusId;
-  contents: Omit<IPostContentModel, 'buttons' | 'icon'>;
-  eCommerce: Omit<
-    IPostECommerceModel,
-    'variationDefaults' | 'variations' | 'typeId' | 'attributes'
-  >;
-}
-
-export interface IPostECommerceVariationSelectedModel<T = string> {
+export interface IPostECommerceVariationOptionModel {
   _id?: string;
-  attributeId: T;
-  variationId: T;
+  attributeId: string;
+  variationTermId: string;
 }

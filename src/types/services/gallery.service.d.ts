@@ -8,8 +8,8 @@ export type IGalleryImageProperties = {
 };
 
 export type IGalleryGetResultService = {
-  authorId: IUserPopulateService;
-} & Omit<IGalleryModel, 'authorId'> &
+  author?: IUserPopulateService;
+} & IGalleryModel &
   IGalleryImageProperties;
 
 export type IGalleryAddParamService = {} & FormData;

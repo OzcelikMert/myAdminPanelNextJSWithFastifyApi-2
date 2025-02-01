@@ -10,16 +10,16 @@ export interface IComponentAlternateService {
   langId: string;
 }
 
-export type IComponentGetResultService = {
-  authorId: IUserPopulateService;
-  lastAuthorId: IUserPopulateService;
-  elements: IComponentElementGetResultService[]
-} & Omit<IComponentModel, 'elements' | 'authorId' | 'lastAuthorId'>;
-
-export type IComponentElementGetResultService = {
+export type IComponentGetResultServiceElement = {
   contents?: IComponentElementContentModel;
   alternates?: IComponentAlternateService[];
 } & Omit<IComponentElementModel, 'contents'>;
+
+export type IComponentGetResultService = {
+  author?: IUserPopulateService;
+  lastAuthor?: IUserPopulateService;
+  elements: IComponentGetResultServiceElement[]
+} & Omit<IComponentModel, 'elements'>;
 
 export interface IComponentGetWithIdParamService {
   _id: string;
