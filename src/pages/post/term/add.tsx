@@ -1,4 +1,4 @@
-import React, { FormEvent, useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import { Tab, Tabs } from 'react-bootstrap';
 import { PostTermService } from '@services/postTerm.service';
 import {
@@ -329,7 +329,7 @@ export default function PagePostTermAdd(props: IPageProps) {
         dispatch({ type: ActionTypes.SET_ITEM, payload: item });
         form.reset({
           ...item,
-          parentId: item.parentId?._id || '',
+          parentId: item.parentId || '',
           contents: {
             ...item.contents,
             langId: _langId,

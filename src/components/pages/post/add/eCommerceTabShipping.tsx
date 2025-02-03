@@ -23,7 +23,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 title={t('width')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.shipping.width`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.shipping.width`
                     : `eCommerce.shipping.width`
                 }
                 type="text"
@@ -34,7 +34,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 title={t('height')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.shipping.height`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.shipping.height`
                     : `eCommerce.shipping.height`
                 }
                 type="text"
@@ -45,7 +45,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 title={t('depth')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.shipping.depth`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.shipping.depth`
                     : `eCommerce.shipping.depth`
                 }
                 type="text"
@@ -56,7 +56,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 title={t('weight')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.shipping.weight`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.shipping.weight`
                     : `eCommerce.shipping.weight`
                 }
                 type="text"
@@ -67,7 +67,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 title={t('shippingPrice')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.shipping`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.pricing.shipping`
                     : `eCommerce.pricing.shipping`
                 }
                 type="number"

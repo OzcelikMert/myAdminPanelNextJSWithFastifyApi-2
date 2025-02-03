@@ -329,7 +329,7 @@ export default function PageGalleryList(props: IPageProps) {
           sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
           cell: (row) => (
             <ComponentTableUpdatedBy
-              name={row.authorId.name}
+              name={row.author?.name}
               updatedAt={row.createdAt || ''}
             />
           ),

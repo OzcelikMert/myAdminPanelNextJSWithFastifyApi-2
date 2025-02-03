@@ -16,9 +16,9 @@ const initialState: IComponentState = {
 };
 
 type IComponentProps = {
-  attributes?: IPagePostAddState['attributes'];
+  attributeTerms?: IPagePostAddState['attributeTerms'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
-  variations?: IPagePostAddState['variations'];
+  variationTerms?: IPagePostAddState['variationTerms'];
   selectedAttributes?: IPostECommerceAttributeModel[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
@@ -46,27 +46,17 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
     return (
       <div className="row mb-3">
         <div className="col-md-7">
-          <button
-            type={'button'}
-            className="btn btn-gradient-success btn-lg"
-            onClick={() => props.onClickAddNew()}
-          >
-            + {t('addNew')}
-          </button>
-        </div>
-        <div className="col-md-7 mt-2">
           <Accordion flush>
             {props.selectedAttributes?.map((item, index) => (
               <ComponentPagePostAddECommerceTabAttributesItem
                 key={item._id}
                 item={item}
-                attrId={item.attributeId}
                 index={index}
-                attributes={props.attributes}
+                attributeTerms={props.attributeTerms}
                 attributeTypes={props.attributeTypes}
-                variations={props.variations?.findMulti(
+                variationTerms={props.variationTerms?.findMulti(
                   'parentId',
-                  item.attributeId
+                  item.attributeTermId
                 )}
                 isSelected={accordionKey == item._id}
                 onClickDelete={(_id) => props.onClickDelete(_id)}
@@ -74,6 +64,15 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
               />
             ))}
           </Accordion>
+        </div>
+        <div className="col-md-7 text-center mt-4">
+          <button
+            type={'button'}
+            className="btn btn-gradient-success btn-lg"
+            onClick={() => props.onClickAddNew()}
+          >
+            + {t('addNew')}
+          </button>
         </div>
       </div>
     );

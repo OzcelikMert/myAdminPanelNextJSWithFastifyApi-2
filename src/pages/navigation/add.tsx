@@ -277,7 +277,7 @@ export default function PageNavigationAdd() {
         dispatch({ type: ActionTypes.SET_ITEM, payload: item });
         form.reset({
           ...item,
-          parentId: item.parentId?._id || '',
+          parentId: item.parentId || '',
           contents: {
             ...item.contents,
             langId: _langId,

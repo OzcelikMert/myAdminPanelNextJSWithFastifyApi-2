@@ -54,10 +54,10 @@ export type IPagePostAddState = {
   attributeTypes: IComponentInputSelectData<AttributeTypeId>[];
   productTypes: IComponentInputSelectData<ProductTypeId>[];
   components: IComponentInputSelectData<string>[];
-  categories: IComponentInputSelectData<string>[];
-  tags: IComponentInputSelectData<string>[];
-  attributes: IComponentInputSelectData<string>[];
-  variations: (IComponentInputSelectData<string> & { parentId: string })[];
+  categoryTerms: IComponentInputSelectData<string>[];
+  tagTerms: IComponentInputSelectData<string>[];
+  attributeTerms: IComponentInputSelectData<string>[];
+  variationTerms: (IComponentInputSelectData<string> & { parentId: string })[];
   status: IComponentInputSelectData<StatusId>[];
   mainTabActiveKey: string;
   item?: IPostGetResultService;
@@ -74,10 +74,10 @@ const initialState: IPagePostAddState = {
   attributeTypes: [],
   productTypes: [],
   components: [],
-  categories: [],
-  tags: [],
-  attributes: [],
-  variations: [],
+  categoryTerms: [],
+  tagTerms: [],
+  attributeTerms: [],
+  variationTerms: [],
   status: [],
   mainTabActiveKey: 'general',
   langId: '',
@@ -88,10 +88,10 @@ const initialState: IPagePostAddState = {
 };
 
 type IActionPayloadSetTerms = {
-  categories: IPagePostAddState['categories'];
-  tags: IPagePostAddState['tags'];
-  attributes: IPagePostAddState['attributes'];
-  variations: IPagePostAddState['variations'];
+  categories: IPagePostAddState['categoryTerms'];
+  tags: IPagePostAddState['tagTerms'];
+  attributes: IPagePostAddState['attributeTerms'];
+  variations: IPagePostAddState['variationTerms'];
 };
 
 export enum ActionTypes {
@@ -100,10 +100,10 @@ export enum ActionTypes {
   SET_ATTRIBUTE_TYPES,
   SET_PRODUCT_TYPES,
   SET_COMPONENTS,
-  SET_CATEGORIES,
-  SET_TAGS,
-  SET_ATTRIBUTES,
-  SET_VARIATIONS,
+  SET_CATEGORY_TERMS,
+  SET_TAG_TERMS,
+  SET_ATTRIBUTE_TERMS,
+  SET_VARIATION_TERMS,
   SET_STATUS,
   SET_MAIN_TAB_ACTIVE_KEY,
   SET_ITEM,
@@ -134,17 +134,17 @@ export type IAction =
       IPagePostAddState['components']
     >
   | IActionWithPayload<
-      ActionTypes.SET_CATEGORIES,
-      IPagePostAddState['categories']
+      ActionTypes.SET_CATEGORY_TERMS,
+      IPagePostAddState['categoryTerms']
     >
-  | IActionWithPayload<ActionTypes.SET_TAGS, IPagePostAddState['tags']>
+  | IActionWithPayload<ActionTypes.SET_TAG_TERMS, IPagePostAddState['tagTerms']>
   | IActionWithPayload<
-      ActionTypes.SET_ATTRIBUTES,
-      IPagePostAddState['attributes']
+      ActionTypes.SET_ATTRIBUTE_TERMS,
+      IPagePostAddState['attributeTerms']
     >
   | IActionWithPayload<
-      ActionTypes.SET_VARIATIONS,
-      IPagePostAddState['variations']
+      ActionTypes.SET_VARIATION_TERMS,
+      IPagePostAddState['variationTerms']
     >
   | IActionWithPayload<ActionTypes.SET_STATUS, IPagePostAddState['status']>
   | IActionWithPayload<
@@ -186,14 +186,14 @@ const reducer = (
       return { ...state, productTypes: action.payload };
     case ActionTypes.SET_COMPONENTS:
       return { ...state, components: action.payload };
-    case ActionTypes.SET_CATEGORIES:
-      return { ...state, categories: action.payload };
-    case ActionTypes.SET_TAGS:
-      return { ...state, tags: action.payload };
-    case ActionTypes.SET_ATTRIBUTES:
-      return { ...state, attributes: action.payload };
-    case ActionTypes.SET_VARIATIONS:
-      return { ...state, variations: action.payload };
+    case ActionTypes.SET_CATEGORY_TERMS:
+      return { ...state, categoryTerms: action.payload };
+    case ActionTypes.SET_TAG_TERMS:
+      return { ...state, tagTerms: action.payload };
+    case ActionTypes.SET_ATTRIBUTE_TERMS:
+      return { ...state, attributeTerms: action.payload };
+    case ActionTypes.SET_VARIATION_TERMS:
+      return { ...state, variationTerms: action.payload };
     case ActionTypes.SET_STATUS:
       return { ...state, status: action.payload };
     case ActionTypes.SET_MAIN_TAB_ACTIVE_KEY:
@@ -205,10 +205,10 @@ const reducer = (
     case ActionTypes.SET_TERMS:
       return {
         ...state,
-        categories: action.payload.categories,
-        tags: action.payload.tags,
-        attributes: action.payload.attributes,
-        variations: action.payload.variations,
+        categoryTerms: action.payload.categories,
+        tagTerms: action.payload.tags,
+        attributeTerms: action.payload.attributes,
+        variationTerms: action.payload.variations,
       };
     case ActionTypes.SET_IS_ITEM_LOADING:
       return { ...state, isItemLoading: action.payload };
@@ -275,6 +275,26 @@ export default function PagePostAdd() {
     resolver: zodResolver(PostUtil.getSchema(queries.postTypeId, queries._id)),
   });
 
+  const formFieldECommerceAttributes = useFieldArray({
+    name: 'eCommerce.attributes',
+    control: form.control,
+  });
+
+  const formFieldECommerceVariations = useFieldArray({
+    name: 'eCommerce.variations',
+    control: form.control,
+  });
+
+  const formFieldECommerceDefaultVariationOptions = useFieldArray({
+    name: 'eCommerce.defaultVariationOptions',
+    control: form.control,
+  });
+
+  const formFieldContentButtons = useFieldArray({
+    name: 'contents.buttons',
+    control: form.control,
+  });
+
   const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
@@ -331,6 +351,7 @@ export default function PagePostAdd() {
       if ([PostTypeId.Product].includes(queries.postTypeId)) {
         getAttributeTypes();
         getProductTypes();
+        setECommerceDefaultValues();
       }
       if ([PostTypeId.BeforeAndAfter].includes(queries.postTypeId)) {
         form.setValue('beforeAndAfter', {
@@ -389,11 +410,6 @@ export default function PagePostAdd() {
         label: t(product.langKey),
         value: product.id,
       })),
-    });
-    form.setValue('eCommerce', {
-      ...form.getValues().eCommerce,
-      typeId: ProductTypeId.SimpleProduct,
-      images: [],
     });
   };
 
@@ -506,7 +522,7 @@ export default function PagePostAdd() {
           newVariations.push({
             value: term._id,
             label: term.contents?.title || t('[noLangAdd]'),
-            parentId: term.parentId?._id || '',
+            parentId: term.parentId || '',
           });
         }
       }
@@ -580,35 +596,37 @@ export default function PagePostAdd() {
             ...item.eCommerce,
             attributes: item.eCommerce.attributes?.map((attribute) => ({
               ...attribute,
-              attributeId: attribute.attributeId._id,
-              variations: attribute.variations.map(
+              attributeTermId: attribute.attributeTermId,
+              variationTerms: attribute.variationTerms.map(
                 (variation) => variation._id
               ),
             })),
             variations: item.eCommerce.variations?.map((variation) => ({
               ...variation,
-              itemId: {
-                ...variation.itemId,
+              product: {
+                statusId: StatusId.Active,
+                rank: 0,
+                ...variation.product,
                 contents: {
-                  ...variation.itemId.contents,
+                  ...variation.product?.contents,
                   langId: _langId,
+                  title: '',
                 },
               },
-              selectedVariations: variation.selectedVariations.map(
-                (selectedVariation) => ({
-                  ...selectedVariation,
-                  variationId: selectedVariation.variationId._id,
-                  attributeId: selectedVariation.attributeId._id,
+              options: variation.options.map((option) => ({
+                ...option,
+                variationTermId: option.variationTermId,
+                attributeId: option.attributeId,
+              })),
+            })),
+            defaultVariationOptions:
+              item.eCommerce.defaultVariationOptions?.map(
+                (defaultVariationOption) => ({
+                  ...defaultVariationOption,
+                  attributeId: defaultVariationOption.attributeId,
+                  variationId: defaultVariationOption.variationTermId,
                 })
               ),
-            })),
-            variationDefaults: item.eCommerce.variationDefaults?.map(
-              (variationDefault) => ({
-                ...variationDefault,
-                attributeId: variationDefault.attributeId._id,
-                variationId: variationDefault.variationId._id,
-              })
-            ),
           };
         }
 
@@ -630,6 +648,16 @@ export default function PagePostAdd() {
     }
   };
 
+  const setECommerceDefaultValues = () => {
+    form.setValue('eCommerce', {
+      ...form.getValues().eCommerce,
+      typeId: ProductTypeId.SimpleProduct,
+      images: [],
+      attributes: [],
+      variations: [],
+    });
+  };
+
   const navigatePage = async () => {
     const postTypeId = queries.postTypeId;
     const pagePath = PostUtil.getPagePath(postTypeId);
@@ -639,8 +667,8 @@ export default function PagePostAdd() {
 
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
-    console.log("onSubmit", data);
-    
+    console.log('onSubmit', data);
+
     return;
 
     let serviceResult = null;
@@ -693,9 +721,9 @@ export default function PagePostAdd() {
     switch (item.typeId) {
       case PostTermTypeId.Category:
         dispatch({
-          type: ActionTypes.SET_CATEGORIES,
+          type: ActionTypes.SET_CATEGORY_TERMS,
           payload: [
-            ...state.categories,
+            ...state.categoryTerms,
             {
               label: item.contents?.title || t('[noLangAdd]'),
               value: item._id,
@@ -705,9 +733,9 @@ export default function PagePostAdd() {
         break;
       case PostTermTypeId.Tag:
         dispatch({
-          type: ActionTypes.SET_TAGS,
+          type: ActionTypes.SET_TAG_TERMS,
           payload: [
-            ...state.tags,
+            ...state.tagTerms,
             {
               label: item.contents?.title || t('[noLangAdd]'),
               value: item._id,
@@ -727,23 +755,18 @@ export default function PagePostAdd() {
   };
 
   const onClickAddNewButton = () => {
-    form.setValue('contents.buttons', [
-      ...(form.getValues().contents?.buttons || []),
-      {
-        _id: String.createId(),
-        title: '',
-        url: '',
-      },
-    ]);
+    formFieldContentButtons.append({
+      _id: String.createId(),
+      title: '',
+      url: '',
+    });
   };
 
   const onClickDeleteButton = (_id: string) => {
     const formValues = form.getValues();
-    if (formValues.contents.buttons) {
-      form.setValue(
-        'contents.buttons',
-        formValues.contents.buttons.filter((item) => item._id != _id)
-      );
+    const index = formValues.contents.buttons?.indexOfKey('_id', _id);
+    if (index && index > -1) {
+      formFieldContentButtons.remove(index);
     }
   };
 
@@ -761,33 +784,45 @@ export default function PagePostAdd() {
     }
   };
 
-  const checkSameVariation = (attributeId: string, variationId: string) => {
+  const checkSameVariation = (attributeId: string, variationTermId: string) => {
     const variations = form.getValues().eCommerce?.variations ?? [];
     const filteredVariations = variations.findMulti(
-      'selectedVariations.attributeId',
+      'options.attributeId',
       attributeId
     );
     return filteredVariations.some((filteredVariation) =>
-      filteredVariation.selectedVariations.some(
-        (selectedVariation) => selectedVariation.variationId == variationId
+      filteredVariation.options.some(
+        (option) => option.variationTermId == variationTermId
       )
     );
   };
 
   const onClickAddNewAttribute = () => {
-    const _id = String.createId();
+    if (state.attributeTerms.length > 0) {
+      const formValues = form.getValues();
+      const _id = String.createId();
 
-    if(state.attributes.length > 0){
-      let newAttributes = form.getValues().eCommerce?.attributes ?? [];
-      newAttributes.push({
+      formFieldECommerceAttributes.append({
         _id: _id,
-        attributeId: state.attributes[0].value,
+        attributeTermId: state.attributeTerms[0].value,
         typeId: AttributeTypeId.Text,
-        variations: [],
+        variationTerms: [],
       });
-  
-      form.setValue('eCommerce.attributes', newAttributes);
-    }else {
+
+      formFieldECommerceVariations.replace(
+        formFieldECommerceVariations.fields.map((variation) => ({
+          ...variation,
+          options: [
+            ...variation.options,
+            {
+              _id: String.createId(),
+              attributeId: _id,
+              variationTermId: '',
+            },
+          ],
+        }))
+      );
+    } else {
       showToast({
         type: 'error',
         title: t('error'),
@@ -797,31 +832,42 @@ export default function PagePostAdd() {
   };
 
   const onClickDeleteAttribute = (_id: string) => {
-    form.setValue(
-      'eCommerce.attributes',
-      form.getValues().eCommerce?.attributes?.filter((item) => item._id != _id)
-    );
+    const formValues = form.getValues();
+    const index = formValues.eCommerce?.attributes?.indexOfKey('_id', _id);
+    if (index && index > -1) {
+      formFieldECommerceAttributes.remove(index);
+
+      formFieldECommerceVariations.replace(
+        formFieldECommerceVariations.fields.map((variation) => ({
+          ...variation,
+          options: variation.options.filter(
+            (variationOption) => variationOption.attributeId != _id
+          ),
+        }))
+      );
+    }
   };
 
   const onClickAddNewVariation = () => {
     const _id = String.createId();
+    const productId = String.createId();
 
     const formValues = form.getValues();
 
-    let newVariations = formValues.eCommerce?.variations ?? [];
-    newVariations.push({
+    formFieldECommerceVariations.append({
       _id: _id,
-      selectedVariations: [],
-      rank: formValues.eCommerce?.variations?.length ?? 0,
-      itemId: {
-        _id: String.createId(),
+      options: [],
+      productId: productId,
+      product: {
         statusId: StatusId.Active,
+        rank: formValues.eCommerce?.variations?.length ?? 0,
         contents: {
           title: '',
           langId: formValues.contents.langId,
         },
         eCommerce: {
           images: [],
+          typeId: ProductTypeId.SimpleProduct,
           pricing: {
             taxIncluded: 0,
             compared: 0,
@@ -843,8 +889,6 @@ export default function PagePostAdd() {
         },
       },
     });
-
-    form.setValue('eCommerce.variations', newVariations);
   };
 
   const onClickDeleteVariation = async (_id: string) => {
@@ -858,34 +902,32 @@ export default function PagePostAdd() {
     });
 
     if (result.isConfirmed) {
-      form.setValue(
-        'eCommerce.variations',
-        form
-          .getValues()
-          .eCommerce?.variations?.filter((item) => item._id != _id)
-      );
+      const formValues = form.getValues();
+      const index = formValues.eCommerce?.variations.indexOfKey('_id', _id);
+
+      if (index && index > -1) {
+        formFieldECommerceVariations.remove(index);
+      }
     }
   };
 
   const onChangeVariation = (
-    mainId: string,
+    variationId: string,
     attributeId: string,
-    variationId: string
+    variationTermId: string
   ) => {
-    if (!checkSameVariation(attributeId, variationId)) {
+    if (!checkSameVariation(attributeId, variationTermId)) {
       const newVariations = form.getValues().eCommerce?.variations ?? [];
-      const variation = newVariations.findSingle('_id', mainId);
+      const variation = newVariations.findSingle('_id', variationId);
       if (variation) {
-        const index = variation.selectedVariations.indexOfKey(
-          'attributeId',
-          attributeId
-        );
+        const index = variation.options.indexOfKey('attributeId', attributeId);
         if (index > -1) {
-          variation.selectedVariations[index].variationId = variationId;
+          variation.options[index].variationTermId = variationTermId;
         } else {
-          variation.selectedVariations.push({
+          variation.options.push({
+            _id: String.createId(),
             attributeId: attributeId,
-            variationId: variationId,
+            variationTermId: variationTermId,
           });
         }
       }
@@ -899,7 +941,7 @@ export default function PagePostAdd() {
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
-  console.log("PagePostAdd", formValues);
+  console.log('PagePostAdd', formValues);
 
   return isPageLoading ? null : (
     <div className="page-post">
@@ -909,8 +951,8 @@ export default function PagePostAdd() {
         termTypeId={state.termTypeIdForModal}
         items={
           state.termTypeIdForModal == PostTermTypeId.Category
-            ? state.categories
-            : state.tags
+            ? state.categoryTerms
+            : state.tagTerms
         }
         onSubmit={(item) => onSubmitTermModal(item)}
         onHide={() =>
@@ -966,14 +1008,10 @@ export default function PagePostAdd() {
                     >
                       <Tab eventKey="general" title={t('general')}>
                         <ComponentPagePostAddTabGeneral
-                          categories={state.categories}
-                          tags={state.tags}
-                          icon={formValues.contents.icon}
-                          image={formValues.contents.image}
+                          categoryTerms={state.categoryTerms}
+                          tagTerms={state.tagTerms}
                           isIconActive={state.isIconActive}
-                          selectedCategories={formValues.categories}
-                          selectedTags={formValues.tags}
-                          showCategorySelect={
+                          showCategoryTermSelect={
                             ![
                               PostTypeId.Page,
                               PostTypeId.Slider,
@@ -984,7 +1022,7 @@ export default function PagePostAdd() {
                           showIconCheckBox={[PostTypeId.Service].includes(
                             formValues.typeId
                           )}
-                          showTagSelect={
+                          showTagTermSelect={
                             ![
                               PostTypeId.Slider,
                               PostTypeId.Service,
@@ -1020,17 +1058,14 @@ export default function PagePostAdd() {
                             status={state.status}
                             statusId={formValues.statusId}
                             authors={state.authors}
-                            pageTypeId={formValues.pageTypeId}
                             pageTypes={state.pageTypes}
-                            selectedAuthors={formValues.authors}
                             showAuthorsSelect={
                               !formValues._id ||
                               PermissionUtil.checkPermissionRoleRank(
                                 sessionAuth!.user.roleId,
                                 UserRoleId.Editor
                               ) ||
-                              sessionAuth!.user.userId ==
-                                state.item?.authorId?._id
+                              sessionAuth!.user.userId == state.item?.authorId
                             }
                             showNoIndexCheckBox={
                               [PostTypeId.Page].includes(formValues.typeId) &&
@@ -1046,8 +1081,7 @@ export default function PagePostAdd() {
                                 sessionAuth!.user.roleId,
                                 UserRoleId.Editor
                               ) ||
-                              sessionAuth!.user.userId ==
-                                state.item?.authorId?._id
+                              sessionAuth!.user.userId == state.item?.authorId
                             }
                           />
                         </Tab>
@@ -1059,8 +1093,6 @@ export default function PagePostAdd() {
             </div>
             {[PostTypeId.BeforeAndAfter].includes(formValues.typeId) ? (
               <ComponentPagePostAddBeforeAndAfter
-                imageAfter={formValues.beforeAndAfter?.imageAfter}
-                imageBefore={formValues.beforeAndAfter?.imageBefore}
                 images={formValues.beforeAndAfter?.images}
               />
             ) : null}
@@ -1068,7 +1100,7 @@ export default function PagePostAdd() {
               formValues.typeId
             ) ? (
               <ComponentPagePostAddButtons
-                items={formValues.contents.buttons}
+                items={formFieldContentButtons.fields}
                 onClickAddNew={() => onClickAddNewButton()}
                 onClickDelete={(_id) => onClickDeleteButton(_id)}
               />
@@ -1083,11 +1115,17 @@ export default function PagePostAdd() {
             ) : null}
             {[PostTypeId.Product].includes(formValues.typeId) ? (
               <ComponentPagePostAddECommerce
-                variations={state.variations}
-                attributes={state.attributes}
+                variationTerms={state.variationTerms}
+                attributeTerms={state.attributeTerms}
                 attributeTypes={state.attributeTypes}
                 productTypes={state.productTypes}
-                eCommerce={formValues.eCommerce}
+                eCommerce={{
+                  ...formValues.eCommerce!,
+                  attributes: formFieldECommerceAttributes.fields,
+                  variations: formFieldECommerceVariations.fields,
+                  defaultVariationOptions:
+                    formFieldECommerceDefaultVariationOptions.fields,
+                }}
                 onClickAddNewAttribute={() => onClickAddNewAttribute()}
                 onClickDeleteAttribute={(_id) => onClickDeleteAttribute(_id)}
                 onClickAddNewVariation={() => onClickAddNewVariation()}

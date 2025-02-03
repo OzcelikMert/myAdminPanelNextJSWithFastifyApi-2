@@ -93,13 +93,12 @@ export interface IPostECommerceAttributeModel {
 
 export interface IPostECommerceVariationModel {
   _id: string;
-  rank: number;
   options: IPostECommerceVariationOptionModel[];
   productId: IPostECommerceVariationItemModel;
 }
 
 export interface IPostECommerceVariationOptionModel {
-  _id?: string;
+  _id: string;
   attributeId: string;
   variationTermId: string;
 }

@@ -11,7 +11,7 @@ import { StatusId } from '@constants/status';
 import { SelectUtil } from '@utils/select.util';
 import { EndPoints } from '@constants/endPoints';
 import { RouteUtil } from '@utils/route.util';
-import React, { FormEvent, useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useRouter } from 'next/router';

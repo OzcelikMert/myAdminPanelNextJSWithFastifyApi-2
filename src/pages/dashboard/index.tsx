@@ -301,7 +301,7 @@ export default function PageDashboard() {
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
-            name={row.lastAuthorId.name}
+            name={row.lastAuthor?.name ?? ""}
             updatedAt={row.updatedAt || ''}
           />
         ),

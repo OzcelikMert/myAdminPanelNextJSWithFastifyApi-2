@@ -9,6 +9,7 @@ export enum PostTypeId {
   Service,
   Testimonial,
   Product,
+  ProductVariation,
   BeforeAndAfter,
 }
 
@@ -21,5 +22,6 @@ export const postTypes: Array<IPostType> = [
   { id: PostTypeId.Service, rank: 6, langKey: 'services' },
   { id: PostTypeId.Testimonial, rank: 7, langKey: 'testimonials' },
   { id: PostTypeId.Product, rank: 9, langKey: 'product' },
-  { id: PostTypeId.BeforeAndAfter, rank: 10, langKey: 'beforeAndAfter' },
+  { id: PostTypeId.ProductVariation, rank: 10, langKey: 'variation' },
+  { id: PostTypeId.BeforeAndAfter, rank: 11, langKey: 'beforeAndAfter' },
 ];

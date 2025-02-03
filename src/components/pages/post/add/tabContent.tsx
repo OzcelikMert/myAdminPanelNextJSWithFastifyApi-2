@@ -18,7 +18,7 @@ const ComponentPagePostAddTabContent = React.memo((props: IComponentProps) => {
         <ComponentFormInputRichTextbox
           name={
             props.isECommerceVariation
-              ? `eCommerce.variations.${props.index}.itemId.contents.content`
+              ? `eCommerce.variations.${props.index}.product.contents.content`
               : `contents.content`
           }
         />

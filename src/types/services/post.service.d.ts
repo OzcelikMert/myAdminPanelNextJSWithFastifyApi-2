@@ -6,6 +6,7 @@ import {
   IPostECommerceModel,
   IPostECommerceVariationModel,
   IPostECommerceVariationOptionModel,
+  IPostECommerceAttributeModel,
 } from '../models/post.model';
 import { PostTypeId } from '@constants/postTypes';
 import { PageTypeId } from '@constants/pageTypes';
@@ -23,9 +24,10 @@ export type IPostGetResultServiceECommerceVariationOption = {
 } & IPostECommerceVariationOptionModel;
 
 export type IPostGetResultServiceECommerceVariation = {
-  product?: Omit<IPostModel, 'contents'> & {
+  product?: Omit<IPostModel, '_id' | 'typeId' |'contents' | 'authorId' | 'lastAuthorId'> & {
+    _id?: string
     alternates?: IPostAlternateService[];
-    contents?: IPostContentModel | IPostContentModel[];
+    contents?: IPostContentModel;
     author?: IUserPopulateService;
     lastAuthor?: IUserPopulateService;
   };
@@ -42,16 +44,16 @@ export type IPostGetResultServiceECommerce<T = string> = {
   attributes: IPostGetResultServiceECommerceAttribute<T>[];
 } & Omit<IPostECommerceModel, 'variations' | 'attributes'>;
 
-export type IPostGetResultService = {
+export type IPostGetResultService<T = IPostTermPopulateService> = {
   author?: IUserPopulateService;
   lastAuthor?: IUserPopulateService;
   authors?: IUserPopulateService[];
   views?: number;
-  categories?: IPostTermPopulateService[];
-  tags?: IPostTermPopulateService[];
+  categories?: T[];
+  tags?: T[];
   contents?: IPostContentModel;
   alternates?: IPostAlternateService[];
-  eCommerce?: IPostGetResultServiceECommerce<IPostTermPopulateService>;
+  eCommerce?: IPostGetResultServiceECommerce<T>;
 } & Omit<
   IPostModel,
   'contents' | 'categories' | 'tags' | 'eCommerce' | 'authors'
@@ -92,21 +94,16 @@ export interface IPostGetCountParamService {
   categories?: string[];
 }
 
-export type IPostAddParamService = {} & Omit<
+export type IPostAddParamService = {
+  eCommerce?: IPostGetResultServiceECommerce;
+} & Omit<
   IPostModel,
-  '_id' | 'views' | 'authorId' | 'lastAuthorId'
+  '_id' | 'views' | 'authorId' | 'lastAuthorId' | 'eCommerce'
 >;
 
 export type IPostAddProductParamService = {} & Omit<
-  IPostModel,
-  | '_id'
-  | 'views'
-  | 'authorId'
-  | 'lastAuthorId'
-  | 'pageTypeId'
-  | 'isNoIndex'
-  | 'beforeAndAfter'
-  | 'components'
+  IPostAddParamService,
+  'pageTypeId' | 'isNoIndex' | 'beforeAndAfter' | 'components'
 >;
 
 export type IPostUpdateWithIdParamService = {

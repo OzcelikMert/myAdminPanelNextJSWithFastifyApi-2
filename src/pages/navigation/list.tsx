@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { TableColumn } from 'react-data-table-component';
 import Swal from 'sweetalert2';
 import ComponentDataTable from '@components/elements/table/dataTable';
@@ -320,7 +320,7 @@ export default function PageNavigationList() {
         name: t('main'),
         selector: (row) =>
           row.parentId
-            ? row.parentId.contents?.title || t('[noLangAdd]')
+            ? row.parent?.contents?.title || t('[noLangAdd]')
             : t('notSelected'),
         sortable: true,
       },
@@ -334,7 +334,7 @@ export default function PageNavigationList() {
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
-            name={row.lastAuthorId.name}
+            name={row.lastAuthor?.name}
             updatedAt={row.updatedAt || ''}
           />
         ),
@@ -366,7 +366,7 @@ export default function PageNavigationList() {
         sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
         cell: (row) => (
           <ComponentTableUpdatedBy
-            name={row.authorId.name}
+            name={row.author?.name}
             updatedAt={row.createdAt || ''}
           />
         ),

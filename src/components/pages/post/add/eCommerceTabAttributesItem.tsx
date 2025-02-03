@@ -12,10 +12,9 @@ import { useDidMount } from '@library/react/hooks';
 type IComponentProps = {
   item: IPostECommerceAttributeModel;
   index: number;
-  attrId: string,
-  attributes?: IPagePostAddState['attributes'];
+  attributeTerms?: IPagePostAddState['attributeTerms'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
-  variations?: IPagePostAddState['variations'];
+  variationTerms?: IPagePostAddState['variationTerms'];
   isSelected?: boolean;
   onClickDelete: (_id: string) => void;
   onClickAccordionToggle: (id: string) => void;
@@ -34,8 +33,8 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                 <div className="col-md-6 mt-2 mt-md-0">
                   <ComponentFormInputSelect
                     title={t('attribute')}
-                    name={`eCommerce.attributes.${props.index}.attributeId`}
-                    options={props.attributes}
+                    name={`eCommerce.attributes.${props.index}.attributeTermId`}
+                    options={props.attributeTerms}
                     watch
                   />
                 </div>
@@ -85,8 +84,8 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
               <div className="col-md-12">
                 <ComponentFormInputSelect
                   title={t('variations')}
-                  name={`eCommerce.attributes.${props.index}.variations`}
-                  options={props.variations}
+                  name={`eCommerce.attributes.${props.index}.variationTerms`}
+                  options={props.variationTerms}
                   isMulti
                   closeMenuOnSelect={false}
                 />

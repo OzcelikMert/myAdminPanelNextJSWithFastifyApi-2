@@ -529,12 +529,12 @@ export default function PagePostList() {
       {
         name: t('updatedBy'),
         selector: (row) =>
-          row.lastAuthorId.name +
+          row.lastAuthor?.name +
           new Date(row.updatedAt || '').toLocaleDateString(),
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
-            name={row.lastAuthorId.name}
+            name={row.lastAuthor?.name}
             updatedAt={row.updatedAt || ''}
           />
         ),
@@ -575,7 +575,7 @@ export default function PagePostList() {
         sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
         cell: (row) => (
           <ComponentTableUpdatedBy
-            name={row.authorId.name}
+            name={row.author?.name}
             updatedAt={row.createdAt || ''}
           />
         ),

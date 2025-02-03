@@ -11,7 +11,7 @@ import ComponentPagePostAddECommerceTabShipping from './eCommerceTabShipping';
 import ComponentPagePostAddECommerceTabAttributes from './eCommerceTabAttributes';
 import ComponentPagePostAddECommerceTabVariations from './eCommerceTabVariations';
 import { IPagePostAddState } from '@pages/post/add';
-import { IPostECommerceModel } from 'types/models/post.model';
+import { IPostGetResultServiceECommerce } from 'types/services/post.service';
 
 type IComponentState = {
   tabKey: string;
@@ -22,25 +22,25 @@ const initialState: IComponentState = {
 };
 
 type IComponentProps = {
-  attributes?: IPagePostAddState['attributes'];
+  attributeTerms?: IPagePostAddState['attributeTerms'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
-  variations?: IPagePostAddState['variations'];
+  variationTerms?: IPagePostAddState['variationTerms'];
   productTypes?: IPagePostAddState['productTypes'];
-  eCommerce?: IPostECommerceModel;
+  eCommerce?: IPostGetResultServiceECommerce<string>;
   onClickAddNewAttribute?: () => void;
   onClickDeleteAttribute?: (_id: string) => void;
   onClickAddNewVariation?: () => void;
   onClickDeleteVariation?: (_id: string) => void;
   onChangeVariation?: (
-    mainId: string,
+    variationId: string,
     attributeId: string,
-    variationId: string
+    variationTermId: string
   ) => void;
 };
 
 const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-  console.log("ComponentPagePostAddECommerce", props);
+  console.log('ComponentPagePostAddECommerce', props);
   const [tabKey, setTabKey] = React.useState(initialState.tabKey);
 
   return (
@@ -90,9 +90,9 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
               ) : null}
               <Tab eventKey="attributes" title={t('attributes')}>
                 <ComponentPagePostAddECommerceTabAttributes
-                  attributes={props.attributes}
+                  attributeTerms={props.attributeTerms}
                   attributeTypes={props.attributeTypes}
-                  variations={props.variations}
+                  variationTerms={props.variationTerms}
                   selectedAttributes={props.eCommerce?.attributes}
                   onClickAddNew={() =>
                     props.onClickAddNewAttribute &&
@@ -107,11 +107,13 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
               {props.eCommerce?.typeId == ProductTypeId.VariableProduct ? (
                 <Tab eventKey="variations" title={t('variations')}>
                   <ComponentPagePostAddECommerceTabVariations
-                    variations={props.variations}
-                    attributes={props.attributes}
+                    variationTerms={props.variationTerms}
+                    attributeTerms={props.attributeTerms}
                     selectedVariations={props.eCommerce?.variations}
                     selectedAttributes={props.eCommerce?.attributes}
-                    variationDefaults={props.eCommerce?.variationDefaults}
+                    defaultVariationOptions={
+                      props.eCommerce?.defaultVariationOptions
+                    }
                     onClickAddNew={() =>
                       props.onClickAddNewVariation &&
                       props.onClickAddNewVariation()
@@ -120,9 +122,17 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                       props.onClickDeleteVariation &&
                       props.onClickDeleteVariation(_id)
                     }
-                    onChangeVariation={(mainId, attributeId, variationId) =>
+                    onChangeVariation={(
+                      variationId,
+                      attributeId,
+                      variationTermId
+                    ) =>
                       props.onChangeVariation &&
-                      props.onChangeVariation(mainId, attributeId, variationId)
+                      props.onChangeVariation(
+                        variationId,
+                        attributeId,
+                        variationTermId
+                      )
                     }
                   />
                 </Tab>

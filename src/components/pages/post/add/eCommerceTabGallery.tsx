@@ -37,7 +37,7 @@ const ComponentPagePostAddECommerceTabGallery = React.memo(
           <ComponentThemeChooseImageForm
             name={
               props.isECommerceVariation
-                ? `eCommerce.variations.${props.index}.itemId.eCommerce.images`
+                ? `eCommerce.variations.${props.index}.product.eCommerce.images`
                 : `eCommerce.images`
             }
             isMulti={true}

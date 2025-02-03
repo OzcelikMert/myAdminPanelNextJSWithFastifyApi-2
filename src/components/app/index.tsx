@@ -2,7 +2,6 @@ import React, { useRef } from 'react';
 import ComponentToolNavbar from '@components/tools/navbar';
 import ComponentToolSidebar from '@components/tools/sidebar';
 import ComponentToolFooter from '@components/tools/footer';
-import ComponentThemeBreadCrumb from '@components/theme/breadCrumb';
 import ComponentHead from '@components/head';
 import ComponentProviderAuth from '@components/providers/auth';
 import ComponentProviderAppInit from '@components/providers/appInit';

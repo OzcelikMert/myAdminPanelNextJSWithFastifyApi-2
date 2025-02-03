@@ -9,18 +9,14 @@ import { PostTermTypeId } from '@constants/postTermTypes';
 import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
-  categories?: IPagePostAddState['categories'];
-  tags?: IPagePostAddState['tags'];
-  image?: string;
-  icon?: string;
-  selectedCategories?: string[];
-  selectedTags?: string[];
+  categoryTerms?: IPagePostAddState['categoryTerms'];
+  tagTerms?: IPagePostAddState['tagTerms'];
   isIconActive?: boolean;
   showIconCheckBox?: boolean;
-  showCategorySelect?: boolean;
-  showTagSelect?: boolean;
-  isECommerceVariation?: boolean;
+  showCategoryTermSelect?: boolean;
+  showTagTermSelect?: boolean;
   index?: number;
+  isECommerceVariation?: boolean;
   onChangeIsIconActive?: () => void;
   onClickShowTermModal?: (termTypeId: PostTermTypeId) => void;
 };
@@ -65,7 +61,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
           <ComponentThemeChooseImageForm
             name={
               props.isECommerceVariation
-                ? `eCommerce.variations.${props.index}.itemId.contents.image`
+                ? `eCommerce.variations.${props.index}.product.contents.image`
                 : `contents.image`
             }
             reviewImageClassName={'post-image'}
@@ -77,7 +73,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
           title={`${t('title')}*`}
           name={
             props.isECommerceVariation
-              ? `eCommerce.variations.${props.index}.itemId.contents.title`
+              ? `eCommerce.variations.${props.index}.product.contents.title`
               : `contents.title`
           }
           type="text"
@@ -93,14 +89,14 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
           title={t('shortContent').toCapitalizeCase()}
           name={
             props.isECommerceVariation
-              ? `eCommerce.variations.${props.index}.itemId.contents.shortContent`
+              ? `eCommerce.variations.${props.index}.product.contents.shortContent`
               : `contents.shortContent`
           }
           type="textarea"
         />
       </div>
 
-      {props.showCategorySelect ? (
+      {props.showCategoryTermSelect ? (
         <div className="col-md-7 mb-3">
           <div className="row">
             <div className="col-md-10">
@@ -110,7 +106,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
                 placeholder={t('chooseCategory').toCapitalizeCase()}
                 isMulti
                 closeMenuOnSelect={false}
-                options={props.categories}
+                options={props.categoryTerms}
               />
             </div>
             <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">
@@ -129,7 +125,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         </div>
       ) : null}
 
-      {props.showTagSelect ? (
+      {props.showTagTermSelect ? (
         <div className="col-md-7 mb-3">
           <div className="row">
             <div className="col-md-10">
@@ -139,7 +135,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
                 placeholder={t('chooseTag').toCapitalizeCase()}
                 isMulti
                 closeMenuOnSelect={false}
-                options={props.tags}
+                options={props.tagTerms}
               />
             </div>
             <div className="col-md-2 mt-2 m-md-auto text-end text-md-center">

@@ -27,8 +27,6 @@ const initialState: IComponentState = {
 };
 
 type IComponentProps = {
-  imageBefore?: string;
-  imageAfter?: string;
   images?: string[];
 };
 

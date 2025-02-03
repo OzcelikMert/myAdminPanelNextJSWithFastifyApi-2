@@ -29,17 +29,19 @@ const schemaECommercePricing = object({
 });
 
 const schemaECommerceAttribute = object({
+  _id: string().optional(),
   typeId: z.nativeEnum(AttributeTypeId),
-  attributeId: string().min(1),
-  variations: array(string().min(1)),
+  attributeTermId: string().min(1),
+  variationTerms: array(string().min(1)),
 });
 
-const schemaECommerceVariationSelected = object({
+const schemaECommerceVariationOption = object({
+  _id: string().optional(),
   attributeId: string().min(1),
-  variationId: string().min(1),
+  variationTermId: string().min(1),
 });
 
-const schemaECommerceVariationItem = object({
+const schemaECommerceVariationProduct = object({
   _id: string().min(1),
   statusId: z.nativeEnum(StatusId),
   contents: object({
@@ -59,9 +61,10 @@ const schemaECommerceVariationItem = object({
 });
 
 const schemaECommerceVariation = object({
-  rank: number().min(0),
-  selectedVariations: array(schemaECommerceVariationSelected).default([]),
-  itemId: schemaECommerceVariationItem,
+  _id: string().optional(),
+  options: array(schemaECommerceVariationOption).default([]),
+  productId: string().optional(),
+  product: schemaECommerceVariationProduct,
 });
 
 const schemaECommerce = object({
@@ -72,7 +75,7 @@ const schemaECommerce = object({
   shipping: schemaECommerceShipping.optional(),
   attributes: array(schemaECommerceAttribute).default([]),
   variations: array(schemaECommerceVariation).default([]),
-  variationDefaults: array(schemaECommerceVariationSelected).default([]),
+  defaultVariationOptions: array(schemaECommerceVariationOption).default([]),
 });
 
 const schemaContentButton = object({

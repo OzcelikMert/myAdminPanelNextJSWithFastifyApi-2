@@ -24,7 +24,7 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
                 title={t('sku')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.inventory.sku`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.inventory.sku`
                     : `eCommerce.inventory.sku`
                 }
                 type="text"
@@ -35,7 +35,7 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
                 title={t('quantity')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.inventory.quantity`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.inventory.quantity`
                     : `eCommerce.inventory.quantity`
                 }
                 disabled={!props.inventory?.isManageStock || false}
@@ -47,7 +47,7 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
                 title={t('isManageStock')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.inventory.isManageStock`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.inventory.isManageStock`
                     : `eCommerce.inventory.isManageStock`
                 }
                 value={1}

@@ -6,16 +6,13 @@ import ComponentFormInput from '@components/elements/form/inputs/input';
 import ComponentFormInputCheckbox from '@components/elements/form/inputs/checkbox';
 import { StatusId } from '@constants/status';
 import { IPagePostAddState } from '@pages/post/add';
-import { PageTypeId } from '@constants/pageTypes';
 import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   status: IPagePostAddState['status'];
   statusId: StatusId;
   pageTypes?: IPagePostAddState['pageTypes'];
-  pageTypeId?: PageTypeId;
   authors?: IPagePostAddState['authors'];
-  selectedAuthors?: string[];
   showStatusSelect?: boolean;
   showPageTypeSelect?: boolean;
   showAuthorsSelect?: boolean;

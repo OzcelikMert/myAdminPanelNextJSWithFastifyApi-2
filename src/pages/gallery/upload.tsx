@@ -121,7 +121,7 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
           props.onUploadImages(
             serviceResult.data.map((image) => ({
               ...image,
-              authorId: {
+              author: {
                 _id: sessionAuth!.user.userId,
                 name: sessionAuth!.user.name,
                 image: sessionAuth!.user.image,

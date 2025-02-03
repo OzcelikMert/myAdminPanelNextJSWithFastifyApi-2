@@ -18,6 +18,7 @@ import ComponentPagePostAddECommerceTabPricing from './eCommerceTabPricing';
 import ComponentPagePostAddECommerceTabInvertory from './eCommerceTabInventory';
 import ComponentPagePostAddECommerceTabShipping from './eCommerceTabShipping';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
+import { IPostGetResultServiceECommerceVariation } from 'types/services/post.service';
 
 type IComponentState = {
   tabKey: string;
@@ -28,20 +29,20 @@ const initialState: IComponentState = {
 };
 
 type IComponentProps = {
-  item: IPostECommerceVariationModel;
+  item: IPostGetResultServiceECommerceVariation;
   index: number;
-  attributes?: IPagePostAddState['attributes'];
-  variations?: IPagePostAddState['variations'];
+  attributeTerms?: IPagePostAddState['attributeTerms'];
+  variationTerms?: IPagePostAddState['variationTerms'];
   selectedVariations?: IPostECommerceVariationModel[];
   selectedAttributes?: IPostECommerceAttributeModel[];
-  variationDefaults?: IPostECommerceVariationOptionModel[];
+  defaultVariationOptions?: IPostECommerceVariationOptionModel[];
   isDefault?: boolean;
   isSelected?: boolean;
   onClickDelete: (_id: string) => void;
   onChangeVariation: (
-    mainId: string,
+    variationId: string,
     attributeId: string,
-    variationId: string
+    variationTermId: string
   ) => void;
   onClickAccordionToggle: (id: string) => void;
 };
@@ -63,27 +64,27 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                     <i className="mdi mdi-menu"></i>
                   </div>
                 </div>
-                {props.selectedAttributes?.map((attribute, index) => (
+                {props.item.options?.map((option, index) => (
                   <div className="col-md mt-3">
                     <ComponentFormInputSelect
-                      name={`eCommerce.variations.${index}.variationId`}
+                      name={`eCommerce.variations.${props.index}.option.${index}.variationTermId`}
                       title={
-                        props.attributes?.findSingle(
+                        props.attributeTerms?.findSingle(
                           'value',
-                          attribute.attributeId
+                          props.selectedAttributes?.findSingle("_id", option.attributeId)?.attributeTermId
                         )?.label
                       }
-                      options={props.variations?.findMulti(
+                      options={props.variationTerms?.findMulti(
                         'value',
-                        attribute.variations
+                        props.selectedAttributes?.findSingle("_id", option.attributeId)?.variationTerms
                       )}
-                      onChange={(selectedItem, e) =>
+                     /* onChange={(selectedItem, e) =>
                         props.onChangeVariation(
                           props.item._id,
-                          attribute.attributeId,
+                          attribute._id,
                           (selectedItem as IComponentInputSelectData).value
                         )
-                      }
+                      }*/
                     />
                   </div>
                 ))}
@@ -135,7 +136,6 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
               <Tab eventKey="general" title={t('general')}>
                 <div className="mb-4">
                   <ComponentPagePostAddTabGeneral
-                    image={props.item.itemId.contents?.image}
                     index={props.index}
                     isECommerceVariation
                   />

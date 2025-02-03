@@ -23,7 +23,7 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
                 title={t('taxIncludedPrice')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.taxIncluded`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.pricing.taxIncluded`
                     : `eCommerce.pricing.taxIncluded`
                 }
                 type="number"
@@ -34,7 +34,7 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
                 title={t('taxExcludedPrice')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.taxExcluded`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.pricing.taxExcluded`
                     : `eCommerce.pricing.taxExcluded`
                 }
                 type="number"
@@ -45,7 +45,7 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
                 title={t('taxRate')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.taxRate`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.pricing.taxRate`
                     : `eCommerce.pricing.taxRate`
                 }
                 type="number"
@@ -56,7 +56,7 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
                 title={t('comparedPrice')}
                 name={
                   props.isECommerceVariation
-                    ? `eCommerce.variations.${props.index}.itemId.eCommerce.pricing.compared`
+                    ? `eCommerce.variations.${props.index}.product.eCommerce.pricing.compared`
                     : `eCommerce.pricing.compared`
                 }
                 type="number"
