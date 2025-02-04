@@ -5,7 +5,12 @@ import ComponentInputSelect, {
 import { useEffectAfterDidMount } from '@library/react/hooks';
 import { ZodUtil } from '@utils/zod.util';
 import React from 'react';
-import { useFormContext, Controller, Control } from 'react-hook-form';
+import {
+  useFormContext,
+  Controller,
+  Control,
+  ControllerRenderProps,
+} from 'react-hook-form';
 
 type IComponentPropsI18 = {
   setErrorText?: (errorCode: any) => string;
@@ -22,13 +27,30 @@ type IComponentProps<T = any> = {
 const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
   const form = useFormContext();
 
+  const selectRef = React.useRef<any>(null);
+  const fieldRef = React.useRef<ControllerRenderProps<any, string>>(null);
+
   if (props.watch) {
     form.watch(props.name);
   }
 
   useEffectAfterDidMount(() => {
-    console.log(props.name, "ComponentFormInputSelect useEffectAfterDidMount[props.options]", props.options);
-  }, [props.options])
+    if (fieldRef.current) {
+      if (
+        props.options?.some((option) =>
+          Array.isArray(fieldRef.current?.value)
+            ? !fieldRef.current.value.includes(option.value)
+            : fieldRef.current?.value != option.value
+        )
+      ) {
+        fieldRef.current.onChange(
+          setValue(
+            getValue(props.options ?? [], fieldRef.current.value ?? props.value)
+          )
+        );
+      }
+    }
+  }, [props.options]);
 
   const setValue = (
     newValue: IComponentInputSelectData | IComponentInputSelectData[]
@@ -49,11 +71,14 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
   };
 
   const getValue = (options: IComponentInputSelectData<any>[], value: any) => {
+    let newValue;
     if (Array.isArray(value)) {
-      return options.findMulti('value', value);
+      newValue = options.findMulti('value', value);
     } else {
-      return options.findSingle('value', value);
+      newValue = options.findSingle('value', value);
     }
+
+    return newValue ?? { label: props.placeholder?.toString() ?? "", value: undefined };
   };
 
   return (
@@ -61,26 +86,30 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
       name={props.name}
       control={props.control}
       rules={{ required: props.required }}
-      render={({ field, formState }) => (
-        <div className="form-input">
+      render={({ field, formState }) => {
+        fieldRef.current = field;
+        const hasAnError = Boolean(
+          formState.errors && formState.errors[props.name]
+        );
+        return (
           <ComponentInputSelect
             {...field}
             onChange={(newValue, action) => field.onChange(setValue(newValue))}
             {...props}
             value={getValue(props.options ?? [], field.value ?? props.value)}
-            ref={(e) => field.ref(e)}
+            ref={(e) => {
+              selectRef.current = e;
+              return field.ref(e);
+            }}
+            hasAnError={hasAnError}
+            errorText={
+              hasAnError && props.i18?.setErrorText
+                ? props.i18?.setErrorText(formState.errors[props.name]?.type)
+                : formState.errors[props.name]?.message?.toString()
+            }
           />
-          {formState.errors &&
-            formState.errors[props.name] &&
-            formState.errors[props.name]?.message && (
-              <div className="error">
-                {props.i18?.setErrorText
-                  ? props.i18?.setErrorText(formState.errors[props.name]?.type)
-                  : null}
-              </div>
-            )}
-        </div>
-      )}
+        );
+      }}
     />
   );
 });

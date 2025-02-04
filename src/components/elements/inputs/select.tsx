@@ -11,6 +11,8 @@ export type IComponentInputSelectProps<T = any> = {
   title?: string;
   mainDivCustomClassName?: string;
   options?: IComponentInputSelectData<T>[];
+  hasAnError?: boolean;
+  errorText?: string;
   onChange?: (
     newValue: IComponentInputSelectData<T> | IComponentInputSelectData<T>[],
     action: ActionMeta<T>
@@ -31,7 +33,7 @@ const ComponentInputSelect = React.memo(
     return (
       <div className={`theme-input static ${props.mainDivCustomClassName}`}>
         <span className="label">{props.title}</span>
-        <label className="field">
+        <label className={`field ${props.hasAnError ? 'error' : ''}`}>
           <Select
             className="custom-select"
             classNamePrefix="custom-select"
@@ -40,6 +42,9 @@ const ComponentInputSelect = React.memo(
             onChange={(newValue, action) => onChange(newValue, action)}
           />
         </label>
+        {props.hasAnError ? (
+          <div className="error-text">{props.errorText}</div>
+        ) : null}
       </div>
     );
   })

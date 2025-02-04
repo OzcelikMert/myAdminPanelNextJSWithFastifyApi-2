@@ -765,7 +765,7 @@ export default function PagePostAdd() {
   const onClickDeleteButton = (_id: string) => {
     const formValues = form.getValues();
     const index = formValues.contents.buttons?.indexOfKey('_id', _id);
-    if (index && index > -1) {
+    if (typeof index === "number" && index > -1) {
       formFieldContentButtons.remove(index);
     }
   };
@@ -799,7 +799,6 @@ export default function PagePostAdd() {
 
   const onClickAddNewAttribute = () => {
     if (state.attributeTerms.length > 0) {
-      const formValues = form.getValues();
       const _id = String.createId();
 
       formFieldECommerceAttributes.append({
@@ -807,6 +806,12 @@ export default function PagePostAdd() {
         attributeTermId: state.attributeTerms[0].value,
         typeId: AttributeTypeId.Text,
         variationTerms: [],
+      });
+
+      formFieldECommerceDefaultVariationOptions.append({
+        _id: String.createId(),
+        attributeId: _id,
+        variationTermId: '',
       });
 
       formFieldECommerceVariations.replace(
@@ -832,10 +837,14 @@ export default function PagePostAdd() {
   };
 
   const onClickDeleteAttribute = (_id: string) => {
-    const formValues = form.getValues();
-    const index = formValues.eCommerce?.attributes?.indexOfKey('_id', _id);
-    if (index && index > -1) {
+    const index = formFieldECommerceAttributes.fields.indexOfKey('_id', _id);
+    if (typeof index === "number" && index > -1) {
       formFieldECommerceAttributes.remove(index);
+
+      const indexDefaultVariationOption = formFieldECommerceDefaultVariationOptions.fields.indexOfKey('attributeId', _id);
+      if(typeof indexDefaultVariationOption === "number" && indexDefaultVariationOption > -1){
+        formFieldECommerceDefaultVariationOptions.remove(indexDefaultVariationOption);
+      }
 
       formFieldECommerceVariations.replace(
         formFieldECommerceVariations.fields.map((variation) => ({
@@ -860,7 +869,7 @@ export default function PagePostAdd() {
       productId: productId,
       product: {
         statusId: StatusId.Active,
-        rank: formValues.eCommerce?.variations?.length ?? 0,
+        rank: formFieldECommerceVariations.fields.length ?? 0,
         contents: {
           title: '',
           langId: formValues.contents.langId,
@@ -903,9 +912,9 @@ export default function PagePostAdd() {
 
     if (result.isConfirmed) {
       const formValues = form.getValues();
-      const index = formValues.eCommerce?.variations.indexOfKey('_id', _id);
+      const index = formFieldECommerceVariations.fields.indexOfKey('_id', _id);
 
-      if (index && index > -1) {
+      if (typeof index === "number" && index > -1) {
         formFieldECommerceVariations.remove(index);
       }
     }
@@ -1119,13 +1128,13 @@ export default function PagePostAdd() {
                 attributeTerms={state.attributeTerms}
                 attributeTypes={state.attributeTypes}
                 productTypes={state.productTypes}
-                eCommerce={{
+                eCommerce={formValues.eCommerce/*{
                   ...formValues.eCommerce!,
                   attributes: formFieldECommerceAttributes.fields,
                   variations: formFieldECommerceVariations.fields,
                   defaultVariationOptions:
                     formFieldECommerceDefaultVariationOptions.fields,
-                }}
+                }*/}
                 onClickAddNewAttribute={() => onClickAddNewAttribute()}
                 onClickDeleteAttribute={(_id) => onClickDeleteAttribute(_id)}
                 onClickAddNewVariation={() => onClickAddNewVariation()}

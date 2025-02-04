@@ -35,6 +35,8 @@ export type IComponentInputTagsProps = {
   placeHolder?: string;
   valueAsNumber?: boolean;
   required?: boolean
+  hasAnError?: boolean;
+  errorText?: string;
 };
 
 const ComponentInputTags = React.memo(
@@ -77,7 +79,7 @@ const ComponentInputTags = React.memo(
     return (
       <div className="theme-input static">
         <span className="label">{props.title}</span>
-        <div className="tags field">
+        <div className={`tags field ${props.hasAnError ? 'error' : ''}`}>
           {tags.map((tag, index: any) => (
             <Tag
               title={tag}
@@ -93,6 +95,9 @@ const ComponentInputTags = React.memo(
             placeholder={props.placeHolder}
           />
         </div>
+        {props.hasAnError ? (
+          <div className="error-text">{props.errorText}</div>
+        ) : null}
       </div>
     );
   })

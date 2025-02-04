@@ -54,7 +54,10 @@ const reducer = (state: IComponentState, action: IAction): IComponentState => {
   }
 };
 
-type IComponentProps = {} & Omit<IJoditEditorProps, 'config' | 'onBlur'>;
+type IComponentProps = {
+  hasAnError?: boolean;
+  errorText?: string;
+} & Omit<IJoditEditorProps, 'config' | 'onBlur'>;
 
 const ComponentInputRichTextbox = React.memo(
   React.forwardRef<JoditReact, IComponentProps>((props, ref) => {
@@ -129,7 +132,7 @@ const ComponentInputRichTextbox = React.memo(
     return state.isLoading ? (
       <Spinner animation="border" />
     ) : (
-      <div id={`themeRichTextBox_${String.createId()}`}>
+      <div id={`themeRichTextBox_${String.createId()}`} className="theme-input">
         <ComponentThemeChooseImage
           isMulti={true}
           isShow={state.isGalleryShow}
@@ -150,6 +153,9 @@ const ComponentInputRichTextbox = React.memo(
             />
           }
         </React.Fragment>
+        {props.hasAnError ? (
+          <div className="error-text">{props.errorText}</div>
+        ) : null}
       </div>
     );
   })

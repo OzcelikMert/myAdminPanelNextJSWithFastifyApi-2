@@ -1,6 +1,5 @@
 import React from 'react';
 import { Controller, Control } from 'react-hook-form';
-import { ZodUtil } from '@utils/zod.util';
 import ComponentInputTags, {
   IComponentInputTagsProps,
 } from '@components/elements/inputs/tags';
@@ -21,27 +20,25 @@ const ComponentFormInputTags = React.memo((props: IComponentProps) => {
       name={props.name}
       control={props.control}
       rules={{ required: props.required }}
-      render={({ field, formState }) => (
-        <div className="form-input">
+      render={({ field, formState }) => {
+        const hasAnError = Boolean(
+          formState.errors && formState.errors[props.name]
+        );
+        return (
           <ComponentInputTags
             {...field}
             onChange={(value) => field.onChange(value)}
             {...props}
             ref={(e) => field.ref(e)}
+            hasAnError={hasAnError}
+            errorText={
+              hasAnError && props.i18?.setErrorText
+                ? props.i18?.setErrorText(formState.errors[props.name]?.type)
+                : formState.errors[props.name]?.message?.toString()
+            }
           />
-          {formState.errors &&
-            formState.errors[props.name] &&
-            formState.errors[props.name]?.message && (
-              <div className="error">
-                {props.i18?.setErrorText
-                  ? props.i18?.setErrorText(
-                      formState.errors[props.name]?.type
-                    )
-                  : null}
-              </div>
-            )}
-        </div>
-      )}
+        );
+      }}
     />
   );
 });

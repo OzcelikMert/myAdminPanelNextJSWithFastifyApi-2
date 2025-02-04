@@ -19,7 +19,7 @@ const getFormInputErrorText = (errorCode?: any): IPanelLanguageKeys => {
     case 'too_small':
       return 'inputIsRequiredWithName';
     default:
-      return '[noLangAdd]';
+      return errorCode;
   }
 };
 

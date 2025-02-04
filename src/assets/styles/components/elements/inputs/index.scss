@@ -42,9 +42,9 @@
     color: var(--theme-input-color);
     background: transparent;
     border-radius: 4px;
-    &.failed {
-      @extend .border-danger;
-      @extend .border-3;
+    &.error { 
+      border: 1px solid #ff0000 !important;
+      box-shadow: 1px 1px 4px 1px #bd0000 !important;
     }
     &.textarea {
       min-height: 100px;
@@ -63,5 +63,10 @@
     &:hover {
       border-color: black;
     }
+  }
+  .error-text {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--bs-pink);
   }
 }

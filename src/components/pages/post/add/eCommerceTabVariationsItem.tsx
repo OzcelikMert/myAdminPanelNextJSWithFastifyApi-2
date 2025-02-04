@@ -64,30 +64,41 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                     <i className="mdi mdi-menu"></i>
                   </div>
                 </div>
-                {props.item.options?.map((option, index) => (
-                  <div className="col-md mt-3">
-                    <ComponentFormInputSelect
-                      name={`eCommerce.variations.${props.index}.option.${index}.variationTermId`}
-                      title={
-                        props.attributeTerms?.findSingle(
-                          'value',
-                          props.selectedAttributes?.findSingle("_id", option.attributeId)?.attributeTermId
-                        )?.label
-                      }
-                      options={props.variationTerms?.findMulti(
-                        'value',
-                        props.selectedAttributes?.findSingle("_id", option.attributeId)?.variationTerms
-                      )}
-                     /* onChange={(selectedItem, e) =>
-                        props.onChangeVariation(
-                          props.item._id,
-                          attribute._id,
-                          (selectedItem as IComponentInputSelectData).value
-                        )
-                      }*/
-                    />
-                  </div>
-                ))}
+                {props.selectedAttributes?.map((item, index) => {
+                  const indexOption = props.item.options.indexOfKey(
+                    'attributeId',
+                    item._id
+                  );
+
+                  if (typeof indexOption === 'number' && indexOption > -1) {
+                    return (
+                      <div className="col-md mt-3">
+                        <ComponentFormInputSelect
+                          name={`eCommerce.variations.${props.index}.options.${indexOption}.variationTermId`}
+                          title={
+                            props.attributeTerms?.findSingle(
+                              'value',
+                              item.attributeTermId
+                            )?.label
+                          }
+                          options={props.variationTerms?.findMulti(
+                            'value',
+                            item.variationTerms
+                          )}
+                          /* onChange={(selectedItem, e) =>
+                            props.onChangeVariation(
+                              props.item._id,
+                              attribute._id,
+                              (selectedItem as IComponentInputSelectData).value
+                            )
+                          }*/
+                        />
+                      </div>
+                    );
+                  }
+
+                  return null;
+                })}
               </div>
             </div>
             <div className="col-3 m-auto">

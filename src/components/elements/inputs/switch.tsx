@@ -1,7 +1,10 @@
+import { omit } from 'lodash';
 import React from 'react';
 
 export type IComponentInputSwitchProps = {
   title?: string;
+  hasAnError?: boolean;
+  errorText?: string;
 } & React.DetailedHTMLProps<
   React.InputHTMLAttributes<HTMLInputElement>,
   HTMLInputElement
@@ -10,14 +13,15 @@ export type IComponentInputSwitchProps = {
 const ComponentInputSwitch = React.memo(
   React.forwardRef<any, IComponentInputSwitchProps>((props, ref) => {
     const idRef = React.useRef<string>(String.createId());
+    const inputProps = omit(props, "hasAnError", "errorText");
 
     return (
-      <div className="form-switch">
+      <div className="theme-input form-switch">
         <input
           type="checkbox"
           className="form-check-input"
           id={idRef.current}
-          {...props}
+          {...inputProps}
           ref={ref}
         />
         <label
@@ -26,6 +30,9 @@ const ComponentInputSwitch = React.memo(
         >
           {props.title}
         </label>
+        {props.hasAnError ? (
+          <div className="error-text">{props.errorText}</div>
+        ) : null}
       </div>
     );
   })

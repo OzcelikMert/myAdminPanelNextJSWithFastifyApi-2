@@ -26,7 +26,7 @@ type IComponentProps = {
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
   (props: IComponentProps) => {
-    console.log("ComponentPagePostAddECommerceTabAttributes", props);
+    console.log('ComponentPagePostAddECommerceTabAttributes', props);
     const t = useAppSelector(selectTranslation);
 
     const [accordionKey, setAccordionKey] = React.useState(
@@ -34,7 +34,7 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
     );
 
     useDidMount(() => {
-      console.log("ComponentPagePostAddECommerceTabAttributes didMount", props);
+      console.log('ComponentPagePostAddECommerceTabAttributes didMount', props);
     });
 
     const onClickAccordionToggle = (_id: string) => {
@@ -47,22 +47,33 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
       <div className="row mb-3">
         <div className="col-md-7">
           <Accordion flush>
-            {props.selectedAttributes?.map((item, index) => (
-              <ComponentPagePostAddECommerceTabAttributesItem
-                key={item._id}
-                item={item}
-                index={index}
-                attributeTerms={props.attributeTerms}
-                attributeTypes={props.attributeTypes}
-                variationTerms={props.variationTerms?.findMulti(
+            {props.selectedAttributes?.map((item, index) => {
+              console.log(
+                'ComponentPagePostAddECommerceTabAttributes props.selectedAttributes?.map',
+                item,
+                props.variationTerms?.findMulti(
                   'parentId',
                   item.attributeTermId
-                )}
-                isSelected={accordionKey == item._id}
-                onClickDelete={(_id) => props.onClickDelete(_id)}
-                onClickAccordionToggle={(_id) => onClickAccordionToggle(_id)}
-              />
-            ))}
+                )
+              );
+
+              return (
+                <ComponentPagePostAddECommerceTabAttributesItem
+                  key={item._id}
+                  item={item}
+                  index={index}
+                  attributeTerms={props.attributeTerms}
+                  attributeTypes={props.attributeTypes}
+                  variationTerms={props.variationTerms?.findMulti(
+                    'parentId',
+                    item.attributeTermId
+                  )}
+                  isSelected={accordionKey == item._id}
+                  onClickDelete={(_id) => props.onClickDelete(_id)}
+                  onClickAccordionToggle={(_id) => onClickAccordionToggle(_id)}
+                />
+              );
+            })}
           </Accordion>
         </div>
         <div className="col-md-7 text-center mt-4">
