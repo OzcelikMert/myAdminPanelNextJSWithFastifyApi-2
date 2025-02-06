@@ -14,17 +14,17 @@ export type IComponentInputSelectProps<T = any> = {
   hasAnError?: boolean;
   errorText?: string;
   onChange?: (
-    newValue: IComponentInputSelectData<T> | IComponentInputSelectData<T>[],
+    newValue: IComponentInputSelectData<T>[] | IComponentInputSelectData<T>,
     action: ActionMeta<T>
   ) => void;
-} & Omit<StateManagerProps<T>, 'onChange' | 'options'>;
+} & Omit<
+  StateManagerProps<IComponentInputSelectData<T>>,
+  'onChange' | 'options'
+>;
 
 const ComponentInputSelect = React.memo(
   React.forwardRef<any, IComponentInputSelectProps>((props, ref) => {
-    const onChange = (
-      newValue: IComponentInputSelectData | IComponentInputSelectData[],
-      action: ActionMeta<any>
-    ) => {
+    const onChange = (newValue: any, action: any) => {
       if (props.onChange) {
         props.onChange(newValue, action);
       }

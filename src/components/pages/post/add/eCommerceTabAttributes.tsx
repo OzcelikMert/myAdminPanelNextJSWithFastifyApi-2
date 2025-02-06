@@ -22,6 +22,7 @@ type IComponentProps = {
   selectedAttributes?: IPostECommerceAttributeModel[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
+  onChangeAttribute: (attributeId: string, attributeTermId: string) => boolean;
 };
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
@@ -42,6 +43,12 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
         state != _id ? _id : initialState.accordionKey
       );
     };
+
+    const onChangeAttribute = (attributeId: string, attributeTermId: string) => {
+      if(props.onChangeAttribute(attributeId, attributeTermId)){
+        setAccordionKey("");
+      }
+    }
 
     return (
       <div className="row mb-3">
@@ -71,6 +78,9 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
                   isSelected={accordionKey == item._id}
                   onClickDelete={(_id) => props.onClickDelete(_id)}
                   onClickAccordionToggle={(_id) => onClickAccordionToggle(_id)}
+                  onChangeAttribute={(attributeId, attributeTermId) =>
+                    onChangeAttribute(attributeId, attributeTermId)
+                  }
                 />
               );
             })}

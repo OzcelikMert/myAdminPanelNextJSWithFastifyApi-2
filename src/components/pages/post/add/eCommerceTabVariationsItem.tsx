@@ -39,7 +39,7 @@ type IComponentProps = {
   isDefault?: boolean;
   isSelected?: boolean;
   onClickDelete: (_id: string) => void;
-  onChangeVariation: (
+  onChangeVariationOption: (
     variationId: string,
     attributeId: string,
     variationTermId: string
@@ -85,13 +85,14 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                             'value',
                             item.variationTerms
                           )}
-                          /* onChange={(selectedItem, e) =>
-                            props.onChangeVariation(
+                          watch
+                          onChange={(selectedItem, e) =>
+                            props.onChangeVariationOption(
                               props.item._id,
-                              attribute._id,
+                              item._id,
                               (selectedItem as IComponentInputSelectData).value
                             )
-                          }*/
+                          }
                         />
                       </div>
                     );

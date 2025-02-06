@@ -30,7 +30,7 @@ type IComponentProps = {
   defaultVariationOptions?: IPostGetResultServiceECommerceVariationOption[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
-  onChangeVariation: (
+  onChangeVariationOption: (
     variationId: string,
     attributeId: string,
     variationTermId: string
@@ -120,12 +120,12 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
                 isDefault={checkIsVariationDefault(item)}
                 isSelected={accordionKey == item._id}
                 onClickDelete={(id) => props.onClickDelete(id)}
-                onChangeVariation={(
+                onChangeVariationOption={(
                   variationId,
                   attributeId,
                   variationTermId
                 ) =>
-                  props.onChangeVariation(
+                  props.onChangeVariationOption(
                     variationId,
                     attributeId,
                     variationTermId

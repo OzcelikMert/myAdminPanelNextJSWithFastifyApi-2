@@ -2,15 +2,8 @@ import ComponentInputSelect, {
   IComponentInputSelectData,
   IComponentInputSelectProps,
 } from '@components/elements/inputs/select';
-import { useEffectAfterDidMount } from '@library/react/hooks';
-import { ZodUtil } from '@utils/zod.util';
 import React from 'react';
-import {
-  useFormContext,
-  Controller,
-  Control,
-  ControllerRenderProps,
-} from 'react-hook-form';
+import { useFormContext, Controller, Control } from 'react-hook-form';
 
 type IComponentPropsI18 = {
   setErrorText?: (errorCode: any) => string;
@@ -27,30 +20,9 @@ type IComponentProps<T = any> = {
 const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
   const form = useFormContext();
 
-  const selectRef = React.useRef<any>(null);
-  const fieldRef = React.useRef<ControllerRenderProps<any, string>>(null);
-
   if (props.watch) {
     form.watch(props.name);
   }
-
-  useEffectAfterDidMount(() => {
-    if (fieldRef.current) {
-      if (
-        props.options?.some((option) =>
-          Array.isArray(fieldRef.current?.value)
-            ? !fieldRef.current.value.includes(option.value)
-            : fieldRef.current?.value != option.value
-        )
-      ) {
-        fieldRef.current.onChange(
-          setValue(
-            getValue(props.options ?? [], fieldRef.current.value ?? props.value)
-          )
-        );
-      }
-    }
-  }, [props.options]);
 
   const setValue = (
     newValue: IComponentInputSelectData | IComponentInputSelectData[]
@@ -78,7 +50,12 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
       newValue = options.findSingle('value', value);
     }
 
-    return newValue ?? { label: props.placeholder?.toString() ?? "", value: undefined };
+    return (
+      newValue ?? {
+        label: props.placeholder?.toString() ?? '',
+        value: props.isMulti ? [] : props.valueAsNumber ? -1 : '',
+      }
+    );
   };
 
   return (
@@ -87,7 +64,6 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
       control={props.control}
       rules={{ required: props.required }}
       render={({ field, formState }) => {
-        fieldRef.current = field;
         const hasAnError = Boolean(
           formState.errors && formState.errors[props.name]
         );
@@ -97,10 +73,7 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
             onChange={(newValue, action) => field.onChange(setValue(newValue))}
             {...props}
             value={getValue(props.options ?? [], field.value ?? props.value)}
-            ref={(e) => {
-              selectRef.current = e;
-              return field.ref(e);
-            }}
+            ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={
               hasAnError && props.i18?.setErrorText

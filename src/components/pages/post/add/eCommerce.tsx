@@ -31,7 +31,8 @@ type IComponentProps = {
   onClickDeleteAttribute?: (_id: string) => void;
   onClickAddNewVariation?: () => void;
   onClickDeleteVariation?: (_id: string) => void;
-  onChangeVariation?: (
+  onChangeAttribute?: (attributeId: string, attributeTermId: string) => boolean;
+  onChangeVariationOption?: (
     variationId: string,
     attributeId: string,
     variationTermId: string
@@ -102,6 +103,11 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                     props.onClickDeleteAttribute &&
                     props.onClickDeleteAttribute(_id)
                   }
+                  onChangeAttribute={(attributeId, attributeTermId) =>
+                    props.onChangeAttribute
+                      ? props.onChangeAttribute(attributeId, attributeTermId)
+                      : false
+                  }
                 />
               </Tab>
               {props.eCommerce?.typeId == ProductTypeId.VariableProduct ? (
@@ -122,13 +128,13 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                       props.onClickDeleteVariation &&
                       props.onClickDeleteVariation(_id)
                     }
-                    onChangeVariation={(
+                    onChangeVariationOption={(
                       variationId,
                       attributeId,
                       variationTermId
                     ) =>
-                      props.onChangeVariation &&
-                      props.onChangeVariation(
+                      props.onChangeVariationOption &&
+                      props.onChangeVariationOption(
                         variationId,
                         attributeId,
                         variationTermId

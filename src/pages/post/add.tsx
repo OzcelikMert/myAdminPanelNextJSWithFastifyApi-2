@@ -47,6 +47,7 @@ import { IPagePostTermAddFormState } from './term/add';
 import Swal from 'sweetalert2';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
+import { formToJSON } from 'axios';
 
 export type IPagePostAddState = {
   authors: IComponentInputSelectData<string>[];
@@ -765,7 +766,7 @@ export default function PagePostAdd() {
   const onClickDeleteButton = (_id: string) => {
     const formValues = form.getValues();
     const index = formValues.contents.buttons?.indexOfKey('_id', _id);
-    if (typeof index === "number" && index > -1) {
+    if (typeof index === 'number' && index > -1) {
       formFieldContentButtons.remove(index);
     }
   };
@@ -838,12 +839,21 @@ export default function PagePostAdd() {
 
   const onClickDeleteAttribute = (_id: string) => {
     const index = formFieldECommerceAttributes.fields.indexOfKey('_id', _id);
-    if (typeof index === "number" && index > -1) {
+    if (typeof index === 'number' && index > -1) {
       formFieldECommerceAttributes.remove(index);
 
-      const indexDefaultVariationOption = formFieldECommerceDefaultVariationOptions.fields.indexOfKey('attributeId', _id);
-      if(typeof indexDefaultVariationOption === "number" && indexDefaultVariationOption > -1){
-        formFieldECommerceDefaultVariationOptions.remove(indexDefaultVariationOption);
+      const indexDefaultVariationOption =
+        formFieldECommerceDefaultVariationOptions.fields.indexOfKey(
+          'attributeId',
+          _id
+        );
+      if (
+        typeof indexDefaultVariationOption === 'number' &&
+        indexDefaultVariationOption > -1
+      ) {
+        formFieldECommerceDefaultVariationOptions.remove(
+          indexDefaultVariationOption
+        );
       }
 
       formFieldECommerceVariations.replace(
@@ -911,37 +921,64 @@ export default function PagePostAdd() {
     });
 
     if (result.isConfirmed) {
-      const formValues = form.getValues();
       const index = formFieldECommerceVariations.fields.indexOfKey('_id', _id);
 
-      if (typeof index === "number" && index > -1) {
+      if (typeof index === 'number' && index > -1) {
         formFieldECommerceVariations.remove(index);
       }
     }
   };
 
-  const onChangeVariation = (
+  const onChangeAttribute = (attributeId: string, attributeTermId: string) => {
+    const attributes = form.getValues().eCommerce?.attributes;
+
+    if (attributes) {
+      const indexAttribute = attributes?.indexOfKey('_id', attributeId);
+      if (typeof indexAttribute === 'number' && indexAttribute > -1) {
+        const attribute = attributes[indexAttribute];
+        if (attribute.attributeTermId != attributeTermId) {
+          form.setValue(`eCommerce.attributes.${indexAttribute}`, {
+            ...attribute,
+            attributeTermId,
+            variationTerms: [],
+          });
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  const onChangeVariationOption = (
     variationId: string,
     attributeId: string,
     variationTermId: string
   ) => {
     if (!checkSameVariation(attributeId, variationTermId)) {
-      const newVariations = form.getValues().eCommerce?.variations ?? [];
-      const variation = newVariations.findSingle('_id', variationId);
-      if (variation) {
-        const index = variation.options.indexOfKey('attributeId', attributeId);
-        if (index > -1) {
-          variation.options[index].variationTermId = variationTermId;
-        } else {
-          variation.options.push({
-            _id: String.createId(),
-            attributeId: attributeId,
-            variationTermId: variationTermId,
-          });
+      const variations = form.getValues().eCommerce?.variations;
+      if (variations) {
+        const indexVariation = variations.indexOfKey('_id', variationId);
+        if (typeof indexVariation === 'number' && indexVariation > -1) {
+          const variation = variations[indexVariation];
+          const indexOption = variation.options.indexOfKey(
+            'attributeId',
+            attributeId
+          );
+          if (indexOption > -1) {
+            const options = variation.options[indexOption];
+            if (options.variationTermId != variationTermId) {
+              form.setValue(
+                `eCommerce.variations.${indexVariation}.options.${indexOption}`,
+                {
+                  ...options,
+                  variationTermId,
+                }
+              );
+            }
+          }
         }
       }
-
-      form.setValue('eCommerce.variations', newVariations);
     }
   };
 
@@ -1128,19 +1165,24 @@ export default function PagePostAdd() {
                 attributeTerms={state.attributeTerms}
                 attributeTypes={state.attributeTypes}
                 productTypes={state.productTypes}
-                eCommerce={formValues.eCommerce/*{
-                  ...formValues.eCommerce!,
-                  attributes: formFieldECommerceAttributes.fields,
-                  variations: formFieldECommerceVariations.fields,
-                  defaultVariationOptions:
-                    formFieldECommerceDefaultVariationOptions.fields,
-                }*/}
+                eCommerce={formValues.eCommerce}
                 onClickAddNewAttribute={() => onClickAddNewAttribute()}
                 onClickDeleteAttribute={(_id) => onClickDeleteAttribute(_id)}
+                onChangeAttribute={(attributeId, attributeTermId) =>
+                  onChangeAttribute(attributeId, attributeTermId)
+                }
                 onClickAddNewVariation={() => onClickAddNewVariation()}
                 onClickDeleteVariation={(_id) => onClickDeleteVariation(_id)}
-                onChangeVariation={(mainId, attributeId, variationId) =>
-                  onChangeVariation(mainId, attributeId, variationId)
+                onChangeVariationOption={(
+                  variationId,
+                  attributeId,
+                  variationTermId
+                ) =>
+                  onChangeVariationOption(
+                    variationId,
+                    attributeId,
+                    variationTermId
+                  )
                 }
               />
             ) : null}

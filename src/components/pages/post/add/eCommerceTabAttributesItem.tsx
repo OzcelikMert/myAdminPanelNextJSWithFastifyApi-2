@@ -8,6 +8,7 @@ import { IPagePostAddState } from '@pages/post/add';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { useDidMount } from '@library/react/hooks';
+import ComponentToolTip from '@components/elements/tooltip';
 
 type IComponentProps = {
   item: IPostECommerceAttributeModel;
@@ -18,6 +19,7 @@ type IComponentProps = {
   isSelected?: boolean;
   onClickDelete: (_id: string) => void;
   onClickAccordionToggle: (id: string) => void;
+  onChangeAttribute: (attributeId: string, attributeTermId: string) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
@@ -35,7 +37,12 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                     title={t('attribute')}
                     name={`eCommerce.attributes.${props.index}.attributeTermId`}
                     options={props.attributeTerms}
-                    watch
+                    onChange={(selectedItem, e) =>
+                      props.onChangeAttribute(
+                        props.item._id,
+                        (selectedItem as IComponentInputSelectData).value
+                      )
+                    }
                   />
                 </div>
                 <div className="col-md-6 mt-2 mt-md-0">
@@ -50,7 +57,16 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
             </div>
             <div className="col-3 m-auto">
               <div className="row">
-                <div className="col-md-6 text-center text-md-end">
+                {props.item.variationTerms.length == 0 ? (
+                  <div className="col-md text-center text-md-start mb-2 mb-md-0">
+                    <ComponentToolTip
+                      message={t('eCommerceAttributeLengthError')}
+                    >
+                      <i className="mdi mdi-alert-circle text-danger fs-3"></i>
+                    </ComponentToolTip>
+                  </div>
+                ) : null}
+                <div className="col-md text-center text-md-end">
                   <button
                     type="button"
                     className="btn btn-gradient-danger btn-lg"
@@ -59,7 +75,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                     <i className="mdi mdi-trash-can"></i>
                   </button>
                 </div>
-                <div className="col-md-6 text-center pt-1 mt-5 m-md-auto">
+                <div className="col-md text-center pt-1 mt-5 m-md-auto">
                   <ComponentAccordionToggle
                     eventKey={props.item._id || ''}
                     onClick={() => props.onClickAccordionToggle(props.item._id)}
@@ -85,6 +101,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                 <ComponentFormInputSelect
                   title={t('variations')}
                   name={`eCommerce.attributes.${props.index}.variationTerms`}
+                  watch
                   options={props.variationTerms}
                   isMulti
                   closeMenuOnSelect={false}
