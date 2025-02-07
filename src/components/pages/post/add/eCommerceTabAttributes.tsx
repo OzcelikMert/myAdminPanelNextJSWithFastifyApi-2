@@ -19,10 +19,10 @@ type IComponentProps = {
   attributeTerms?: IPagePostAddState['attributeTerms'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
   variationTerms?: IPagePostAddState['variationTerms'];
-  selectedAttributes?: IPostECommerceAttributeModel[];
+  selectedAttributes?: (IPostECommerceAttributeModel & {id?: string})[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
-  onChangeAttribute: (attributeId: string, attributeTermId: string) => boolean;
+  onChangeAttribute: (attributeId: string, attributeTermId: string) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
@@ -45,9 +45,10 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
     };
 
     const onChangeAttribute = (attributeId: string, attributeTermId: string) => {
-      if(props.onChangeAttribute(attributeId, attributeTermId)){
-        setAccordionKey("");
-      }
+      props.onChangeAttribute(attributeId, attributeTermId)
+      //if(){
+        //setAccordionKey("");
+      //}
     }
 
     return (
@@ -56,7 +57,7 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
           <Accordion flush>
             {props.selectedAttributes?.map((item, index) => {
               console.log(
-                'ComponentPagePostAddECommerceTabAttributes props.selectedAttributes?.map',
+                `ComponentPagePostAddECommerceTabAttributes props.selectedAttributes?.map ${index}`,
                 item,
                 props.variationTerms?.findMulti(
                   'parentId',
@@ -66,7 +67,7 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
 
               return (
                 <ComponentPagePostAddECommerceTabAttributesItem
-                  key={item._id}
+                  key={item.id}
                   item={item}
                   index={index}
                   attributeTerms={props.attributeTerms}

@@ -5,13 +5,13 @@ import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
 import {
   IPostECommerceVariationModel,
+  IPostECommerceVariationOptionModel,
 } from 'types/models/post.model';
 import { Accordion } from 'react-bootstrap';
 import ComponentPagePostAddECommerceTabVariationsItem from './eCommerceTabVariationsItem';
 import {
   IPostGetResultServiceECommerceAttribute,
   IPostGetResultServiceECommerceVariation,
-  IPostGetResultServiceECommerceVariationOption,
 } from 'types/services/post.service';
 
 type IComponentState = {
@@ -25,9 +25,9 @@ const initialState: IComponentState = {
 type IComponentProps = {
   attributeTerms?: IPagePostAddState['attributeTerms'];
   variationTerms?: IPagePostAddState['variationTerms'];
-  selectedVariations?: IPostGetResultServiceECommerceVariation[];
+  selectedVariations?: (IPostGetResultServiceECommerceVariation & {id?: string})[];
   selectedAttributes?: IPostGetResultServiceECommerceAttribute[];
-  defaultVariationOptions?: IPostGetResultServiceECommerceVariationOption[];
+  defaultVariationOptions?: (IPostECommerceVariationOptionModel & {id?: string})[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
   onChangeVariationOption: (
@@ -72,36 +72,28 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
         <div className="col-md-7">
           <h4>{t('default')}</h4>
           <div className="row">
-            {props.selectedAttributes?.map((item, index) => {
-              const indexOption = props.defaultVariationOptions?.indexOfKey(
-                'attributeId',
-                item._id
-              );
-              
-              if (typeof indexOption === "number" && indexOption > -1) {
+            {props.defaultVariationOptions?.map((item, index) => {
+                const attribute = props.selectedAttributes?.findSingle("_id", item.attributeId);
+
                 return (
                   <div className="col-md-4 mt-3">
                     <ComponentFormInputSelect
-                      name={`eCommerce.defaultVariationOptions.${indexOption}.variationTermId`}
+                      key={item.id}
+                      name={`eCommerce.defaultVariationOptions.${index}.variationTermId`}
                       title={
                         props.attributeTerms?.findSingle(
                           'value',
-                          item.attributeTermId
+                          attribute?.attributeTermId
                         )?.label
                       }
                       options={props.variationTerms?.findMulti(
-                        'parentId',
-                        item.attributeTermId
-                      ).findMulti(
                         'value',
-                        item.variationTerms
+                        attribute?.variationTerms
                       )}
                     />
                   </div>
                 );
-              }
-
-              return null;
+              
             })}
           </div>
         </div>
@@ -109,7 +101,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
           <Accordion flush>
             {props.selectedVariations?.map((item, index) => (
               <ComponentPagePostAddECommerceTabVariationsItem
-                key={`eCommerceVariation_${item._id}`}
+                key={item.id}
                 item={item}
                 index={index}
                 attributeTerms={props.attributeTerms}

@@ -31,7 +31,7 @@ type IComponentProps = {
   onClickDeleteAttribute?: (_id: string) => void;
   onClickAddNewVariation?: () => void;
   onClickDeleteVariation?: (_id: string) => void;
-  onChangeAttribute?: (attributeId: string, attributeTermId: string) => boolean;
+  onChangeAttribute?: (attributeId: string, attributeTermId: string) => void;
   onChangeVariationOption?: (
     variationId: string,
     attributeId: string,

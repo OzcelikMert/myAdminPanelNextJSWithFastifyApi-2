@@ -167,7 +167,7 @@ export default function PagePostList() {
       PostPermissionMethod.GET
     );
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         minPermission,
         router,
         sessionAuth,

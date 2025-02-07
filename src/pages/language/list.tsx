@@ -96,7 +96,7 @@ export default function PageSettingLanguageList() {
       setIsPageLoaded(false);
     }
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         router,
         sessionAuth,
         t,

@@ -140,7 +140,7 @@ export default function PageSettingsGeneral() {
       setIsPageLoaded(false);
     }
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         router,
         sessionAuth,
         t,

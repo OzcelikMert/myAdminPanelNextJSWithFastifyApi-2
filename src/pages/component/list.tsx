@@ -65,7 +65,7 @@ export default function PageComponentList() {
       setIsPageLoaded(false);
     }
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         router,
         t,
         sessionAuth,

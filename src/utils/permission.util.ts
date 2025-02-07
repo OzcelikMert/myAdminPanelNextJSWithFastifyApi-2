@@ -121,9 +121,9 @@ const check = (
   );
 };
 
-const checkAndRedirect = (
+const checkAndRedirect = async (
   props: IPermissionCheckAndRedirectParamUtil
-): boolean => {
+): Promise<boolean> => {
   let status = true;
 
   if (props.sessionAuth) {
@@ -135,7 +135,7 @@ const checkAndRedirect = (
         content: props.t('noPerm'),
         position: 'top-right',
       });
-      RouteUtil.change({
+      await RouteUtil.change({
         router: props.router,
         path: props.redirectPath ?? EndPoints.DASHBOARD,
       });
@@ -148,7 +148,7 @@ const checkAndRedirect = (
       content: props.t('sessionRequired'),
       position: 'top-right',
     });
-    RouteUtil.change({
+    await RouteUtil.change({
       router: props.router,
       path: EndPoints.LOGIN,
     });

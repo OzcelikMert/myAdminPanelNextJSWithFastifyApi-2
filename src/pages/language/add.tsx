@@ -142,7 +142,7 @@ export default function PageSettingLanguageAdd() {
       ? LanguageEndPointPermission.UPDATE
       : LanguageEndPointPermission.ADD;
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         t,
         sessionAuth,
         router,

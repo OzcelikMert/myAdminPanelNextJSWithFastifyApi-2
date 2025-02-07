@@ -32,7 +32,7 @@ const schemaECommerceAttribute = object({
   _id: string().optional(),
   typeId: z.nativeEnum(AttributeTypeId),
   attributeTermId: string().min(1),
-  variationTerms: array(string().min(1)),
+  variationTerms: array(string().min(1)).min(1),
 });
 
 const schemaECommerceVariationOption = object({
@@ -47,6 +47,7 @@ const schemaECommerceVariationProduct = object({
   contents: object({
     langId: string().min(1),
     title: string().min(3),
+    icon: string().optional(),
     image: string().optional(),
     url: string().optional(),
     content: string().optional(),

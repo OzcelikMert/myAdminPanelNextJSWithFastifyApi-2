@@ -327,7 +327,7 @@ export default function PagePostAdd() {
     );
 
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         minPermission,
         router,
         sessionAuth,
@@ -800,7 +800,44 @@ export default function PagePostAdd() {
 
   const onClickAddNewAttribute = () => {
     if (state.attributeTerms.length > 0) {
+      const formValues = form.getValues();
       const _id = String.createId();
+
+      /*if (formValues.eCommerce) {
+        form.setValue('eCommerce.attributes', [
+          ...(formValues.eCommerce.attributes ?? []),
+          {
+            _id: _id,
+            attributeTermId: state.attributeTerms[0].value,
+            typeId: AttributeTypeId.Text,
+            variationTerms: [],
+          },
+        ]);
+
+        form.setValue('eCommerce.defaultVariationOptions', [
+          ...(formValues.eCommerce.defaultVariationOptions ?? []),
+          {
+            _id: String.createId(),
+            attributeId: _id,
+            variationTermId: '',
+          },
+        ]);
+
+        form.setValue(
+          'eCommerce.variations',
+          formValues.eCommerce.variations?.map((variation) => ({
+            ...variation,
+            options: [
+              ...variation.options,
+              {
+                _id: String.createId(),
+                attributeId: _id,
+                variationTermId: '',
+              },
+            ],
+          }))
+        );
+      }*/
 
       formFieldECommerceAttributes.append({
         _id: _id,
@@ -937,17 +974,19 @@ export default function PagePostAdd() {
       if (typeof indexAttribute === 'number' && indexAttribute > -1) {
         const attribute = attributes[indexAttribute];
         if (attribute.attributeTermId != attributeTermId) {
-          form.setValue(`eCommerce.attributes.${indexAttribute}`, {
+          /*form.setValue(`eCommerce.attributes.${indexAttribute}`, {
+            ...attribute,
+            attributeTermId,
+            variationTerms: [],
+          });*/
+          formFieldECommerceAttributes.update(indexAttribute, {
             ...attribute,
             attributeTermId,
             variationTerms: [],
           });
-          return true;
         }
       }
     }
-
-    return false;
   };
 
   const onChangeVariationOption = (
@@ -966,15 +1005,26 @@ export default function PagePostAdd() {
             attributeId
           );
           if (indexOption > -1) {
-            const options = variation.options[indexOption];
-            if (options.variationTermId != variationTermId) {
-              form.setValue(
+            const option = variation.options[indexOption];
+            if (option.variationTermId != variationTermId) {
+              /*form.setValue(
                 `eCommerce.variations.${indexVariation}.options.${indexOption}`,
                 {
-                  ...options,
+                  ...option,
                   variationTermId,
                 }
-              );
+              );*/
+              formFieldECommerceVariations.update(indexVariation, {
+                ...variation,
+                options: variation.options.map((variationOption) => ({
+                  ...variationOption,
+                  ...(option.variationTermId == variationTermId
+                    ? {
+                        variationTermId,
+                      }
+                    : {}),
+                })),
+              });
             }
           }
         }
@@ -987,6 +1037,12 @@ export default function PagePostAdd() {
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
+  const eCommerce = formValues.eCommerce ? {
+    ...formValues.eCommerce,
+    attributes: formFieldECommerceAttributes.fields,
+    variations: formFieldECommerceVariations.fields,
+    defaultVariationOptions: formFieldECommerceDefaultVariationOptions.fields
+  } : undefined;
   console.log('PagePostAdd', formValues);
 
   return isPageLoading ? null : (
@@ -1165,7 +1221,7 @@ export default function PagePostAdd() {
                 attributeTerms={state.attributeTerms}
                 attributeTypes={state.attributeTypes}
                 productTypes={state.productTypes}
-                eCommerce={formValues.eCommerce}
+                eCommerce={eCommerce}
                 onClickAddNewAttribute={() => onClickAddNewAttribute()}
                 onClickDeleteAttribute={(_id) => onClickDeleteAttribute(_id)}
                 onChangeAttribute={(attributeId, attributeTermId) =>

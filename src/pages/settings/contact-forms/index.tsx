@@ -106,7 +106,7 @@ export default function PageSettingsContactForms() {
       setIsPageLoaded(false);
     }
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         sessionAuth,
         t,
         router,

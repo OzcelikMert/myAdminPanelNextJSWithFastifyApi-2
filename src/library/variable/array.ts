@@ -1,8 +1,8 @@
 declare global {
   interface Array<T> {
     indexOfKey(key: string, value: any): number;
-    findSingle(key: string, value: any): T | undefined;
-    findMulti(key: string, value: any | any[], isEquals?: boolean): this;
+    findSingle(key: string, value: any): T & {_index: number} | undefined;
+    findMulti(key: string, value: any | any[], isEquals?: boolean): (T & {_index: number} )[];
     orderBy(key: string | '', sort_type: `asc` | `desc`): this;
     serializeObject(): object;
     remove(index: number, deleteCount?: number): void;
@@ -41,7 +41,7 @@ Array.prototype.indexOfKey = function (key, value) {
 };
 Array.prototype.findSingle = function (key, value) {
   let foundItem = null;
-
+  let index = 0;
   if (typeof value !== 'undefined') {
     for (const item of this) {
       let _data: any = item;
@@ -55,9 +55,10 @@ Array.prototype.findSingle = function (key, value) {
       }
 
       if (convertQueryData(_data) == convertQueryData(value)) {
-        foundItem = item;
+        foundItem = { ...item, _index: index } ;
         break;
       }
+      index++;
     }
   }
 
@@ -65,7 +66,7 @@ Array.prototype.findSingle = function (key, value) {
 };
 Array.prototype.findMulti = function (key, value, isEquals = true) {
   const foundItems = [];
-
+  let index = 0;
   if (typeof value !== 'undefined') {
     for (const item of this) {
       let _data: any = item;
@@ -89,8 +90,10 @@ Array.prototype.findMulti = function (key, value, isEquals = true) {
       }
 
       if (query == isEquals) {
-        foundItems.push(item);
+        foundItems.push({...item, _index: index});
       }
+      
+      index++;
     }
   }
 

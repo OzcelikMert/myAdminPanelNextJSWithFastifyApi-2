@@ -123,7 +123,7 @@ export default function PageECommerceSettings() {
       setIsPageLoaded(false);
     }
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         router,
         t,
         sessionAuth,

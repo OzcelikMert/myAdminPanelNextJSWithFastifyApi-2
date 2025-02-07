@@ -174,7 +174,7 @@ export default function PageUserAdd() {
       ? UserEndPointPermission.UPDATE
       : UserEndPointPermission.ADD;
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         router,
         sessionAuth,
         t,

@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFormInputSelect from '@components/elements/form/inputs/select';
-import { IPagePostAddState } from '@pages/post/add';
+import { IPageFormState, IPagePostAddState } from '@pages/post/add';
 import {
   IPostECommerceAttributeModel,
   IPostECommerceVariationModel,
@@ -19,6 +19,7 @@ import ComponentPagePostAddECommerceTabInvertory from './eCommerceTabInventory';
 import ComponentPagePostAddECommerceTabShipping from './eCommerceTabShipping';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { IPostGetResultServiceECommerceVariation } from 'types/services/post.service';
+import { useFieldArray, useFormContext } from 'react-hook-form';
 
 type IComponentState = {
   tabKey: string;
@@ -50,6 +51,11 @@ type IComponentProps = {
 const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
+    const { control } = useFormContext<IPageFormState>();
+    const formFieldVariationOptions = useFieldArray({
+      control: control,
+      name: `eCommerce.variations.${props.index}.options`
+    })
 
     const [tabKey, setTabKey] = React.useState(initialState.tabKey);
 
@@ -64,41 +70,38 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                     <i className="mdi mdi-menu"></i>
                   </div>
                 </div>
-                {props.selectedAttributes?.map((item, index) => {
-                  const indexOption = props.item.options.indexOfKey(
-                    'attributeId',
-                    item._id
+                {formFieldVariationOptions.fields.map((item, index) => {
+                  const attribute = props.selectedAttributes?.findSingle(
+                    '_id',
+                    item.attributeId
                   );
 
-                  if (typeof indexOption === 'number' && indexOption > -1) {
-                    return (
-                      <div className="col-md mt-3">
-                        <ComponentFormInputSelect
-                          name={`eCommerce.variations.${props.index}.options.${indexOption}.variationTermId`}
-                          title={
-                            props.attributeTerms?.findSingle(
-                              'value',
-                              item.attributeTermId
-                            )?.label
-                          }
-                          options={props.variationTerms?.findMulti(
+                  return (
+                    <div className="col-md mt-3">
+                      <ComponentFormInputSelect
+                        key={item.id}
+                        name={`eCommerce.variations.${props.index}.options.${index}.variationTermId`}
+                        title={
+                          props.attributeTerms?.findSingle(
                             'value',
-                            item.variationTerms
-                          )}
-                          watch
-                          onChange={(selectedItem, e) =>
-                            props.onChangeVariationOption(
-                              props.item._id,
-                              item._id,
-                              (selectedItem as IComponentInputSelectData).value
-                            )
-                          }
-                        />
-                      </div>
-                    );
-                  }
-
-                  return null;
+                            attribute?.attributeTermId
+                          )?.label
+                        }
+                        options={props.variationTerms?.findMulti(
+                          'value',
+                          attribute?.variationTerms
+                        )}
+                        watch
+                        onChange={(selectedItem, e) =>
+                          props.onChangeVariationOption(
+                            props.item._id,
+                            item._id,
+                            (selectedItem as IComponentInputSelectData).value
+                          )
+                        }
+                      />
+                    </div>
+                  );
                 })}
               </div>
             </div>

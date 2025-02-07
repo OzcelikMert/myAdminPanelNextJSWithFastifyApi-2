@@ -51,7 +51,11 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         <div className="col-md-7 mb-3">
           <ComponentFormInput
             title={`${t('icon')}`}
-            name="contents.icon"
+            name={
+              props.isECommerceVariation
+                ? `eCommerce.variations.${props.index}.product.contents.icon`
+                : `contents.icon`
+            }
             type="text"
           />
         </div>

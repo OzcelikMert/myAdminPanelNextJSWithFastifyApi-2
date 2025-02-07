@@ -199,7 +199,7 @@ export default function PageComponentAdd() {
       ? ComponentEndPointPermission.UPDATE
       : ComponentEndPointPermission.ADD;
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         minPermission,
         router,
         sessionAuth,

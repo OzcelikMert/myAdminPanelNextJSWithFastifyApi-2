@@ -19,20 +19,18 @@ export interface IPostAlternateService {
   url?: string;
 }
 
-export type IPostGetResultServiceECommerceVariationOption = {
-  variationTerm?: IPostTermPopulateService;
-} & IPostECommerceVariationOptionModel;
-
 export type IPostGetResultServiceECommerceVariation = {
-  product?: Omit<IPostModel, '_id' | 'typeId' |'contents' | 'authorId' | 'lastAuthorId'> & {
-    _id?: string
+  product?: Omit<
+    IPostModel,
+    '_id' | 'typeId' | 'contents' | 'authorId' | 'lastAuthorId'
+  > & {
+    _id?: string;
     alternates?: IPostAlternateService[];
     contents?: IPostContentModel;
     author?: IUserPopulateService;
     lastAuthor?: IUserPopulateService;
   };
-  options: IPostGetResultServiceECommerceVariationOption[];
-} & Omit<IPostECommerceVariationModel, 'options'>;
+} & IPostECommerceVariationModel;
 
 export type IPostGetResultServiceECommerceAttribute<T = string> = {
   variationTerms: T[];
@@ -59,9 +57,7 @@ export type IPostGetResultService<T = IPostTermPopulateService> = {
   'contents' | 'categories' | 'tags' | 'eCommerce' | 'authors'
 >;
 
-export type IPostGetManyResultService = {
-  eCommerce?: IPostGetResultServiceECommerce;
-} & Omit<IPostGetResultService, 'eCommerce'>;
+export type IPostGetManyResultService = {} & IPostGetResultService;
 
 export interface IPostGetWithIdParamService {
   typeId: PostTypeId;

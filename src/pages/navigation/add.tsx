@@ -190,7 +190,7 @@ export default function PageNavigationAdd() {
       ? NavigationEndPointPermission.UPDATE
       : NavigationEndPointPermission.ADD;
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         router,
         sessionAuth,
         t,

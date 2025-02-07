@@ -9,7 +9,9 @@ import { StatusId } from '@constants/status';
 
 export interface IPostTermPopulateService {
   _id: string;
-  typeId: number;
+  postTypeId: PostTypeId;
+  typeId: PostTermTypeId;
+  rank: number;
   contents: {
     langId: string;
     title?: string;

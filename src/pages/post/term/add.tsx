@@ -213,7 +213,7 @@ export default function PagePostTermAdd(props: IPageProps) {
     );
 
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         minPermission,
         router,
         sessionAuth,

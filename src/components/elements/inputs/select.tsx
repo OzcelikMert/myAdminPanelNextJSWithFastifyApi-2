@@ -31,7 +31,7 @@ const ComponentInputSelect = React.memo(
     };
 
     return (
-      <div className={`theme-input static ${props.mainDivCustomClassName}`}>
+      <div className={`theme-input static ${props.mainDivCustomClassName ?? ""}`}>
         <span className="label">{props.title}</span>
         <label className={`field ${props.hasAnError ? 'error' : ''}`}>
           <Select

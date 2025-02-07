@@ -7,7 +7,6 @@ import ComponentFormInputSelect from '@components/elements/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
-import { useDidMount } from '@library/react/hooks';
 import ComponentToolTip from '@components/elements/tooltip';
 
 type IComponentProps = {
@@ -100,11 +99,11 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
               <div className="col-md-12">
                 <ComponentFormInputSelect
                   title={t('variations')}
-                  name={`eCommerce.attributes.${props.index}.variationTerms`}
-                  watch
+                  name={`eCommerce.attributes[${props.index}].variationTerms`}
                   options={props.variationTerms}
-                  isMulti
                   closeMenuOnSelect={false}
+                  isMulti
+                  watch
                 />
               </div>
             </div>

@@ -171,7 +171,7 @@ export default function PagePostTermList() {
       PostPermissionMethod.GET
     );
     if (
-      PermissionUtil.checkAndRedirect({
+      await PermissionUtil.checkAndRedirect({
         minPermission,
         router,
         sessionAuth,

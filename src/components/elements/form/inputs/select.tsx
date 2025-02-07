@@ -3,7 +3,7 @@ import ComponentInputSelect, {
   IComponentInputSelectProps,
 } from '@components/elements/inputs/select';
 import React from 'react';
-import { useFormContext, Controller, Control } from 'react-hook-form';
+import { useFormContext, Controller, Control, useFieldArray } from 'react-hook-form';
 
 type IComponentPropsI18 = {
   setErrorText?: (errorCode: any) => string;
@@ -67,6 +67,7 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
         const hasAnError = Boolean(
           formState.errors && formState.errors[props.name]
         );
+        
         return (
           <ComponentInputSelect
             {...field}
