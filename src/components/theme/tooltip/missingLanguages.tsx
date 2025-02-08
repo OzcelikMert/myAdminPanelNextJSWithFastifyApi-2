@@ -3,10 +3,7 @@ import ComponentToolTip from '@components/elements/tooltip';
 import React, { useState } from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import {
-  useDidMount,
-  useEffectAfterDidMount,
-} from '@library/react/hooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 
 const Icon = () => {
   return <i className={`mdi mdi-alert-circle text-warning fs-4`}></i>;
@@ -16,14 +13,15 @@ type IComponentState = {
   missingLanguages: ILanguageGetResultService[];
 };
 
-type IItemLanguage = {
+export type IAlternate = {
   langId: string;
 };
 
 type IComponentProps = {
-  itemLanguages: IItemLanguage[] | IItemLanguage[][];
+  alternates: IAlternate[] | IAlternate[][] | (IAlternate | IAlternate[])[];
   div?: boolean;
   divClass?: string;
+  language?: ILanguageGetResultService;
 };
 
 const ComponentThemeToolTipMissingLanguages = React.memo(
@@ -41,25 +39,28 @@ const ComponentThemeToolTipMissingLanguages = React.memo(
 
     useEffectAfterDidMount(() => {
       init();
-    }, [props.itemLanguages]);
+    }, [props.alternates]);
 
     const init = () => {
       setMissingLanguages(findMissingLanguages());
     };
 
-    const findMissingLanguages = () => {
-      let missingLanguages = languages.filter(
-        (language) =>
-          !props.itemLanguages.some((itemLanguage) =>
-            Array.isArray(itemLanguage)
-              ? itemLanguage.every(
-                  (itemLanguage_2) => language._id == itemLanguage_2.langId
-                )
-              : language._id == itemLanguage.langId
-          )
+    const checkIsMissing = (langId: string) => {
+      return !props.alternates.some((itemLanguage) =>
+        Array.isArray(itemLanguage)
+          ? itemLanguage.every(
+              (itemLanguage_2) => langId == itemLanguage_2.langId
+            )
+          : langId == itemLanguage.langId
       );
+    };
 
-      return missingLanguages;
+    const findMissingLanguages = () => {
+      return props.language
+        ? checkIsMissing(props.language._id)
+          ? [props.language]
+          : []
+        : languages.filter((language) => checkIsMissing(language._id));
     };
 
     if (missingLanguages.length == 0) {
@@ -68,11 +69,17 @@ const ComponentThemeToolTipMissingLanguages = React.memo(
 
     return (
       <ComponentToolTip
-        message={t('warningAboutMissingLanguagesWithVariable', [
-          missingLanguages
-            .map((missingLanguage) => missingLanguage.locale.toUpperCase())
-            .join(', '),
-        ])}
+        message={
+          props.language
+            ? t('warningAboutMissingLanguage')
+            : t('warningAboutMissingLanguagesWithVariable', [
+                missingLanguages
+                  .map((missingLanguage) =>
+                    missingLanguage.locale.toUpperCase()
+                  )
+                  .join(', '),
+              ])
+        }
       >
         {props.div ? (
           <div className={`${props.divClass}`}>

@@ -5,7 +5,7 @@ import { IPostECommerceAttributeModel } from 'types/models/post.model';
 import { Accordion } from 'react-bootstrap';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentPagePostAddECommerceTabAttributesItem from './eCommerceTabAttributesItem';
-import { useDidMount } from '@library/react/hooks';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 
 type IComponentState = {
   accordionKey: string;
@@ -27,16 +27,16 @@ type IComponentProps = {
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
   (props: IComponentProps) => {
-    console.log('ComponentPagePostAddECommerceTabAttributes', props);
     const t = useAppSelector(selectTranslation);
-
+    
     const [accordionKey, setAccordionKey] = React.useState(
       initialState.accordionKey
     );
 
-    useDidMount(() => {
-      console.log('ComponentPagePostAddECommerceTabAttributes didMount', props);
-    });
+    useEffectAfterDidMount(() => {
+      console.log(props.selectedAttributes);
+      
+    }, [props.selectedAttributes]);
 
     const onClickAccordionToggle = (_id: string) => {
       setAccordionKey((state) =>
@@ -44,30 +44,14 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
       );
     };
 
-    const onChangeAttribute = (attributeId: string, attributeTermId: string) => {
-      props.onChangeAttribute(attributeId, attributeTermId)
-      //if(){
-        //setAccordionKey("");
-      //}
-    }
-
     return (
       <div className="row mb-3">
         <div className="col-md-7">
           <Accordion flush>
             {props.selectedAttributes?.map((item, index) => {
-              console.log(
-                `ComponentPagePostAddECommerceTabAttributes props.selectedAttributes?.map ${index}`,
-                item,
-                props.variationTerms?.findMulti(
-                  'parentId',
-                  item.attributeTermId
-                )
-              );
-
               return (
                 <ComponentPagePostAddECommerceTabAttributesItem
-                  key={item.id}
+                  key={item._id}
                   item={item}
                   index={index}
                   attributeTerms={props.attributeTerms}
@@ -80,7 +64,7 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
                   onClickDelete={(_id) => props.onClickDelete(_id)}
                   onClickAccordionToggle={(_id) => onClickAccordionToggle(_id)}
                   onChangeAttribute={(attributeId, attributeTermId) =>
-                    onChangeAttribute(attributeId, attributeTermId)
+                    props.onChangeAttribute(attributeId, attributeTermId)
                   }
                 />
               );

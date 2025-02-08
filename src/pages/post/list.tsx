@@ -406,7 +406,7 @@ export default function PagePostList() {
             <div className="col-md-8">
               {
                 <ComponentThemeToolTipMissingLanguages
-                  itemLanguages={row.alternates ?? []}
+                  alternates={row.alternates ?? []}
                 />
               }
               <ComponentThemeWebsiteLinkPost

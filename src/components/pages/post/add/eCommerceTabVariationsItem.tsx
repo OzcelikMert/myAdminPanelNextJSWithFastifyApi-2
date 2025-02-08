@@ -19,7 +19,8 @@ import ComponentPagePostAddECommerceTabInvertory from './eCommerceTabInventory';
 import ComponentPagePostAddECommerceTabShipping from './eCommerceTabShipping';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { IPostGetResultServiceECommerceVariation } from 'types/services/post.service';
-import { useFieldArray, useFormContext } from 'react-hook-form';
+import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
+import { useFormContext } from 'react-hook-form';
 
 type IComponentState = {
   tabKey: string;
@@ -51,11 +52,8 @@ type IComponentProps = {
 const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
-    const { control } = useFormContext<IPageFormState>();
-    const formFieldVariationOptions = useFieldArray({
-      control: control,
-      name: `eCommerce.variations.${props.index}.options`
-    })
+    const form = useFormContext<IPageFormState>();
+    const watchOptions = form.watch(`eCommerce.variations.${props.index}.options`);
 
     const [tabKey, setTabKey] = React.useState(initialState.tabKey);
 
@@ -70,32 +68,32 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                     <i className="mdi mdi-menu"></i>
                   </div>
                 </div>
-                {formFieldVariationOptions.fields.map((item, index) => {
+                {props.item.options.map((item, index) => {
                   const attribute = props.selectedAttributes?.findSingle(
                     '_id',
                     item.attributeId
                   );
+                  if (!attribute) return null;
 
                   return (
                     <div className="col-md mt-3">
                       <ComponentFormInputSelect
-                        key={item.id}
+                        key={item._id}
                         name={`eCommerce.variations.${props.index}.options.${index}.variationTermId`}
                         title={
                           props.attributeTerms?.findSingle(
                             'value',
-                            attribute?.attributeTermId
+                            attribute.attributeTermId
                           )?.label
                         }
                         options={props.variationTerms?.findMulti(
                           'value',
-                          attribute?.variationTerms
+                          attribute.variationTerms
                         )}
-                        watch
                         onChange={(selectedItem, e) =>
                           props.onChangeVariationOption(
                             props.item._id,
-                            item._id,
+                            attribute._id,
                             (selectedItem as IComponentInputSelectData).value
                           )
                         }
@@ -107,6 +105,11 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
             </div>
             <div className="col-3 m-auto">
               <div className="row">
+                <ComponentThemeToolTipMissingLanguages
+                  alternates={props.item.product?.alternates ?? []}
+                  divClass="col-md text-center text-md-start mb-2 mb-md-0"
+                  div
+                />
                 <div className="col-md text-center text-md-end m-md-auto">
                   {props.isDefault ? (
                     <ComponentToolTip message={t('default')}>

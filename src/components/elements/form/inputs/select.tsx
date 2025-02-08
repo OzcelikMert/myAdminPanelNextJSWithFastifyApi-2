@@ -2,14 +2,16 @@ import ComponentInputSelect, {
   IComponentInputSelectData,
   IComponentInputSelectProps,
 } from '@components/elements/inputs/select';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 import React from 'react';
-import { useFormContext, Controller, Control, useFieldArray } from 'react-hook-form';
+import { useFormContext, Controller, Control } from 'react-hook-form';
 
 type IComponentPropsI18 = {
   setErrorText?: (errorCode: any) => string;
 };
 
 type IComponentProps<T = any> = {
+  key?: string;
   valueAsNumber?: boolean;
   name: string;
   control?: Control<any>;
@@ -23,6 +25,12 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
   if (props.watch) {
     form.watch(props.name);
   }
+
+  useEffectAfterDidMount(() => {
+    return () => {
+      form.unregister(props.name);
+    };
+  }, []);
 
   const setValue = (
     newValue: IComponentInputSelectData | IComponentInputSelectData[]
@@ -63,11 +71,12 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
       name={props.name}
       control={props.control}
       rules={{ required: props.required }}
+      defaultValue={props.isMulti ? [] : ''}
       render={({ field, formState }) => {
         const hasAnError = Boolean(
           formState.errors && formState.errors[props.name]
         );
-        
+
         return (
           <ComponentInputSelect
             {...field}

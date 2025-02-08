@@ -4,13 +4,14 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import { IPostECommerceAttributeModel } from 'types/models/post.model';
 import { Accordion, Card } from 'react-bootstrap';
 import ComponentFormInputSelect from '@components/elements/form/inputs/select';
-import { IPagePostAddState } from '@pages/post/add';
+import { IPageFormState, IPagePostAddState } from '@pages/post/add';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import ComponentToolTip from '@components/elements/tooltip';
+import { useFormContext } from 'react-hook-form';
 
 type IComponentProps = {
-  item: IPostECommerceAttributeModel;
+  item: (IPostECommerceAttributeModel & {id?: string});
   index: number;
   attributeTerms?: IPagePostAddState['attributeTerms'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
@@ -24,6 +25,9 @@ type IComponentProps = {
 const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
+
+    const form = useFormContext<IPageFormState>();
+    const watch = form.watch(`eCommerce.attributes.${props.index}`);
 
     return (
       <Card>
@@ -99,11 +103,10 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
               <div className="col-md-12">
                 <ComponentFormInputSelect
                   title={t('variations')}
-                  name={`eCommerce.attributes[${props.index}].variationTerms`}
+                  name={`eCommerce.attributes.${props.index}.variationTerms`}
                   options={props.variationTerms}
                   closeMenuOnSelect={false}
                   isMulti
-                  watch
                 />
               </div>
             </div>

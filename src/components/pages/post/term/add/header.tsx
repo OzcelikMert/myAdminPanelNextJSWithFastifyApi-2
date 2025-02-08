@@ -44,8 +44,7 @@ const ComponentPagePostTermAddHeader = React.memo((props: IComponentProps) => {
             <ComponentThemeLanguageSelector
               onChange={(item) => props.onChangeLanguage(item.value._id)}
               selectedLangId={props.langId}
-              showMissingMessage
-              ownedLanguages={props.item?.alternates}
+              alternates={props.item?.alternates}
             />
           ) : null}
         </div>

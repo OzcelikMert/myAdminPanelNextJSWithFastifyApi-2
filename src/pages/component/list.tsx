@@ -164,7 +164,7 @@ export default function PageComponentList() {
               <div className="col-md-12">
                 {
                   <ComponentThemeToolTipMissingLanguages
-                    itemLanguages={row.elements.map(
+                    alternates={row.elements.map(
                       (element) => element.alternates ?? []
                     )}
                   />

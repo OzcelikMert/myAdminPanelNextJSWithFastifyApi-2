@@ -35,8 +35,7 @@ const ComponentPageComponentAddHeader = React.memo((props: IComponentProps) => {
             <ComponentThemeLanguageSelector
               onChange={(item) => props.onChangeLanguage(item.value._id)}
               selectedLangId={props.langId}
-              showMissingMessage
-              ownedLanguages={props.item?.elements.map(
+              alternates={props.item?.elements.map(
                 (item) => item.alternates ?? []
               )}
             />

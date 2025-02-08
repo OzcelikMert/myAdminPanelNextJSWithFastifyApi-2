@@ -16,7 +16,7 @@ type IComponentProps = {
 };
 
 const ComponentPagePostAddHeader = React.memo((props: IComponentProps) => {
-  const t = useAppSelector(selectTranslation);
+  const t = useAppSelector(selectTranslation);  
 
   return (
     <div className="col-md-12">
@@ -47,8 +47,10 @@ const ComponentPagePostAddHeader = React.memo((props: IComponentProps) => {
             <ComponentThemeLanguageSelector
               onChange={(item) => props.onChangeLanguage(item.value._id)}
               selectedLangId={props.langId}
-              showMissingMessage
-              ownedLanguages={props.item?.alternates}
+              alternates={[
+                ...(props.item?.alternates ?? []),
+                ...(props.item?.eCommerce?.variations.map(variation => variation.product?.alternates ?? []) ?? [])
+              ]}
             />
           ) : null}
         </div>

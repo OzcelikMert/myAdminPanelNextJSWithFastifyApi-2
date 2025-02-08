@@ -41,7 +41,6 @@ type IComponentProps = {
 
 const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-  console.log('ComponentPagePostAddECommerce', props);
   const [tabKey, setTabKey] = React.useState(initialState.tabKey);
 
   return (

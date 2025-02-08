@@ -17,8 +17,7 @@ const ComponentPageSettingsSEOHeader = React.memo((props: IComponentProps) => {
           <ComponentThemeLanguageSelector
             onChange={(item) => props.onChangeLanguage(item.value._id)}
             selectedLangId={props.langId}
-            showMissingMessage
-            ownedLanguages={props.item?.seoContentAlternates}
+            alternates={props.item?.seoContentAlternates}
           />
         </div>
       </div>

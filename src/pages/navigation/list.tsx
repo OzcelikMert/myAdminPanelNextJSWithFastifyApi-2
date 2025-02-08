@@ -305,7 +305,7 @@ export default function PageNavigationList() {
             <div className="col-md-12">
               {
                 <ComponentThemeToolTipMissingLanguages
-                  itemLanguages={row.alternates ?? []}
+                  alternates={row.alternates ?? []}
                 />
               }
               {row.parentId ? <span className="pe-3">-</span> : null}

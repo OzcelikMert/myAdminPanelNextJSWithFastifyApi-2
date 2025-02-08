@@ -2,10 +2,10 @@ import React from 'react';
 import Select, { ActionMeta } from 'react-select';
 import { StateManagerProps } from 'react-select/dist/declarations/src/useStateManager';
 
-export interface IComponentInputSelectData<T = any> {
+export type IComponentInputSelectData<T = any> = {
   label: string;
   value: T;
-}
+} & { [key: string]: any }
 
 export type IComponentInputSelectProps<T = any> = {
   title?: string;

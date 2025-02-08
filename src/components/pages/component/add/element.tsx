@@ -49,7 +49,7 @@ const ComponentPageComponentAddElement = React.memo(
             </div>
             {
               <ComponentThemeToolTipMissingLanguages
-                itemLanguages={props.item.alternates ?? []}
+                alternates={props.item.alternates ?? []}
                 div={true}
                 divClass="col-md-1"
               />

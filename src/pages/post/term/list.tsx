@@ -409,7 +409,7 @@ export default function PagePostTermList() {
             <div className="col-md-12">
               {
                 <ComponentThemeToolTipMissingLanguages
-                  itemLanguages={row.alternates ?? []}
+                  alternates={row.alternates ?? []}
                 />
               }
               <ComponentThemeWebsiteLinkPostTerm

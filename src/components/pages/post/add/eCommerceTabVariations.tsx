@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFormInputSelect from '@components/elements/form/inputs/select';
-import { IPagePostAddState } from '@pages/post/add';
+import { IPageFormState, IPagePostAddState } from '@pages/post/add';
 import {
   IPostECommerceVariationModel,
   IPostECommerceVariationOptionModel,
@@ -13,6 +13,7 @@ import {
   IPostGetResultServiceECommerceAttribute,
   IPostGetResultServiceECommerceVariation,
 } from 'types/services/post.service';
+import { useFormContext } from 'react-hook-form';
 
 type IComponentState = {
   accordionKey: string;
@@ -40,6 +41,8 @@ type IComponentProps = {
 const ComponentPagePostAddECommerceTabVariations = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
+    const form = useFormContext<IPageFormState>();
+    const watchDefaultOptions = form.watch("eCommerce.defaultVariationOptions");
 
     const [accordionKey, setAccordionKey] = React.useState(
       initialState.accordionKey
@@ -74,6 +77,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
           <div className="row">
             {props.defaultVariationOptions?.map((item, index) => {
                 const attribute = props.selectedAttributes?.findSingle("_id", item.attributeId);
+                if(!attribute) return null;
 
                 return (
                   <div className="col-md-4 mt-3">
