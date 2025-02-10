@@ -20,7 +20,7 @@ import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
@@ -422,12 +422,8 @@ export default function PagePostTermAdd(props: IPageProps) {
           <ComponentSpinnerDonut customClass="page-spinner" />
         ) : null}
         <div className="col-md-12">
-          <ComponentForm
+          <ComponentThemeForm
             formMethods={form}
-            i18={{
-              submitButtonText: t('save'),
-              submitButtonSubmittingText: t('loading'),
-            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
@@ -470,7 +466,7 @@ export default function PagePostTermAdd(props: IPageProps) {
                 </div>
               </div>
             </div>
-          </ComponentForm>
+          </ComponentThemeForm>
         </div>
       </div>
     </div>

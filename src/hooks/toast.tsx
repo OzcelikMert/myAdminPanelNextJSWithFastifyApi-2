@@ -46,7 +46,7 @@ export const useToast = (): IToastReturn => {
   const getColor = React.useCallback((type: IToastType) => Colors[type], []);
   const getOptions = React.useCallback(
     (props: IToastProps): ToastOptions => ({
-      position: props.position ?? 'top-right',
+      position: props.position ?? 'top-center',
       autoClose: props.timeOut
         ? Number(props.timeOut) * 1000
         : props.type === 'loading' || typeof props.type === 'undefined'

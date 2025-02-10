@@ -11,7 +11,7 @@ import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useRouter } from 'next/router';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -149,13 +149,12 @@ export default function PageLogin() {
           <div className="col-lg-6 d-flex align-items-center justify-content-center login-half-form">
             <div className="auth-form-transparent text-left p-3">
               <h4 className="text-center">{t('loginPanel')}</h4>
-              <ComponentForm
+              <ComponentThemeForm
                 formMethods={form}
                 enterToSubmit={true}
                 submitButtonClassName="btn btn-block btn-gradient-primary btn-lg font-weight-medium auth-form-btn w-100"
                 i18={{
                   submitButtonText: t('login'),
-                  submitButtonSubmittingText: t('loading'),
                 }}
                 onSubmit={(data) => onSubmit(data)}
               >
@@ -163,7 +162,7 @@ export default function PageLogin() {
                   isWrong={state.isWrong}
                   user={state.user}
                 />
-              </ComponentForm>
+              </ComponentThemeForm>
             </div>
           </div>
           <div className="col-lg-6 login-half-bg d-flex flex-row">

@@ -13,9 +13,9 @@ import React, { useReducer, useState } from 'react';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
-import ComponentForm from '@components/elements/form';
-import ComponentFormInput from '@components/elements/form/inputs/input';
-import ComponentFormInputTags from '@components/elements/form/inputs/tags';
+import ComponentThemeForm from '@components/theme/form';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
+import ComponentThemeFormInputTags from '@components/theme/form/inputs/tags';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
 import { useForm } from 'react-hook-form';
@@ -235,54 +235,38 @@ export default function PageSettingsSEO() {
           <div className="grid-margin stretch-card">
             <div className="card">
               <div className="card-body">
-                <ComponentForm
+                <ComponentThemeForm
                   formMethods={form}
-                  i18={{
-                    submitButtonText: t('save'),
-                    submitButtonSubmittingText: t('loading'),
-                  }}
                   onSubmit={(event) => onSubmit(event)}
                 >
                   <div className="row">
                     <div className="col-md-7 mb-3">
-                      <ComponentFormInput
+                      <ComponentThemeFormInput
                         title={t('websiteTitle')}
                         type="text"
                         name="seoContents.title"
                         maxLength={50}
-                        i18={{
-                          setErrorText: (errorCode) =>
-                            t(I18Util.getFormInputErrorText(errorCode), [
-                              t('websiteTitle'),
-                            ]),
-                        }}
                         required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
-                      <ComponentFormInput
+                      <ComponentThemeFormInput
                         title={t('websiteDescription')}
                         type="textarea"
                         name="seoContents.content"
                         maxLength={120}
-                        i18={{
-                          setErrorText: (errorCode) =>
-                            t(I18Util.getFormInputErrorText(errorCode), [
-                              t('websiteDescription'),
-                            ]),
-                        }}
                         required
                       />
                     </div>
                     <div className="col-md-7">
-                      <ComponentFormInputTags
+                      <ComponentThemeFormInputTags
                         title={t('websiteTags')}
                         placeHolder={t('writeAndPressEnter')}
                         name="seoContents.tags"
                       />
                     </div>
                   </div>
-                </ComponentForm>
+                </ComponentThemeForm>
               </div>
             </div>
           </div>

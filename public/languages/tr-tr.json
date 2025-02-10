@@ -5,6 +5,8 @@
   "inputIsRequiredWithName": "'{{0}}' alanı gereklidir! Lütfen boş bırakmayınız.",
   "warningAboutMissingLanguage": "Bu öğenin içerikleri bu dilde girilmemiş!",
   "warningAboutMissingLanguagesWithVariable": "Bu öğe bazı eksik diller içeriyor! Eksik diller şunlardır: '{{0}}'",
+  "warningAboutFormFieldError": "Lütfen tüm alanları doğru doldurduğunuzdan emin olun!",
+  "warningAboutFormFieldErrorsWithVariable": "Lütfen tüm alanları doğru doldurduğunuzdan emin olun!: '{{0}}'",
   "googleAnalyticURL": "Google Analytic URL",
   "host": "Host",
   "targetEmail": "Hedef Eposta",

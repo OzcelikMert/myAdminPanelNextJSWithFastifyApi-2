@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentForm from '@components/elements/form';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeForm from '@components/theme/form';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { IPageProfileFormState } from '@pages/settings/profile';
 import { UseFormReturn } from 'react-hook-form';
 import { I18Util } from '@utils/i18.util';
@@ -21,66 +21,56 @@ const ComponentPageProfileForm = React.memo((props: IComponentProps) => {
         <div className="card-body">
           <div className="row">
             <div className="col-md-12">
-              <ComponentForm
+              <ComponentThemeForm
                 formMethods={props.form}
-                i18={{
-                  submitButtonText: t('save'),
-                  submitButtonSubmittingText: t('loading'),
-                }}
                 onSubmit={(event) => props.onSubmit(event)}
               >
                 <div className="row">
                   <div className="col-md-12 mb-3">
-                    <ComponentFormInput
+                    <ComponentThemeFormInput
                       title={`${t('name')}*`}
                       name="name"
                       type="text"
-                      i18={{
-                        setErrorText: (errorCode) =>
-                          t(I18Util.getFormInputErrorText(errorCode), [
-                            t('name'),
-                          ]),
-                      }}
                       required
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormInput
+                    <ComponentThemeFormInput
                       title={t('comment')}
                       name="comment"
                       type="textarea"
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormInput
+                    <ComponentThemeFormInput
                       title={`${t('phone')}`}
                       name="phone"
                       type="text"
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormInput
+                    <ComponentThemeFormInput
                       title="Facebook"
                       name="facebook"
                       type="url"
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormInput
+                    <ComponentThemeFormInput
                       title="Instagram"
                       name="instagram"
                       type="url"
                     />
                   </div>
                   <div className="col-md-12 mb-3">
-                    <ComponentFormInput
+                    <ComponentThemeFormInput
                       title="Twitter"
                       name="twitter"
                       type="url"
                     />
                   </div>
                 </div>
-              </ComponentForm>
+              </ComponentThemeForm>
             </div>
           </div>
         </div>

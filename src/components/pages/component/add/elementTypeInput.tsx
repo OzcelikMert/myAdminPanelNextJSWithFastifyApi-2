@@ -3,23 +3,23 @@ import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import dynamic from 'next/dynamic';
 import { IComponentElementModel } from 'types/models/component.model';
 import { ElementTypeId } from '@constants/elementTypes';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 
-const ComponentFormInputRichTextbox = dynamic(
-  () => import('@components/elements/form/inputs/richTextbox'),
+const ComponentThemeFormInputRichTextbox = dynamic(
+  () => import('@components/theme/form/inputs/richTextbox'),
   { ssr: false }
 );
 
 const TextArea = React.memo((props: { name: string }) => {
   const t = useAppSelector(selectTranslation);
 
-  return <ComponentFormInput title={t('text')} type={'textarea'} {...props} />;
+  return <ComponentThemeFormInput title={t('text')} type={'textarea'} {...props} />;
 });
 
 const RichText = React.memo((props: { name: string }) => {
-  return <ComponentFormInputRichTextbox {...props} />;
+  return <ComponentThemeFormInputRichTextbox {...props} />;
 });
 
 const Image = React.memo((props: { name: string }) => {
@@ -40,14 +40,14 @@ const Button = React.memo((props: { nameText: string; nameUrl: string }) => {
   return (
     <div className="row">
       <div className="col-md-6">
-        <ComponentFormInput
+        <ComponentThemeFormInput
           title={t('text')}
           type={'text'}
           name={props.nameText}
         />
       </div>
       <div className="col-md-6 mt-3 mt-lg-0">
-        <ComponentFormInput
+        <ComponentThemeFormInput
           title={t('url')}
           type={'text'}
           name={props.nameUrl}
@@ -60,7 +60,7 @@ const Button = React.memo((props: { nameText: string; nameUrl: string }) => {
 const Text = React.memo((props: { name: string }) => {
   const t = useAppSelector(selectTranslation);
 
-  return <ComponentFormInput title={t('text')} type={'text'} {...props} />;
+  return <ComponentThemeFormInput title={t('text')} type={'text'} {...props} />;
 });
 
 type IComponentProps = {

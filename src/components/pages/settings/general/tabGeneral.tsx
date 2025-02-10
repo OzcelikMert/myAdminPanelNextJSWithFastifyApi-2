@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import { IPageSettingsGeneralState } from '@pages/settings/general';
@@ -45,7 +45,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
           </ComponentFieldSet>
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormInputSelect
+          <ComponentThemeFormInputSelect
             title={t('adminPanelLanguage').toCapitalizeCase()}
             name="panelLangId"
             isMulti={false}

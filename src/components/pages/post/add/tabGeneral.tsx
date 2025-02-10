@@ -1,8 +1,8 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import { PostTermTypeId } from '@constants/postTermTypes';
@@ -49,7 +49,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
       ) : null}
       {props.showIconCheckBox && props.isIconActive ? (
         <div className="col-md-7 mb-3">
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={`${t('icon')}`}
             name={
               props.isECommerceVariation
@@ -73,7 +73,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         </div>
       ) : null}
       <div className="col-md-7 mb-3">
-        <ComponentFormInput
+        <ComponentThemeFormInput
           title={`${t('title')}*`}
           name={
             props.isECommerceVariation
@@ -81,15 +81,11 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
               : `contents.title`
           }
           type="text"
-          i18={{
-            setErrorText: (errorCode) =>
-              t(I18Util.getFormInputErrorText(errorCode), [t('title')]),
-          }}
-          required
+          required={!props.isECommerceVariation}
         />
       </div>
       <div className="col-md-7 mb-3">
-        <ComponentFormInput
+        <ComponentThemeFormInput
           title={t('shortContent').toCapitalizeCase()}
           name={
             props.isECommerceVariation
@@ -104,7 +100,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         <div className="col-md-7 mb-3">
           <div className="row">
             <div className="col-md-10">
-              <ComponentFormInputSelect
+              <ComponentThemeFormInputSelect
                 title={t('category')}
                 name="categories"
                 placeholder={t('chooseCategory').toCapitalizeCase()}
@@ -133,7 +129,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         <div className="col-md-7 mb-3">
           <div className="row">
             <div className="col-md-10">
-              <ComponentFormInputSelect
+              <ComponentThemeFormInputSelect
                 title={t('tag')}
                 name="tags"
                 placeholder={t('chooseTag').toCapitalizeCase()}

@@ -1,6 +1,6 @@
 import React from 'react';
-import ComponentForm from '@components/elements/form';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeForm from '@components/theme/form';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { UseFormReturn } from 'react-hook-form';
@@ -17,21 +17,17 @@ const ComponentToolLockForm = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
 
   return (
-    <ComponentForm
+    <ComponentThemeForm
       formMethods={props.form}
       hideSubmitButton={true}
       onSubmit={(data) => props.onSubmit(data)}
     >
       <div className="row">
         <div className="col-md-12 mb-3">
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={t('password')}
             type="password"
             name="password"
-            i18={{
-              setErrorText: (errorCode) =>
-                t(I18Util.getFormInputErrorText(errorCode), [t('password')]),
-            }}
             required
           />
         </div>
@@ -55,7 +51,7 @@ const ComponentToolLockForm = React.memo((props: IComponentProps) => {
           )}
         </div>
       </div>
-    </ComponentForm>
+    </ComponentThemeForm>
   );
 });
 

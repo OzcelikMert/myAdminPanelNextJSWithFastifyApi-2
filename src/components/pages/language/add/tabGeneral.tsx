@@ -1,8 +1,8 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import Image from 'next/image';
 import { IPageLanguageAddState } from '@pages/language/add';
 import { ImageSourceUtil } from '@utils/imageSource.util';
@@ -31,7 +31,7 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
               />
             </div>
             <div className="col-11">
-              <ComponentFormInputSelect
+              <ComponentThemeFormInputSelect
                 title={t('image')}
                 name="image"
                 options={props.flags}
@@ -40,38 +40,26 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
           </div>
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={`${t('title')}*`}
             name="title"
             type="text"
-            i18={{
-              setErrorText: (errorCode) =>
-                t(I18Util.getFormInputErrorText(errorCode), [t('title')]),
-            }}
             required
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={`${t('shortKey')}*`}
             name="shortKey"
             type="text"
-            i18={{
-              setErrorText: (errorCode) =>
-                t(I18Util.getFormInputErrorText(errorCode), [t('shortKey')]),
-            }}
             required
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={`${t('locale')}*`}
             name="locale"
             type="text"
-            i18={{
-              setErrorText: (errorCode) =>
-                t(I18Util.getFormInputErrorText(errorCode), [t('locale')]),
-            }}
             required
           />
         </div>

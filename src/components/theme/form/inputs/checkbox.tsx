@@ -1,22 +1,24 @@
 import ComponentInputCheckbox, {
   IComponentInputCheckboxProps,
 } from '@components/elements/inputs/checkbox';
+import { I18Util } from '@utils/i18.util';
+import { ObjectUtil } from '@utils/object.util';
 import React from 'react';
 import { Controller, Control } from 'react-hook-form';
-
-type IComponentPropsI18 = {
-  setErrorText?: (errorCode: any) => string;
-};
+import { IFormFieldError } from '..';
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
 
 type IComponentProps = {
   valueAsNumber?: boolean;
   valueAsBoolean?: boolean;
   name: string;
   control?: Control<any>;
-  i18?: IComponentPropsI18;
 } & Omit<IComponentInputCheckboxProps, 'name'>;
 
-const ComponentFormInputCheckbox = React.memo((props: IComponentProps) => {
+const ComponentThemeFormInputCheckbox = React.memo((props: IComponentProps) => {
+  const t = useAppSelector(selectTranslation);
+
   const setValue = (value: any, isSelected: boolean) => {
     if (Array.isArray(value)) {
       return value.map((item) => (props.valueAsNumber ? Number(item) : item));
@@ -35,9 +37,19 @@ const ComponentFormInputCheckbox = React.memo((props: IComponentProps) => {
       control={props.control}
       rules={{ required: props.required }}
       render={({ field, formState }) => {
-        const hasAnError = Boolean(
-          formState.errors && formState.errors[props.name]
+        const error = ObjectUtil.getWithKey<IFormFieldError>(
+          formState.errors,
+          props.name
         );
+        const hasAnError = Boolean(error);
+        let errorText = '';
+
+        if (error) {
+          error.title = props.title;
+          errorText = error.type
+            ? t(I18Util.getFormInputErrorText(error.type), [props.title ?? ''])
+            : (error.message?.toString() ?? '');
+        }
 
         return (
           <ComponentInputCheckbox
@@ -48,11 +60,7 @@ const ComponentFormInputCheckbox = React.memo((props: IComponentProps) => {
             }
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
-            errorText={
-              hasAnError && props.i18?.setErrorText
-                ? props.i18?.setErrorText(formState.errors[props.name]?.type)
-                : formState.errors[props.name]?.message?.toString()
-            }
+            errorText={hasAnError ? errorText : undefined}
           />
         );
       }}
@@ -60,4 +68,4 @@ const ComponentFormInputCheckbox = React.memo((props: IComponentProps) => {
   );
 });
 
-export default ComponentFormInputCheckbox;
+export default ComponentThemeFormInputCheckbox;

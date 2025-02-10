@@ -19,7 +19,7 @@ import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useForm } from 'react-hook-form';
@@ -243,12 +243,8 @@ export default function PageSettingLanguageAdd() {
         <ComponentPageLanguageAddHeader onNavigatePage={() => navigatePage()} />
       </div>
       <div className="row">
-        <ComponentForm
+        <ComponentThemeForm
           formMethods={form}
-          i18={{
-            submitButtonText: t('save'),
-            submitButtonSubmittingText: t('loading'),
-          }}
           onSubmit={(data) => onSubmit(data)}
         >
           <div className="grid-margin stretch-card">
@@ -283,7 +279,7 @@ export default function PageSettingLanguageAdd() {
               </div>
             </div>
           </div>
-        </ComponentForm>
+        </ComponentThemeForm>
       </div>
     </div>
   );

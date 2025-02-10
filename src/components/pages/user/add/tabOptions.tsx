@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { IPageUserAddState } from '@pages/user/add';
 import { StatusId } from '@constants/status';
 import { UserRoleId } from '@constants/userRoles';
@@ -20,7 +20,7 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
   return (
     <div className="row">
       <div className="col-md-7 mb-3">
-        <ComponentFormInputSelect
+        <ComponentThemeFormInputSelect
           title={t('role')}
           name="roleId"
           placeholder={t('chooseRole')}
@@ -30,7 +30,7 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
         />
       </div>
       <div className="col-md-7 mb-3">
-        <ComponentFormInputSelect
+        <ComponentThemeFormInputSelect
           title={t('status')}
           name="statusId"
           options={props.status}
@@ -41,14 +41,14 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
       {props.statusId == StatusId.Banned ? (
         <div className="col-md-7 mb-3">
           <div className="mb-3">
-            <ComponentFormInput
+            <ComponentThemeFormInput
               title={`${t('banDateEnd')}*`}
               type="date"
               name="banDateEnd"
             />
           </div>
           <div className="mb-3">
-            <ComponentFormInput
+            <ComponentThemeFormInput
               title={t('banComment')}
               name="banComment"
               type="textarea"

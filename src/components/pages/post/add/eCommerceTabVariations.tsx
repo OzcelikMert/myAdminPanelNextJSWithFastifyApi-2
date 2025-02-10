@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPageFormState, IPagePostAddState } from '@pages/post/add';
 import {
   IPostECommerceVariationModel,
@@ -81,7 +81,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
 
                 return (
                   <div className="col-md-4 mt-3">
-                    <ComponentFormInputSelect
+                    <ComponentThemeFormInputSelect
                       key={item.id}
                       name={`eCommerce.defaultVariationOptions.${index}.variationTermId`}
                       title={

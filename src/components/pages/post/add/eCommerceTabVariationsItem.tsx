@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPageFormState, IPagePostAddState } from '@pages/post/add';
 import {
   IPostECommerceAttributeModel,
@@ -21,6 +21,8 @@ import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { IPostGetResultServiceECommerceVariation } from 'types/services/post.service';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useFormContext } from 'react-hook-form';
+import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentState = {
   tabKey: string;
@@ -53,7 +55,9 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
     const form = useFormContext<IPageFormState>();
-    const watchOptions = form.watch(`eCommerce.variations.${props.index}.options`);
+    const watchOptions = form.watch(
+      `eCommerce.variations.${props.index}.options`
+    );
 
     const [tabKey, setTabKey] = React.useState(initialState.tabKey);
 
@@ -75,21 +79,23 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                   );
                   if (!attribute) return null;
 
+                  const title = props.attributeTerms?.findSingle(
+                    'value',
+                    attribute.attributeTermId
+                  )?.label;
+
+                  const options = props.variationTerms?.findMulti(
+                    'value',
+                    attribute.variationTerms
+                  );
+
                   return (
                     <div className="col-md mt-3">
-                      <ComponentFormInputSelect
+                      <ComponentThemeFormInputSelect
                         key={item._id}
                         name={`eCommerce.variations.${props.index}.options.${index}.variationTermId`}
-                        title={
-                          props.attributeTerms?.findSingle(
-                            'value',
-                            attribute.attributeTermId
-                          )?.label
-                        }
-                        options={props.variationTerms?.findMulti(
-                          'value',
-                          attribute.variationTerms
-                        )}
+                        title={title}
+                        options={options}
                         onChange={(selectedItem, e) =>
                           props.onChangeVariationOption(
                             props.item._id,
@@ -105,6 +111,13 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
             </div>
             <div className="col-3 m-auto">
               <div className="row">
+                <ComponentThemeToolTipFormFieldErrors
+                  keys={[
+                    `eCommerce.variations.${props.index}.product.contents.title`,
+                  ]}
+                  divClass="col-md text-center text-md-start mb-2 mb-md-0"
+                  div
+                />
                 <ComponentThemeToolTipMissingLanguages
                   alternates={props.item.product?.alternates ?? []}
                   divClass="col-md text-center text-md-start mb-2 mb-md-0"

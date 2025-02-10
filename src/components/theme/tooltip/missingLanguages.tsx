@@ -82,7 +82,7 @@ const ComponentThemeToolTipMissingLanguages = React.memo(
         }
       >
         {props.div ? (
-          <div className={`${props.divClass}`}>
+          <div className={`${props.divClass ?? ""}`}>
             <Icon />
           </div>
         ) : (

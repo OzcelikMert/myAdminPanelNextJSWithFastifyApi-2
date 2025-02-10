@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
-import ComponentFormInput from '@components/elements/form/inputs/input';
-import ComponentFormInputCheckbox from '@components/elements/form/inputs/checkbox';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
+import ComponentThemeFormInputCheckbox from '@components/theme/form/inputs/checkbox';
 import { StatusId } from '@constants/status';
 import { IPagePostAddState } from '@pages/post/add';
 import { I18Util } from '@utils/i18.util';
@@ -26,7 +26,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
     <div className="row">
       {props.showStatusSelect ? (
         <div className="col-md-7 mb-3">
-          <ComponentFormInputSelect
+          <ComponentThemeFormInputSelect
             title={t('status')}
             name="statusId"
             options={props.status}
@@ -37,7 +37,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
       ) : null}
       {props.statusId == StatusId.Pending ? (
         <div className="col-md-7 mb-3">
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={`${t('startDate').toCapitalizeCase()}*`}
             type="date"
             name="dateStart"
@@ -45,20 +45,16 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
         </div>
       ) : null}
       <div className="col-md-7 mb-3">
-        <ComponentFormInput
+        <ComponentThemeFormInput
           title={t('rank')}
           name="rank"
           type="number"
-          i18={{
-            setErrorText: (errorCode) =>
-              t(I18Util.getFormInputErrorText(errorCode), [t('rank')]),
-          }}
           required
         />
       </div>
       {props.showPageTypeSelect ? (
         <div className="col-md-7 mb-3">
-          <ComponentFormInputSelect
+          <ComponentThemeFormInputSelect
             title={t('pageType')}
             name="pageTypeId"
             options={props.pageTypes}
@@ -68,7 +64,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
       ) : null}
       {props.showAuthorsSelect ? (
         <div className="col-md-7 mb-3">
-          <ComponentFormInputSelect
+          <ComponentThemeFormInputSelect
             title={t('authors')}
             name="authors"
             isMulti
@@ -78,11 +74,11 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
         </div>
       ) : null}
       <div className="col-md-7 mb-3">
-        <ComponentFormInputCheckbox title={t('isFixed')} name="isFixed" />
+        <ComponentThemeFormInputCheckbox title={t('isFixed')} name="isFixed" />
       </div>
       {props.showNoIndexCheckBox ? (
         <div className="col-md-7">
-          <ComponentFormInputCheckbox title={t('noIndex')} name="isNoIndex" />
+          <ComponentThemeFormInputCheckbox title={t('noIndex')} name="isNoIndex" />
         </div>
       ) : null}
     </div>

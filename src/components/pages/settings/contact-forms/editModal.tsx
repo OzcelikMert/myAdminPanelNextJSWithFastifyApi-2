@@ -1,11 +1,11 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { Modal } from 'react-bootstrap';
 import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { ISettingContactFormModel } from 'types/models/setting.model';
 import { I18Util } from '@utils/i18.util';
 
@@ -74,46 +74,30 @@ const ComponentPageSettingsContactFormsEditModal = React.memo(
                 {props.item?.title || t('newContactForm')}
               </h4>
               <div className="row mt-4">
-                <ComponentForm
+                <ComponentThemeForm
                   formMethods={form}
-                  i18={{
-                    submitButtonText: t('save'),
-                    submitButtonSubmittingText: t('loading'),
-                  }}
                   onSubmit={(data) => onSubmit(data)}
                 >
                   <div className="row mt-3">
                     <div className="col-md-12">
-                      <ComponentFormInput
+                      <ComponentThemeFormInput
                         title={`${t('title')}*`}
                         name="title"
                         placeholder={t('title')}
                         type="text"
-                        i18={{
-                          setErrorText: (errorCode) =>
-                            t(I18Util.getFormInputErrorText(errorCode), [
-                              t('title'),
-                            ]),
-                        }}
                         required
                       />
                     </div>
                     <div className="col-md-12 mt-3">
-                      <ComponentFormInput
+                      <ComponentThemeFormInput
                         title={`${t('key')}*`}
                         name="key"
                         type="text"
-                        i18={{
-                          setErrorText: (errorCode) =>
-                            t(I18Util.getFormInputErrorText(errorCode), [
-                              t('key'),
-                            ]),
-                        }}
                         required
                       />
                     </div>
                   </div>
-                </ComponentForm>
+                </ComponentThemeForm>
               </div>
             </div>
           </div>

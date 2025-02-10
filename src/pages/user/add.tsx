@@ -21,7 +21,7 @@ import { DateMask } from '@library/variable/date';
 import { useRouter } from 'next/router';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import {
   IBreadCrumbData,
@@ -353,12 +353,8 @@ export default function PageUserAdd() {
       </div>
       <div className="row">
         <div className="col-md-12">
-          <ComponentForm
+          <ComponentThemeForm
             formMethods={form}
-            i18={{
-              submitButtonText: t('save'),
-              submitButtonSubmittingText: t('loading'),
-            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
@@ -408,7 +404,7 @@ export default function PageUserAdd() {
                 </div>
               </div>
             </div>
-          </ComponentForm>
+          </ComponentThemeForm>
         </div>
       </div>
     </div>

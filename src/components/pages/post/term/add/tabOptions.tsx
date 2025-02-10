@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { StatusId } from '@constants/status';
 import { IPagePostTermAddState } from '@pages/post/term/add';
 import { I18Util } from '@utils/i18.util';
@@ -20,7 +20,7 @@ const ComponentPagePostTermAddTabOptions = React.memo(
     return (
       <div className="row">
         <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
-          <ComponentFormInputSelect
+          <ComponentThemeFormInputSelect
             title={t('status')}
             name="statusId"
             options={props.status}
@@ -28,14 +28,10 @@ const ComponentPagePostTermAddTabOptions = React.memo(
           />
         </div>
         <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={t('rank')}
             name="rank"
             type="number"
-            i18={{
-              setErrorText: (errorCode) =>
-                t(I18Util.getFormInputErrorText(errorCode), [t('rank')]),
-            }}
             required
           />
         </div>

@@ -1,4 +1,6 @@
 export const panelLanguageKeys = [
+  'warningAboutFormFieldError',
+  'warningAboutFormFieldErrorsWithVariable',
   'eCommerceAttributeLengthError',
   'updateStatus',
   'fillCorrectlyWithName',

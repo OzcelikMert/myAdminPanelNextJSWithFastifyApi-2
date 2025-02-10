@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPageECommerceSettingsState } from '@pages/e-commerce/settings';
 import { CurrencyId } from '@constants/currencyTypes';
 
@@ -17,7 +17,7 @@ const ComponentPageECommerceSettingsTabGeneral = React.memo(
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
-          <ComponentFormInputSelect
+          <ComponentThemeFormInputSelect
             title={t('currencyType')}
             name="eCommerce.currencyId"
             options={props.currencyTypes}

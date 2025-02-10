@@ -4,8 +4,8 @@ import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { EndPoints } from '@constants/endPoints';
-import ComponentForm from '@components/elements/form';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeForm from '@components/theme/form';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
@@ -108,12 +108,8 @@ export default function PageChangePassword() {
     <div className="page-settings">
       <div className="row">
         <div className="col-md-12">
-          <ComponentForm
+          <ComponentThemeForm
             formMethods={form}
-            i18={{
-              submitButtonText: t('save'),
-              submitButtonSubmittingText: t('loading'),
-            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
@@ -121,44 +117,26 @@ export default function PageChangePassword() {
                 <div className="card-body">
                   <div className="row">
                     <div className="col-md-7 mb-3">
-                      <ComponentFormInput
+                      <ComponentThemeFormInput
                         title={`${t('password')}*`}
                         name="password"
                         type="password"
-                        i18={{
-                          setErrorText: (errorCode) =>
-                            t(I18Util.getFormInputErrorText(errorCode), [
-                              t('password'),
-                            ]),
-                        }}
                         required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
-                      <ComponentFormInput
+                      <ComponentThemeFormInput
                         title={`${t('newPassword')}*`}
                         name="newPassword"
                         type="password"
-                        i18={{
-                          setErrorText: (errorCode) =>
-                            t(I18Util.getFormInputErrorText(errorCode), [
-                              t('newPassword'),
-                            ]),
-                        }}
                         required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
-                      <ComponentFormInput
+                      <ComponentThemeFormInput
                         title={`${t('confirmPassword')}*`}
                         name="confirmPassword"
                         type="password"
-                        i18={{
-                          setErrorText: (errorCode) =>
-                            t(I18Util.getFormInputErrorText(errorCode), [
-                              t('confirmPassword'),
-                            ]),
-                        }}
                         required
                       />
                     </div>
@@ -166,7 +144,7 @@ export default function PageChangePassword() {
                 </div>
               </div>
             </div>
-          </ComponentForm>
+          </ComponentThemeForm>
         </div>
       </div>
     </div>

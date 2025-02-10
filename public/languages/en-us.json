@@ -5,6 +5,8 @@
   "inputIsRequiredWithName": "'{{0}}' is required, it cannot be empty!",
   "warningAboutMissingLanguage": "This item has missing contents for this language!",
   "warningAboutMissingLanguagesWithVariable": "This item has some missing languages! The missing languages are: '{{0}}'",
+  "warningAboutFormFieldError": "Please make sure you fill in all fields correctly!",
+  "warningAboutFormFieldErrorsWithVariable": "Please make sure you fill in all fields correctly!: '{{0}}'",
   "googleAnalyticURL": "Google Analytic URL",
   "host": "Host",
   "targetEmail": "Target Email",

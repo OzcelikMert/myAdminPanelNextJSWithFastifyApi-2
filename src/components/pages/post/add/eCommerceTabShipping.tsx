@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { IPostECommerceShippingModel } from 'types/models/post.model';
 
 type IComponentProps = {
@@ -19,7 +19,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
         <div className="col-md-7">
           <div className="row">
             <div className="col-md-6 mb-3">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 title={t('width')}
                 name={
                   props.isECommerceVariation
@@ -30,7 +30,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 title={t('height')}
                 name={
                   props.isECommerceVariation
@@ -41,7 +41,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 title={t('depth')}
                 name={
                   props.isECommerceVariation
@@ -52,7 +52,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 title={t('weight')}
                 name={
                   props.isECommerceVariation
@@ -63,7 +63,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
               />
             </div>
             <div className="col-md-6 mb-3">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 title={t('shippingPrice')}
                 name={
                   props.isECommerceVariation

@@ -1,6 +1,6 @@
 import React from 'react';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import { IPostContentButtonModel } from 'types/models/post.model';
@@ -28,14 +28,14 @@ const ComponentPagePostButtonsItem = React.memo((props: IComponentProps) => {
       >
         <div className="row mt-2">
           <div className="col-md-6">
-            <ComponentFormInput
+            <ComponentThemeFormInput
               type={'text'}
               title={t('title')}
               name={`contents.buttons.${props.index}.title`}
             />
           </div>
           <div className="col-md-6 mt-3 mt-lg-0">
-            <ComponentFormInput
+            <ComponentThemeFormInput
               type={'text'}
               title={t('url')}
               name={`contents.buttons.${props.index}.url`}

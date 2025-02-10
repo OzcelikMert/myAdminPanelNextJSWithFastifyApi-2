@@ -2,7 +2,7 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { ISettingSocialMediaModel } from 'types/models/setting.model';
 
 type IComponentProps = {
@@ -40,7 +40,7 @@ const ComponentPageSettingsSocialMediaItem = React.memo(
         >
           <div className="row">
             <div className="col-md-12 mt-4">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 type="text"
                 name={`socialMedia.${props.index}.url`}
                 title={t('url')}

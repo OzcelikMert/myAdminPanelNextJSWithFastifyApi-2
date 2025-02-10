@@ -14,7 +14,7 @@ import { useRouter } from 'next/router';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
 import { setCurrencyIdState } from '@redux/features/settingSlice';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentPageECommerceSettingsTabGeneral from '@components/pages/e-commerce/settings/tabGeneral';
 import { useForm } from 'react-hook-form';
@@ -197,12 +197,8 @@ export default function PageECommerceSettings() {
     <div className="page-post">
       <div className="row">
         <div className="col-md-12">
-          <ComponentForm
+          <ComponentThemeForm
             formMethods={form}
-            i18={{
-              submitButtonText: t('save'),
-              submitButtonSubmittingText: t('loading'),
-            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
@@ -231,7 +227,7 @@ export default function PageECommerceSettings() {
                 </div>
               </div>
             </div>
-          </ComponentForm>
+          </ComponentThemeForm>
         </div>
       </div>
     </div>

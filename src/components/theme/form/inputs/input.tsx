@@ -1,23 +1,25 @@
 import ComponentInput, {
   IComponentInputProps,
 } from '@components/elements/inputs/input';
+import { IFormFieldError } from '@components/theme/form';
+import { ObjectUtil } from '@utils/object.util';
 import moment from 'moment';
 import React from 'react';
 import { Controller, Control } from 'react-hook-form';
-
-type IComponentPropsI18 = {
-  setErrorText?: (errorCode: any) => string;
-};
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { I18Util } from '@utils/i18.util';
 
 export type IComponentFormInputProps = {
   valueAsNumber?: boolean;
   valueAsDate?: boolean;
   name: string;
   control?: Control<any>;
-  i18?: IComponentPropsI18;
 } & Omit<IComponentInputProps, 'name'>;
 
-const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
+const ComponentThemeFormInput = React.memo((props: IComponentFormInputProps) => {
+  const t = useAppSelector(selectTranslation);
+
   const setValue = (value: any) => {
     if (props.valueAsNumber || props.type == 'number') {
       return Number(value);
@@ -34,9 +36,19 @@ const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
       control={props.control}
       rules={{ required: props.required }}
       render={({ field, formState }) => {
-        const hasAnError = Boolean(
-          formState.errors && formState.errors[props.name]
+        const error = ObjectUtil.getWithKey<IFormFieldError>(
+          formState.errors,
+          props.name
         );
+        const hasAnError = Boolean(error);
+        let errorText = '';
+
+        if (error) {
+          error.title = props.title;
+          errorText = error.type
+            ? t(I18Util.getFormInputErrorText(error.type), [props.title ?? ''])
+            : (error.message?.toString() ?? '');
+        }
 
         return (
           <ComponentInput
@@ -45,11 +57,7 @@ const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
             onChange={(e) => field.onChange(setValue(e.target.value))}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
-            errorText={
-              hasAnError && props.i18?.setErrorText
-                ? props.i18?.setErrorText(formState.errors[props.name]?.type)
-                : formState.errors[props.name]?.message?.toString()
-            }
+            errorText={hasAnError ? errorText : undefined}
           />
         );
       }}
@@ -57,4 +65,4 @@ const ComponentFormInput = React.memo((props: IComponentFormInputProps) => {
   );
 });
 
-export default ComponentFormInput;
+export default ComponentThemeFormInput;

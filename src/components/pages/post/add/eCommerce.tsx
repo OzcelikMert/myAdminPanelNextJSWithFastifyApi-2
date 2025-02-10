@@ -12,6 +12,7 @@ import ComponentPagePostAddECommerceTabAttributes from './eCommerceTabAttributes
 import ComponentPagePostAddECommerceTabVariations from './eCommerceTabVariations';
 import { IPagePostAddState } from '@pages/post/add';
 import { IPostGetResultServiceECommerce } from 'types/services/post.service';
+import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
 
 type IComponentState = {
   tabKey: string;
@@ -88,7 +89,18 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                   />
                 </Tab>
               ) : null}
-              <Tab eventKey="attributes" title={t('attributes')}>
+              <Tab
+                eventKey="attributes"
+                title={
+                  <div>
+                    {t('attributes')}{' '}
+                    <ComponentThemeToolTipFormFieldErrors
+                      keys={['eCommerce.attributes']}
+                      hideFieldTitles
+                    />
+                  </div>
+                }
+              >
                 <ComponentPagePostAddECommerceTabAttributes
                   attributeTerms={props.attributeTerms}
                   attributeTypes={props.attributeTypes}
@@ -110,7 +122,18 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                 />
               </Tab>
               {props.eCommerce?.typeId == ProductTypeId.VariableProduct ? (
-                <Tab eventKey="variations" title={t('variations')}>
+                <Tab
+                  eventKey="variations"
+                  title={
+                    <div>
+                      {t('variations')}{' '}
+                      <ComponentThemeToolTipFormFieldErrors
+                        keys={['eCommerce.variations']}
+                        hideFieldTitles
+                      />
+                    </div>
+                  }
+                >
                   <ComponentPagePostAddECommerceTabVariations
                     variationTerms={props.variationTerms}
                     attributeTerms={props.attributeTerms}

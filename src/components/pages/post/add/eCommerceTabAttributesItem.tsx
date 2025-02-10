@@ -3,7 +3,7 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { IPostECommerceAttributeModel } from 'types/models/post.model';
 import { Accordion, Card } from 'react-bootstrap';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPageFormState, IPagePostAddState } from '@pages/post/add';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
@@ -28,6 +28,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
 
     const form = useFormContext<IPageFormState>();
     const watch = form.watch(`eCommerce.attributes.${props.index}`);
+    const watchVariationTerms = form.watch(`eCommerce.attributes.${props.index}.variationTerms`);
 
     return (
       <Card>
@@ -36,7 +37,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
             <div className="col-9">
               <div className="row">
                 <div className="col-md-6 mt-2 mt-md-0">
-                  <ComponentFormInputSelect
+                  <ComponentThemeFormInputSelect
                     title={t('attribute')}
                     name={`eCommerce.attributes.${props.index}.attributeTermId`}
                     options={props.attributeTerms}
@@ -49,7 +50,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                   />
                 </div>
                 <div className="col-md-6 mt-2 mt-md-0">
-                  <ComponentFormInputSelect
+                  <ComponentThemeFormInputSelect
                     title={t('type')}
                     name={`eCommerce.attributes.${props.index}.typeId`}
                     options={props.attributeTypes}
@@ -101,7 +102,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
           <Card.Body>
             <div className="row">
               <div className="col-md-12">
-                <ComponentFormInputSelect
+                <ComponentThemeFormInputSelect
                   title={t('variations')}
                   name={`eCommerce.attributes.${props.index}.variationTerms`}
                   options={props.variationTerms}

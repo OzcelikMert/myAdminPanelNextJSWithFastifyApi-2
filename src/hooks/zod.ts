@@ -8,6 +8,8 @@ export const useZodValidationResolver = <T = any>(
   useCallback(
     async (data: T) => {
       const validatedData = await ZodUtil.getParsedData(validationSchema)(data);
+      console.log(validatedData);
+      
       if (validatedData.success) {
         return {
           values: validatedData.data,

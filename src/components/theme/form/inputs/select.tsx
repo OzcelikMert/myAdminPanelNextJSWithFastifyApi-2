@@ -2,24 +2,26 @@ import ComponentInputSelect, {
   IComponentInputSelectData,
   IComponentInputSelectProps,
 } from '@components/elements/inputs/select';
+import { IFormFieldError } from '@components/theme/form';
 import { useEffectAfterDidMount } from '@library/react/hooks';
+import { ObjectUtil } from '@utils/object.util';
 import React from 'react';
 import { useFormContext, Controller, Control } from 'react-hook-form';
-
-type IComponentPropsI18 = {
-  setErrorText?: (errorCode: any) => string;
-};
+import { useAppSelector } from '@redux/hooks';
+import { selectTranslation } from '@redux/features/translationSlice';
+import { I18Util } from '@utils/i18.util';
 
 type IComponentProps<T = any> = {
   key?: string;
   valueAsNumber?: boolean;
   name: string;
   control?: Control<any>;
-  i18?: IComponentPropsI18;
   watch?: boolean;
 } & Omit<IComponentInputSelectProps<T>, 'name'>;
 
-const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
+const ComponentThemeFormInputSelect = React.memo((props: IComponentProps) => {
+  const t = useAppSelector(selectTranslation);
+
   const form = useFormContext();
 
   if (props.watch) {
@@ -73,9 +75,19 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
       rules={{ required: props.required }}
       defaultValue={props.isMulti ? [] : ''}
       render={({ field, formState }) => {
-        const hasAnError = Boolean(
-          formState.errors && formState.errors[props.name]
+        const error = ObjectUtil.getWithKey<IFormFieldError>(
+          formState.errors,
+          props.name
         );
+        const hasAnError = Boolean(error);
+        let errorText = '';
+
+        if (error) {
+          error.title = props.title;
+          errorText = error.type
+            ? t(I18Util.getFormInputErrorText(error.type), [props.title ?? ''])
+            : (error.message?.toString() ?? '');
+        }
 
         return (
           <ComponentInputSelect
@@ -85,11 +97,7 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
             value={getValue(props.options ?? [], field.value ?? props.value)}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
-            errorText={
-              hasAnError && props.i18?.setErrorText
-                ? props.i18?.setErrorText(formState.errors[props.name]?.type)
-                : formState.errors[props.name]?.message?.toString()
-            }
+            errorText={hasAnError ? errorText : undefined}
           />
         );
       }}
@@ -97,4 +105,4 @@ const ComponentFormInputSelect = React.memo((props: IComponentProps) => {
   );
 });
 
-export default ComponentFormInputSelect;
+export default ComponentThemeFormInputSelect;

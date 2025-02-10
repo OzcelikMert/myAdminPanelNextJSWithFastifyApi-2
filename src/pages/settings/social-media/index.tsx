@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { EndPoints } from '@constants/endPoints';
 import { setBreadCrumbState } from '@redux/features/breadCrumbSlice';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
@@ -237,12 +237,8 @@ export default function PageSettingsSocialMedia() {
           <div className="grid-margin stretch-card">
             <div className="card">
               <div className="card-body">
-                <ComponentForm
+                <ComponentThemeForm
                   formMethods={form}
-                  i18={{
-                    submitButtonText: t('save'),
-                    submitButtonSubmittingText: t('loading'),
-                  }}
                   onSubmit={(event) => onSubmit(event)}
                 >
                   <div className="row">
@@ -273,7 +269,7 @@ export default function PageSettingsSocialMedia() {
                       </div>
                     ) : null}
                   </div>
-                </ComponentForm>
+                </ComponentThemeForm>
               </div>
             </div>
           </div>

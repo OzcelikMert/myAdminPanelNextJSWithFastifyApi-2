@@ -1,5 +1,5 @@
-import ComponentFormLoadingButton from '@components/elements/form/button/loadingButton';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormLoadingButton from '@components/theme/form/button/loadingButton';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
 import React from 'react';
@@ -7,7 +7,7 @@ import { Modal } from 'react-bootstrap';
 import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { I18Util } from '@utils/i18.util';
 
 type IComponentState = {
@@ -83,30 +83,23 @@ const ComponentThemeModalUpdateItemRank = React.memo(
                 {t('rank')} {props.title ? `(${props.title})` : ''}
               </h4>
               <div className="row mt-4">
-                <ComponentForm
+                <ComponentThemeForm
                   formMethods={form}
                   submitButtonExtraClassName="mt-4"
                   i18={{
                     submitButtonText: t('update'),
-                    submitButtonSubmittingText: t('loading'),
                   }}
                   onSubmit={(data) => onSubmit(data)}
                 >
                   <div className="col-md-12">
-                    <ComponentFormInput
+                    <ComponentThemeFormInput
                       title={`${t('rank')}`}
                       name="rank"
                       type="number"
-                      i18={{
-                        setErrorText: (errorCode) =>
-                          t(I18Util.getFormInputErrorText(errorCode), [
-                            t('rank'),
-                          ]),
-                      }}
                       required
                     />
                   </div>
-                </ComponentForm>
+                </ComponentThemeForm>
               </div>
             </div>
           </div>

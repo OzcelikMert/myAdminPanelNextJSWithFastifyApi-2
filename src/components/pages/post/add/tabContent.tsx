@@ -1,8 +1,8 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 
-const ComponentFormInputRichTextbox = dynamic(
-  () => import('@components/elements/form/inputs/richTextbox'),
+const ComponentThemeFormInputRichTextbox = dynamic(
+  () => import('@components/theme/form/inputs/richTextbox'),
   { ssr: false }
 );
 
@@ -15,7 +15,7 @@ const ComponentPagePostAddTabContent = React.memo((props: IComponentProps) => {
   return (
     <div className="row">
       <div className="col-md-12 mb-3">
-        <ComponentFormInputRichTextbox
+        <ComponentThemeFormInputRichTextbox
           name={
             props.isECommerceVariation
               ? `eCommerce.variations.${props.index}.product.contents.content`

@@ -1,8 +1,8 @@
 import React from 'react';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentFormInputSelect from '@components/elements/form/inputs/select';
+import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPageNavigationAddState } from '@pages/navigation/add';
 import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
 import { PostTermTypeId } from '@constants/postTermTypes';
@@ -45,19 +45,15 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
           />
         </div>
         <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={`${t('title')}*`}
             name="contents.title"
             type="text"
-            i18={{
-              setErrorText: (errorCode) =>
-                t(I18Util.getFormInputErrorText(errorCode), [t('title')]),
-            }}
             required
           />
         </div>
         <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
-          <ComponentFormInput
+          <ComponentThemeFormInput
             title={t('shortContent').toCapitalizeCase()}
             name="contents.shortContent"
             type="textarea"
@@ -65,7 +61,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
         </div>
         {props.showParentSelect ? (
           <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
-            <ComponentFormInputSelect
+            <ComponentThemeFormInputSelect
               title={getSelectMainInputTitle()}
               name="parentId"
               placeholder={t('chooseMainCategory')}

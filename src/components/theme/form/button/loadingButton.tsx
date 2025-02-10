@@ -5,7 +5,7 @@ type IComponentProps = {
   className?: string;
 };
 
-const ComponentFormLoadingButton = React.memo((props: IComponentProps) => {
+const ComponentThemeFormLoadingButton = React.memo((props: IComponentProps) => {
   return (
     <button
       className={`${props.className} btn btn-gradient-dark float-end btn-save`}
@@ -18,4 +18,4 @@ const ComponentFormLoadingButton = React.memo((props: IComponentProps) => {
   );
 });
 
-export default ComponentFormLoadingButton;
+export default ComponentThemeFormLoadingButton;

@@ -2,9 +2,9 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentFormInput from '@components/elements/form/inputs/input';
+import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { ISettingContactFormModel } from 'types/models/setting.model';
-import ComponentFormInputSwitch from '@components/elements/form/inputs/switch';
+import ComponentThemeFormInputSwitch from '@components/theme/form/inputs/switch';
 
 type IComponentProps = {
   item: ISettingContactFormModel;
@@ -41,49 +41,49 @@ const ComponentPageSettingsContactFormsItem = React.memo(
         >
           <div className="row">
             <div className="col-md-12 mt-4">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 type="text"
                 name={`contactForms.${props.index}.name`}
                 title={t('name')}
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 type="email"
                 name={`contactForms.${props.index}.targetEmail`}
                 title={t('targetEmail')}
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 type="email"
                 name={`contactForms.${props.index}.email`}
                 title={t('email')}
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 type="password"
                 name={`contactForms.${props.index}.password`}
                 title={t('password')}
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 type="text"
                 name={`contactForms.${props.index}.host`}
                 title={t('host')}
               />
             </div>
             <div className="col-md-12 mt-4">
-              <ComponentFormInput
+              <ComponentThemeFormInput
                 type="number"
                 name={`contactForms.${props.index}.port`}
                 title={t('port')}
               />
             </div>
             <div className="col-md-7 mt-4">
-              <ComponentFormInputSwitch
+              <ComponentThemeFormInputSwitch
                 title={t('hasSSL')}
                 name={`contactForms.${props.index}.hasSSL`}
               />

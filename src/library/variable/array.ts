@@ -1,8 +1,12 @@
 declare global {
   interface Array<T> {
     indexOfKey(key: string, value: any): number;
-    findSingle(key: string, value: any): T & {_index: number} | undefined;
-    findMulti(key: string, value: any | any[], isEquals?: boolean): (T & {_index: number} )[];
+    findSingle(key: string, value: any): (T & { _index: number }) | undefined;
+    findMulti(
+      key: string,
+      value: any | any[],
+      isEquals?: boolean
+    ): (T & { _index: number })[];
     orderBy(key: string | '', sort_type: `asc` | `desc`): this;
     serializeObject(): object;
     remove(index: number, deleteCount?: number): void;
@@ -55,7 +59,7 @@ Array.prototype.findSingle = function (key, value) {
       }
 
       if (convertQueryData(_data) == convertQueryData(value)) {
-        foundItem = { ...item, _index: index } ;
+        foundItem = { ...item, _index: index };
         break;
       }
       index++;
@@ -90,9 +94,9 @@ Array.prototype.findMulti = function (key, value, isEquals = true) {
       }
 
       if (query == isEquals) {
-        foundItems.push({...item, _index: index});
+        foundItems.push({ ...item, _index: index });
       }
-      
+
       index++;
     }
   }

@@ -33,7 +33,7 @@ import {
   IBreadCrumbData,
   setBreadCrumbState,
 } from '@redux/features/breadCrumbSlice';
-import ComponentForm from '@components/elements/form';
+import ComponentThemeForm from '@components/theme/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
@@ -48,7 +48,6 @@ import { IPagePostTermAddFormState } from './term/add';
 import Swal from 'sweetalert2';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
-import { formToJSON } from 'axios';
 
 export type IPagePostAddState = {
   authors: IComponentInputSelectData<string>[];
@@ -265,7 +264,6 @@ export default function PagePostAdd() {
   });
 
   const form = useForm<IPageFormState>({
-    mode: 'onBlur',
     defaultValues: {
       ...initialFormState,
       typeId: queries.postTypeId,
@@ -1029,7 +1027,7 @@ export default function PagePostAdd() {
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
-  console.log('PagePostAdd', formValues);
+  console.log('PagePostAdd', formValues, form.formState);
 
   return isPageLoading ? null : (
     <div className="page-post">
@@ -1071,12 +1069,8 @@ export default function PagePostAdd() {
           <ComponentSpinnerDonut customClass="page-spinner" />
         ) : null}
         <div className="col-md-12">
-          <ComponentForm
+          <ComponentThemeForm
             formMethods={form}
-            i18={{
-              submitButtonText: t('save'),
-              submitButtonSubmittingText: t('loading'),
-            }}
             onSubmit={(data) => onSubmit(data)}
           >
             <div className="grid-margin stretch-card">
@@ -1228,7 +1222,7 @@ export default function PagePostAdd() {
                 }
               />
             ) : null}
-          </ComponentForm>
+          </ComponentThemeForm>
         </div>
       </div>
     </div>
