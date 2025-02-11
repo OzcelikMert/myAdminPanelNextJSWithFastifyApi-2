@@ -7,10 +7,9 @@ import ComponentThemeChooseImage from '@components/theme/chooseImage';
 import { Config } from 'jodit/types/config';
 import Spinner from 'react-bootstrap/Spinner';
 import { ImageSourceUtil } from '@utils/imageSource.util';
-import { IJodit, IViewBased, IViewOptions } from 'jodit/types/types';
+import { IJodit } from 'jodit/types/types';
 import { useDidMount } from '@library/react/hooks';
 import { IActionWithPayload } from 'types/hooks';
-import { GSP_NO_RETURNED_VALUE } from 'next/dist/lib/constants';
 
 type IComponentState = {
   value: string;

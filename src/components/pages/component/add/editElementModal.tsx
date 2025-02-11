@@ -10,8 +10,6 @@ import { useForm } from 'react-hook-form';
 import ComponentThemeForm from '@components/theme/form';
 import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPageComponentAddState } from '@pages/component/add';
-import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
-import { I18Util } from '@utils/i18.util';
 
 type IComponentFormState = {} & IComponentElementModel;
 

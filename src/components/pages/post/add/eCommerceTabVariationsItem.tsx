@@ -8,7 +8,7 @@ import {
   IPostECommerceVariationModel,
   IPostECommerceVariationOptionModel,
 } from 'types/models/post.model';
-import { Accordion, Card, Tab, Tabs } from 'react-bootstrap';
+import { Accordion, Card } from 'react-bootstrap';
 import ComponentToolTip from '@components/elements/tooltip';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 import ComponentPagePostAddTabGeneral from './tabGeneral';
@@ -22,7 +22,8 @@ import { IPostGetResultServiceECommerceVariation } from 'types/services/post.ser
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useFormContext } from 'react-hook-form';
 import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
-import { I18Util } from '@utils/i18.util';
+import ComponentThemeTab from '@components/theme/tabs/tab';
+import ComponentThemeTabs from '@components/theme/tabs';
 
 type IComponentState = {
   tabKey: string;
@@ -115,8 +116,7 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                   keys={[
                     `eCommerce.variations.${props.index}.product.contents.title`,
                   ]}
-                  divClass="col-md text-center text-md-start mb-2 mb-md-0"
-                  div
+                  className="col-md text-center text-md-start mb-2 mb-md-0"
                 />
                 <ComponentThemeToolTipMissingLanguages
                   alternates={props.item.product?.alternates ?? []}
@@ -158,21 +158,26 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
         </Card.Header>
         <Accordion.Collapse eventKey={props.item._id} in={props.isSelected}>
           <Card.Body>
-            <Tabs
+            <ComponentThemeTabs
               onSelect={(key: any) => setTabKey(key)}
               activeKey={tabKey}
-              className="mb-5"
-              transition={false}
             >
-              <Tab eventKey="general" title={t('general')}>
+              <ComponentThemeTab
+                eventKey="general"
+                title={t('general')}
+                formFieldErrorKeys={[
+                  `eCommerce.variations.${props.index}.product.contents.title`,
+                ]}
+                showFormFieldErrors
+              >
                 <div className="mb-4">
                   <ComponentPagePostAddTabGeneral
                     index={props.index}
                     isECommerceVariation
                   />
                 </div>
-              </Tab>
-              <Tab eventKey="content" title={t('content')}>
+              </ComponentThemeTab>
+              <ComponentThemeTab eventKey="content" title={t('content')}>
                 <div className="mb-4">
                   {tabKey === 'content' ? (
                     <ComponentPagePostAddTabContent
@@ -181,40 +186,40 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                     />
                   ) : null}
                 </div>
-              </Tab>
-              <Tab eventKey="gallery" title={t('gallery')}>
+              </ComponentThemeTab>
+              <ComponentThemeTab eventKey="gallery" title={t('gallery')}>
                 <div className="mb-4">
                   <ComponentPagePostAddECommerceTabGallery
                     index={props.index}
                     isECommerceVariation
                   />
                 </div>
-              </Tab>
-              <Tab eventKey="pricing" title={t('pricing')}>
+              </ComponentThemeTab>
+              <ComponentThemeTab eventKey="pricing" title={t('pricing')}>
                 <div className="mb-4">
                   <ComponentPagePostAddECommerceTabPricing
                     index={props.index}
                     isECommerceVariation
                   />
                 </div>
-              </Tab>
-              <Tab eventKey="inventory" title={t('inventory')}>
+              </ComponentThemeTab>
+              <ComponentThemeTab eventKey="inventory" title={t('inventory')}>
                 <div className="mb-4">
                   <ComponentPagePostAddECommerceTabInvertory
                     index={props.index}
                     isECommerceVariation
                   />
                 </div>
-              </Tab>
-              <Tab eventKey="shipping" title={t('shipping')}>
+              </ComponentThemeTab>
+              <ComponentThemeTab eventKey="shipping" title={t('shipping')}>
                 <div className="mb-4">
                   <ComponentPagePostAddECommerceTabShipping
                     index={props.index}
                     isECommerceVariation
                   />
                 </div>
-              </Tab>
-            </Tabs>
+              </ComponentThemeTab>
+            </ComponentThemeTabs>
           </Card.Body>
         </Accordion.Collapse>
       </Card>

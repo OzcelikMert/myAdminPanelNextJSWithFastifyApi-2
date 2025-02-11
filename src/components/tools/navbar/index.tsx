@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { Dropdown } from 'react-bootstrap';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { AuthService } from '@services/auth.service';
 import { LocalStorageUtil } from '@utils/localStorage.util';
@@ -8,8 +7,6 @@ import { ThemeUtil } from '@utils/theme.util';
 import Image from 'next/image';
 import { IThemeKeys } from 'types/constants/themeKeys';
 import { EndPoints } from '@constants/endPoints';
-import { ImageSourceUtil } from '@utils/imageSource.util';
-import { RouteUtil } from '@utils/route.util';
 import { useRouter } from 'next/router';
 import { setIsLockState } from '@redux/features/appSlice';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
@@ -19,6 +16,7 @@ import { useDidMount } from '@library/react/hooks';
 import ComponentToolNavbarProfile, {
   NavbarProfileDropdownItems,
 } from './profile';
+import { RouteUtil } from '@utils/route.util';
 
 type IComponentState = {
   isDarkTheme: boolean;

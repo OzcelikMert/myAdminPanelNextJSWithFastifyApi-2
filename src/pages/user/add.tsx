@@ -1,5 +1,4 @@
 import React, { useReducer, useRef, useState } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
 import { UserService } from '@services/user.service';
 import {
   IUserGetResultService,
@@ -37,6 +36,8 @@ import ComponentPageUserAddTabOptions from '@components/pages/user/add/tabOption
 import ComponentPageUserAddTabPermissions from '@components/pages/user/add/tabPermissions';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 export type IPageUserAddState = {
   mainTabActiveKey: string;
@@ -360,47 +361,41 @@ export default function PageUserAdd() {
             <div className="grid-margin stretch-card">
               <div className="card">
                 <div className="card-body">
-                  <div className="theme-tabs">
-                    <Tabs
-                      onSelect={(key: any) =>
-                        dispatch({
-                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                          payload: key,
-                        })
-                      }
-                      activeKey={state.mainTabActiveKey}
-                      className="mb-5"
-                      transition={false}
+                  <ComponentThemeTabs
+                    onSelect={(key: any) =>
+                      dispatch({
+                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+                        payload: key,
+                      })
+                    }
+                    activeKey={state.mainTabActiveKey}
+                  >
+                    <ComponentThemeTab eventKey="general" title={t('general')}>
+                      <ComponentPageUserAddTabGeneral
+                        isPasswordRequired={!queries._id}
+                      />
+                    </ComponentThemeTab>
+                    <ComponentThemeTab eventKey="options" title={t('options')}>
+                      <ComponentPageUserAddTabOptions
+                        roleId={formValues.roleId}
+                        statusId={formValues.statusId}
+                        status={state.status}
+                        userRoles={state.userRoles}
+                      />
+                    </ComponentThemeTab>
+                    <ComponentThemeTab
+                      eventKey="permissions"
+                      title={`${t('permissions')} (${t(userRole?.langKey ?? '[noLangAdd]')})`}
                     >
-                      <Tab eventKey="general" title={t('general')}>
-                        <ComponentPageUserAddTabGeneral
-                          isPasswordRequired={!queries._id}
-                        />
-                      </Tab>
-                      <Tab eventKey="options" title={t('options')}>
-                        <ComponentPageUserAddTabOptions
-                          roleId={formValues.roleId}
-                          statusId={formValues.statusId}
-                          status={state.status}
-                          userRoles={state.userRoles}
-                        />
-                      </Tab>
-                      <Tab
-                        eventKey="permissions"
-                        title={`${t('permissions')} (${t(userRole?.langKey ?? '[noLangAdd]')})`}
-                      >
-                        <ComponentPageUserAddTabPermissions
-                          permissionGroups={state.permissionGroups}
-                          permissions={state.permissions}
-                          userPermissions={formValues.permissions}
-                          onSelectAllPermissions={() =>
-                            onSelectAllPermissions()
-                          }
-                          onSelectPermission={(id) => onSelectPermission(id)}
-                        />
-                      </Tab>
-                    </Tabs>
-                  </div>
+                      <ComponentPageUserAddTabPermissions
+                        permissionGroups={state.permissionGroups}
+                        permissions={state.permissions}
+                        userPermissions={formValues.permissions}
+                        onSelectAllPermissions={() => onSelectAllPermissions()}
+                        onSelectPermission={(id) => onSelectPermission(id)}
+                      />
+                    </ComponentThemeTab>
+                  </ComponentThemeTabs>
                 </div>
               </div>
             </div>

@@ -1,4 +1,3 @@
-import ComponentThemeFormLoadingButton from '@components/theme/form/button/loadingButton';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useAppSelector } from '@redux/hooks';
@@ -6,9 +5,7 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import ComponentThemeForm from '@components/theme/form';
-import { I18Util } from '@utils/i18.util';
 
 type IComponentState = {
   isSubmitting: boolean;

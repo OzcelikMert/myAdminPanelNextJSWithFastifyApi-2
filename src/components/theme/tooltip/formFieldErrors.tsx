@@ -7,8 +7,16 @@ import { IFormFieldError } from '@components/theme/form';
 import { useEffectAfterDidMount } from '@library/react/hooks';
 import { ObjectUtil } from '@utils/object.util';
 
-const Icon = () => {
-  return <i className={`mdi mdi-alert-circle text-danger fs-4`}></i>;
+type IIconProps = {
+  iconFontSize?: '1' | '2' | '3' | '4' | '5' | '6';
+};
+
+const Icon = (props: IIconProps) => {
+  return (
+    <i
+      className={`mdi mdi-alert-circle text-danger fs-${props.iconFontSize ?? '4'}`}
+    ></i>
+  );
 };
 
 type IComponentState = {
@@ -22,9 +30,8 @@ const initialState: IComponentState = {
 type IComponentProps = {
   keys: string[];
   hideFieldTitles?: boolean;
-  div?: boolean;
-  divClass?: string;
-};
+  className?: string;
+} & IIconProps;
 
 const ComponentThemeToolTipFormFieldErrors = React.memo(
   (props: IComponentProps) => {
@@ -45,7 +52,9 @@ const ComponentThemeToolTipFormFieldErrors = React.memo(
           newErrors.push(newError);
         }
       }
-      setErrors(newErrors);
+      if (JSON.stringify(errors) != JSON.stringify(newErrors)) {
+        setErrors(newErrors);
+      }
     };
 
     if (errors.length == 0) {
@@ -62,15 +71,9 @@ const ComponentThemeToolTipFormFieldErrors = React.memo(
               ])
         }
       >
-        {props.div ? (
-          <div className={`${props.divClass ?? ''}`}>
-            <Icon />
-          </div>
-        ) : (
-          <span>
-            <Icon />{' '}
-          </span>
-        )}
+        <div className={`d-inline-block ${props.className ?? ''}`}>
+          <Icon />
+        </div>
       </ComponentToolTip>
     );
   }

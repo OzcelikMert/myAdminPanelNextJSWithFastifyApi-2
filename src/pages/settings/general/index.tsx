@@ -1,7 +1,6 @@
 import { SettingService } from '@services/setting.service';
 import { ServerInfoService } from '@services/serverInfo.service';
 import { ISettingUpdateGeneralParamService } from 'types/services/setting.service';
-import { Tab, Tabs } from 'react-bootstrap';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { IServerInfoGetResultService } from 'types/services/serverInfo.service';
 import { LocalStorageUtil } from '@utils/localStorage.util';
@@ -28,6 +27,8 @@ import ComponentPageSettingsGeneralTabTools from '@components/pages/settings/gen
 import ComponentPageSettingsGeneralServerInfo from '@components/pages/settings/general/serverInfo';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 export type IPageSettingsGeneralState = {
   panelLanguages: IComponentInputSelectData[];
@@ -245,8 +246,7 @@ export default function PageSettingsGeneral() {
             <div className="grid-margin stretch-card">
               <div className="card">
                 <div className="card-body">
-                  <div className="theme-tabs">
-                    <Tabs
+                    <ComponentThemeTabs
                       onSelect={(key: any) =>
                         dispatch({
                           type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
@@ -254,10 +254,11 @@ export default function PageSettingsGeneral() {
                         })
                       }
                       activeKey={state.mainTabActiveKey}
-                      className="mb-5"
-                      transition={false}
                     >
-                      <Tab eventKey="general" title={t('general')}>
+                      <ComponentThemeTab
+                        eventKey="general"
+                        title={t('general')}
+                      >
                         <ComponentPageSettingsGeneralTabGeneral
                           panelLanguages={state.panelLanguages}
                           panelLangId={formValues.panelLangId}
@@ -265,19 +266,21 @@ export default function PageSettingsGeneral() {
                           logo={formValues.logo}
                           logoTwo={formValues.logoTwo}
                         />
-                      </Tab>
-                      <Tab eventKey="contact" title={t('contact')}>
+                      </ComponentThemeTab>
+                      <ComponentThemeTab
+                        eventKey="contact"
+                        title={t('contact')}
+                      >
                         <ComponentPageSettingsGeneralTabContact
                           contact={formValues.contact}
                         />
-                      </Tab>
+                      </ComponentThemeTab>
                       {isUserSuperAdmin ? (
-                        <Tab eventKey="tools" title={t('tools')}>
+                        <ComponentThemeTab eventKey="tools" title={t('tools')}>
                           <ComponentPageSettingsGeneralTabTools />
-                        </Tab>
+                        </ComponentThemeTab>
                       ) : null}
-                    </Tabs>
-                  </div>
+                    </ComponentThemeTabs>
                 </div>
               </div>
             </div>

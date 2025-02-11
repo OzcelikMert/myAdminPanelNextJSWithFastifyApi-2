@@ -1,5 +1,4 @@
 import React from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
 import { ProductTypeId } from '@constants/productTypes';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -12,7 +11,8 @@ import ComponentPagePostAddECommerceTabAttributes from './eCommerceTabAttributes
 import ComponentPagePostAddECommerceTabVariations from './eCommerceTabVariations';
 import { IPagePostAddState } from '@pages/post/add';
 import { IPostGetResultServiceECommerce } from 'types/services/post.service';
-import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 type IComponentState = {
   tabKey: string;
@@ -48,125 +48,108 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
     <div className="grid-margin stretch-card">
       <div className="card">
         <div className="card-body">
-          <div className="theme-tabs">
-            <Tabs
-              onSelect={(key: any) => setTabKey(key)}
-              activeKey={tabKey}
-              className="mb-5"
-              transition={false}
-            >
-              <Tab eventKey="options" title={t('options')}>
-                <ComponentPagePostAddECommerceTabOptions
-                  productTypes={props.productTypes}
-                  productTypeId={props.eCommerce?.typeId}
+          <ComponentThemeTabs
+            onSelect={(key: any) => setTabKey(key)}
+            activeKey={tabKey}
+          >
+            <ComponentThemeTab eventKey="options" title={t('options')}>
+              <ComponentPagePostAddECommerceTabOptions
+                productTypes={props.productTypes}
+                productTypeId={props.eCommerce?.typeId}
+              />
+            </ComponentThemeTab>
+            {props.eCommerce?.typeId == ProductTypeId.SimpleProduct ? (
+              <ComponentThemeTab eventKey="gallery" title={t('gallery')}>
+                <ComponentPagePostAddECommerceTabGallery
+                  images={props.eCommerce.images}
                 />
-              </Tab>
-              {props.eCommerce?.typeId == ProductTypeId.SimpleProduct ? (
-                <Tab eventKey="gallery" title={t('gallery')}>
-                  <ComponentPagePostAddECommerceTabGallery
-                    images={props.eCommerce.images}
-                  />
-                </Tab>
-              ) : null}
-              {props.eCommerce?.typeId == ProductTypeId.SimpleProduct ? (
-                <Tab eventKey="pricing" title={t('pricing')}>
-                  <ComponentPagePostAddECommerceTabPricing
-                    pricing={props.eCommerce?.pricing}
-                  />
-                </Tab>
-              ) : null}
-              {props.eCommerce?.typeId == ProductTypeId.SimpleProduct ? (
-                <Tab eventKey="inventory" title={t('inventory')}>
-                  <ComponentPagePostAddECommerceTabInvertory
-                    inventory={props.eCommerce?.inventory}
-                  />
-                </Tab>
-              ) : null}
-              {props.eCommerce?.typeId == ProductTypeId.SimpleProduct ? (
-                <Tab eventKey="shipping" title={t('shipping')}>
-                  <ComponentPagePostAddECommerceTabShipping
-                    shipping={props.eCommerce?.shipping}
-                  />
-                </Tab>
-              ) : null}
-              <Tab
-                eventKey="attributes"
-                title={
-                  <div>
-                    {t('attributes')}{' '}
-                    <ComponentThemeToolTipFormFieldErrors
-                      keys={['eCommerce.attributes']}
-                      hideFieldTitles
-                    />
-                  </div>
+              </ComponentThemeTab>
+            ) : null}
+            {props.eCommerce?.typeId == ProductTypeId.SimpleProduct ? (
+              <ComponentThemeTab eventKey="pricing" title={t('pricing')}>
+                <ComponentPagePostAddECommerceTabPricing
+                  pricing={props.eCommerce?.pricing}
+                />
+              </ComponentThemeTab>
+            ) : null}
+            {props.eCommerce?.typeId == ProductTypeId.SimpleProduct ? (
+              <ComponentThemeTab eventKey="inventory" title={t('inventory')}>
+                <ComponentPagePostAddECommerceTabInvertory
+                  inventory={props.eCommerce?.inventory}
+                />
+              </ComponentThemeTab>
+            ) : null}
+            {props.eCommerce?.typeId == ProductTypeId.SimpleProduct ? (
+              <ComponentThemeTab eventKey="shipping" title={t('shipping')}>
+                <ComponentPagePostAddECommerceTabShipping
+                  shipping={props.eCommerce?.shipping}
+                />
+              </ComponentThemeTab>
+            ) : null}
+            <ComponentThemeTab
+              title={t('attributes')}
+              eventKey="attributes"
+              formFieldErrorKeys={['eCommerce.attributes']}
+              showFormFieldErrors
+            >
+              <ComponentPagePostAddECommerceTabAttributes
+                attributeTerms={props.attributeTerms}
+                attributeTypes={props.attributeTypes}
+                variationTerms={props.variationTerms}
+                selectedAttributes={props.eCommerce?.attributes}
+                onClickAddNew={() =>
+                  props.onClickAddNewAttribute && props.onClickAddNewAttribute()
                 }
+                onClickDelete={(_id) =>
+                  props.onClickDeleteAttribute &&
+                  props.onClickDeleteAttribute(_id)
+                }
+                onChangeAttribute={(attributeId, attributeTermId) =>
+                  props.onChangeAttribute
+                    ? props.onChangeAttribute(attributeId, attributeTermId)
+                    : false
+                }
+              />
+            </ComponentThemeTab>
+            {props.eCommerce?.typeId == ProductTypeId.VariableProduct ? (
+              <ComponentThemeTab
+                title={t('variations')}
+                eventKey="variations"
+                formFieldErrorKeys={['eCommerce.variations']}
+                showFormFieldErrors
               >
-                <ComponentPagePostAddECommerceTabAttributes
-                  attributeTerms={props.attributeTerms}
-                  attributeTypes={props.attributeTypes}
+                <ComponentPagePostAddECommerceTabVariations
                   variationTerms={props.variationTerms}
+                  attributeTerms={props.attributeTerms}
+                  selectedVariations={props.eCommerce?.variations}
                   selectedAttributes={props.eCommerce?.attributes}
+                  defaultVariationOptions={
+                    props.eCommerce?.defaultVariationOptions
+                  }
                   onClickAddNew={() =>
-                    props.onClickAddNewAttribute &&
-                    props.onClickAddNewAttribute()
+                    props.onClickAddNewVariation &&
+                    props.onClickAddNewVariation()
                   }
                   onClickDelete={(_id) =>
-                    props.onClickDeleteAttribute &&
-                    props.onClickDeleteAttribute(_id)
+                    props.onClickDeleteVariation &&
+                    props.onClickDeleteVariation(_id)
                   }
-                  onChangeAttribute={(attributeId, attributeTermId) =>
-                    props.onChangeAttribute
-                      ? props.onChangeAttribute(attributeId, attributeTermId)
-                      : false
-                  }
-                />
-              </Tab>
-              {props.eCommerce?.typeId == ProductTypeId.VariableProduct ? (
-                <Tab
-                  eventKey="variations"
-                  title={
-                    <div>
-                      {t('variations')}{' '}
-                      <ComponentThemeToolTipFormFieldErrors
-                        keys={['eCommerce.variations']}
-                        hideFieldTitles
-                      />
-                    </div>
-                  }
-                >
-                  <ComponentPagePostAddECommerceTabVariations
-                    variationTerms={props.variationTerms}
-                    attributeTerms={props.attributeTerms}
-                    selectedVariations={props.eCommerce?.variations}
-                    selectedAttributes={props.eCommerce?.attributes}
-                    defaultVariationOptions={
-                      props.eCommerce?.defaultVariationOptions
-                    }
-                    onClickAddNew={() =>
-                      props.onClickAddNewVariation &&
-                      props.onClickAddNewVariation()
-                    }
-                    onClickDelete={(_id) =>
-                      props.onClickDeleteVariation &&
-                      props.onClickDeleteVariation(_id)
-                    }
-                    onChangeVariationOption={(
+                  onChangeVariationOption={(
+                    variationId,
+                    attributeId,
+                    variationTermId
+                  ) =>
+                    props.onChangeVariationOption &&
+                    props.onChangeVariationOption(
                       variationId,
                       attributeId,
                       variationTermId
-                    ) =>
-                      props.onChangeVariationOption &&
-                      props.onChangeVariationOption(
-                        variationId,
-                        attributeId,
-                        variationTermId
-                      )
-                    }
-                  />
-                </Tab>
-              ) : null}
-            </Tabs>
-          </div>
+                    )
+                  }
+                />
+              </ComponentThemeTab>
+            ) : null}
+          </ComponentThemeTabs>
         </div>
       </div>
     </div>

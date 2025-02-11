@@ -7,7 +7,6 @@ import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useForm } from 'react-hook-form';
 import ComponentThemeForm from '@components/theme/form';
 import { ISettingSocialMediaModel } from 'types/models/setting.model';
-import { I18Util } from '@utils/i18.util';
 
 type IComponentFormState = {} & ISettingSocialMediaModel;
 

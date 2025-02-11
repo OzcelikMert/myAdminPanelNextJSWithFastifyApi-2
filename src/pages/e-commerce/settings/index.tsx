@@ -1,6 +1,5 @@
 import { SettingService } from '@services/setting.service';
 import { ISettingUpdateECommerceParamService } from 'types/services/setting.service';
-import { Tab, Tabs } from 'react-bootstrap';
 import { CurrencyId, currencyTypes } from '@constants/currencyTypes';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { SettingProjectionKeys } from '@constants/settingProjections';
@@ -22,6 +21,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SettingSchema } from 'schemas/setting.schema';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from 'hooks/toast';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 export type IPageECommerceSettingsState = {
   currencyTypes: IComponentInputSelectData[];
@@ -204,26 +205,10 @@ export default function PageECommerceSettings() {
             <div className="grid-margin stretch-card">
               <div className="card">
                 <div className="card-body">
-                  <div className="theme-tabs">
-                    <Tabs
-                      onSelect={(key: any) =>
-                        dispatch({
-                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                          payload: key,
-                        })
-                      }
-                      activeKey={state.mainTabActiveKey}
-                      className="mb-5"
-                      transition={false}
-                    >
-                      <Tab eventKey="general" title={t('general')}>
-                        <ComponentPageECommerceSettingsTabGeneral
-                          currencyTypes={state.currencyTypes}
-                          currencyId={formValues.eCommerce.currencyId}
-                        />
-                      </Tab>
-                    </Tabs>
-                  </div>
+                  <ComponentPageECommerceSettingsTabGeneral
+                    currencyTypes={state.currencyTypes}
+                    currencyId={formValues.eCommerce.currencyId}
+                  />
                 </div>
               </div>
             </div>

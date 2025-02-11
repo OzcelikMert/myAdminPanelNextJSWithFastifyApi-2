@@ -1,5 +1,4 @@
 import React, { useReducer, useRef, useState } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
 import { PostTermService } from '@services/postTerm.service';
 import {
   IPostTermGetResultService,
@@ -33,6 +32,8 @@ import ComponentPagePostTermAddTabGeneral from '@components/pages/post/term/add/
 import ComponentPagePostTermAddTabOptions from '@components/pages/post/term/add/tabOptions';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 export type IPagePostTermAddState = {
   mainTabActiveKey: string;
@@ -429,40 +430,36 @@ export default function PagePostTermAdd(props: IPageProps) {
             <div className="grid-margin stretch-card">
               <div className="card">
                 <div className="card-body">
-                  <div className="theme-tabs">
-                    <Tabs
-                      onSelect={(key: any) =>
-                        dispatch({
-                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                          payload: key,
-                        })
-                      }
-                      activeKey={state.mainTabActiveKey}
-                      className="mb-5"
-                      transition={false}
-                    >
-                      <Tab eventKey="general" title={t('general')}>
-                        <ComponentPagePostTermAddTabGeneral
-                          items={state.items}
-                          termTypeId={formValues.typeId}
-                          image={formValues.contents.image}
-                          parentId={formValues.parentId}
-                          isModal={props.isModal}
-                          showParentSelect={[
-                            PostTermTypeId.Category,
-                            PostTermTypeId.Variations,
-                          ].includes(formValues.typeId)}
-                        />
-                      </Tab>
-                      <Tab eventKey="options" title={t('options')}>
-                        <ComponentPagePostTermAddTabOptions
-                          status={state.status}
-                          statusId={formValues.statusId}
-                          isModal={props.isModal}
-                        />
-                      </Tab>
-                    </Tabs>
-                  </div>
+                  <ComponentThemeTabs
+                    onSelect={(key: any) =>
+                      dispatch({
+                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+                        payload: key,
+                      })
+                    }
+                    activeKey={state.mainTabActiveKey}
+                  >
+                    <ComponentThemeTab eventKey="general" title={t('general')}>
+                      <ComponentPagePostTermAddTabGeneral
+                        items={state.items}
+                        termTypeId={formValues.typeId}
+                        image={formValues.contents.image}
+                        parentId={formValues.parentId}
+                        isModal={props.isModal}
+                        showParentSelect={[
+                          PostTermTypeId.Category,
+                          PostTermTypeId.Variations,
+                        ].includes(formValues.typeId)}
+                      />
+                    </ComponentThemeTab>
+                    <ComponentThemeTab eventKey="options" title={t('options')}>
+                      <ComponentPagePostTermAddTabOptions
+                        status={state.status}
+                        statusId={formValues.statusId}
+                        isModal={props.isModal}
+                      />
+                    </ComponentThemeTab>
+                  </ComponentThemeTabs>
                 </div>
               </div>
             </div>

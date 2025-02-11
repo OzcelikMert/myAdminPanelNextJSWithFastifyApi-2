@@ -1,5 +1,4 @@
 import React, { FormEvent, useReducer, useRef, useState } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
 import { PostTermService } from '@services/postTerm.service';
 import { PostService } from '@services/post.service';
 import {
@@ -48,6 +47,8 @@ import { IPagePostTermAddFormState } from './term/add';
 import Swal from 'sweetalert2';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 export type IPagePostAddState = {
   authors: IComponentInputSelectData<string>[];
@@ -809,19 +810,24 @@ export default function PagePostAdd() {
       const newAttributes = formValues.eCommerce.attributes.filter(
         (attribute) => attribute._id != _id
       );
-      const newDefaultVariationOptions = formValues.eCommerce.defaultVariationOptions?.filter(
-        (option) => option.attributeId != _id
-      );
-      const newVariations = formValues.eCommerce.variations?.map((variation) => ({
-        ...variation,
-        options: variation.options.filter(
+      const newDefaultVariationOptions =
+        formValues.eCommerce.defaultVariationOptions?.filter(
           (option) => option.attributeId != _id
-        ),
-      }));
+        );
+      const newVariations = formValues.eCommerce.variations?.map(
+        (variation) => ({
+          ...variation,
+          options: variation.options.filter(
+            (option) => option.attributeId != _id
+          ),
+        })
+      );
 
-      form.resetField('eCommerce.attributes', {defaultValue: newAttributes});
-      form.resetField('eCommerce.defaultVariationOptions', {defaultValue: newDefaultVariationOptions});
-      form.resetField('eCommerce.variations', {defaultValue: newVariations});
+      form.resetField('eCommerce.attributes', { defaultValue: newAttributes });
+      form.resetField('eCommerce.defaultVariationOptions', {
+        defaultValue: newDefaultVariationOptions,
+      });
+      form.resetField('eCommerce.variations', { defaultValue: newVariations });
     }
   };
 
@@ -1076,100 +1082,102 @@ export default function PagePostAdd() {
             <div className="grid-margin stretch-card">
               <div className="card">
                 <div className="card-body">
-                  <div className="theme-tabs">
-                    <Tabs
-                      onSelect={(key: any) =>
-                        dispatch({
-                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                          payload: key,
-                        })
-                      }
-                      activeKey={state.mainTabActiveKey}
-                      className="mb-5"
-                      transition={false}
-                    >
-                      <Tab eventKey="general" title={t('general')}>
-                        <ComponentPagePostAddTabGeneral
-                          categoryTerms={state.categoryTerms}
-                          tagTerms={state.tagTerms}
-                          isIconActive={state.isIconActive}
-                          showCategoryTermSelect={
-                            ![
-                              PostTypeId.Page,
-                              PostTypeId.Slider,
-                              PostTypeId.Service,
-                              PostTypeId.Testimonial,
-                            ].includes(formValues.typeId)
+                  <ComponentThemeTabs
+                    onSelect={(key: any) =>
+                      dispatch({
+                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+                        payload: key,
+                      })
+                    }
+                    activeKey={state.mainTabActiveKey}
+                  >
+                    <ComponentThemeTab eventKey="general" title={t('general')}>
+                      <ComponentPagePostAddTabGeneral
+                        categoryTerms={state.categoryTerms}
+                        tagTerms={state.tagTerms}
+                        isIconActive={state.isIconActive}
+                        showCategoryTermSelect={
+                          ![
+                            PostTypeId.Page,
+                            PostTypeId.Slider,
+                            PostTypeId.Service,
+                            PostTypeId.Testimonial,
+                          ].includes(formValues.typeId)
+                        }
+                        showIconCheckBox={[PostTypeId.Service].includes(
+                          formValues.typeId
+                        )}
+                        showTagTermSelect={
+                          ![
+                            PostTypeId.Slider,
+                            PostTypeId.Service,
+                            PostTypeId.Testimonial,
+                          ].includes(formValues.typeId)
+                        }
+                        onChangeIsIconActive={() =>
+                          dispatch({
+                            type: ActionTypes.SET_IS_ICON_ACTIVE,
+                            payload: !state.isIconActive,
+                          })
+                        }
+                        onClickShowTermModal={(termTypeId) =>
+                          onClickShowTermModal(termTypeId)
+                        }
+                      />
+                    </ComponentThemeTab>
+                    {![PostTypeId.Slider].includes(
+                      Number(formValues.typeId)
+                    ) ? (
+                      <ComponentThemeTab
+                        eventKey="content"
+                        title={t('content')}
+                      >
+                        {state.mainTabActiveKey === 'content' ? (
+                          <ComponentPagePostAddTabContent />
+                        ) : (
+                          ''
+                        )}
+                      </ComponentThemeTab>
+                    ) : null}
+                    {formValues.typeId == PostTypeId.Page &&
+                    !isUserSuperAdmin ? null : (
+                      <ComponentThemeTab
+                        eventKey="options"
+                        title={t('options')}
+                      >
+                        <ComponentPagePostAddTabOptions
+                          status={state.status}
+                          statusId={formValues.statusId}
+                          authors={state.authors}
+                          pageTypes={state.pageTypes}
+                          showAuthorsSelect={
+                            !formValues._id ||
+                            PermissionUtil.checkPermissionRoleRank(
+                              sessionAuth!.user.roleId,
+                              UserRoleId.Editor
+                            ) ||
+                            sessionAuth!.user.userId == state.item?.authorId
                           }
-                          showIconCheckBox={[PostTypeId.Service].includes(
-                            formValues.typeId
-                          )}
-                          showTagTermSelect={
-                            ![
-                              PostTypeId.Slider,
-                              PostTypeId.Service,
-                              PostTypeId.Testimonial,
-                            ].includes(formValues.typeId)
+                          showNoIndexCheckBox={
+                            [PostTypeId.Page].includes(formValues.typeId) &&
+                            isUserSuperAdmin
                           }
-                          onChangeIsIconActive={() =>
-                            dispatch({
-                              type: ActionTypes.SET_IS_ICON_ACTIVE,
-                              payload: !state.isIconActive,
-                            })
+                          showPageTypeSelect={
+                            [PostTypeId.Page].includes(formValues.typeId) &&
+                            isUserSuperAdmin
                           }
-                          onClickShowTermModal={(termTypeId) =>
-                            onClickShowTermModal(termTypeId)
+                          showStatusSelect={
+                            !formValues._id ||
+                            PermissionUtil.checkPermissionRoleRank(
+                              sessionAuth!.user.roleId,
+                              UserRoleId.Editor
+                            ) ||
+                            sessionAuth!.user.userId == state.item?.authorId
                           }
                         />
-                      </Tab>
-                      {![PostTypeId.Slider].includes(
-                        Number(formValues.typeId)
-                      ) ? (
-                        <Tab eventKey="content" title={t('content')}>
-                          {state.mainTabActiveKey === 'content' ? (
-                            <ComponentPagePostAddTabContent />
-                          ) : (
-                            ''
-                          )}
-                        </Tab>
-                      ) : null}
-                      {formValues.typeId == PostTypeId.Page &&
-                      !isUserSuperAdmin ? null : (
-                        <Tab eventKey="options" title={t('options')}>
-                          <ComponentPagePostAddTabOptions
-                            status={state.status}
-                            statusId={formValues.statusId}
-                            authors={state.authors}
-                            pageTypes={state.pageTypes}
-                            showAuthorsSelect={
-                              !formValues._id ||
-                              PermissionUtil.checkPermissionRoleRank(
-                                sessionAuth!.user.roleId,
-                                UserRoleId.Editor
-                              ) ||
-                              sessionAuth!.user.userId == state.item?.authorId
-                            }
-                            showNoIndexCheckBox={
-                              [PostTypeId.Page].includes(formValues.typeId) &&
-                              isUserSuperAdmin
-                            }
-                            showPageTypeSelect={
-                              [PostTypeId.Page].includes(formValues.typeId) &&
-                              isUserSuperAdmin
-                            }
-                            showStatusSelect={
-                              !formValues._id ||
-                              PermissionUtil.checkPermissionRoleRank(
-                                sessionAuth!.user.roleId,
-                                UserRoleId.Editor
-                              ) ||
-                              sessionAuth!.user.userId == state.item?.authorId
-                            }
-                          />
-                        </Tab>
-                      )}
-                    </Tabs>
-                  </div>
+                      </ComponentThemeTab>
+                    )}
+                  </ComponentThemeTabs>
                 </div>
               </div>
             </div>

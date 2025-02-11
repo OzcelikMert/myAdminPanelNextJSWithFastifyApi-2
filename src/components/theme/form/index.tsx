@@ -9,7 +9,6 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormSubmitButton from './button/submitButton';
-import ComponentThemeToolTipFormFieldErrors from '../tooltip/formFieldErrors';
 import { useEffectAfterDidMount } from '@library/react/hooks';
 import { useToast } from '@hooks/toast';
 
@@ -51,8 +50,6 @@ const ComponentThemeForm = React.memo((props: IComponentProps) => {
     }
   }, [props.formMethods.formState.errors])
 
-
-
   return (
     <FormProvider {...props.formMethods}>
       <form
@@ -80,7 +77,6 @@ const ComponentThemeForm = React.memo((props: IComponentProps) => {
               className={props.submitButtonClassName}
               extraClassName={props.submitButtonExtraClassName}
               isLoading={props.formMethods.formState.isSubmitting}
-              hasError={hasError}
             />
           )}
         </div>

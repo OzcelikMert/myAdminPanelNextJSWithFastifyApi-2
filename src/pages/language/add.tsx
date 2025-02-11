@@ -1,4 +1,3 @@
-import { Tab, Tabs } from 'react-bootstrap';
 import {
   ILanguageGetResultService,
   ILanguageUpdateWithIdParamService,
@@ -30,6 +29,8 @@ import ComponentPageLanguageAddTabGeneral from '@components/pages/language/add/t
 import ComponentPageLanguageAddTabOptions from '@components/pages/language/add/tabOptions';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 export type IPageLanguageAddState = {
   mainTabActiveKey: string;
@@ -250,32 +251,28 @@ export default function PageSettingLanguageAdd() {
           <div className="grid-margin stretch-card">
             <div className="card">
               <div className="card-body">
-                <div className="theme-tabs">
-                  <Tabs
-                    onSelect={(key: any) =>
-                      dispatch({
-                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                        payload: key,
-                      })
-                    }
-                    activeKey={state.mainTabActiveKey}
-                    className="mb-5"
-                    transition={false}
-                  >
-                    <Tab eventKey="general" title={t('general')}>
-                      <ComponentPageLanguageAddTabGeneral
-                        flags={state.flags}
-                        image={formValues.image}
-                      />
-                    </Tab>
-                    <Tab eventKey="options" title={t('options')}>
-                      <ComponentPageLanguageAddTabOptions
-                        status={state.status}
-                        statusId={formValues.statusId}
-                      />
-                    </Tab>
-                  </Tabs>
-                </div>
+                <ComponentThemeTabs
+                  onSelect={(key: any) =>
+                    dispatch({
+                      type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+                      payload: key,
+                    })
+                  }
+                  activeKey={state.mainTabActiveKey}
+                >
+                  <ComponentThemeTab eventKey="general" title={t('general')}>
+                    <ComponentPageLanguageAddTabGeneral
+                      flags={state.flags}
+                      image={formValues.image}
+                    />
+                  </ComponentThemeTab>
+                  <ComponentThemeTab eventKey="options" title={t('options')}>
+                    <ComponentPageLanguageAddTabOptions
+                      status={state.status}
+                      statusId={formValues.statusId}
+                    />
+                  </ComponentThemeTab>
+                </ComponentThemeTabs>
               </div>
             </div>
           </div>

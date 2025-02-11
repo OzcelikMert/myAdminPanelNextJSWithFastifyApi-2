@@ -1,5 +1,4 @@
 import React, { FormEvent, useReducer, useRef, useState } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
 import {
   INavigationGetResultService,
   INavigationUpdateWithIdParamService,
@@ -31,6 +30,8 @@ import ComponentPageNavigationAddTabGeneral from '@components/pages/navigation/a
 import ComponentPageNavigationAddTabOptions from '@components/pages/navigation/add/tabOptions';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 export type IPageNavigationAddState = {
   items: IComponentInputSelectData<string>[];
@@ -362,32 +363,28 @@ export default function PageNavigationAdd() {
             <div className="grid-margin stretch-card">
               <div className="card">
                 <div className="card-body">
-                  <div className="theme-tabs">
-                    <Tabs
-                      onSelect={(key: any) =>
-                        dispatch({
-                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                          payload: key,
-                        })
-                      }
-                      activeKey={state.mainTabActiveKey}
-                      className="mb-5"
-                      transition={false}
-                    >
-                      <Tab eventKey="general" title={t('general')}>
-                        <ComponentPageNavigationAddTabGeneral
-                          items={state.items}
-                          parentId={formValues.parentId}
-                        />
-                      </Tab>
-                      <Tab eventKey="options" title={t('options')}>
-                        <ComponentPageNavigationAddTabOptions
-                          status={state.status}
-                          statusId={formValues.statusId}
-                        />
-                      </Tab>
-                    </Tabs>
-                  </div>
+                  <ComponentThemeTabs
+                    onSelect={(key: any) =>
+                      dispatch({
+                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+                        payload: key,
+                      })
+                    }
+                    activeKey={state.mainTabActiveKey}
+                  >
+                    <ComponentThemeTab eventKey="general" title={t('general')}>
+                      <ComponentPageNavigationAddTabGeneral
+                        items={state.items}
+                        parentId={formValues.parentId}
+                      />
+                    </ComponentThemeTab>
+                    <ComponentThemeTab eventKey="options" title={t('options')}>
+                      <ComponentPageNavigationAddTabOptions
+                        status={state.status}
+                        statusId={formValues.statusId}
+                      />
+                    </ComponentThemeTab>
+                  </ComponentThemeTabs>
                 </div>
               </div>
             </div>

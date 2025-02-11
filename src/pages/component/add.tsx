@@ -1,5 +1,4 @@
 import React, { useReducer, useRef, useState } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import {
@@ -36,6 +35,8 @@ import ComponentPageComponentAddHeader from '@components/pages/component/add/hea
 import { SelectUtil } from '@utils/select.util';
 import { IActionWithPayload } from 'types/hooks';
 import { useToast } from 'hooks/toast';
+import ComponentThemeTabs from '@components/theme/tabs';
+import ComponentThemeTab from '@components/theme/tabs/tab';
 
 export type IPageComponentAddState = {
   elementTypes: IComponentInputSelectData<ElementTypeId>[];
@@ -416,39 +417,41 @@ export default function PageComponentAdd() {
             <div className="grid-margin stretch-card">
               <div className="card">
                 <div className="card-body">
-                  <div className="theme-tabs">
-                    <Tabs
-                      onSelect={(key: any) =>
-                        dispatch({
-                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                          payload: key,
-                        })
-                      }
-                      activeKey={state.mainTabActiveKey}
-                      className="mb-5"
-                      transition={false}
-                    >
-                      {PermissionUtil.checkPermissionRoleRank(
-                        sessionAuth!.user.roleId,
-                        UserRoleId.SuperAdmin
-                      ) ? (
-                        <Tab eventKey="general" title={t('general')}>
-                          <ComponentPageComponentAddTabGeneral
-                            componentTypes={state.componentTypes}
-                            typeId={formValues.typeId}
-                          />
-                        </Tab>
-                      ) : null}
-                      <Tab eventKey="elements" title={t('elements')}>
-                        <ComponentPageComponentAddTabElements
-                          elements={formValues.elements}
-                          onCreateNewElement={() => onCreateElement()}
-                          onDelete={(_id) => onDelete(_id)}
-                          onEdit={(_id) => onEdit(_id)}
+                  <ComponentThemeTabs
+                    onSelect={(key: any) =>
+                      dispatch({
+                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+                        payload: key,
+                      })
+                    }
+                    activeKey={state.mainTabActiveKey}
+                  >
+                    {PermissionUtil.checkPermissionRoleRank(
+                      sessionAuth!.user.roleId,
+                      UserRoleId.SuperAdmin
+                    ) ? (
+                      <ComponentThemeTab
+                        eventKey="general"
+                        title={t('general')}
+                      >
+                        <ComponentPageComponentAddTabGeneral
+                          componentTypes={state.componentTypes}
+                          typeId={formValues.typeId}
                         />
-                      </Tab>
-                    </Tabs>
-                  </div>
+                      </ComponentThemeTab>
+                    ) : null}
+                    <ComponentThemeTab
+                      eventKey="elements"
+                      title={t('elements')}
+                    >
+                      <ComponentPageComponentAddTabElements
+                        elements={formValues.elements}
+                        onCreateNewElement={() => onCreateElement()}
+                        onDelete={(_id) => onDelete(_id)}
+                        onEdit={(_id) => onEdit(_id)}
+                      />
+                    </ComponentThemeTab>
+                  </ComponentThemeTabs>
                 </div>
               </div>
             </div>

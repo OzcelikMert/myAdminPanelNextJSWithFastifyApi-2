@@ -14,7 +14,6 @@ import {
 import Spinner from 'react-bootstrap/Spinner';
 import React, { useReducer } from 'react';
 import { useDidMount } from '@library/react/hooks';
-import { PayloadAction } from '@reduxjs/toolkit';
 import { IActionWithPayload } from 'types/hooks';
 
 ChartJS.register(
