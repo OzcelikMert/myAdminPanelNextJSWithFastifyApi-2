@@ -117,6 +117,7 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                 eventKey="variations"
                 formFieldErrorKeys={['eCommerce.variations']}
                 showFormFieldErrors
+                disabled={Boolean(!props.eCommerce.attributes || props.eCommerce.attributes.length == 0)}
               >
                 <ComponentPagePostAddECommerceTabVariations
                   variationTerms={props.variationTerms}

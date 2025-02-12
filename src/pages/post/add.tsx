@@ -36,7 +36,7 @@ import ComponentThemeForm from '@components/theme/form';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentSpinnerDonut from '@components/elements/spinners/donut';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import ComponentPagePostAddHeader from '@components/pages/post/add/header';
 import ComponentPagePostAddTabGeneral from '@components/pages/post/add/tabGeneral';
@@ -637,6 +637,7 @@ export default function PagePostAdd() {
       images: [],
       attributes: [],
       variations: [],
+      defaultVariationOptions: [],
     });
   };
 
@@ -649,9 +650,6 @@ export default function PagePostAdd() {
 
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
-    console.log('onSubmit', data);
-
-    return;
 
     let serviceResult = null;
 
@@ -738,14 +736,18 @@ export default function PagePostAdd() {
 
   const onClickAddNewButton = () => {
     const formValues = form.getValues();
-    form.setValue('contents.buttons', [
-      ...(formValues.contents.buttons ?? []),
-      {
-        _id: String.createId(),
-        title: '',
-        url: '',
-      },
-    ]);
+    form.setValue(
+      'contents.buttons',
+      [
+        ...(formValues.contents.buttons ?? []),
+        {
+          _id: String.createId(),
+          title: '',
+          url: '',
+        },
+      ],
+      { shouldValidate: true }
+    );
   };
 
   const onClickDeleteButton = (_id: string) => {
@@ -753,13 +755,16 @@ export default function PagePostAdd() {
     if (formValues.contents.buttons) {
       form.setValue(
         'contents.buttons',
-        formValues.contents.buttons.filter((button) => button._id != _id)
+        formValues.contents.buttons.filter((button) => button._id != _id),
+        { shouldValidate: true }
       );
     }
   };
 
   const onClickAddNewComponent = () => {
-    form.setValue('components', [...(form.getValues().components || []), '']);
+    form.setValue('components', [...(form.getValues().components || []), ''], {
+      shouldValidate: true,
+    });
   };
 
   const onClickDeleteComponent = (_id: string) => {
@@ -767,7 +772,8 @@ export default function PagePostAdd() {
     if (formValues.components) {
       form.setValue(
         'components',
-        formValues.components.filter((item) => item != _id)
+        formValues.components.filter((item) => item != _id),
+        { shouldValidate: true }
       );
     }
   };
@@ -823,11 +829,17 @@ export default function PagePostAdd() {
         })
       );
 
-      form.resetField('eCommerce.attributes', { defaultValue: newAttributes });
-      form.resetField('eCommerce.defaultVariationOptions', {
-        defaultValue: newDefaultVariationOptions,
+      form.setValue('eCommerce.attributes', newAttributes, {
+        shouldValidate: true,
       });
-      form.resetField('eCommerce.variations', { defaultValue: newVariations });
+      form.setValue(
+        'eCommerce.defaultVariationOptions',
+        newDefaultVariationOptions,
+        { shouldValidate: true }
+      );
+      form.setValue('eCommerce.variations', newVariations, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -848,8 +860,8 @@ export default function PagePostAdd() {
           formValues.eCommerce?.variations.filter(
             (variation) => variation._id != _id
           ) ?? [];
-        form.resetField('eCommerce.variations', {
-          defaultValue: newVariations,
+        form.setValue('eCommerce.variations', newVariations, {
+          shouldValidate: true,
         });
       }
     }
@@ -893,16 +905,16 @@ export default function PagePostAdd() {
         })
       );
 
-      form.resetField('eCommerce.attributes', {
-        defaultValue: newAttributes,
+      form.setValue('eCommerce.attributes', newAttributes, {
+        shouldValidate: true,
       });
-
-      form.resetField('eCommerce.defaultVariationOptions', {
-        defaultValue: newDefaultVariationOptions,
-      });
-
-      form.resetField('eCommerce.variations', {
-        defaultValue: newVariations,
+      form.setValue(
+        'eCommerce.defaultVariationOptions',
+        newDefaultVariationOptions,
+        { shouldValidate: true }
+      );
+      form.setValue('eCommerce.variations', newVariations, {
+        shouldValidate: true,
       });
     } else {
       showToast({
@@ -963,7 +975,9 @@ export default function PagePostAdd() {
         },
       ];
 
-      form.resetField('eCommerce.variations', { defaultValue: newVariations });
+      form.setValue('eCommerce.variations', newVariations, {
+        shouldValidate: true,
+      });
     }
   };
 
@@ -976,11 +990,15 @@ export default function PagePostAdd() {
         if (typeof indexAttribute === 'number' && indexAttribute > -1) {
           const attribute = attributes[indexAttribute];
           if (attribute.attributeTermId != attributeTermId) {
-            form.setValue(`eCommerce.attributes.${indexAttribute}`, {
-              ...attribute,
-              attributeTermId,
-              variationTerms: [],
-            });
+            form.setValue(
+              `eCommerce.attributes.${indexAttribute}`,
+              {
+                ...attribute,
+                attributeTermId,
+                variationTerms: [],
+              },
+              { shouldValidate: true }
+            );
           }
         }
       }
@@ -1012,7 +1030,8 @@ export default function PagePostAdd() {
                   {
                     ...option,
                     variationTermId,
-                  }
+                  },
+                  { shouldValidate: true }
                 );
               }
             }
@@ -1033,7 +1052,6 @@ export default function PagePostAdd() {
     sessionAuth!.user.roleId,
     UserRoleId.SuperAdmin
   );
-  console.log('PagePostAdd', formValues, form.formState);
 
   return isPageLoading ? null : (
     <div className="page-post">

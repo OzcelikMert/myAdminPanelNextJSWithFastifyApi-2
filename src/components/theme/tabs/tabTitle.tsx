@@ -14,7 +14,7 @@ const ComponentThemeTabTitle = React.memo((props: IComponentProps) => {
       {props.showFormFieldErrors ? (
         <ComponentThemeToolTipFormFieldErrors
           keys={props.keys ?? []}
-          className="col-md text-center text-md-start mb-2 mb-md-0"
+          className=""
           iconFontSize="5"
           hideFieldTitles
         />

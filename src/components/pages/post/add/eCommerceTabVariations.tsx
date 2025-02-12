@@ -42,6 +42,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
     const form = useFormContext<IPageFormState>();
+    
     const watchDefaultOptions = form.watch("eCommerce.defaultVariationOptions");
 
     const [accordionKey, setAccordionKey] = React.useState(
@@ -80,7 +81,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
                 if(!attribute) return null;
 
                 return (
-                  <div className="col-md-4 mt-3">
+                  <div className="col-md-3 mt-3">
                     <ComponentThemeFormInputSelect
                       key={item.id}
                       name={`eCommerce.defaultVariationOptions.${index}.variationTermId`}

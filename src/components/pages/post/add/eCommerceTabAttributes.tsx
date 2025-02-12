@@ -38,7 +38,6 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
     });
 
     useEffectAfterDidMount(() => {
-      console.log(props.selectedAttributes);
       findAttributeWithoutVariation();
     }, [props.selectedAttributes]);
 

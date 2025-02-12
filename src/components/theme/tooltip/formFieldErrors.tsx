@@ -4,7 +4,7 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormContext } from 'react-hook-form';
 import { IFormFieldError } from '@components/theme/form';
-import { useEffectAfterDidMount } from '@library/react/hooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { ObjectUtil } from '@utils/object.util';
 
 type IIconProps = {
@@ -40,9 +40,13 @@ const ComponentThemeToolTipFormFieldErrors = React.memo(
 
     const [errors, setErrors] = React.useState(initialState.errors);
 
+    useDidMount(() => {
+      findErrors();
+    });
+
     useEffectAfterDidMount(() => {
       findErrors();
-    }, [form.formState.errors]);
+    }, [form.formState.errors, form.formState]);
 
     const findErrors = () => {
       const newErrors: IComponentState['errors'] = [];
@@ -52,16 +56,13 @@ const ComponentThemeToolTipFormFieldErrors = React.memo(
           newErrors.push(newError);
         }
       }
+      
       if (JSON.stringify(errors) != JSON.stringify(newErrors)) {
         setErrors(newErrors);
       }
     };
 
-    if (errors.length == 0) {
-      return null;
-    }
-
-    return (
+    return errors.length > 0 ? (
       <ComponentToolTip
         message={
           props.hideFieldTitles
@@ -72,10 +73,10 @@ const ComponentThemeToolTipFormFieldErrors = React.memo(
         }
       >
         <div className={`d-inline-block ${props.className ?? ''}`}>
-          <Icon />
+          <Icon iconFontSize={props.iconFontSize} />
         </div>
       </ComponentToolTip>
-    );
+    ) : null;
   }
 );
 

@@ -104,6 +104,7 @@ const schemaContent = object({
 const schemaProduct = object({
   statusId: z.nativeEnum(StatusId),
   categories: array(string().min(1)).default([]),
+  typeId: z.nativeEnum(PostTypeId),
   tags: array(string().min(1)).default([]),
   authors: array(string().min(1)).optional(),
   dateStart: string().optional(),

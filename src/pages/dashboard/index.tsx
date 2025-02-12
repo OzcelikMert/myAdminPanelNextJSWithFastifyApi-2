@@ -204,6 +204,17 @@ export default function PageDashboard() {
         langId: mainLangId,
         count: 10,
         sortTypeId: PostSortTypeId.Newest,
+        typeId: [
+          PostTypeId.Page,
+          PostTypeId.Blog,
+          PostTypeId.BeforeAndAfter,
+          PostTypeId.Portfolio,
+          PostTypeId.Product,
+          PostTypeId.Reference,
+          PostTypeId.Service,
+          PostTypeId.Slider,
+          PostTypeId.Testimonial,
+        ],
       },
       abortControllerRef.current.signal
     );
@@ -301,7 +312,7 @@ export default function PageDashboard() {
         sortable: true,
         cell: (row) => (
           <ComponentTableUpdatedBy
-            name={row.lastAuthor?.name ?? ""}
+            name={row.lastAuthor?.name ?? ''}
             updatedAt={row.updatedAt || ''}
           />
         ),

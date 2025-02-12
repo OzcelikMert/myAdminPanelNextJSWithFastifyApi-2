@@ -31,10 +31,6 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
     const watchAttributeTermId = form.watch(`eCommerce.attributes.${props.index}.attributeTermId`);
     const watchVariationTerms = form.watch(`eCommerce.attributes.${props.index}.variationTerms`);
 
-    useEffectAfterDidMount(() => {
-      console.log("ComponentPagePostAddECommerceTabAttributesItem", props.item);
-    }, [watchVariationTerms])
-
     return (
       <Card>
         <Card.Header>
@@ -108,7 +104,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
             <div className="row">
               <div className="col-md-12">
                 <ComponentThemeFormInputSelect
-                  title={t('variations')}
+                  title={`${t('variations')}*`}
                   name={`eCommerce.attributes.${props.index}.variationTerms`}
                   options={props.variationTerms}
                   closeMenuOnSelect={false}

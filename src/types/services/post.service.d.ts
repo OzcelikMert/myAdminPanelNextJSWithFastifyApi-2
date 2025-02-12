@@ -70,7 +70,7 @@ export interface IPostGetWithIdParamService {
 export interface IPostGetManyParamService {
   _id?: string[];
   sortTypeId?: PostSortTypeId;
-  typeId?: PostTypeId[];
+  typeId: PostTypeId[];
   pageTypeId?: PageTypeId[];
   langId?: string;
   statusId?: StatusId;
