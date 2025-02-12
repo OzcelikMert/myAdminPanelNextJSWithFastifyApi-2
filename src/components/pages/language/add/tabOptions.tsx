@@ -32,7 +32,6 @@ const ComponentPageLanguageAddTabOptions = React.memo(
             title={`${t('rank')}*`}
             name="rank"
             type="number"
-            required
           />
         </div>
         <div className="col-md-7 mb-3">

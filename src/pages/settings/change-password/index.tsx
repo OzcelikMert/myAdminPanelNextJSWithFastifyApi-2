@@ -121,7 +121,6 @@ export default function PageChangePassword() {
                         title={`${t('password')}*`}
                         name="password"
                         type="password"
-                        required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -129,7 +128,6 @@ export default function PageChangePassword() {
                         title={`${t('newPassword')}*`}
                         name="newPassword"
                         type="password"
-                        required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -137,7 +135,6 @@ export default function PageChangePassword() {
                         title={`${t('confirmPassword')}*`}
                         name="confirmPassword"
                         type="password"
-                        required
                       />
                     </div>
                   </div>

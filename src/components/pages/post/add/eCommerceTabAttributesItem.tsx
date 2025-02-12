@@ -9,6 +9,7 @@ import ComponentAccordionToggle from '@components/elements/accordion/toggle';
 import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import ComponentToolTip from '@components/elements/tooltip';
 import { useFormContext } from 'react-hook-form';
+import { useEffectAfterDidMount } from '@library/react/hooks';
 
 type IComponentProps = {
   item: (IPostECommerceAttributeModel & {id?: string});
@@ -27,8 +28,12 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
     const t = useAppSelector(selectTranslation);
 
     const form = useFormContext<IPageFormState>();
-    const watch = form.watch(`eCommerce.attributes.${props.index}`);
+    const watchAttributeTermId = form.watch(`eCommerce.attributes.${props.index}.attributeTermId`);
     const watchVariationTerms = form.watch(`eCommerce.attributes.${props.index}.variationTerms`);
+
+    useEffectAfterDidMount(() => {
+      console.log("ComponentPagePostAddECommerceTabAttributesItem", props.item);
+    }, [watchVariationTerms])
 
     return (
       <Card>

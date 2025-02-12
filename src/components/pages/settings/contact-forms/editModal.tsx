@@ -84,7 +84,6 @@ const ComponentPageSettingsContactFormsEditModal = React.memo(
                         name="title"
                         placeholder={t('title')}
                         type="text"
-                        required
                       />
                     </div>
                     <div className="col-md-12 mt-3">
@@ -92,7 +91,6 @@ const ComponentPageSettingsContactFormsEditModal = React.memo(
                         title={`${t('key')}*`}
                         name="key"
                         type="text"
-                        required
                       />
                     </div>
                   </div>

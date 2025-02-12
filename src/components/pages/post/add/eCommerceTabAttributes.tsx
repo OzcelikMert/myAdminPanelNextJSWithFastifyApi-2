@@ -5,7 +5,7 @@ import { IPostECommerceAttributeModel } from 'types/models/post.model';
 import { Accordion } from 'react-bootstrap';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentPagePostAddECommerceTabAttributesItem from './eCommerceTabAttributesItem';
-import { useEffectAfterDidMount } from '@library/react/hooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 
 type IComponentState = {
   accordionKey: string;
@@ -19,7 +19,7 @@ type IComponentProps = {
   attributeTerms?: IPagePostAddState['attributeTerms'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
   variationTerms?: IPagePostAddState['variationTerms'];
-  selectedAttributes?: (IPostECommerceAttributeModel & {id?: string})[];
+  selectedAttributes?: (IPostECommerceAttributeModel & { id?: string })[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
   onChangeAttribute: (attributeId: string, attributeTermId: string) => void;
@@ -28,15 +28,30 @@ type IComponentProps = {
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
-    
+
     const [accordionKey, setAccordionKey] = React.useState(
       initialState.accordionKey
     );
 
+    useDidMount(() => {
+      findAttributeWithoutVariation();
+    });
+
     useEffectAfterDidMount(() => {
       console.log(props.selectedAttributes);
-      
+      findAttributeWithoutVariation();
     }, [props.selectedAttributes]);
+
+    const findAttributeWithoutVariation = () => {
+      for (const attribute of props.selectedAttributes ?? []) {
+        if (attribute.variationTerms.length == 0) {
+          if(accordionKey != attribute._id){
+            onClickAccordionToggle(attribute._id);
+          }
+          break;
+        }
+      }
+    };
 
     const onClickAccordionToggle = (_id: string) => {
       setAccordionKey((state) =>

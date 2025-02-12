@@ -81,7 +81,6 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
               : `contents.title`
           }
           type="text"
-          required={!props.isECommerceVariation}
         />
       </div>
       <div className="col-md-7 mb-3">

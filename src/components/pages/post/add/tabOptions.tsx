@@ -49,7 +49,6 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
           title={t('rank')}
           name="rank"
           type="number"
-          required
         />
       </div>
       {props.showPageTypeSelect ? (

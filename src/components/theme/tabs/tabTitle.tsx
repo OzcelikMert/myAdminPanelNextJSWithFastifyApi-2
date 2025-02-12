@@ -8,8 +8,6 @@ type IComponentProps = {
 };
 
 const ComponentThemeTabTitle = React.memo((props: IComponentProps) => {
-  console.log("ComponentThemeTabTitle", props);
-
   return (
     <div>
       <b>{props.title}</b>{' '}

@@ -49,7 +49,6 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
             title={`${t('title')}*`}
             name="contents.title"
             type="text"
-            required
           />
         </div>
         <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>

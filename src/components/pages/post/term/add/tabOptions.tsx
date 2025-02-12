@@ -32,7 +32,6 @@ const ComponentPagePostTermAddTabOptions = React.memo(
             title={t('rank')}
             name="rank"
             type="number"
-            required
           />
         </div>
       </div>

@@ -28,7 +28,6 @@ const ComponentToolLockForm = React.memo((props: IComponentProps) => {
             title={t('password')}
             type="password"
             name="password"
-            required
           />
         </div>
         <div className="col-md-12">

@@ -73,41 +73,46 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                     <i className="mdi mdi-menu"></i>
                   </div>
                 </div>
-                {props.item.options.map((item, index) => {
-                  const attribute = props.selectedAttributes?.findSingle(
-                    '_id',
-                    item.attributeId
-                  );
-                  if (!attribute) return null;
+                <div className="col-md-11">
+                  <div className="row">
+                    {props.item.options.map((item, index) => {
+                      const attribute = props.selectedAttributes?.findSingle(
+                        '_id',
+                        item.attributeId
+                      );
+                      if (!attribute) return null;
 
-                  const title = props.attributeTerms?.findSingle(
-                    'value',
-                    attribute.attributeTermId
-                  )?.label;
+                      const title = props.attributeTerms?.findSingle(
+                        'value',
+                        attribute.attributeTermId
+                      )?.label;
 
-                  const options = props.variationTerms?.findMulti(
-                    'value',
-                    attribute.variationTerms
-                  );
+                      const options = props.variationTerms?.findMulti(
+                        'value',
+                        attribute.variationTerms
+                      );
 
-                  return (
-                    <div className="col-md mt-3">
-                      <ComponentThemeFormInputSelect
-                        key={item._id}
-                        name={`eCommerce.variations.${props.index}.options.${index}.variationTermId`}
-                        title={title}
-                        options={options}
-                        onChange={(selectedItem, e) =>
-                          props.onChangeVariationOption(
-                            props.item._id,
-                            attribute._id,
-                            (selectedItem as IComponentInputSelectData).value
-                          )
-                        }
-                      />
-                    </div>
-                  );
-                })}
+                      return (
+                        <div className="col-md-3 mt-3">
+                          <ComponentThemeFormInputSelect
+                            key={item._id}
+                            name={`eCommerce.variations.${props.index}.options.${index}.variationTermId`}
+                            title={title}
+                            options={options}
+                            onChange={(selectedItem, e) =>
+                              props.onChangeVariationOption(
+                                props.item._id,
+                                attribute._id,
+                                (selectedItem as IComponentInputSelectData)
+                                  .value
+                              )
+                            }
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
             <div className="col-3 m-auto">

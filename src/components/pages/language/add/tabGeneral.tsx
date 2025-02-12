@@ -44,7 +44,6 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
             title={`${t('title')}*`}
             name="title"
             type="text"
-            required
           />
         </div>
         <div className="col-md-7 mb-3">
@@ -52,7 +51,6 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
             title={`${t('shortKey')}*`}
             name="shortKey"
             type="text"
-            required
           />
         </div>
         <div className="col-md-7 mb-3">
@@ -60,7 +58,6 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
             title={`${t('locale')}*`}
             name="locale"
             type="text"
-            required
           />
         </div>
       </div>

@@ -12,8 +12,6 @@ type IComponentProps = {
 };
 
 const ComponentThemeTabs = React.memo((props: IComponentProps) => {
-  console.log('ComponentThemeTabs', props);
-
   return (
     <div className="theme-tabs">
       <Tab.Container
@@ -34,7 +32,9 @@ const ComponentThemeTabs = React.memo((props: IComponentProps) => {
                 (child) =>
                   child && (
                     <Tab.Pane eventKey={child.props.eventKey}>
-                      {props.activeKey != child.props.eventKey ? null : child.props.children}
+                      {props.activeKey != child.props.eventKey
+                        ? null
+                        : child.props.children}
                     </Tab.Pane>
                   )
               )}

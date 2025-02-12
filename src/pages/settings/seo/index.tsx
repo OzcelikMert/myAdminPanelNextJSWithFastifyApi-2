@@ -246,7 +246,6 @@ export default function PageSettingsSEO() {
                         type="text"
                         name="seoContents.title"
                         maxLength={50}
-                        required
                       />
                     </div>
                     <div className="col-md-7 mb-3">
@@ -255,7 +254,6 @@ export default function PageSettingsSEO() {
                         type="textarea"
                         name="seoContents.content"
                         maxLength={120}
-                        required
                       />
                     </div>
                     <div className="col-md-7">

@@ -22,7 +22,6 @@ const ComponentPageNavigationAddTabGeneral = React.memo(
             title={`${t('title')}*`}
             name="contents.title"
             type="text"
-            required
           />
         </div>
         <div className="col-md-7 mb-3">
@@ -30,7 +29,6 @@ const ComponentPageNavigationAddTabGeneral = React.memo(
             title={`${t('url')}*`}
             name="contents.url"
             type="text"
-            required
           />
         </div>
         <div className="col-md-7 mb-3">

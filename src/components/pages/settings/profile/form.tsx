@@ -31,7 +31,6 @@ const ComponentPageProfileForm = React.memo((props: IComponentProps) => {
                       title={`${t('name')}*`}
                       name="name"
                       type="text"
-                      required
                     />
                   </div>
                   <div className="col-md-12 mb-3">

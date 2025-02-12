@@ -11,8 +11,6 @@ export type IComponentThemeTabProps = {
 };
 
 const ComponentThemeTab = React.memo((props: IComponentThemeTabProps) => {
-  console.log('ComponentThemeTab', props);
-
   return (
     <Nav.Item>
       <Nav.Link eventKey={props.eventKey}>
