@@ -4,7 +4,7 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPageNavigationAddState } from '@pages/navigation/add';
-import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
+import ComponentThemeFormSelectImage from '@components/theme/form/inputs/selectImage';
 import { PostTermTypeId } from '@constants/postTermTypes';
 import { I18Util } from '@utils/i18.util';
 
@@ -39,7 +39,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
     return (
       <div className="row">
         <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
-          <ComponentThemeChooseImageForm
+          <ComponentThemeFormSelectImage
             name="contents.image"
             reviewImageClassName={'post-image'}
           />

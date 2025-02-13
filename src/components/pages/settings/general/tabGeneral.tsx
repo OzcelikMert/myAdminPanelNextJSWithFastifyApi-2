@@ -3,7 +3,7 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import ComponentFieldSet from '@components/elements/fieldSet';
-import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
+import ComponentThemeFormSelectImage from '@components/theme/form/inputs/selectImage';
 import { IPageSettingsGeneralState } from '@pages/settings/general';
 
 type IComponentProps = {
@@ -22,7 +22,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
       <div className="row">
         <div className="col-md-4 mb-3">
           <ComponentFieldSet legend={t('logo')}>
-            <ComponentThemeChooseImageForm
+            <ComponentThemeFormSelectImage
               name="logo"
               reviewImageClassName={'post-image'}
             />
@@ -30,7 +30,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
         </div>
         <div className="col-md-4 mb-3">
           <ComponentFieldSet legend={t('logo') + ' - 2'}>
-            <ComponentThemeChooseImageForm
+            <ComponentThemeFormSelectImage
               name="logoTwo"
               reviewImageClassName={'post-image'}
             />
@@ -38,7 +38,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
         </div>
         <div className="col-md-4 mb-3">
           <ComponentFieldSet legend={t('icon')}>
-            <ComponentThemeChooseImageForm
+            <ComponentThemeFormSelectImage
               name="icon"
               reviewImageClassName={'post-image'}
             />

@@ -1,5 +1,5 @@
 import React from 'react';
-import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
+import ComponentThemeFormSelectImage from '@components/theme/form/inputs/selectImage';
 import Image from 'next/image';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import { ImageSourceUtil } from '@utils/imageSource.util';
@@ -44,7 +44,7 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
             <div className="row">
               <div className="col-md-7 mb-3">
                 <ComponentFieldSet legend={t('imageBefore')}>
-                  <ComponentThemeChooseImageForm
+                  <ComponentThemeFormSelectImage
                     name="beforeAndAfter.imageBefore"
                     reviewImageClassName={'post-image'}
                   />
@@ -52,14 +52,14 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
               </div>
               <div className="col-md-7 mb-3">
                 <ComponentFieldSet legend={t('imageAfter')}>
-                  <ComponentThemeChooseImageForm
+                  <ComponentThemeFormSelectImage
                     name="beforeAndAfter.imageAfter"
                     reviewImageClassName={'post-image'}
                   />
                 </ComponentFieldSet>
               </div>
               <div className="col-md-7 mb-3">
-                <ComponentThemeChooseImageForm
+                <ComponentThemeFormSelectImage
                   name="beforeAndAfter.images"
                   isMulti
                   showModalButtonText={t('gallery')}

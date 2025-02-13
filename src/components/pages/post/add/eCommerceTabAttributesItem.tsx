@@ -6,10 +6,8 @@ import { Accordion, Card } from 'react-bootstrap';
 import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPageFormState, IPagePostAddState } from '@pages/post/add';
 import ComponentAccordionToggle from '@components/elements/accordion/toggle';
-import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import ComponentToolTip from '@components/elements/tooltip';
 import { useFormContext } from 'react-hook-form';
-import { useEffectAfterDidMount } from '@library/react/hooks';
 
 type IComponentProps = {
   item: (IPostECommerceAttributeModel & {id?: string});
@@ -21,6 +19,7 @@ type IComponentProps = {
   onClickDelete: (_id: string) => void;
   onClickAccordionToggle: (id: string) => void;
   onChangeAttribute: (attributeId: string, attributeTermId: string) => void;
+  onChangeAttributeVariationTerms: (attributeId: string, variationTerms: string[]) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
@@ -45,7 +44,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                     onChange={(selectedItem, e) =>
                       props.onChangeAttribute(
                         props.item._id,
-                        (selectedItem as IComponentInputSelectData).value
+                        selectedItem
                       )
                     }
                   />
@@ -109,6 +108,12 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                   options={props.variationTerms}
                   closeMenuOnSelect={false}
                   isMulti
+                  onChange={(selectedItem, e) =>
+                    props.onChangeAttributeVariationTerms(
+                      props.item._id,
+                      selectedItem 
+                    )
+                  }
                 />
               </div>
             </div>

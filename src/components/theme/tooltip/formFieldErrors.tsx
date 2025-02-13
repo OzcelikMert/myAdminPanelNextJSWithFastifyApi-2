@@ -4,7 +4,6 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { useFormContext } from 'react-hook-form';
 import { IFormFieldError } from '@components/theme/form';
-import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import { ObjectUtil } from '@utils/object.util';
 
 type IIconProps = {
@@ -19,14 +18,6 @@ const Icon = (props: IIconProps) => {
   );
 };
 
-type IComponentState = {
-  errors: IFormFieldError[];
-};
-
-const initialState: IComponentState = {
-  errors: [],
-};
-
 type IComponentProps = {
   keys: string[];
   hideFieldTitles?: boolean;
@@ -38,29 +29,16 @@ const ComponentThemeToolTipFormFieldErrors = React.memo(
     const t = useAppSelector(selectTranslation);
     const form = useFormContext();
 
-    const [errors, setErrors] = React.useState(initialState.errors);
-
-    useDidMount(() => {
-      findErrors();
-    });
-
-    useEffectAfterDidMount(() => {
-      findErrors();
-    }, [form.formState.errors, form.formState]);
-
-    const findErrors = () => {
-      const newErrors: IComponentState['errors'] = [];
+    const errors: IFormFieldError[] = [];
+    
+    if(form.formState.submitCount > 0){
       for (const key of props.keys) {
         const newError = ObjectUtil.getWithKey(form.formState.errors, key);
         if (newError) {
-          newErrors.push(newError);
+          errors.push(newError);
         }
       }
-      
-      if (JSON.stringify(errors) != JSON.stringify(newErrors)) {
-        setErrors(newErrors);
-      }
-    };
+    }
 
     return errors.length > 0 ? (
       <ComponentToolTip

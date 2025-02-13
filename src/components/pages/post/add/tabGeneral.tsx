@@ -4,7 +4,7 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import { IPagePostAddState } from '@pages/post/add';
-import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
+import ComponentThemeFormSelectImage from '@components/theme/form/inputs/selectImage';
 import { PostTermTypeId } from '@constants/postTermTypes';
 import { I18Util } from '@utils/i18.util';
 
@@ -62,7 +62,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
       ) : null}
       {!props.isIconActive ? (
         <div className="col-md-7 mb-3">
-          <ComponentThemeChooseImageForm
+          <ComponentThemeFormSelectImage
             name={
               props.isECommerceVariation
                 ? `eCommerce.variations.${props.index}.product.contents.image`

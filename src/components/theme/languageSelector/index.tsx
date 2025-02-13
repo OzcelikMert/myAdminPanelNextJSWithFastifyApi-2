@@ -54,7 +54,7 @@ const initialState: IComponentState = {
 type IComponentProps = {
   selectedLangId: string;
   onChange: (
-    item: IComponentInputSelectData<ILanguageGetResultService>
+    item: ILanguageGetResultService
   ) => void;
   alternates?: IAlternate[] | IAlternate[][] | (IAlternate | IAlternate[])[];
 };
@@ -70,8 +70,8 @@ const ComponentThemeLanguageSelector = React.memo((props: IComponentProps) => {
       initialState.selectedLangId
   );
 
-  const onChange = (newValue: IComponentInputSelectData<ILanguageGetResultService>) => {
-    setSelectedLangId(newValue.value._id);
+  const onChange = (newValue: ILanguageGetResultService) => {
+    setSelectedLangId(newValue._id);
     props.onChange(newValue);
   };
 

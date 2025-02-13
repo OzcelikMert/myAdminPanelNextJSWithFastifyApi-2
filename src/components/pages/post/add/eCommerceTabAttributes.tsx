@@ -19,10 +19,11 @@ type IComponentProps = {
   attributeTerms?: IPagePostAddState['attributeTerms'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
   variationTerms?: IPagePostAddState['variationTerms'];
-  selectedAttributes?: (IPostECommerceAttributeModel & { id?: string })[];
+  selectedAttributes?: IPostECommerceAttributeModel[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
   onChangeAttribute: (attributeId: string, attributeTermId: string) => void;
+  onChangeAttributeVariationTerms: (attributeId: string, variationTerms: string[]) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
@@ -79,6 +80,9 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
                   onClickAccordionToggle={(_id) => onClickAccordionToggle(_id)}
                   onChangeAttribute={(attributeId, attributeTermId) =>
                     props.onChangeAttribute(attributeId, attributeTermId)
+                  }
+                  onChangeAttributeVariationTerms={(attributeId, variationTerms) =>
+                    props.onChangeAttributeVariationTerms(attributeId, variationTerms)
                   }
                 />
               );

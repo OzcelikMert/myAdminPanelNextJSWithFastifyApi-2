@@ -1,6 +1,8 @@
 import React from 'react';
 import { Controller, Control, useFormContext } from 'react-hook-form';
-import ComponentThemeChooseImage, { IComponentThemeChooseImageProps } from '.';
+import ComponentThemeChooseImage, {
+  IComponentThemeChooseImageProps,
+} from '@components/theme/chooseImage';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { I18Util } from '@utils/i18.util';
@@ -18,7 +20,7 @@ type IComponentProps = {
   'onSelected' | 'reviewImage' | 'selectedImages'
 >;
 
-const ComponentThemeChooseImageForm = React.memo((props: IComponentProps) => {
+const ComponentThemeFormSelectImage = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
   const form = useFormContext();
 
@@ -32,18 +34,24 @@ const ComponentThemeChooseImageForm = React.memo((props: IComponentProps) => {
       control={props.control}
       rules={{ required: props.required }}
       render={({ field, formState }) => {
-        const error = ObjectUtil.getWithKey<IFormFieldError>(
-          formState.errors,
-          props.name
-        );
-        const hasAnError = Boolean(error);
+        let hasAnError = false;
         let errorText = '';
 
-        if (error) {
-          error.title = props.title;
-          errorText = error.type
-            ? t(I18Util.getFormInputErrorText(error.type), [props.title ?? ''])
-            : (error.message?.toString() ?? '');
+        if (formState.submitCount > 0) {
+          const error = ObjectUtil.getWithKey<IFormFieldError>(
+            formState.errors,
+            props.name
+          );
+
+          if (error) {
+            error.title = props.title;
+            hasAnError = true;
+            errorText = error.type
+              ? t(I18Util.getFormInputErrorText(error.type), [
+                  props.title ?? '',
+                ])
+              : (error.message?.toString() ?? '');
+          }
         }
 
         return (
@@ -68,4 +76,4 @@ const ComponentThemeChooseImageForm = React.memo((props: IComponentProps) => {
   );
 });
 
-export default ComponentThemeChooseImageForm;
+export default ComponentThemeFormSelectImage;

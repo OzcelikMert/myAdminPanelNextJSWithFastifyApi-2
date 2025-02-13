@@ -37,18 +37,24 @@ const ComponentThemeFormInputCheckbox = React.memo((props: IComponentProps) => {
       control={props.control}
       rules={{ required: props.required }}
       render={({ field, formState }) => {
-        const error = ObjectUtil.getWithKey<IFormFieldError>(
-          formState.errors,
-          props.name
-        );
-        const hasAnError = Boolean(error);
+        let hasAnError = false;
         let errorText = '';
 
-        if (error) {
-          error.title = props.title;
-          errorText = error.type
-            ? t(I18Util.getFormInputErrorText(error.type), [props.title ?? ''])
-            : (error.message?.toString() ?? '');
+        if (formState.submitCount > 0) {
+          const error = ObjectUtil.getWithKey<IFormFieldError>(
+            formState.errors,
+            props.name
+          );
+
+          if (error) {
+            error.title = props.title;
+            hasAnError = true;
+            errorText = error.type
+              ? t(I18Util.getFormInputErrorText(error.type), [
+                  props.title ?? '',
+                ])
+              : (error.message?.toString() ?? '');
+          }
         }
 
         return (

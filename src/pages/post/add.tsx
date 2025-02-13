@@ -650,7 +650,7 @@ export default function PagePostAdd() {
 
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
-
+    
     let serviceResult = null;
 
     if (params.typeId == PostTypeId.Product) {
@@ -745,9 +745,9 @@ export default function PagePostAdd() {
           title: '',
           url: '',
         },
-      ],
-      { shouldValidate: true }
+      ]
     );
+    form.trigger(['contents.buttons']);
   };
 
   const onClickDeleteButton = (_id: string) => {
@@ -755,16 +755,15 @@ export default function PagePostAdd() {
     if (formValues.contents.buttons) {
       form.setValue(
         'contents.buttons',
-        formValues.contents.buttons.filter((button) => button._id != _id),
-        { shouldValidate: true }
+        formValues.contents.buttons.filter((button) => button._id != _id)
       );
+      form.trigger(['contents.buttons']);
     }
   };
 
   const onClickAddNewComponent = () => {
-    form.setValue('components', [...(form.getValues().components || []), ''], {
-      shouldValidate: true,
-    });
+    form.setValue('components', [...(form.getValues().components || []), '']);
+    form.trigger(['components']);
   };
 
   const onClickDeleteComponent = (_id: string) => {
@@ -772,9 +771,9 @@ export default function PagePostAdd() {
     if (formValues.components) {
       form.setValue(
         'components',
-        formValues.components.filter((item) => item != _id),
-        { shouldValidate: true }
+        formValues.components.filter((item) => item != _id)
       );
+      form.trigger(['components']);
     }
   };
 
@@ -809,90 +808,33 @@ export default function PagePostAdd() {
     );
   };
 
-  const onClickDeleteAttribute = (_id: string) => {
-    const formValues = form.getValues();
-
-    if (formValues.eCommerce) {
-      const newAttributes = formValues.eCommerce.attributes.filter(
-        (attribute) => attribute._id != _id
-      );
-      const newDefaultVariationOptions =
-        formValues.eCommerce.defaultVariationOptions?.filter(
-          (option) => option.attributeId != _id
-        );
-      const newVariations = formValues.eCommerce.variations?.map(
-        (variation) => ({
-          ...variation,
-          options: variation.options.filter(
-            (option) => option.attributeId != _id
-          ),
-        })
-      );
-
-      form.setValue('eCommerce.attributes', newAttributes, {
-        shouldValidate: true,
-      });
-      form.setValue(
-        'eCommerce.defaultVariationOptions',
-        newDefaultVariationOptions,
-        { shouldValidate: true }
-      );
-      form.setValue('eCommerce.variations', newVariations, {
-        shouldValidate: true,
-      });
-    }
-  };
-
-  const onClickDeleteVariation = async (_id: string) => {
-    const result = await Swal.fire({
-      title: t('deleteAction'),
-      html: `${t('deleteSelectedItemsQuestion')}`,
-      confirmButtonText: t('yes'),
-      cancelButtonText: t('no'),
-      icon: 'question',
-      showCancelButton: true,
-    });
-
-    if (result.isConfirmed) {
-      const formValues = form.getValues();
-      if (formValues.eCommerce) {
-        const newVariations =
-          formValues.eCommerce?.variations.filter(
-            (variation) => variation._id != _id
-          ) ?? [];
-        form.setValue('eCommerce.variations', newVariations, {
-          shouldValidate: true,
-        });
-      }
-    }
-  };
-
   const onClickAddNewAttribute = () => {
     const formValues = form.getValues();
     if (state.attributeTerms.length > 0 && formValues.eCommerce) {
       const _id = String.createId();
 
-      const newAttributes = [
-        ...(formValues.eCommerce.attributes ?? []),
+      form.setValue(
+        `eCommerce.attributes.${(formValues.eCommerce.attributes ?? []).length}`,
         {
           _id: _id,
           attributeTermId: state.attributeTerms[0].value,
           typeId: AttributeTypeId.Text,
           variationTerms: [],
-        },
-      ];
+        }
+      );
 
-      const newDefaultVariationOptions = [
-        ...(formValues.eCommerce.defaultVariationOptions ?? []),
+      form.setValue(
+        `eCommerce.defaultVariationOptions.${(formValues.eCommerce.defaultVariationOptions ?? []).length}`,
         {
           _id: String.createId(),
           attributeId: _id,
           variationTermId: '',
-        },
-      ];
+        }
+      );
 
-      const newVariations = formValues.eCommerce.variations?.map(
-        (variation) => ({
+      form.setValue(
+        'eCommerce.variations',
+        formValues.eCommerce.variations?.map((variation) => ({
           ...variation,
           options: [
             ...variation.options,
@@ -902,20 +844,12 @@ export default function PagePostAdd() {
               variationTermId: '',
             },
           ],
-        })
+        }))
       );
 
-      form.setValue('eCommerce.attributes', newAttributes, {
-        shouldValidate: true,
-      });
-      form.setValue(
-        'eCommerce.defaultVariationOptions',
-        newDefaultVariationOptions,
-        { shouldValidate: true }
-      );
-      form.setValue('eCommerce.variations', newVariations, {
-        shouldValidate: true,
-      });
+      form.trigger([
+        `eCommerce.attributes.${(formValues.eCommerce.attributes ?? []).length}`,
+      ]);
     } else {
       showToast({
         type: 'error',
@@ -932,8 +866,8 @@ export default function PagePostAdd() {
       const _id = String.createId();
       const productId = String.createId();
 
-      const newVariations = [
-        ...(formValues.eCommerce.variations ?? []),
+      form.setValue(
+        `eCommerce.variations.${(formValues.eCommerce.variations ?? []).length}`,
         {
           _id: _id,
           options: formValues.eCommerce.attributes.map((attribute) => ({
@@ -943,6 +877,7 @@ export default function PagePostAdd() {
           })),
           productId: productId,
           product: {
+            _id: productId,
             statusId: StatusId.Active,
             rank: formValues.eCommerce.variations.length ?? 0,
             contents: {
@@ -972,12 +907,12 @@ export default function PagePostAdd() {
               },
             },
           },
-        },
-      ];
+        }
+      );
 
-      form.setValue('eCommerce.variations', newVariations, {
-        shouldValidate: true,
-      });
+      form.trigger([
+        `eCommerce.variations.${(formValues.eCommerce.variations ?? []).length}`,
+      ]);
     }
   };
 
@@ -990,16 +925,93 @@ export default function PagePostAdd() {
         if (typeof indexAttribute === 'number' && indexAttribute > -1) {
           const attribute = attributes[indexAttribute];
           if (attribute.attributeTermId != attributeTermId) {
+            form.setValue(`eCommerce.attributes.${indexAttribute}`, {
+              ...attribute,
+              attributeTermId,
+              variationTerms: [],
+            });
+
             form.setValue(
-              `eCommerce.attributes.${indexAttribute}`,
-              {
-                ...attribute,
-                attributeTermId,
-                variationTerms: [],
-              },
-              { shouldValidate: true }
+              'eCommerce.defaultVariationOptions',
+              formValues.eCommerce.defaultVariationOptions?.map((option) =>
+                option.attributeId == attributeId
+                  ? {
+                      ...option,
+                      variationTermId: '',
+                    }
+                  : option
+              )
             );
+
+            form.setValue(
+              'eCommerce.variations',
+              formValues.eCommerce.variations?.map((variation) => ({
+                ...variation,
+                options: variation.options.map((option) =>
+                  option.attributeId == attributeId
+                    ? {
+                        ...option,
+                        variationTermId: '',
+                      }
+                    : option
+                ),
+              }))
+            );
+
+            form.trigger([`eCommerce.attributes.${indexAttribute}`]);
           }
+        }
+      }
+    }
+  };
+
+  const onChangeAttributeVariationTerms = (
+    attributeId: string,
+    variationTerms: string[]
+  ) => {
+    const formValues = form.getValues();
+    if (formValues.eCommerce) {
+      const attributes = formValues.eCommerce.attributes;
+      if (attributes) {
+        const indexAttribute = attributes?.indexOfKey('_id', attributeId);
+        if (typeof indexAttribute === 'number' && indexAttribute > -1) {
+          const attribute = attributes[indexAttribute];
+
+          form.setValue(`eCommerce.attributes.${indexAttribute}`, {
+            ...attribute,
+            variationTerms: variationTerms,
+          });
+
+          form.setValue(
+            'eCommerce.defaultVariationOptions',
+            formValues.eCommerce.defaultVariationOptions?.map((option) =>
+              option.attributeId == attributeId &&
+              !variationTerms.includes(option.variationTermId)
+                ? {
+                    ...option,
+                    variationTermId: '',
+                  }
+                : option
+            )
+          );
+
+          form.setValue(
+            'eCommerce.variations',
+            formValues.eCommerce.variations?.map((variation) => ({
+              ...variation,
+              options: variation.options.map((option) =>
+                option.attributeId == attributeId &&
+                !variationTerms.includes(option.variationTermId)
+                  ? {
+                      ...option,
+                      variationTermId: '',
+                    }
+                  : option
+              ),
+            }))
+          );
+
+          form.trigger([`eCommerce.attributes.${indexAttribute}`]);
         }
       }
     }
@@ -1030,9 +1042,9 @@ export default function PagePostAdd() {
                   {
                     ...option,
                     variationTermId,
-                  },
-                  { shouldValidate: true }
+                  }
                 );
+                form.trigger([`eCommerce.variations.${indexVariation}`]);
               }
             }
           }
@@ -1043,6 +1055,59 @@ export default function PagePostAdd() {
           title: t('error'),
           content: t('sameVariationErrorMessage'),
         });
+      }
+    }
+  };
+
+  const onClickDeleteAttribute = (_id: string) => {
+    const formValues = form.getValues();
+
+    if (formValues.eCommerce) {
+      const newAttributes = formValues.eCommerce.attributes.filter(
+        (attribute) => attribute._id != _id
+      );
+      const newDefaultVariationOptions =
+        formValues.eCommerce.defaultVariationOptions?.filter(
+          (option) => option.attributeId != _id
+        );
+      const newVariations = formValues.eCommerce.variations?.map(
+        (variation) => ({
+          ...variation,
+          options: variation.options.filter(
+            (option) => option.attributeId != _id
+          ),
+        })
+      );
+
+      form.setValue('eCommerce.attributes', newAttributes);
+      form.setValue(
+        'eCommerce.defaultVariationOptions',
+        newDefaultVariationOptions
+      );
+      form.setValue('eCommerce.variations', newVariations);
+      form.trigger(['eCommerce.attributes']);
+    }
+  };
+
+  const onClickDeleteVariation = async (_id: string) => {
+    const result = await Swal.fire({
+      title: t('deleteAction'),
+      html: `${t('deleteSelectedItemsQuestion')}`,
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
+      icon: 'question',
+      showCancelButton: true,
+    });
+
+    if (result.isConfirmed) {
+      const formValues = form.getValues();
+      if (formValues.eCommerce) {
+        const newVariations =
+          formValues.eCommerce?.variations.filter(
+            (variation) => variation._id != _id
+          ) ?? [];
+        form.setValue('eCommerce.variations', newVariations);
+        form.trigger(['eCommerce.variations']);
       }
     }
   };
@@ -1232,6 +1297,12 @@ export default function PagePostAdd() {
                 onClickDeleteAttribute={(_id) => onClickDeleteAttribute(_id)}
                 onChangeAttribute={(attributeId, attributeTermId) =>
                   onChangeAttribute(attributeId, attributeTermId)
+                }
+                onChangeAttributeVariationTerms={(
+                  attributeId,
+                  variationTerms
+                ) =>
+                  onChangeAttributeVariationTerms(attributeId, variationTerms)
                 }
                 onClickAddNewVariation={() => onClickAddNewVariation()}
                 onClickDeleteVariation={(_id) => onClickDeleteVariation(_id)}

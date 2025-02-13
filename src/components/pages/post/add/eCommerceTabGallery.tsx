@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
-import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
+import ComponentThemeFormSelectImage from '@components/theme/form/inputs/selectImage';
 import Image from 'next/image';
 import { ImageSourceUtil } from '@utils/imageSource.util';
 
@@ -34,7 +34,7 @@ const ComponentPagePostAddECommerceTabGallery = React.memo(
     return (
       <div className="row">
         <div className="col-md-7 mb-3">
-          <ComponentThemeChooseImageForm
+          <ComponentThemeFormSelectImage
             name={
               props.isECommerceVariation
                 ? `eCommerce.variations.${props.index}.product.eCommerce.images`

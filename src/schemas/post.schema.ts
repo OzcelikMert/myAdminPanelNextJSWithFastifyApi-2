@@ -134,9 +134,7 @@ const schema = object({
 
 const postSchema = schema;
 
-const postProductSchema = object({
-  body: schemaProduct,
-});
+const postProductSchema = schemaProduct;
 
 const putWithIdSchema = object({
   _id: string().min(1),

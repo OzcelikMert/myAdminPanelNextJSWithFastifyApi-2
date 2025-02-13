@@ -17,52 +17,60 @@ export type IComponentFormInputProps = {
   control?: Control<any>;
 } & Omit<IComponentInputProps, 'name'>;
 
-const ComponentThemeFormInput = React.memo((props: IComponentFormInputProps) => {
-  const t = useAppSelector(selectTranslation);
+const ComponentThemeFormInput = React.memo(
+  (props: IComponentFormInputProps) => {
+    const t = useAppSelector(selectTranslation);
 
-  const setValue = (value: any) => {
-    if (props.valueAsNumber || props.type == 'number') {
-      return Number(value);
-    } else if (props.valueAsDate || props.type == 'date') {
-      return moment(value).format('YYYY-MM-DD');
-    }
+    const setValue = (value: any) => {
+      if (props.valueAsNumber || props.type == 'number') {
+        return Number(value);
+      } else if (props.valueAsDate || props.type == 'date') {
+        return moment(value).format('YYYY-MM-DD');
+      }
 
-    return value;
-  };
+      return value;
+    };
 
-  return (
-    <Controller
-      name={props.name}
-      control={props.control}
-      rules={{ required: props.required }}
-      render={({ field, formState }) => {
-        const error = ObjectUtil.getWithKey<IFormFieldError>(
-          formState.errors,
-          props.name
-        );
-        const hasAnError = Boolean(error);
-        let errorText = '';
+    return (
+      <Controller
+        name={props.name}
+        control={props.control}
+        rules={{ required: props.required }}
+        render={({ field, formState }) => {
+          let hasAnError = false;
+          let errorText = '';
 
-        if (error) {
-          error.title = props.title;
-          errorText = error.type
-            ? t(I18Util.getFormInputErrorText(error.type), [props.title ?? ''])
-            : (error.message?.toString() ?? '');
-        }
+          if (formState.submitCount > 0) {
+            const error = ObjectUtil.getWithKey<IFormFieldError>(
+              formState.errors,
+              props.name
+            );
 
-        return (
-          <ComponentInput
-            {...field}
-            {...props}
-            onChange={(e) => field.onChange(setValue(e.target.value))}
-            ref={(e) => field.ref(e)}
-            hasAnError={hasAnError}
-            errorText={hasAnError ? errorText : undefined}
-          />
-        );
-      }}
-    />
-  );
-});
+            if (error) {
+              error.title = props.title;
+              hasAnError = true;
+              errorText = error.type
+                ? t(I18Util.getFormInputErrorText(error.type), [
+                    props.title ?? '',
+                  ])
+                : (error.message?.toString() ?? '');
+            }
+          }
+
+          return (
+            <ComponentInput
+              {...field}
+              {...props}
+              onChange={(e) => field.onChange(setValue(e.target.value))}
+              ref={(e) => field.ref(e)}
+              hasAnError={hasAnError}
+              errorText={hasAnError ? errorText : undefined}
+            />
+          );
+        }}
+      />
+    );
+  }
+);
 
 export default ComponentThemeFormInput;

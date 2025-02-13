@@ -3,7 +3,6 @@ import ComponentInputSelect, {
   IComponentInputSelectProps,
 } from '@components/elements/inputs/select';
 import { IFormFieldError } from '@components/theme/form';
-import { useEffectAfterDidMount } from '@library/react/hooks';
 import { ObjectUtil } from '@utils/object.util';
 import React from 'react';
 import { useFormContext, Controller, Control } from 'react-hook-form';
@@ -21,34 +20,23 @@ type IComponentProps<T = any> = {
 
 const ComponentThemeFormInputSelect = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-
   const form = useFormContext();
 
   if (props.watch) {
     form.watch(props.name);
   }
 
-  useEffectAfterDidMount(() => {
-    return () => {
-      form.unregister(props.name);
-    };
-  }, []);
-
-  const setValue = (
-    newValue: IComponentInputSelectData | IComponentInputSelectData[]
-  ) => {
+  const setValue = (newValue: any) => {
     if (props.isMulti) {
       if (Array.isArray(newValue)) {
         return newValue.map((item) =>
-          props.valueAsNumber ? Number(item.value) : item.value
+          props.valueAsNumber ? Number(item) : item
         );
       } else {
-        return [props.valueAsNumber ? Number(newValue.value) : newValue.value];
+        return [props.valueAsNumber ? Number(newValue) : newValue];
       }
     } else {
-      return props.valueAsNumber
-        ? Number((newValue as IComponentInputSelectData).value)
-        : (newValue as IComponentInputSelectData).value;
+      return props.valueAsNumber ? Number(newValue) : newValue;
     }
   };
 
@@ -75,18 +63,24 @@ const ComponentThemeFormInputSelect = React.memo((props: IComponentProps) => {
       rules={{ required: props.required }}
       defaultValue={props.isMulti ? [] : ''}
       render={({ field, formState }) => {
-        const error = ObjectUtil.getWithKey<IFormFieldError>(
-          formState.errors,
-          props.name
-        );
-        const hasAnError = Boolean(error);
+        let hasAnError = false;
         let errorText = '';
 
-        if (error) {
-          error.title = props.title;
-          errorText = error.type
-            ? t(I18Util.getFormInputErrorText(error.type), [props.title ?? ''])
-            : (error.message?.toString() ?? '');
+        if (formState.submitCount > 0) {
+          const error = ObjectUtil.getWithKey<IFormFieldError>(
+            formState.errors,
+            props.name
+          );
+
+          if (error) {
+            error.title = props.title;
+            hasAnError = true;
+            errorText = error.type
+              ? t(I18Util.getFormInputErrorText(error.type), [
+                  props.title ?? '',
+                ])
+              : (error.message?.toString() ?? '');
+          }
         }
 
         return (

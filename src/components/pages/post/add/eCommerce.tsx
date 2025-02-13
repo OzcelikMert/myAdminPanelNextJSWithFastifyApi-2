@@ -33,6 +33,7 @@ type IComponentProps = {
   onClickAddNewVariation?: () => void;
   onClickDeleteVariation?: (_id: string) => void;
   onChangeAttribute?: (attributeId: string, attributeTermId: string) => void;
+  onChangeAttributeVariationTerms?: (attributeId: string, variationTerms: string[]) => void;
   onChangeVariationOption?: (
     variationId: string,
     attributeId: string,
@@ -109,13 +110,18 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                     ? props.onChangeAttribute(attributeId, attributeTermId)
                     : false
                 }
+                onChangeAttributeVariationTerms={(attributeId, variationTerms) =>
+                  props.onChangeAttributeVariationTerms
+                    ? props.onChangeAttributeVariationTerms(attributeId, variationTerms)
+                    : false
+                }
               />
             </ComponentThemeTab>
             {props.eCommerce?.typeId == ProductTypeId.VariableProduct ? (
               <ComponentThemeTab
                 title={t('variations')}
                 eventKey="variations"
-                formFieldErrorKeys={['eCommerce.variations']}
+                formFieldErrorKeys={['eCommerce.variations', 'eCommerce.defaultVariationOptions']}
                 showFormFieldErrors
                 disabled={Boolean(!props.eCommerce.attributes || props.eCommerce.attributes.length == 0)}
               >

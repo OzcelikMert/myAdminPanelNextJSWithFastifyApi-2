@@ -17,7 +17,6 @@ import ComponentPagePostAddECommerceTabGallery from './eCommerceTabGallery';
 import ComponentPagePostAddECommerceTabPricing from './eCommerceTabPricing';
 import ComponentPagePostAddECommerceTabInvertory from './eCommerceTabInventory';
 import ComponentPagePostAddECommerceTabShipping from './eCommerceTabShipping';
-import { IComponentInputSelectData } from '@components/elements/inputs/select';
 import { IPostGetResultServiceECommerceVariation } from 'types/services/post.service';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
 import { useFormContext } from 'react-hook-form';
@@ -103,8 +102,7 @@ const ComponentPagePostAddECommerceTabVariationsItem = React.memo(
                               props.onChangeVariationOption(
                                 props.item._id,
                                 attribute._id,
-                                (selectedItem as IComponentInputSelectData)
-                                  .value
+                                selectedItem
                               )
                             }
                           />

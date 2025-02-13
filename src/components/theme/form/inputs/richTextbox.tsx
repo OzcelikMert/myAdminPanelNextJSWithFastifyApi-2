@@ -19,41 +19,49 @@ type IComponentProps = {
   required?: boolean;
 };
 
-const ComponentThemeFormInputRichTextbox = React.memo((props: IComponentProps) => {
-  const t = useAppSelector(selectTranslation);
+const ComponentThemeFormInputRichTextbox = React.memo(
+  (props: IComponentProps) => {
+    const t = useAppSelector(selectTranslation);
 
-  return (
-    <Controller
-      name={props.name}
-      control={props.control}
-      rules={{ required: props.required }}
-      render={({ field, formState }) => {
-        const error = ObjectUtil.getWithKey<IFormFieldError>(
-          formState.errors,
-          props.name
-        );
-        const hasAnError = Boolean(error);
-        let errorText = '';
+    return (
+      <Controller
+        name={props.name}
+        control={props.control}
+        rules={{ required: props.required }}
+        render={({ field, formState }) => {
+          let hasAnError = false;
+          let errorText = '';
 
-        if (error) {
-          error.title = props.title;
-          errorText = error.type
-            ? t(I18Util.getFormInputErrorText(error.type), [props.title ?? ''])
-            : (error.message?.toString() ?? '');
-        }
+          if (formState.submitCount > 0) {
+            const error = ObjectUtil.getWithKey<IFormFieldError>(
+              formState.errors,
+              props.name
+            );
 
-        return (
-          <ComponentInputRichTextbox
-            {...field}
-            ref={(e) => field.ref(e)}
-            onChange={(newValue) => field.onChange(newValue)}
-            hasAnError={hasAnError}
-            errorText={hasAnError ? errorText : undefined}
-          />
-        );
-      }}
-    />
-  );
-});
+            if (error) {
+              error.title = props.title;
+              hasAnError = true;
+              errorText = error.type
+                ? t(I18Util.getFormInputErrorText(error.type), [
+                    props.title ?? '',
+                  ])
+                : (error.message?.toString() ?? '');
+            }
+          }
+
+          return (
+            <ComponentInputRichTextbox
+              {...field}
+              ref={(e) => field.ref(e)}
+              onChange={(newValue) => field.onChange(newValue)}
+              hasAnError={hasAnError}
+              errorText={hasAnError ? errorText : undefined}
+            />
+          );
+        }}
+      />
+    );
+  }
+);
 
 export default ComponentThemeFormInputRichTextbox;

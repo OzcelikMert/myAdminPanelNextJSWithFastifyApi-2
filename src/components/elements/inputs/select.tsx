@@ -5,7 +5,7 @@ import { StateManagerProps } from 'react-select/dist/declarations/src/useStateMa
 export type IComponentInputSelectData<T = any> = {
   label: string;
   value: T;
-} & { [key: string]: any }
+} & { [key: string]: any };
 
 export type IComponentInputSelectProps<T = any> = {
   title?: string;
@@ -13,25 +13,32 @@ export type IComponentInputSelectProps<T = any> = {
   options?: IComponentInputSelectData<T>[];
   hasAnError?: boolean;
   errorText?: string;
-  onChange?: (
-    newValue: IComponentInputSelectData<T>[] | IComponentInputSelectData<T>,
-    action: ActionMeta<T>
-  ) => void;
-} & Omit<
-  StateManagerProps<IComponentInputSelectData<T>>,
-  'onChange' | 'options'
->;
+  onChange?: (newValue: T[] | T, action: ActionMeta<T>) => void;
+} & Omit<StateManagerProps<T>, 'onChange' | 'options'>;
 
 const ComponentInputSelect = React.memo(
   React.forwardRef<any, IComponentInputSelectProps>((props, ref) => {
-    const onChange = (newValue: any, action: any) => {
+    const onChange = (
+      newValue: IComponentInputSelectData | IComponentInputSelectData[],
+      action: any
+    ) => {
       if (props.onChange) {
-        props.onChange(newValue, action);
+        let customNewValue;
+
+        if (Array.isArray(newValue)) {
+          customNewValue = newValue.map((data) => data.value);
+        } else {
+          customNewValue = newValue.value;
+        }
+        
+        props.onChange(customNewValue, action);
       }
     };
 
     return (
-      <div className={`theme-input static ${props.mainDivCustomClassName ?? ""}`}>
+      <div
+        className={`theme-input static ${props.mainDivCustomClassName ?? ''}`}
+      >
         <span className="label">{props.title}</span>
         <label className={`field ${props.hasAnError ? 'error' : ''}`}>
           <Select

@@ -1,5 +1,5 @@
 import React from 'react';
-import ComponentThemeChooseImageForm from '@components/theme/chooseImage/form';
+import ComponentThemeFormSelectImage from '@components/theme/form/inputs/selectImage';
 import dynamic from 'next/dynamic';
 import { IComponentElementModel } from 'types/models/component.model';
 import { ElementTypeId } from '@constants/elementTypes';
@@ -25,7 +25,7 @@ const RichText = React.memo((props: { name: string }) => {
 const Image = React.memo((props: { name: string }) => {
   return (
     <div>
-      <ComponentThemeChooseImageForm
+      <ComponentThemeFormSelectImage
         {...props}
         isMulti={false}
         reviewImageClassName={'post-image'}

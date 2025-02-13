@@ -26,9 +26,9 @@ const initialState: IComponentState = {
 type IComponentProps = {
   attributeTerms?: IPagePostAddState['attributeTerms'];
   variationTerms?: IPagePostAddState['variationTerms'];
-  selectedVariations?: (IPostGetResultServiceECommerceVariation & {id?: string})[];
+  selectedVariations?: IPostGetResultServiceECommerceVariation[];
   selectedAttributes?: IPostGetResultServiceECommerceAttribute[];
-  defaultVariationOptions?: (IPostECommerceVariationOptionModel & {id?: string})[];
+  defaultVariationOptions?: IPostECommerceVariationOptionModel[];
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
   onChangeVariationOption: (
@@ -44,7 +44,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
     const form = useFormContext<IPageFormState>();
     
     const watchDefaultOptions = form.watch("eCommerce.defaultVariationOptions");
-
+    
     const [accordionKey, setAccordionKey] = React.useState(
       initialState.accordionKey
     );
@@ -83,7 +83,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
                 return (
                   <div className="col-md-3 mt-3">
                     <ComponentThemeFormInputSelect
-                      key={item.id}
+                      key={item._id}
                       name={`eCommerce.defaultVariationOptions.${index}.variationTermId`}
                       title={
                         props.attributeTerms?.findSingle(
@@ -106,7 +106,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
           <Accordion flush>
             {props.selectedVariations?.map((item, index) => (
               <ComponentPagePostAddECommerceTabVariationsItem
-                key={item.id}
+                key={item._id}
                 item={item}
                 index={index}
                 attributeTerms={props.attributeTerms}
