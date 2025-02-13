@@ -2,7 +2,7 @@
 myAdminPanelNextJSWithFastifyApi-2 with NextJS, Functional component and Redux
 
 Things to do:
-    - reset the variationTermId of the option in variations when the variationTerms of the attribute is changed
+    - check eCommerce product (add, edit, delete)
     - update array fields using index
     - add value to checkboxes
     - add key for every loop component
