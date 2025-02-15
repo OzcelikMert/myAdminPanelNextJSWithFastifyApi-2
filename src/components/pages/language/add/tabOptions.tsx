@@ -35,7 +35,7 @@ const ComponentPageLanguageAddTabOptions = React.memo(
           />
         </div>
         <div className="col-md-7 mb-3">
-          <ComponentThemeFormInputCheckbox title={t('default')} name="isDefault" />
+          <ComponentThemeFormInputCheckbox title={t('default')} name="isDefault" valueAsBoolean />
         </div>
       </div>
     );

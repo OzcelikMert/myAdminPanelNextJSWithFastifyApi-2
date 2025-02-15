@@ -4,6 +4,8 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import ComponentThemeFormInputCheckbox from '@components/theme/form/inputs/checkbox';
 import { IPostECommerceInventoryModel } from 'types/models/post.model';
+import { useFormContext } from 'react-hook-form';
+import { IPageFormState } from '@pages/post/add';
 
 type IComponentProps = {
   inventory?: IPostECommerceInventoryModel;
@@ -14,7 +16,14 @@ type IComponentProps = {
 const ComponentPagePostAddECommerceTabInvertory = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
+    const form = useFormContext<IPageFormState>();
 
+    const watchIsStock = form.watch(
+      props.isECommerceVariation
+        ? `eCommerce.variations.${props.index ?? 0}.product.eCommerce.inventory.isManageStock`
+        : `eCommerce.inventory.isManageStock`
+    ) ?? false;
+    
     return (
       <div className="row">
         <div className="col-md-7">
@@ -38,7 +47,7 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
                     ? `eCommerce.variations.${props.index}.product.eCommerce.inventory.quantity`
                     : `eCommerce.inventory.quantity`
                 }
-                disabled={!props.inventory?.isManageStock || false}
+                disabled={!watchIsStock}
                 type="number"
               />
             </div>
@@ -50,7 +59,7 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
                     ? `eCommerce.variations.${props.index}.product.eCommerce.inventory.isManageStock`
                     : `eCommerce.inventory.isManageStock`
                 }
-                value={1}
+                valueAsBoolean
               />
             </div>
           </div>

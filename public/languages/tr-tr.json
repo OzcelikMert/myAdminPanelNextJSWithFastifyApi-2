@@ -1,4 +1,6 @@
 {
+  "clear": "Temizle",
+  "loadingWithVariable": "'{{0}}' yükleniyor...",
   "eCommerceAttributeLengthError": "Lütfen en az 1 nitelik ekleyin!",
   "updateStatus": "Durum Güncelle",
   "fillCorrectlyWithName": "Lütfen '{{0}}' alanını doğru bir şekilde girdiğinizden emin olunuz!",

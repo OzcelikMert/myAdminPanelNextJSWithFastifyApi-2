@@ -12,6 +12,7 @@ type IComponentProps = {
   items: IComponentTableToggleMenuItem[];
   label?: string | any;
   title?: string;
+  itemCount?: number;
   onChange: (value: any) => void;
 };
 
@@ -20,6 +21,7 @@ const ComponentTableToggleMenu = React.memo((props: IComponentProps) => {
     <Dropdown align={'end'} className="theme-table-toggle">
       <Dropdown.Toggle className="theme-table-toggle-btn p-0">
         {props.label ?? <i className="mdi mdi-dots-horizontal"></i>}
+        {props.itemCount ? (<b>({props.itemCount})</b>) : null}
       </Dropdown.Toggle>
       <Dropdown.Menu className="theme-table-toggle-menu">
         {props.title ? (

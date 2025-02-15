@@ -16,7 +16,7 @@ type IComponentProps = {
   showStatusSelect?: boolean;
   showPageTypeSelect?: boolean;
   showAuthorsSelect?: boolean;
-  showNoIndexCheckBox?: boolean;
+  showNoIndexCheckbox?: boolean;
 };
 
 const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
@@ -75,7 +75,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
       <div className="col-md-7 mb-3">
         <ComponentThemeFormInputCheckbox title={t('isFixed')} name="isFixed" />
       </div>
-      {props.showNoIndexCheckBox ? (
+      {props.showNoIndexCheckbox ? (
         <div className="col-md-7">
           <ComponentThemeFormInputCheckbox title={t('noIndex')} name="isNoIndex" />
         </div>

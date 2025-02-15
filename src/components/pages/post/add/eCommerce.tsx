@@ -91,7 +91,6 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
               title={t('attributes')}
               eventKey="attributes"
               formFieldErrorKeys={['eCommerce.attributes']}
-              showFormFieldErrors
             >
               <ComponentPagePostAddECommerceTabAttributes
                 attributeTerms={props.attributeTerms}
@@ -122,7 +121,6 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                 title={t('variations')}
                 eventKey="variations"
                 formFieldErrorKeys={['eCommerce.variations', 'eCommerce.defaultVariationOptions']}
-                showFormFieldErrors
                 disabled={Boolean(!props.eCommerce.attributes || props.eCommerce.attributes.length == 0)}
               >
                 <ComponentPagePostAddECommerceTabVariations

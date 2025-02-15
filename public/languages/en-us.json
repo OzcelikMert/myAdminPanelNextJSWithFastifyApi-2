@@ -1,4 +1,6 @@
 {
+  "clear": "Clear",
+  "loadingWithVariable": "'{{0}}' is loading...",
   "eCommerceAttributeLengthError": "Please add at least 1 attribute!",
   "updateStatus": "Update Status",
   "fillCorrectlyWithName": "Please make sure you have entered the '{{0}}' correctly!",

@@ -6,13 +6,12 @@ import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select'
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentThemeFormSelectImage from '@components/theme/form/inputs/selectImage';
 import { PostTermTypeId } from '@constants/postTermTypes';
-import { I18Util } from '@utils/i18.util';
 
 type IComponentProps = {
   categoryTerms?: IPagePostAddState['categoryTerms'];
   tagTerms?: IPagePostAddState['tagTerms'];
   isIconActive?: boolean;
-  showIconCheckBox?: boolean;
+  showIconCheckbox?: boolean;
   showCategoryTermSelect?: boolean;
   showTagTermSelect?: boolean;
   index?: number;
@@ -26,7 +25,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
 
   return (
     <div className="row">
-      {props.showIconCheckBox ? (
+      {props.showIconCheckbox ? (
         <div className="col-md-7 mb-3">
           <div className="form-switch">
             <input
@@ -47,7 +46,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
           </div>
         </div>
       ) : null}
-      {props.showIconCheckBox && props.isIconActive ? (
+      {props.showIconCheckbox && props.isIconActive ? (
         <div className="col-md-7 mb-3">
           <ComponentThemeFormInput
             title={`${t('icon')}`}

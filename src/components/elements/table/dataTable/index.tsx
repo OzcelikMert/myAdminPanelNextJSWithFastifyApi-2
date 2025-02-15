@@ -19,11 +19,11 @@ export type IComponentDataTableColumn<T> = {
 } & TableColumn<T>;
 
 type IComponentState = {
-  selectedItems: any[];
+  selectedItems: IComponentState['items'];
   clearSelectedRows: boolean;
   searchKey: string;
   items: any[];
-  showingItems: any[];
+  showingItems: IComponentState['items'];
   activeFilterButtonIndex: number;
 };
 
@@ -147,8 +147,11 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
   }, [state.items]);
 
   useEffectAfterDidMount(() => {
-    if(props.selectedItemsAtInit && props.selectedItemsAtInit.length > 0){
-      dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: props.selectedItemsAtInit });
+    if (props.selectedItemsAtInit && props.selectedItemsAtInit.length > 0) {
+      dispatch({
+        type: ActionTypes.SET_SELECTED_ITEMS,
+        payload: props.selectedItemsAtInit,
+      });
     }
   }, [props.selectedItemsAtInit]);
 
@@ -177,9 +180,20 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
 
   const onSelectAll = () => {
     const items = getItemListForPage();
+
+    const newSelectedItems = checkAllSelected()
+      ? state.selectedItems.filter(
+          (selectedItem) => !items.includes(selectedItem)
+        )
+      : [...state.selectedItems, ...items];
+
+    if (props.onSelect) {
+      props.onSelect(newSelectedItems);
+    }
+    
     dispatch({
       type: ActionTypes.SET_SELECTED_ITEMS,
-      payload: checkAllSelected() ? [] : items,
+      payload: newSelectedItems,
     });
   };
 
@@ -292,6 +306,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
             <ComponentTableToggleMenu
               items={props.toggleMenuItems ?? []}
               title={props.i18?.toggleMenuTitle}
+              itemCount={state.selectedItems.length}
               onChange={(value) => onClickToggleMenuItem(value)}
             />
           ) : (
@@ -387,7 +402,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
           clearSelectedRows={state.clearSelectedRows}
           noDataComponent={
             <h5 className="p-5 text-center">
-              {props.i18?.noRecords ?? 'There are no records to display'}
+              {props.i18?.noRecords ?? 'There are no records to display'}{' '}
               <i className="mdi mdi-emoticon-sad-outline"></i>
             </h5>
           }

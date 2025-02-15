@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { IUploadingFiles } from 'types/pages/gallery/upload';
 import { GalleryService } from '@services/gallery.service';
 import { IGalleryGetResultService } from 'types/services/gallery.service';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
@@ -12,8 +11,23 @@ import ComponentPageGalleryUploadUploadings from '@components/pages/gallery/uplo
 import ComponentPageGalleryUploadContainer from '@components/pages/gallery/upload/container';
 import { useToast } from '@hooks/toast';
 
+export enum UploadingFileStatus {
+  Pending,
+  Uploading,
+  Uploaded,
+  Error,
+}
+
+export interface IUploadingFile {
+  id: string;
+  file: File;
+  progressValue: number;
+  isUploadable: boolean;
+  status: UploadingFileStatus;
+}
+
 export type IPageGalleryUploadState = {
-  uploadingFiles: IUploadingFiles[];
+  uploadingFiles: IUploadingFile[];
 };
 
 const initialState: IPageGalleryUploadState = {
@@ -34,11 +48,11 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
   const t = useAppSelector(selectTranslation);
   const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
+  const { showToast, hideToast } = useToast();
 
   const [uploadingFiles, setUploadingFiles] = useState(
     initialState.uploadingFiles
   );
-  const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -56,6 +70,16 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
       }
     }
   }, [isPageLoaded]);
+
+  useEffectAfterDidMount(() => {
+    console.log(`useEffectAfterDidMount [uploadingFiles]`);
+    for (const file of uploadingFiles) {
+      console.log(`useEffectAfterDidMount [uploadingFiles] for`, file);
+      if (file.status == UploadingFileStatus.Pending) {
+        uploadFile(file);
+      }
+    }
+  }, [uploadingFiles]);
 
   const init = () => {
     if (isPageLoaded) {
@@ -81,82 +105,109 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
     );
   };
 
-  const uploadFiles = async () => {
-    for (const uploadingFile of uploadingFiles) {
-      if (
-        uploadingFile.progressValue === 100 ||
-        uploadingFile.file.size > maxFileSize ||
-        !uploadingFile.status
-      )
-        continue;
+  const uploadFile = async (file: IUploadingFile) => {
+    const loadingToast = showToast({
+      type: 'loading',
+      title: t('loading'),
+      content: t('loadingWithVariable', [file.file.name]),
+    });
 
-      const formData = new FormData();
-      formData.append('image', uploadingFile.file, uploadingFile.file.name);
-
-      const serviceResult = await GalleryService.add(
-        formData,
-        (e, percent) => {
-          setUploadingFiles((state) => {
-            const findIndex = state.findIndex(
-              (uploadingFile) => uploadingFile.id === uploadingFile.id
-            );
-            if (findIndex > -1) {
-              state[findIndex].progressValue = percent ?? 100;
+    setUploadingFiles((stateFiles) =>
+      stateFiles.map((stateFile) =>
+        stateFile.id == file.id
+          ? {
+              ...stateFile,
+              status: UploadingFileStatus.Uploading,
             }
-            return state;
-          });
-        },
-        abortControllerRef.current.signal
-      );
+          : stateFile
+      )
+    );
 
-      if (serviceResult.status && serviceResult.data) {
-        showToast({
-          type: 'success',
-          title: t('successful'),
-          content: t('imageUploadedWithName', [uploadingFile.file.name]),
-          position: 'top-right',
-          timeOut: 5,
-        });
-        if (props.onUploadImages) {
-          props.onUploadImages(
-            serviceResult.data.map((image) => ({
-              ...image,
-              author: {
-                _id: sessionAuth!.user.userId,
-                name: sessionAuth!.user.name,
-                image: sessionAuth!.user.image,
-                url: sessionAuth!.user.url ?? '',
-              },
-            }))
-          );
-        }
+    const formData = new FormData();
+    formData.append('image', file.file, file.file.name);
+
+    const serviceResult = await GalleryService.add(
+      formData,
+      (e, percent) => {
+        setUploadingFiles((stateFiles) =>
+          stateFiles.map((stateFile) =>
+            stateFile.id == file.id
+              ? {
+                  ...stateFile,
+                  progressValue: percent ?? 100,
+                }
+              : stateFile
+          )
+        );
+      },
+      abortControllerRef.current.signal
+    );
+
+    setUploadingFiles((stateFiles) =>
+      stateFiles.map((stateFile) =>
+        stateFile.id == file.id
+          ? {
+              ...stateFile,
+              status: serviceResult.status
+                ? UploadingFileStatus.Uploaded
+                : UploadingFileStatus.Error,
+            }
+          : stateFile
+      )
+    );
+
+    hideToast(loadingToast);
+
+    if (serviceResult.status && serviceResult.data) {
+      showToast({
+        type: 'success',
+        title: t('successful'),
+        content: t('imageUploadedWithName', [file.file.name]),
+        position: 'top-right',
+        timeOut: 5,
+      });
+      if (props.onUploadImages) {
+        props.onUploadImages(
+          serviceResult.data.map((image) => ({
+            ...image,
+            author: {
+              _id: sessionAuth!.user.userId,
+              name: sessionAuth!.user.name,
+              image: sessionAuth!.user.image,
+              url: sessionAuth!.user.url ?? '',
+            },
+          }))
+        );
       }
     }
   };
 
   const onSelectFiles = (files: FileList) => {
     if (files && files.length > 0) {
-      setUploadingFiles((state) => {
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          state.push({
-            id: String.createId(),
-            file: file,
-            progressValue: file.size < maxFileSize ? 0 : 100,
-            status: file.size < maxFileSize,
-          });
-        }
-        return state;
-      });
-      uploadFiles();
+      const newUploadingFiles: IUploadingFile[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const hasError = file.size > maxFileSize;
+        newUploadingFiles.push({
+          id: String.createId(),
+          file: file,
+          progressValue: hasError ? 100 : 0,
+          isUploadable: !hasError,
+          status: hasError
+            ? UploadingFileStatus.Error
+            : UploadingFileStatus.Pending,
+        });
+      }
+      setUploadingFiles((state) => [...state, ...newUploadingFiles]);
     }
   };
 
   const onClearUploadedImages = () => {
     setUploadingFiles((state) => {
-      return state.filter(
-        (uploadingFile) =>
-          uploadingFile.progressValue < 100 && uploadingFile.status
+      return state.filter((uploadingFile) =>
+        [UploadingFileStatus.Pending, UploadingFileStatus.Uploading].includes(
+          uploadingFile.status
+        )
       );
     });
   };
@@ -171,7 +222,7 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
             />
             <ComponentPageGalleryUploadUploadings
               uploadingFiles={uploadingFiles}
-              maxFilesSize={maxFileSize}
+              onClickClearAll={() => onClearUploadedImages()}
             />
           </div>
         </div>

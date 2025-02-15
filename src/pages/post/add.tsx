@@ -546,10 +546,10 @@ export default function PagePostAdd() {
           ...(item as IPostUpdateWithIdParamService),
           contents: {
             ...formValues.contents,
+            content: '',
             ...item.contents,
             views: item.contents?.views ?? 0,
             langId: _langId,
-            content: item.contents?.content || '',
           },
         };
 
@@ -578,7 +578,6 @@ export default function PagePostAdd() {
             ...item.eCommerce,
             attributes: item.eCommerce.attributes?.map((attribute) => ({
               ...attribute,
-              attributeTermId: attribute.attributeTermId,
               variationTerms: attribute.variationTerms.map(
                 (variation) => variation._id
               ),
@@ -590,25 +589,12 @@ export default function PagePostAdd() {
                 rank: 0,
                 ...variation.product,
                 contents: {
+                  title: '',
                   ...variation.product?.contents,
                   langId: _langId,
-                  title: '',
                 },
               },
-              options: variation.options.map((option) => ({
-                ...option,
-                variationTermId: option.variationTermId,
-                attributeId: option.attributeId,
-              })),
             })),
-            defaultVariationOptions:
-              item.eCommerce.defaultVariationOptions?.map(
-                (defaultVariationOption) => ({
-                  ...defaultVariationOption,
-                  attributeId: defaultVariationOption.attributeId,
-                  variationId: defaultVariationOption.variationTermId,
-                })
-              ),
           };
         }
 
@@ -638,6 +624,24 @@ export default function PagePostAdd() {
       attributes: [],
       variations: [],
       defaultVariationOptions: [],
+      pricing: {
+        taxIncluded: 0,
+        compared: 0,
+        shipping: 0,
+        taxExcluded: 0,
+        taxRate: 0,
+      },
+      shipping: {
+        width: '',
+        height: '',
+        depth: '',
+        weight: '',
+      },
+      inventory: {
+        sku: '',
+        quantity: 0,
+        isManageStock: false,
+      },
     });
   };
 
@@ -650,7 +654,7 @@ export default function PagePostAdd() {
 
   const onSubmit = async (data: IPageFormState) => {
     const params = data;
-    
+
     let serviceResult = null;
 
     if (params.typeId == PostTypeId.Product) {
@@ -736,17 +740,14 @@ export default function PagePostAdd() {
 
   const onClickAddNewButton = () => {
     const formValues = form.getValues();
-    form.setValue(
-      'contents.buttons',
-      [
-        ...(formValues.contents.buttons ?? []),
-        {
-          _id: String.createId(),
-          title: '',
-          url: '',
-        },
-      ]
-    );
+    form.setValue('contents.buttons', [
+      ...(formValues.contents.buttons ?? []),
+      {
+        _id: String.createId(),
+        title: '',
+        url: '',
+      },
+    ]);
     form.trigger(['contents.buttons']);
   };
 
@@ -823,29 +824,31 @@ export default function PagePostAdd() {
         }
       );
 
-      form.setValue(
-        `eCommerce.defaultVariationOptions.${(formValues.eCommerce.defaultVariationOptions ?? []).length}`,
-        {
-          _id: String.createId(),
-          attributeId: _id,
-          variationTermId: '',
-        }
-      );
+      if (formValues.eCommerce.typeId == ProductTypeId.VariableProduct) {
+        form.setValue(
+          `eCommerce.defaultVariationOptions.${(formValues.eCommerce.defaultVariationOptions ?? []).length}`,
+          {
+            _id: String.createId(),
+            attributeId: _id,
+            variationTermId: '',
+          }
+        );
 
-      form.setValue(
-        'eCommerce.variations',
-        formValues.eCommerce.variations?.map((variation) => ({
-          ...variation,
-          options: [
-            ...variation.options,
-            {
-              _id: String.createId(),
-              attributeId: _id,
-              variationTermId: '',
-            },
-          ],
-        }))
-      );
+        form.setValue(
+          'eCommerce.variations',
+          formValues.eCommerce.variations?.map((variation) => ({
+            ...variation,
+            options: [
+              ...variation.options,
+              {
+                _id: String.createId(),
+                attributeId: _id,
+                variationTermId: '',
+              },
+            ],
+          }))
+        );
+      }
 
       form.trigger([
         `eCommerce.attributes.${(formValues.eCommerce.attributes ?? []).length}`,
@@ -931,32 +934,34 @@ export default function PagePostAdd() {
               variationTerms: [],
             });
 
-            form.setValue(
-              'eCommerce.defaultVariationOptions',
-              formValues.eCommerce.defaultVariationOptions?.map((option) =>
-                option.attributeId == attributeId
-                  ? {
-                      ...option,
-                      variationTermId: '',
-                    }
-                  : option
-              )
-            );
-
-            form.setValue(
-              'eCommerce.variations',
-              formValues.eCommerce.variations?.map((variation) => ({
-                ...variation,
-                options: variation.options.map((option) =>
+            if (formValues.eCommerce.typeId == ProductTypeId.VariableProduct) {
+              form.setValue(
+                'eCommerce.defaultVariationOptions',
+                formValues.eCommerce.defaultVariationOptions?.map((option) =>
                   option.attributeId == attributeId
                     ? {
                         ...option,
                         variationTermId: '',
                       }
                     : option
-                ),
-              }))
-            );
+                )
+              );
+
+              form.setValue(
+                'eCommerce.variations',
+                formValues.eCommerce.variations?.map((variation) => ({
+                  ...variation,
+                  options: variation.options.map((option) =>
+                    option.attributeId == attributeId
+                      ? {
+                          ...option,
+                          variationTermId: '',
+                        }
+                      : option
+                  ),
+                }))
+              );
+            }
 
             form.trigger([`eCommerce.attributes.${indexAttribute}`]);
           }
@@ -982,24 +987,10 @@ export default function PagePostAdd() {
             variationTerms: variationTerms,
           });
 
-          form.setValue(
-            'eCommerce.defaultVariationOptions',
-            formValues.eCommerce.defaultVariationOptions?.map((option) =>
-              option.attributeId == attributeId &&
-              !variationTerms.includes(option.variationTermId)
-                ? {
-                    ...option,
-                    variationTermId: '',
-                  }
-                : option
-            )
-          );
-
-          form.setValue(
-            'eCommerce.variations',
-            formValues.eCommerce.variations?.map((variation) => ({
-              ...variation,
-              options: variation.options.map((option) =>
+          if (formValues.eCommerce.typeId == ProductTypeId.VariableProduct) {
+            form.setValue(
+              'eCommerce.defaultVariationOptions',
+              formValues.eCommerce.defaultVariationOptions?.map((option) =>
                 option.attributeId == attributeId &&
                 !variationTerms.includes(option.variationTermId)
                   ? {
@@ -1007,9 +998,25 @@ export default function PagePostAdd() {
                       variationTermId: '',
                     }
                   : option
-              ),
-            }))
-          );
+              )
+            );
+
+            form.setValue(
+              'eCommerce.variations',
+              formValues.eCommerce.variations?.map((variation) => ({
+                ...variation,
+                options: variation.options.map((option) =>
+                  option.attributeId == attributeId &&
+                  !variationTerms.includes(option.variationTermId)
+                    ? {
+                        ...option,
+                        variationTermId: '',
+                      }
+                    : option
+                ),
+              }))
+            );
+          }
 
           form.trigger([`eCommerce.attributes.${indexAttribute}`]);
         }
@@ -1066,25 +1073,28 @@ export default function PagePostAdd() {
       const newAttributes = formValues.eCommerce.attributes.filter(
         (attribute) => attribute._id != _id
       );
-      const newDefaultVariationOptions =
-        formValues.eCommerce.defaultVariationOptions?.filter(
-          (option) => option.attributeId != _id
-        );
-      const newVariations = formValues.eCommerce.variations?.map(
-        (variation) => ({
-          ...variation,
-          options: variation.options.filter(
-            (option) => option.attributeId != _id
-          ),
-        })
-      );
 
       form.setValue('eCommerce.attributes', newAttributes);
-      form.setValue(
-        'eCommerce.defaultVariationOptions',
-        newDefaultVariationOptions
-      );
-      form.setValue('eCommerce.variations', newVariations);
+
+      if (formValues.eCommerce.typeId == ProductTypeId.VariableProduct) {
+        form.setValue(
+          'eCommerce.defaultVariationOptions',
+          formValues.eCommerce.defaultVariationOptions?.filter(
+            (option) => option.attributeId != _id
+          )
+        );
+
+        form.setValue(
+          'eCommerce.variations',
+          formValues.eCommerce.variations?.map((variation) => ({
+            ...variation,
+            options: variation.options.filter(
+              (option) => option.attributeId != _id
+            ),
+          }))
+        );
+      }
+
       form.trigger(['eCommerce.attributes']);
     }
   };
@@ -1174,7 +1184,11 @@ export default function PagePostAdd() {
                     }
                     activeKey={state.mainTabActiveKey}
                   >
-                    <ComponentThemeTab eventKey="general" title={t('general')}>
+                    <ComponentThemeTab
+                      eventKey="general"
+                      title={t('general')}
+                      formFieldErrorKeys={['contents.title']}
+                    >
                       <ComponentPagePostAddTabGeneral
                         categoryTerms={state.categoryTerms}
                         tagTerms={state.tagTerms}
@@ -1187,7 +1201,7 @@ export default function PagePostAdd() {
                             PostTypeId.Testimonial,
                           ].includes(formValues.typeId)
                         }
-                        showIconCheckBox={[PostTypeId.Service].includes(
+                        showIconCheckbox={[PostTypeId.Service].includes(
                           formValues.typeId
                         )}
                         showTagTermSelect={
@@ -1241,7 +1255,7 @@ export default function PagePostAdd() {
                             ) ||
                             sessionAuth!.user.userId == state.item?.authorId
                           }
-                          showNoIndexCheckBox={
+                          showNoIndexCheckbox={
                             [PostTypeId.Page].includes(formValues.typeId) &&
                             isUserSuperAdmin
                           }

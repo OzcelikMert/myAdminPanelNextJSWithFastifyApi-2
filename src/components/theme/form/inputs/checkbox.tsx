@@ -4,7 +4,7 @@ import ComponentInputCheckbox, {
 import { I18Util } from '@utils/i18.util';
 import { ObjectUtil } from '@utils/object.util';
 import React from 'react';
-import { Controller, Control } from 'react-hook-form';
+import { Controller, Control, useFormContext } from 'react-hook-form';
 import { IFormFieldError } from '..';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -14,10 +14,16 @@ type IComponentProps = {
   valueAsBoolean?: boolean;
   name: string;
   control?: Control<any>;
+  watch?: boolean
 } & Omit<IComponentInputCheckboxProps, 'name'>;
 
 const ComponentThemeFormInputCheckbox = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
+  const form = useFormContext();
+
+  if(props.watch){
+    const watch = form.watch(props.name);
+  }
 
   const setValue = (value: any, isSelected: boolean) => {
     if (Array.isArray(value)) {
@@ -60,10 +66,10 @@ const ComponentThemeFormInputCheckbox = React.memo((props: IComponentProps) => {
         return (
           <ComponentInputCheckbox
             {...field}
-            {...props}
             onChange={(e) =>
               field.onChange(setValue(field.value, e.target.checked))
             }
+            {...props}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

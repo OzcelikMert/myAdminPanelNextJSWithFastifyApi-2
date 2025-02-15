@@ -2,18 +2,18 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import Image from 'next/image';
-import { IUploadingFiles } from 'types/pages/gallery/upload';
+import { IUploadingFile } from '@pages/gallery/upload';
 
 type IComponentProps = {
-  item: IUploadingFiles;
+  item: IUploadingFile;
   index: number;
-  maxFileSize: number;
 };
 
 const ComponentPageGalleryUploadUploadingItem = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
-
+    console.log("ComponentPageGalleryUploadUploadingItem", props);
+    
     return (
       <div className="col-md-3 mt-1 mt-lg-2">
         <div className="row">
@@ -34,7 +34,7 @@ const ComponentPageGalleryUploadUploadingItem = React.memo(
                   : props.item.file.name.length}
               </div>
               <div className="col-md-12 mt-2">
-                {props.item.file.size > props.maxFileSize ? (
+                {!props.item.isUploadable ? (
                   <b className="text-danger">{t('bigImageSize')}</b>
                 ) : (
                   <div className="progress-lg progress">

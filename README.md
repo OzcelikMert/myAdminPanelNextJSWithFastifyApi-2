@@ -2,7 +2,6 @@
 myAdminPanelNextJSWithFastifyApi-2 with NextJS, Functional component and Redux
 
 Things to do:
-    - check eCommerce product (add, edit, delete)
     - update array fields using index
     - add value to checkboxes
     - add key for every loop component
