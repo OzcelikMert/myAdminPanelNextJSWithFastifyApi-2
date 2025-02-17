@@ -270,6 +270,7 @@ export default function PageSettingLanguageAdd() {
                     <ComponentPageLanguageAddTabOptions
                       status={state.status}
                       statusId={formValues.statusId}
+                      disableIsDefault={state.item?.isDefault}
                     />
                   </ComponentThemeTab>
                 </ComponentThemeTabs>

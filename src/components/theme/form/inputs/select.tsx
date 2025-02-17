@@ -9,6 +9,7 @@ import { useFormContext, Controller, Control } from 'react-hook-form';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { I18Util } from '@utils/i18.util';
+import { omit } from 'lodash';
 
 type IComponentProps<T = any> = {
   key?: string;
@@ -26,7 +27,7 @@ const ComponentThemeFormInputSelect = React.memo((props: IComponentProps) => {
     form.watch(props.name);
   }
 
-  const setValue = (newValue: any) => {
+  const getValue = (newValue: any) => {
     if (props.isMulti) {
       if (Array.isArray(newValue)) {
         return newValue.map((item) =>
@@ -40,7 +41,7 @@ const ComponentThemeFormInputSelect = React.memo((props: IComponentProps) => {
     }
   };
 
-  const getValue = (options: IComponentInputSelectData<any>[], value: any) => {
+  const getOptionValue = (options: IComponentInputSelectData<any>[], value: any) => {
     let newValue;
     if (Array.isArray(value)) {
       newValue = options.findMulti('value', value);
@@ -86,9 +87,9 @@ const ComponentThemeFormInputSelect = React.memo((props: IComponentProps) => {
         return (
           <ComponentInputSelect
             {...field}
-            onChange={(newValue, action) => field.onChange(setValue(newValue))}
-            {...props}
-            value={getValue(props.options ?? [], field.value ?? props.value)}
+            onChange={(newValue, action) => field.onChange(getValue(newValue))}
+            {...omit(props, "valueAsNumber", "watch", "control")}
+            value={getOptionValue(props.options ?? [], field.value ?? props.value)}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

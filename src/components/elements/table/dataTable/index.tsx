@@ -181,11 +181,13 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
   const onSelectAll = () => {
     const items = getItemListForPage();
 
-    const newSelectedItems = checkAllSelected()
-      ? state.selectedItems.filter(
-          (selectedItem) => !items.includes(selectedItem)
-        )
-      : [...state.selectedItems, ...items];
+    let newSelectedItems = state.selectedItems.filter(
+      (selectedItem) => !items.includes(selectedItem)
+    );
+
+    if(!checkAllSelected()){
+      newSelectedItems =  [...newSelectedItems, ...items];
+    }
 
     if (props.onSelect) {
       props.onSelect(newSelectedItems);
@@ -287,9 +289,10 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
   const onClickToggleMenuItem = async (value: any) => {
     if (props.onClickToggleMenuItem) {
       await props.onClickToggleMenuItem(state.selectedItems, value);
+      dispatch({ type: ActionTypes.SET_SELECTED_ITEMS, payload: [] });
+      onFilter();
+      onSearch();
     }
-    onFilter();
-    onSearch();
   };
 
   const getColumns = () => {

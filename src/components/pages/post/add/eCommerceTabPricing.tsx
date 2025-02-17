@@ -18,7 +18,7 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
       <div className="row">
         <div className="col-md-7">
           <div className="row">
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('taxIncludedPrice')}
                 name={
@@ -29,7 +29,7 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
                 type="number"
               />
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('taxExcludedPrice')}
                 name={
@@ -40,7 +40,7 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
                 type="number"
               />
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('taxRate')}
                 name={
@@ -51,7 +51,7 @@ const ComponentPagePostAddECommerceTabPricing = React.memo(
                 type="number"
               />
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('comparedPrice')}
                 name={

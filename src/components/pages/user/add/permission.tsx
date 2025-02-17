@@ -3,13 +3,12 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { IPermission } from 'types/constants/permissions';
 import { PermissionId } from '@constants/permissions';
-import ComponentInputCheckbox from '@components/elements/inputs/checkbox';
+import ComponentThemeFormInputCheckbox from '@components/theme/form/inputs/checkbox';
+import ComponentThemeFormInputSwitch from '@components/theme/form/inputs/switch';
 
 type IComponentProps = {
   item: IPermission;
   index: number;
-  isSelected: boolean;
-  onSelect: (id: PermissionId) => void;
 };
 
 const ComponentPageUserAddPermission = React.memo((props: IComponentProps) => {
@@ -17,10 +16,11 @@ const ComponentPageUserAddPermission = React.memo((props: IComponentProps) => {
 
   return (
     <div className="col-md-4">
-      <ComponentInputCheckbox
+      <ComponentThemeFormInputCheckbox
+        name={`permissions`}
         title={t(props.item.langKey)}
-        checked={props.isSelected}
-        onChange={(e) => props.onSelect(props.item.id)}
+        value={props.item.id}
+        valueAsNumber
       />
     </div>
   );

@@ -116,21 +116,21 @@ export default function PageChangePassword() {
               <div className="card">
                 <div className="card-body">
                   <div className="row">
-                    <div className="col-md-7 mb-3">
+                    <div className="col-md-7">
                       <ComponentThemeFormInput
                         title={`${t('password')}*`}
                         name="password"
                         type="password"
                       />
                     </div>
-                    <div className="col-md-7 mb-3">
+                    <div className="col-md-7">
                       <ComponentThemeFormInput
                         title={`${t('newPassword')}*`}
                         name="newPassword"
                         type="password"
                       />
                     </div>
-                    <div className="col-md-7 mb-3">
+                    <div className="col-md-7">
                       <ComponentThemeFormInput
                         title={`${t('confirmPassword')}*`}
                         name="confirmPassword"

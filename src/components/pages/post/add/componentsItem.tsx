@@ -4,6 +4,7 @@ import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select'
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { IPagePostAddState } from '@pages/post/add';
+import Link from 'next/link';
 
 type IComponentProps = {
   components?: IPagePostAddState['components'];
@@ -26,20 +27,21 @@ const ComponentPagePostAddComponentsItem = React.memo(
               title={t('component')}
               name={`components.${props.index}`}
               options={props.components}
+              watch
             />
           </div>
           <div className="col-md-3 mt-2">
             <div className="row">
               <div className="col-6">
                 {props.showEditButton ? (
-                  <a
+                  <Link
                     href={EndPoints.COMPONENT_WITH.EDIT(props._id)}
                     target="_blank"
                     className="btn btn-gradient-warning btn-lg"
-                    rel="noreferrer"
+                    referrerPolicy="no-referrer"
                   >
                     <i className="fa fa-pencil-square-o"></i>
-                  </a>
+                  </Link>
                 ) : null}
               </div>
               <div className="col-6 text-end">

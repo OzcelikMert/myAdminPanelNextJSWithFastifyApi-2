@@ -3,8 +3,8 @@ import { StatusId } from '@constants/status';
 
 const schemaContent = object({
   langId: string().min(1),
-  title: string().default(''),
-  url: string().optional(),
+  title: string().min(1),
+  url: string().min(1),
 });
 
 const schema = object({
@@ -16,9 +16,7 @@ const schema = object({
   contents: schemaContent,
 });
 
-const postSchema = object({
-  body: schema,
-});
+const postSchema = schema;
 
 const putWithIdSchema = object({
   _id: string().min(1),

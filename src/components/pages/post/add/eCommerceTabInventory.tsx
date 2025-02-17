@@ -2,10 +2,10 @@ import React from 'react';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
-import ComponentThemeFormInputCheckbox from '@components/theme/form/inputs/checkbox';
 import { IPostECommerceInventoryModel } from 'types/models/post.model';
 import { useFormContext } from 'react-hook-form';
 import { IPageFormState } from '@pages/post/add';
+import ComponentThemeFormInputSwitch from '@components/theme/form/inputs/switch';
 
 type IComponentProps = {
   inventory?: IPostECommerceInventoryModel;
@@ -28,7 +28,7 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
       <div className="row">
         <div className="col-md-7">
           <div className="row">
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('sku')}
                 name={
@@ -39,7 +39,7 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
                 type="text"
               />
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('quantity')}
                 name={
@@ -52,14 +52,13 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
               />
             </div>
             <div className="col-md-7">
-              <ComponentThemeFormInputCheckbox
+              <ComponentThemeFormInputSwitch
                 title={t('isManageStock')}
                 name={
                   props.isECommerceVariation
                     ? `eCommerce.variations.${props.index}.product.eCommerce.inventory.isManageStock`
                     : `eCommerce.inventory.isManageStock`
                 }
-                valueAsBoolean
               />
             </div>
           </div>

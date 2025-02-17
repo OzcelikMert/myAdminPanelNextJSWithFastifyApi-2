@@ -14,7 +14,7 @@ type IComponentProps = {
 const ComponentPagePostAddTabContent = React.memo((props: IComponentProps) => {
   return (
     <div className="row">
-      <div className="col-md-12 mb-3">
+      <div className="col-md-12">
         <ComponentThemeFormInputRichTextbox
           name={
             props.isECommerceVariation

@@ -38,20 +38,20 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
 
     return (
       <div className="row">
-        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'}`}>
           <ComponentThemeFormSelectImage
             name="contents.image"
             reviewImageClassName={'post-image'}
           />
         </div>
-        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'}`}>
           <ComponentThemeFormInput
             title={`${t('title')}*`}
             name="contents.title"
             type="text"
           />
         </div>
-        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'}`}>
           <ComponentThemeFormInput
             title={t('shortContent').toCapitalizeCase()}
             name="contents.shortContent"
@@ -59,7 +59,7 @@ const ComponentPagePostTermAddTabGeneral = React.memo(
           />
         </div>
         {props.showParentSelect ? (
-          <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
+          <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'}`}>
             <ComponentThemeFormInputSelect
               title={getSelectMainInputTitle()}
               name="parentId"

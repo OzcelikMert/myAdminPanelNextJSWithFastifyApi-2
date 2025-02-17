@@ -3,10 +3,9 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
-import ComponentThemeFormInputCheckbox from '@components/theme/form/inputs/checkbox';
 import { IPageNavigationAddState } from '@pages/navigation/add';
 import { StatusId } from '@constants/status';
-import { I18Util } from '@utils/i18.util';
+import ComponentThemeFormInputSwitch from '@components/theme/form/inputs/switch';
 
 type IComponentProps = {
   status: IPageNavigationAddState['status'];
@@ -19,7 +18,7 @@ const ComponentPageNavigationAddTabOptions = React.memo(
 
     return (
       <div className="row">
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInputSelect
             title={t('status')}
             name="statusId"
@@ -27,7 +26,7 @@ const ComponentPageNavigationAddTabOptions = React.memo(
             valueAsNumber
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={t('rank')}
             name="rank"
@@ -35,10 +34,13 @@ const ComponentPageNavigationAddTabOptions = React.memo(
           />
         </div>
         <div className="col-md-7">
-          <ComponentThemeFormInputCheckbox title={t('primary')} name="isPrimary" />
+          <ComponentThemeFormInputSwitch
+            title={t('primary')}
+            name="isPrimary"
+          />
         </div>
         <div className="col-md-7">
-          <ComponentThemeFormInputCheckbox
+          <ComponentThemeFormInputSwitch
             title={t('secondary')}
             name="isSecondary"
           />

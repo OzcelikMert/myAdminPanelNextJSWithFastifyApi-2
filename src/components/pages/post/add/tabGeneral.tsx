@@ -47,7 +47,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         </div>
       ) : null}
       {props.showIconCheckbox && props.isIconActive ? (
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={`${t('icon')}`}
             name={
@@ -60,7 +60,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
         </div>
       ) : null}
       {!props.isIconActive ? (
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormSelectImage
             name={
               props.isECommerceVariation
@@ -71,7 +71,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
           />
         </div>
       ) : null}
-      <div className="col-md-7 mb-3">
+      <div className="col-md-7">
         <ComponentThemeFormInput
           title={`${t('title')}*`}
           name={
@@ -82,7 +82,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
           type="text"
         />
       </div>
-      <div className="col-md-7 mb-3">
+      <div className="col-md-7">
         <ComponentThemeFormInput
           title={t('shortContent').toCapitalizeCase()}
           name={
@@ -95,7 +95,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
       </div>
 
       {props.showCategoryTermSelect ? (
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <div className="row">
             <div className="col-md-10">
               <ComponentThemeFormInputSelect
@@ -124,7 +124,7 @@ const ComponentPagePostAddTabGeneral = React.memo((props: IComponentProps) => {
       ) : null}
 
       {props.showTagTermSelect ? (
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <div className="row">
             <div className="col-md-10">
               <ComponentThemeFormInputSelect

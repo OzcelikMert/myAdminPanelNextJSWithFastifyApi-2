@@ -12,21 +12,21 @@ const ComponentPageUserAddTabGeneral = React.memo((props: IComponentProps) => {
 
   return (
     <div className="row">
-      <div className="col-md-7 mb-3">
+      <div className="col-md-7">
         <ComponentThemeFormInput
           title={`${t('name')}*`}
           name="name"
           type="text"
         />
       </div>
-      <div className="col-md-7 mb-3">
+      <div className="col-md-7">
         <ComponentThemeFormInput
           title={`${t('email')}*`}
           name="email"
           type="email"
         />
       </div>
-      <div className="col-md-7 mb-3">
+      <div className="col-md-7">
         <ComponentThemeFormInput
           title={`${t('password')}*`}
           name="password"

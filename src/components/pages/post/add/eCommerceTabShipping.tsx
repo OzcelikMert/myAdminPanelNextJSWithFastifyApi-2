@@ -18,7 +18,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
       <div className="row">
         <div className="col-md-7">
           <div className="row">
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('width')}
                 name={
@@ -29,7 +29,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 type="text"
               />
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('height')}
                 name={
@@ -40,7 +40,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 type="text"
               />
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('depth')}
                 name={
@@ -51,7 +51,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 type="text"
               />
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('weight')}
                 name={
@@ -62,7 +62,7 @@ const ComponentPagePostAddECommerceTabShipping = React.memo(
                 type="text"
               />
             </div>
-            <div className="col-md-6 mb-3">
+            <div className="col-md-6">
               <ComponentThemeFormInput
                 title={t('shippingPrice')}
                 name={

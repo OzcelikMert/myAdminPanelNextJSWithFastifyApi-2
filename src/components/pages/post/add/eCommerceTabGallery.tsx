@@ -33,7 +33,7 @@ const ComponentPagePostAddECommerceTabGallery = React.memo(
 
     return (
       <div className="row">
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormSelectImage
             name={
               props.isECommerceVariation

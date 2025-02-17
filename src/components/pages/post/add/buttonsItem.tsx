@@ -16,7 +16,7 @@ const ComponentPagePostButtonsItem = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
 
   return (
-    <div className="col-md-12 mt-4">
+    <div className={`col-md-12 ${props.index > 0 ? 'mt-5' : ''}`}>
       <ComponentFieldSet
         legend={`${t('button')}#${props.index + 1}`}
         legendElement={
@@ -30,11 +30,11 @@ const ComponentPagePostButtonsItem = React.memo((props: IComponentProps) => {
           <div className="col-md-6">
             <ComponentThemeFormInput
               type={'text'}
-              title={t('title')}
+              title={`${t('title')}*`}
               name={`contents.buttons.${props.index}.title`}
             />
           </div>
-          <div className="col-md-6 mt-3 mt-lg-0">
+          <div className="col-md-6">
             <ComponentThemeFormInput
               type={'text'}
               title={t('url')}

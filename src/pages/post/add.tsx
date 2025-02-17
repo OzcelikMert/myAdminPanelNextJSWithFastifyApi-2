@@ -49,6 +49,7 @@ import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
 import ComponentThemeTabs from '@components/theme/tabs';
 import ComponentThemeTab from '@components/theme/tabs/tab';
+import { ComponentEndPointPermission } from '@constants/endPointPermissions/component.endPoint.permission';
 
 export type IPagePostAddState = {
   authors: IComponentInputSelectData<string>[];
@@ -1287,7 +1288,7 @@ export default function PagePostAdd() {
               formValues.typeId
             ) ? (
               <ComponentPagePostAddButtons
-                items={formValues.contents.buttons}
+                buttons={formValues.contents.buttons}
                 onClickAddNew={() => onClickAddNewButton()}
                 onClickDelete={(_id) => onClickDeleteButton(_id)}
               />
@@ -1296,6 +1297,11 @@ export default function PagePostAdd() {
             [PostTypeId.Page].includes(formValues.typeId) ? (
               <ComponentPagePostAddComponents
                 components={state.components}
+                selectedComponents={formValues.components}
+                showEditButton={PermissionUtil.check(
+                  sessionAuth!,
+                  ComponentEndPointPermission.UPDATE
+                )}
                 onClickAddNew={() => onClickAddNewComponent()}
                 onClickDelete={(_id) => onClickDeleteComponent(_id)}
               />

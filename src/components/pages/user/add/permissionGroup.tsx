@@ -9,10 +9,9 @@ import { PermissionId } from '@constants/permissions';
 
 type IComponentProps = {
   permissions: IPageUserAddState['permissions'];
-  userPermissions: PermissionId[];
+  selectedPermissions: PermissionId[];
   item: IPermissionGroup;
   index: number;
-  onSelectPermission: (id: PermissionId) => void;
 };
 
 const ComponentPageUserAddPermissionGroup = React.memo(
@@ -37,8 +36,6 @@ const ComponentPageUserAddPermissionGroup = React.memo(
               key={`permission_${item.id}`}
               item={item}
               index={index}
-              isSelected={props.userPermissions.includes(item.id)}
-              onSelect={(id) => props.onSelectPermission(id)}
             />
           ))}
         </ComponentFieldSet>

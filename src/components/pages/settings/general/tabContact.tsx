@@ -14,28 +14,28 @@ const ComponentPageSettingsGeneralTabContact = React.memo(
 
     return (
       <div className="row">
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={t('email')}
             name="contact.email"
             type="email"
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={t('phone')}
             name="contact.phone"
             type="tel"
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={t('address')}
             name="contact.address"
             type="text"
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={t('addressMap')}
             name="contact.addressMap"

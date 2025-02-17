@@ -124,7 +124,7 @@ export default function PageSubscribers() {
         type: 'loading',
       });
 
-      const serviceResult = await SubscriberService.getMany(
+      const serviceResult = await SubscriberService.deleteMany(
         {
           _id: selectedItemId,
         },

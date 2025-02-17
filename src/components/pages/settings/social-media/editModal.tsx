@@ -71,7 +71,7 @@ const ComponentPageSettingsSocialMediaEditModal = React.memo(
                   formMethods={form}
                   onSubmit={(data) => onSubmit(data)}
                 >
-                  <div className="row mt-3">
+                  <div className="row">
                     <div className="col-md-12">
                       <ComponentThemeFormInput
                         title={`${t('title')}*`}
@@ -81,7 +81,7 @@ const ComponentPageSettingsSocialMediaEditModal = React.memo(
                         required
                       />
                     </div>
-                    <div className="col-md-12 mt-3">
+                    <div className="col-md-12">
                       <ComponentThemeFormInput
                         title={`${t('key')}*`}
                         name="key"

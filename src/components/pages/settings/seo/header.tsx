@@ -15,7 +15,7 @@ const ComponentPageSettingsSEOHeader = React.memo((props: IComponentProps) => {
         <div className="col-md-6 align-content-center"></div>
         <div className="col-md-6">
           <ComponentThemeLanguageSelector
-            onChange={(item) => props.onChangeLanguage(item.value._id)}
+            onChange={(item) => props.onChangeLanguage(item._id)}
             selectedLangId={props.langId}
             alternates={props.item?.seoContentAlternates}
           />

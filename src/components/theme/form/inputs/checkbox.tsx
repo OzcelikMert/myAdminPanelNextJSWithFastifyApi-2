@@ -8,32 +8,49 @@ import { Controller, Control, useFormContext } from 'react-hook-form';
 import { IFormFieldError } from '..';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
+import { omit } from 'lodash';
 
 type IComponentProps = {
   valueAsNumber?: boolean;
   valueAsBoolean?: boolean;
   name: string;
   control?: Control<any>;
-  watch?: boolean
+  watch?: boolean;
 } & Omit<IComponentInputCheckboxProps, 'name'>;
 
 const ComponentThemeFormInputCheckbox = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
   const form = useFormContext();
 
-  if(props.watch){
+  if (props.watch) {
     const watch = form.watch(props.name);
   }
 
-  const setValue = (value: any, isSelected: boolean) => {
+  const getValue = (value: any, isSelected: boolean) => {    
     if (Array.isArray(value)) {
-      return value.map((item) => (props.valueAsNumber ? Number(item) : item));
+      if(isSelected){
+        return [...value, (props.valueAsNumber ? Number(props.value) : props.value)];
+      }else {
+        return value.filter((item) => item != props.value);
+      }
     } else {
       return props.valueAsNumber
         ? Number(value)
         : props.valueAsBoolean || !props.value
           ? Boolean(isSelected)
           : value;
+    }
+  };
+
+  const getIsChecked = (value: any) => {
+    if (props.value) {
+      if (Array.isArray(value)) {
+        return value.includes(props.value);
+      } else {
+        return props.value == value;
+      }
+    } else {
+      return Boolean(value);
     }
   };
 
@@ -67,9 +84,10 @@ const ComponentThemeFormInputCheckbox = React.memo((props: IComponentProps) => {
           <ComponentInputCheckbox
             {...field}
             onChange={(e) =>
-              field.onChange(setValue(field.value, e.target.checked))
+              field.onChange(getValue(field.value, e.target.checked))
             }
-            {...props}
+            checked={getIsChecked(field.value)}
+            {...omit(props, "valueAsNumber", "valueAsBoolean", "control", "watch")}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

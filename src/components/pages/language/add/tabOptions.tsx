@@ -3,14 +3,15 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormInputSelect from '@components/theme/form/inputs/select';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
-import ComponentThemeFormInputCheckbox from '@components/theme/form/inputs/checkbox';
 import { IPageLanguageAddState } from '@pages/language/add';
 import { StatusId } from '@constants/status';
 import { I18Util } from '@utils/i18.util';
+import ComponentThemeFormInputSwitch from '@components/theme/form/inputs/switch';
 
 type IComponentProps = {
   status: IPageLanguageAddState['status'];
   statusId: StatusId;
+  disableIsDefault?: boolean
 };
 
 const ComponentPageLanguageAddTabOptions = React.memo(
@@ -19,7 +20,7 @@ const ComponentPageLanguageAddTabOptions = React.memo(
 
     return (
       <div className="row">
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInputSelect
             title={t('status')}
             name="statusId"
@@ -27,15 +28,15 @@ const ComponentPageLanguageAddTabOptions = React.memo(
             valueAsNumber
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={`${t('rank')}*`}
             name="rank"
             type="number"
           />
         </div>
-        <div className="col-md-7 mb-3">
-          <ComponentThemeFormInputCheckbox title={t('default')} name="isDefault" valueAsBoolean />
+        <div className="col-md-7">
+          <ComponentThemeFormInputSwitch title={t('default')} name="isDefault" disabled={props.disableIsDefault}/>
         </div>
       </div>
     );

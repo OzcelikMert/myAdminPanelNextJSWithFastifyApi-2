@@ -1,4 +1,4 @@
-import React, { useReducer, useRef, useState } from 'react';
+import React, { use, useReducer, useRef, useState } from 'react';
 import { UserService } from '@services/user.service';
 import {
   IUserGetResultService,
@@ -145,6 +145,7 @@ export default function PageUserAdd() {
     },
     resolver: zodResolver(queries._id ? UserSchema.putWithId : UserSchema.post),
   });
+  const prevRoleIdRef = React.useRef(initialFormState.roleId);
   const { showToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
   const mainTitleRef = useRef<string>('');
@@ -163,8 +164,11 @@ export default function PageUserAdd() {
   }, [isPageLoaded]);
 
   useEffectAfterDidMount(() => {
-    getPermissionsForUserRoleId(form.getValues().roleId);
-    form.setValue('permissions', []);
+    if(prevRoleIdRef.current != form.getValues().roleId){
+      getPermissionsForUserRoleId(form.getValues().roleId);
+      form.setValue('permissions', []);
+      form.trigger('permissions');
+    }
   }, [form.getValues().roleId]);
 
   const init = async () => {
@@ -253,6 +257,8 @@ export default function PageUserAdd() {
           type: ActionTypes.SET_ITEM,
           payload: user,
         });
+        prevRoleIdRef.current = user.roleId;
+        form.reset(user);
         mainTitleRef.current = user.name;
       } else {
         await navigatePage();
@@ -341,11 +347,14 @@ export default function PageUserAdd() {
     } else {
       newPermissions = state.permissions.map((perm) => perm.id);
     }
-    form.setValue('permissions', newPermissions, { shouldValidate: true });
+    form.setValue('permissions', newPermissions);
+    form.trigger('permissions');
   };
 
   const formValues = form.getValues();
   const userRole = userRoles.findSingle('id', formValues.roleId);
+  console.log(formValues);
+  
 
   return isPageLoading ? null : (
     <div className="page-settings page-user">
@@ -390,9 +399,8 @@ export default function PageUserAdd() {
                       <ComponentPageUserAddTabPermissions
                         permissionGroups={state.permissionGroups}
                         permissions={state.permissions}
-                        userPermissions={formValues.permissions}
+                        selectedPermissions={formValues.permissions}
                         onSelectAllPermissions={() => onSelectAllPermissions()}
-                        onSelectPermission={(id) => onSelectPermission(id)}
                       />
                     </ComponentThemeTab>
                   </ComponentThemeTabs>

@@ -8,6 +8,7 @@ import { IFormFieldError } from '@components/theme/form';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { I18Util } from '@utils/i18.util';
+import { omit } from 'lodash';
 
 type IComponentProps = {
   name: string;
@@ -47,7 +48,7 @@ const ComponentThemeFormInputTags = React.memo((props: IComponentProps) => {
           <ComponentInputTags
             {...field}
             onChange={(value) => field.onChange(value)}
-            {...props}
+            {...omit(props, "control")}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

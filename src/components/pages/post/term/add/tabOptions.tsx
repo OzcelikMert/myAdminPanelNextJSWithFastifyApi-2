@@ -19,7 +19,7 @@ const ComponentPagePostTermAddTabOptions = React.memo(
 
     return (
       <div className="row">
-        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'}`}>
           <ComponentThemeFormInputSelect
             title={t('status')}
             name="statusId"
@@ -27,7 +27,7 @@ const ComponentPagePostTermAddTabOptions = React.memo(
             valueAsNumber
           />
         </div>
-        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'} mb-3`}>
+        <div className={`${props.isModal ? 'col-md-12' : 'col-md-7'}`}>
           <ComponentThemeFormInput
             title={t('rank')}
             name="rank"

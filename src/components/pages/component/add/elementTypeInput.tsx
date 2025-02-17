@@ -46,7 +46,7 @@ const Button = React.memo((props: { nameText: string; nameUrl: string }) => {
           name={props.nameText}
         />
       </div>
-      <div className="col-md-6 mt-3 mt-lg-0">
+      <div className="col-md-6">
         <ComponentThemeFormInput
           title={t('url')}
           type={'text'}

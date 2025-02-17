@@ -36,7 +36,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
           <div className="row">
             <div className="col-9">
               <div className="row">
-                <div className="col-md-6 mt-2 mt-md-0">
+                <div className="col-md-6">
                   <ComponentThemeFormInputSelect
                     title={t('attribute')}
                     name={`eCommerce.attributes.${props.index}.attributeTermId`}
@@ -49,7 +49,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                     }
                   />
                 </div>
-                <div className="col-md-6 mt-2 mt-md-0">
+                <div className="col-md-6">
                   <ComponentThemeFormInputSelect
                     title={t('type')}
                     name={`eCommerce.attributes.${props.index}.typeId`}

@@ -4,18 +4,30 @@ import ComponentInputSwitch, {
 import { IFormFieldError } from '@components/theme/form';
 import { ObjectUtil } from '@utils/object.util';
 import React from 'react';
-import { Controller, Control, FieldError } from 'react-hook-form';
+import {
+  Controller,
+  Control,
+  FieldError,
+  useFormContext,
+} from 'react-hook-form';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { I18Util } from '@utils/i18.util';
+import { omit } from 'lodash';
 
 type IComponentProps = {
   name: string;
   control?: Control<any>;
+  watch?: boolean;
 } & Omit<IComponentInputSwitchProps, 'name'>;
 
 const ComponentThemeFormInputSwitch = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
+  const form = useFormContext();
+
+  if (props.watch) {
+    const watch = form.watch(props.name);
+  }
 
   return (
     <Controller
@@ -47,7 +59,8 @@ const ComponentThemeFormInputSwitch = React.memo((props: IComponentProps) => {
           <ComponentInputSwitch
             {...field}
             onChange={(e) => field.onChange(Boolean(e.target.checked))}
-            {...props}
+            checked={Boolean(field.value)}
+            {...omit(props, "watch", "control")}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

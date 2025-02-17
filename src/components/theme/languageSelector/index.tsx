@@ -79,7 +79,7 @@ const ComponentThemeLanguageSelector = React.memo((props: IComponentProps) => {
 
   if (!selectedLanguage) {
     return null;
-  }
+  }  
 
   const options: IComponentItemProps[] = languages
     .filter((item) => item._id != selectedLangId)

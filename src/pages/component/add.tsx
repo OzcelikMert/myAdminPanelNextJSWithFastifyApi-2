@@ -334,6 +334,7 @@ export default function PageComponentAdd() {
       },
     ];
     form.setValue('elements', newElements);
+    form.trigger(`elements`);
     onEdit(_id);
   };
 
@@ -341,8 +342,8 @@ export default function PageComponentAdd() {
     let newElements = form.getValues().elements;
     let foundIndex = newElements.indexOfKey('_id', state.selectedElementId);
     if (foundIndex > -1) {
-      newElements[foundIndex] = newElement;
-      form.setValue('elements', newElements);
+      form.setValue(`elements.${foundIndex}`, newElement);
+      form.trigger(`elements.${foundIndex}`);
       return true;
     }
     return false;
@@ -372,6 +373,7 @@ export default function PageComponentAdd() {
       if (result.isConfirmed) {
         newElements.splice(index, 1);
         form.setValue('elements', newElements);
+        form.trigger(`elements`);
       }
     }
   };
@@ -433,6 +435,7 @@ export default function PageComponentAdd() {
                       <ComponentThemeTab
                         eventKey="general"
                         title={t('general')}
+                        formFieldErrorKeys={["title", "key"]}
                       >
                         <ComponentPageComponentAddTabGeneral
                           componentTypes={state.componentTypes}
@@ -443,6 +446,7 @@ export default function PageComponentAdd() {
                     <ComponentThemeTab
                       eventKey="elements"
                       title={t('elements')}
+                      formFieldErrorKeys={["elements"]}
                     >
                       <ComponentPageComponentAddTabElements
                         elements={formValues.elements}

@@ -26,42 +26,42 @@ const ComponentPageProfileForm = React.memo((props: IComponentProps) => {
                 onSubmit={(event) => props.onSubmit(event)}
               >
                 <div className="row">
-                  <div className="col-md-12 mb-3">
+                  <div className="col-md-12">
                     <ComponentThemeFormInput
                       title={`${t('name')}*`}
                       name="name"
                       type="text"
                     />
                   </div>
-                  <div className="col-md-12 mb-3">
+                  <div className="col-md-12">
                     <ComponentThemeFormInput
                       title={t('comment')}
                       name="comment"
                       type="textarea"
                     />
                   </div>
-                  <div className="col-md-12 mb-3">
+                  <div className="col-md-12">
                     <ComponentThemeFormInput
                       title={`${t('phone')}`}
                       name="phone"
                       type="text"
                     />
                   </div>
-                  <div className="col-md-12 mb-3">
+                  <div className="col-md-12">
                     <ComponentThemeFormInput
                       title="Facebook"
                       name="facebook"
                       type="url"
                     />
                   </div>
-                  <div className="col-md-12 mb-3">
+                  <div className="col-md-12">
                     <ComponentThemeFormInput
                       title="Instagram"
                       name="instagram"
                       type="url"
                     />
                   </div>
-                  <div className="col-md-12 mb-3">
+                  <div className="col-md-12">
                     <ComponentThemeFormInput
                       title="Twitter"
                       name="twitter"

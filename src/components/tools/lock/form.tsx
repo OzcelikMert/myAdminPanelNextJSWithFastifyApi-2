@@ -23,7 +23,7 @@ const ComponentToolLockForm = React.memo((props: IComponentProps) => {
       onSubmit={(data) => props.onSubmit(data)}
     >
       <div className="row">
-        <div className="col-md-12 mb-3">
+        <div className="col-md-12">
           <ComponentThemeFormInput
             title={t('password')}
             type="password"

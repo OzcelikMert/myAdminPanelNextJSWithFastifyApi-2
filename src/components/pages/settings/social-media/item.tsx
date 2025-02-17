@@ -39,7 +39,7 @@ const ComponentPageSettingsSocialMediaItem = React.memo(
           }
         >
           <div className="row">
-            <div className="col-md-12 mt-4">
+            <div className="col-md-12">
               <ComponentThemeFormInput
                 type="text"
                 name={`socialMedia.${props.index}.url`}

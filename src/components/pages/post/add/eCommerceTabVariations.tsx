@@ -81,7 +81,7 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
                 if(!attribute) return null;
 
                 return (
-                  <div className="col-md-3 mt-3">
+                  <div className="col-md-3">
                     <ComponentThemeFormInputSelect
                       key={item._id}
                       name={`eCommerce.defaultVariationOptions.${index}.variationTermId`}

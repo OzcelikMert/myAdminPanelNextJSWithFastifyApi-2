@@ -20,7 +20,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
 
     return (
       <div className="row">
-        <div className="col-md-4 mb-3">
+        <div className="col-md-4">
           <ComponentFieldSet legend={t('logo')}>
             <ComponentThemeFormSelectImage
               name="logo"
@@ -28,7 +28,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
             />
           </ComponentFieldSet>
         </div>
-        <div className="col-md-4 mb-3">
+        <div className="col-md-4">
           <ComponentFieldSet legend={t('logo') + ' - 2'}>
             <ComponentThemeFormSelectImage
               name="logoTwo"
@@ -36,7 +36,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
             />
           </ComponentFieldSet>
         </div>
-        <div className="col-md-4 mb-3">
+        <div className="col-md-4">
           <ComponentFieldSet legend={t('icon')}>
             <ComponentThemeFormSelectImage
               name="icon"
@@ -44,7 +44,7 @@ const ComponentPageSettingsGeneralTabGeneral = React.memo(
             />
           </ComponentFieldSet>
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInputSelect
             title={t('adminPanelLanguage').toCapitalizeCase()}
             name="panelLangId"

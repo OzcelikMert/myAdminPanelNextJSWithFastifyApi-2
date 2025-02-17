@@ -9,6 +9,7 @@ import { Controller, Control } from 'react-hook-form';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { I18Util } from '@utils/i18.util';
+import { omit } from 'lodash';
 
 export type IComponentFormInputProps = {
   valueAsNumber?: boolean;
@@ -21,7 +22,7 @@ const ComponentThemeFormInput = React.memo(
   (props: IComponentFormInputProps) => {
     const t = useAppSelector(selectTranslation);
 
-    const setValue = (value: any) => {
+    const getValue = (value: any) => {
       if (props.valueAsNumber || props.type == 'number') {
         return Number(value);
       } else if (props.valueAsDate || props.type == 'date') {
@@ -60,8 +61,8 @@ const ComponentThemeFormInput = React.memo(
           return (
             <ComponentInput
               {...field}
-              {...props}
-              onChange={(e) => field.onChange(setValue(e.target.value))}
+              {...omit(props, "valueAsNumber", "valueAsDate", "control")}
+              onChange={(e) => field.onChange(getValue(e.target.value))}
               ref={(e) => field.ref(e)}
               hasAnError={hasAnError}
               errorText={hasAnError ? errorText : undefined}

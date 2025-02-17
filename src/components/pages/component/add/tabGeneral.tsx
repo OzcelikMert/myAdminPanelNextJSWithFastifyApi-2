@@ -17,17 +17,17 @@ const ComponentPageComponentAddTabGeneral = React.memo(
 
     return (
       <div className="row">
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={`${t('title')}*`}
             name="title"
             type="text"
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput title={`${t('key')}*`} name="key" type="text" />
         </div>
-        <div className="col-md-7 mt-3">
+        <div className="col-md-7">
           <ComponentThemeFormInputSelect
             title={`${t('typeId')}*`}
             name="typeId"

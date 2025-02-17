@@ -40,49 +40,49 @@ const ComponentPageSettingsContactFormsItem = React.memo(
           }
         >
           <div className="row">
-            <div className="col-md-12 mt-4">
+            <div className="col-md-12">
               <ComponentThemeFormInput
                 type="text"
                 name={`contactForms.${props.index}.name`}
                 title={t('name')}
               />
             </div>
-            <div className="col-md-12 mt-4">
+            <div className="col-md-12">
               <ComponentThemeFormInput
                 type="email"
                 name={`contactForms.${props.index}.targetEmail`}
                 title={t('targetEmail')}
               />
             </div>
-            <div className="col-md-12 mt-4">
+            <div className="col-md-12">
               <ComponentThemeFormInput
                 type="email"
                 name={`contactForms.${props.index}.email`}
                 title={t('email')}
               />
             </div>
-            <div className="col-md-12 mt-4">
+            <div className="col-md-12">
               <ComponentThemeFormInput
                 type="password"
                 name={`contactForms.${props.index}.password`}
                 title={t('password')}
               />
             </div>
-            <div className="col-md-12 mt-4">
+            <div className="col-md-12">
               <ComponentThemeFormInput
                 type="text"
                 name={`contactForms.${props.index}.host`}
                 title={t('host')}
               />
             </div>
-            <div className="col-md-12 mt-4">
+            <div className="col-md-12">
               <ComponentThemeFormInput
                 type="number"
                 name={`contactForms.${props.index}.port`}
                 title={t('port')}
               />
             </div>
-            <div className="col-md-7 mt-4">
+            <div className="col-md-7">
               <ComponentThemeFormInputSwitch
                 title={t('hasSSL')}
                 name={`contactForms.${props.index}.hasSSL`}

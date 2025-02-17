@@ -39,21 +39,21 @@ const ComponentPageLanguageAddTabGeneral = React.memo(
             </div>
           </div>
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={`${t('title')}*`}
             name="title"
             type="text"
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={`${t('shortKey')}*`}
             name="shortKey"
             type="text"
           />
         </div>
-        <div className="col-md-7 mb-3">
+        <div className="col-md-7">
           <ComponentThemeFormInput
             title={`${t('locale')}*`}
             name="locale"

@@ -34,7 +34,7 @@ const ComponentPageNavigationAddHeader = React.memo(
           <div className="col-md-6">
             {props.showLanguageSelector ? (
               <ComponentThemeLanguageSelector
-                onChange={(item) => props.onChangeLanguage(item.value._id)}
+                onChange={(item) => props.onChangeLanguage(item._id)}
                 selectedLangId={props.langId}
                 alternates={props.item?.alternates}
               />

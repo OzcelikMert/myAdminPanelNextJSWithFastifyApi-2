@@ -1,39 +1,43 @@
 import React from 'react';
-import { PermissionUtil } from '@utils/permission.util';
-import { ComponentEndPointPermission } from '@constants/endPointPermissions/component.endPoint.permission';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { IPagePostAddState } from '@pages/post/add';
 import ComponentPagePostAddComponentsItem from './componentsItem';
+import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
 
 type IComponentProps = {
   components?: IPagePostAddState['components'];
+  selectedComponents?: string[];
+  showEditButton?: boolean;
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
 };
 
 const ComponentPagePostAddComponents = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
   return (
     <div className="grid-margin stretch-card">
       <div className="card">
         <div className="card-header text-center pt-3">
-          <h4>{t('components')}</h4>
+          <h4>
+            {t('components')}{' '}
+            <ComponentThemeToolTipFormFieldErrors
+              keys={['components']}
+              hideFieldTitles
+            />
+          </h4>
         </div>
         <div className="card-body">
           <div className="row">
             <div className="col-md-7 mt-2">
               <div className="row">
-                {props.components?.map((_id, index) => (
+                {props.selectedComponents?.map((item, index) => (
                   <ComponentPagePostAddComponentsItem
-                    _id={_id.value}
+                    _id={item}
                     index={index}
-                    showEditButton={PermissionUtil.check(
-                      sessionAuth!,
-                      ComponentEndPointPermission.UPDATE
-                    )}
+                    components={props.components}
+                    showEditButton={props.showEditButton}
                     onClickAddNew={() => props.onClickAddNew()}
                     onClickDelete={(_id) => props.onClickDelete(_id)}
                   />

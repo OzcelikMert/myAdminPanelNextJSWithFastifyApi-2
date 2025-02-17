@@ -6,6 +6,7 @@ import { PermissionUtil } from '@utils/permission.util';
 import { UserRoleId } from '@constants/userRoles';
 import ComponentPageComponentAddElementTypeInput from './elementTypeInput';
 import ComponentThemeToolTipMissingLanguages from '@components/theme/tooltip/missingLanguages';
+import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
 
 type IComponentProps = {
   item: IComponentGetResultServiceElement;
@@ -19,7 +20,7 @@ const ComponentPageComponentAddElement = React.memo(
     const sessionAuth = useAppSelector((state) => state.sessionState.auth);
 
     return (
-      <div className={`col-md-12 ${props.index > 0 ? 'mt-5' : ''}`}>
+      <div className={`col-md-12 ${props.index > 0 ? 'mt-3' : ''}`}>
         <ComponentFieldSet
           legend={`${props.item.title} ${PermissionUtil.checkPermissionRoleRank(sessionAuth!.user.roleId, UserRoleId.SuperAdmin) ? `(#${props.item.key})` : ''}`}
           legendElement={
@@ -48,10 +49,17 @@ const ComponentPageComponentAddElement = React.memo(
               />
             </div>
             {
+              <ComponentThemeToolTipFormFieldErrors
+              className="col-md-1 align-content-center"
+                keys={[`elements.${props.index}`]}
+                hideFieldTitles
+              />
+            }
+            {
               <ComponentThemeToolTipMissingLanguages
                 alternates={props.item.alternates ?? []}
                 div={true}
-                divClass="col-md-1"
+                divClass="col-md-1 align-content-center"
               />
             }
           </div>

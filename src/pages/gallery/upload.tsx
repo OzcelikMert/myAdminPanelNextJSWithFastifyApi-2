@@ -72,9 +72,7 @@ export default function PageGalleryUpload(props: IPageGalleryUploadProps) {
   }, [isPageLoaded]);
 
   useEffectAfterDidMount(() => {
-    console.log(`useEffectAfterDidMount [uploadingFiles]`);
     for (const file of uploadingFiles) {
-      console.log(`useEffectAfterDidMount [uploadingFiles] for`, file);
       if (file.status == UploadingFileStatus.Pending) {
         uploadFile(file);
       }

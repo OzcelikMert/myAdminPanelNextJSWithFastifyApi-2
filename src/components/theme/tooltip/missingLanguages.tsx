@@ -46,12 +46,12 @@ const ComponentThemeToolTipMissingLanguages = React.memo(
     };
 
     const checkIsMissing = (langId: string) => {
-      return !props.alternates.some((itemLanguage) =>
-        Array.isArray(itemLanguage)
-          ? itemLanguage.every(
-              (itemLanguage_2) => langId == itemLanguage_2.langId
+      return !props.alternates.some((alternate) =>
+        Array.isArray(alternate)
+          ? alternate.some(
+              (alternateSub) => langId == alternateSub.langId
             )
-          : langId == itemLanguage.langId
+          : langId == alternate.langId
       );
     };
 

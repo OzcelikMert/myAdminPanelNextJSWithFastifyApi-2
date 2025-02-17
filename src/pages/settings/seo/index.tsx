@@ -240,7 +240,7 @@ export default function PageSettingsSEO() {
                   onSubmit={(event) => onSubmit(event)}
                 >
                   <div className="row">
-                    <div className="col-md-7 mb-3">
+                    <div className="col-md-7">
                       <ComponentThemeFormInput
                         title={t('websiteTitle')}
                         type="text"
@@ -248,7 +248,7 @@ export default function PageSettingsSEO() {
                         maxLength={50}
                       />
                     </div>
-                    <div className="col-md-7 mb-3">
+                    <div className="col-md-7">
                       <ComponentThemeFormInput
                         title={t('websiteDescription')}
                         type="textarea"

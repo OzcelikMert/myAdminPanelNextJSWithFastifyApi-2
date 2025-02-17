@@ -1,6 +1,7 @@
 import ComponentThemeFormLoadingButton from './button/loadingButton';
 import {
   FieldError,
+  FieldErrors,
   FormProvider,
   useFormContext,
   UseFormReturn,
@@ -34,21 +35,25 @@ type IComponentProps = {
 
 const ComponentThemeForm = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-  const {showToast} = useToast();
+  const { showToast } = useToast();
 
   const hasError =
     props.formMethods.formState.submitCount > 0 &&
     !props.formMethods.formState.isValid;
 
-  useEffectAfterDidMount(() => {
-    if(hasError){
+  useEffectAfterDidMount(() => {}, [props.formMethods.formState.errors]);
+
+  const onError = (errors: FieldErrors) => {
+    console.error(errors);
+
+    if (hasError) {
       showToast({
         title: t('error'),
-        content: t("warningAboutFormFieldError"),
-        type: 'error'
+        content: t('warningAboutFormFieldError'),
+        type: 'error',
       });
     }
-  }, [props.formMethods.formState.errors])
+  };
 
   return (
     <FormProvider {...props.formMethods}>
@@ -60,7 +65,7 @@ const ComponentThemeForm = React.memo((props: IComponentProps) => {
         }}
         onSubmit={
           props.onSubmit &&
-          props.formMethods.handleSubmit(props.onSubmit as any)
+          props.formMethods.handleSubmit(props.onSubmit as any, onError)
         }
       >
         {props.children}

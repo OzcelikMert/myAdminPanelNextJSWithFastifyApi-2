@@ -32,6 +32,7 @@ import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
 import ComponentThemeTabs from '@components/theme/tabs';
 import ComponentThemeTab from '@components/theme/tabs/tab';
+import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
 
 export type IPageNavigationAddState = {
   items: IComponentInputSelectData<string>[];
@@ -338,8 +339,8 @@ export default function PageNavigationAdd() {
     }
   };
 
-  const formValues = form.getValues();
-
+  const formValues = form.getValues();  
+  
   return isPageLoading ? null : (
     <div className="page-post">
       <div className="row mb-3">
@@ -372,7 +373,7 @@ export default function PageNavigationAdd() {
                     }
                     activeKey={state.mainTabActiveKey}
                   >
-                    <ComponentThemeTab eventKey="general" title={t('general')}>
+                    <ComponentThemeTab eventKey="general" title={t('general')} formFieldErrorKeys={["contents.title", "contents.url"]}>
                       <ComponentPageNavigationAddTabGeneral
                         items={state.items}
                         parentId={formValues.parentId}

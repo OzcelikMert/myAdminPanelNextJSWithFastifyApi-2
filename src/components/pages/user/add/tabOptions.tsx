@@ -19,7 +19,7 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
   
   return (
     <div className="row">
-      <div className="col-md-7 mb-3">
+      <div className="col-md-7">
         <ComponentThemeFormInputSelect
           title={t('role')}
           name="roleId"
@@ -29,7 +29,7 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
           watch
         />
       </div>
-      <div className="col-md-7 mb-3">
+      <div className="col-md-7">
         <ComponentThemeFormInputSelect
           title={t('status')}
           name="statusId"
@@ -39,15 +39,15 @@ const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
         />
       </div>
       {props.statusId == StatusId.Banned ? (
-        <div className="col-md-7 mb-3">
-          <div className="mb-3">
+        <div className="col-md-7">
+          <div>
             <ComponentThemeFormInput
               title={`${t('banDateEnd')}*`}
               type="date"
               name="banDateEnd"
             />
           </div>
-          <div className="mb-3">
+          <div>
             <ComponentThemeFormInput
               title={t('banComment')}
               name="banComment"

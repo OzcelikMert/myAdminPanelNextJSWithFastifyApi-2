@@ -1,5 +1,5 @@
-import ComponentThemeFormInputCheckbox from '@components/theme/form/inputs/checkbox';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
+import ComponentThemeFormInputSwitch from '@components/theme/form/inputs/switch';
 import { StatusId } from '@constants/status';
 import { IPageLoginState } from '@pages/login';
 import { selectTranslation } from '@redux/features/translationSlice';
@@ -16,18 +16,18 @@ const ComponentPageLoginForm = React.memo((props: IComponentProps) => {
 
   return (
     <div className="row">
-      <div className="col-md-12 mb-3">
+      <div className="col-md-12">
         <ComponentThemeFormInput title={t('email')} type="email" name="email" />
       </div>
-      <div className="col-md-12 mb-3">
+      <div className="col-md-12">
         <ComponentThemeFormInput
           title={t('password')}
           type="password"
           name="password"
         />
       </div>
-      <div className="col-md-12 mb-3">
-        <ComponentThemeFormInputCheckbox title={t('keepMe')} name="keepMe" />
+      <div className="col-md-12">
+        <ComponentThemeFormInputSwitch title={t('keepMe')} name="keepMe" />
       </div>
       <div className="col-md-12">
         {props.isWrong ? (
