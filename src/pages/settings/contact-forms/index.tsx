@@ -179,6 +179,7 @@ export default function PageSettingsContactForms() {
     });
 
     form.setValue('contactForms', newContactForms);
+    form.trigger('contactForms');
     onEdit(_id);
   };
 
@@ -186,8 +187,8 @@ export default function PageSettingsContactForms() {
     let newContactForms = form.getValues().contactForms;
     let index = newContactForms.indexOfKey('_id', state.selectedItemId);
     if (index > -1) {
-      newContactForms[index] = newItem;
-      form.setValue('contactForms', newContactForms);
+      form.setValue(`contactForms.${index}`, newItem);
+      form.trigger(`contactForms.${index}`);
       return true;
     }
     return false;
@@ -213,6 +214,7 @@ export default function PageSettingsContactForms() {
     if (result.isConfirmed) {
       newContactForms.splice(index, 1);
       form.setValue('contactForms', newContactForms);
+      form.trigger('contactForms');
     }
   };
 

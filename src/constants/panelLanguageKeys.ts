@@ -1,4 +1,7 @@
 export const panelLanguageKeys = [
+  'looksLikeYouAreLost',
+  'returnHomePage',
+  '404Error',
   'clear',
   'loadingWithVariable',
   'warningAboutFormFieldError',

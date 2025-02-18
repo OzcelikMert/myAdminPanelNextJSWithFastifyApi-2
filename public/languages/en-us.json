@@ -1,4 +1,7 @@
 {
+  "looksLikeYouAreLost": "Looks like you're lost",
+  "404Error": "The page you're looking for couldn't be found!",
+  "returnHomePage": "Return Home Page",
   "clear": "Clear",
   "loadingWithVariable": "'{{0}}' is loading...",
   "eCommerceAttributeLengthError": "Please add at least 1 attribute!",

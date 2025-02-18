@@ -14,13 +14,14 @@ import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
 import { useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentToolHeader from '@components/tools/header';
+import ComponentProviderRoute from '@components/providers/route';
 
 type ICurrentPath = {
   pathname: string;
   query?: any;
 };
 
-const checkEqualRouterAndCurrentPath = (
+const checkRouterAndCurrentPathIsEqual = (
   router: NextRouter,
   currentPath: ICurrentPath
 ) => {
@@ -48,7 +49,7 @@ const ComponentApp = React.memo((props: IComponentProps) => {
     pathname: router.pathname,
     query: router.query,
   });
-  const isEqualRouterAndCurrentPath = checkEqualRouterAndCurrentPath(
+  const isEqualRouterAndCurrentPath = checkRouterAndCurrentPathIsEqual(
     router,
     currentPathRef.current
   );
@@ -63,12 +64,7 @@ const ComponentApp = React.memo((props: IComponentProps) => {
         query: router.query,
       };
     }
-  }, [isEqualRouterAndCurrentPath]);
-
-  if (router.asPath === '/' || typeof props.statusCode !== 'undefined') {
-    router.replace(EndPoints.LOGIN);
-    return null;
-  }
+  }, [router.pathname, router.query]);
 
   const getBreadcrumbTitle = () => {
     return breadCrumb.map((item) => item.title).join(' - ');
@@ -104,7 +100,9 @@ const ComponentApp = React.memo((props: IComponentProps) => {
                 {!isFullPageLayout ? <ComponentToolHeader /> : null}
                 {isEqualRouterAndCurrentPath ? (
                   <ComponentProviderAuth>
-                    {props.children}
+                    <ComponentProviderRoute statusCode={props.statusCode}>
+                      {props.children}
+                    </ComponentProviderRoute>
                   </ComponentProviderAuth>
                 ) : null}
               </div>

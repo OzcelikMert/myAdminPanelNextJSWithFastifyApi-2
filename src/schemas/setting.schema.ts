@@ -49,7 +49,7 @@ const schemaContact = object({
 
 const schemaSEOContent = object({
   langId: string().min(1),
-  title: string().optional(),
+  title: string().min(1).max(50),
   content: string().optional(),
   tags: array(string().min(1)).default([]),
 });

@@ -1,0 +1,22 @@
+.page-error {
+  text-align: center;
+  .error-404 {
+    img {
+        object-fit: none;
+        object-position: 73% 60%;
+        height: 240px;
+    }
+
+    h1 {
+      font-size: 80px;
+    }
+
+    h3 {
+      color: var(--theme-h3-text-color);
+    }
+
+    p {
+      color: var(--theme-menu-title-color);
+    }
+  }
+}

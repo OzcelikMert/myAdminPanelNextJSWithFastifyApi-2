@@ -353,8 +353,6 @@ export default function PageUserAdd() {
 
   const formValues = form.getValues();
   const userRole = userRoles.findSingle('id', formValues.roleId);
-  console.log(formValues);
-  
 
   return isPageLoading ? null : (
     <div className="page-settings page-user">

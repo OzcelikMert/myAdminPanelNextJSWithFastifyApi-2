@@ -232,13 +232,13 @@ export default function PageSettingsSEO() {
           <ComponentSpinnerDonut customClass="page-spinner" />
         ) : null}
         <div className="col-md-12">
-          <div className="grid-margin stretch-card">
-            <div className="card">
-              <div className="card-body">
-                <ComponentThemeForm
-                  formMethods={form}
-                  onSubmit={(event) => onSubmit(event)}
-                >
+          <ComponentThemeForm
+            formMethods={form}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
                   <div className="row">
                     <div className="col-md-7">
                       <ComponentThemeFormInput
@@ -264,10 +264,10 @@ export default function PageSettingsSEO() {
                       />
                     </div>
                   </div>
-                </ComponentThemeForm>
+                </div>
               </div>
             </div>
-          </div>
+          </ComponentThemeForm>
         </div>
       </div>
     </div>

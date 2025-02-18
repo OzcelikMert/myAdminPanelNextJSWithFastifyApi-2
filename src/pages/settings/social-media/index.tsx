@@ -172,6 +172,7 @@ export default function PageSettingsSocialMedia() {
       title: '',
     });
     form.setValue('socialMedia', newSocialMedia);
+    form.trigger(`socialMedia`);
     onEdit(_id);
   };
 
@@ -179,8 +180,8 @@ export default function PageSettingsSocialMedia() {
     let newSocialMedia = form.getValues().socialMedia;
     let index = newSocialMedia.indexOfKey('_id', state.selectedItemId);
     if (index > -1) {
-      newSocialMedia[index] = newItem;
-      form.setValue('socialMedia', newSocialMedia);
+      form.setValue(`socialMedia.${index}`, newItem);
+      form.trigger(`socialMedia.${index}`);
       return true;
     }
     return false;
@@ -206,6 +207,7 @@ export default function PageSettingsSocialMedia() {
     if (result.isConfirmed) {
       newSocialMedia.splice(index, 1);
       form.setValue('socialMedia', newSocialMedia);
+      form.trigger(`socialMedia`);
     }
   };
 
@@ -234,13 +236,13 @@ export default function PageSettingsSocialMedia() {
       />
       <div className="row">
         <div className="col-md-12">
-          <div className="grid-margin stretch-card">
-            <div className="card">
-              <div className="card-body">
-                <ComponentThemeForm
-                  formMethods={form}
-                  onSubmit={(event) => onSubmit(event)}
-                >
+          <ComponentThemeForm
+            formMethods={form}
+            onSubmit={(event) => onSubmit(event)}
+          >
+            <div className="grid-margin stretch-card">
+              <div className="card">
+                <div className="card-body">
                   <div className="row">
                     <div className="col-md-7 mt-2">
                       <div className="row">
@@ -269,10 +271,10 @@ export default function PageSettingsSocialMedia() {
                       </div>
                     ) : null}
                   </div>
-                </ComponentThemeForm>
+                </div>
               </div>
             </div>
-          </div>
+          </ComponentThemeForm>
         </div>
       </div>
     </div>

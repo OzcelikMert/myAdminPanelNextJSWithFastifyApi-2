@@ -5,6 +5,7 @@ import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { ISettingContactFormModel } from 'types/models/setting.model';
 import ComponentThemeFormInputSwitch from '@components/theme/form/inputs/switch';
+import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
 
 type IComponentProps = {
   item: ISettingContactFormModel;
@@ -35,6 +36,12 @@ const ComponentPageSettingsContactFormsItem = React.memo(
                     props.onDelete && props.onDelete(props.item._id)
                   }
                 ></i>
+                <ComponentThemeToolTipFormFieldErrors 
+                  keys={[`contactForms.${props.index}`]}
+                  iconFontSize='1'
+                  className='ms-2'
+                  hideFieldTitles
+                />
               </span>
             ) : undefined
           }

@@ -1,5 +1,6 @@
 import { ILanguageModel } from '../models/language.model';
 import { StatusId } from '@constants/status';
+import { IUserPopulateService } from './user.service';
 
 export type ILanguageGetResultService = {
   author?: IUserPopulateService;

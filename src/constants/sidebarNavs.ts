@@ -351,13 +351,6 @@ export const sidebarNavs: ISidebarPath[] = [
         permission: SettingsEndPointPermission.UPDATE_SEO,
       },
       {
-        id: 'settingPaths',
-        path: EndPoints.SETTINGS_WITH.PATHS,
-        icon: `sign-direction`,
-        title: 'paths',
-        permission: SettingsEndPointPermission.UPDATE_PATH,
-      },
-      {
         id: 'settingContactForms',
         path: EndPoints.SETTINGS_WITH.CONTACT_FORMS,
         title: 'contactForms',

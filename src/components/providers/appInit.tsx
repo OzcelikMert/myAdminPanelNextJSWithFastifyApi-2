@@ -51,10 +51,7 @@ const ComponentProviderAppInit = (props: IComponentProps) => {
       let foundDefaultLanguage = serviceResult.data.findSingle(
         'isDefault',
         true
-      );
-      if (!foundDefaultLanguage) {
-        foundDefaultLanguage = serviceResult.data[0];
-      }
+      ) ?? serviceResult.data[0];
       appDispatch(setLanguagesState(serviceResult.data));
       appDispatch(setMainLangIdState(foundDefaultLanguage._id));
     }
