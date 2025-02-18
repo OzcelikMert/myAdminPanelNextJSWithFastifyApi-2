@@ -2,6 +2,7 @@
 myAdminPanelNextJSWithFastifyApi-2 with NextJS, Functional component and Redux
 
 Things to do:
+    - add field erros to social media page
     - update array fields using index
     - add value to checkboxes
     - add key for every loop component
