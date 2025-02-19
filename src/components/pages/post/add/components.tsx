@@ -34,7 +34,8 @@ const ComponentPagePostAddComponents = React.memo((props: IComponentProps) => {
               <div className="row">
                 {props.selectedComponents?.map((item, index) => (
                   <ComponentPagePostAddComponentsItem
-                    _id={item}
+                    key={`post-component-item-${index}`}
+                    item={item}
                     index={index}
                     components={props.components}
                     showEditButton={props.showEditButton}

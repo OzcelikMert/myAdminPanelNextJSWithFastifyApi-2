@@ -26,6 +26,7 @@ const ComponentPageComponentAddTabElements = React.memo(
               ?.orderBy('rank', 'asc')
               .map((item, index) => (
                 <ComponentPageComponentAddElement
+                  key={item._id}
                   index={index}
                   item={item}
                   onDelete={(_id) => props.onDelete(_id)}

@@ -34,7 +34,7 @@ const ComponentTableToggleMenu = React.memo((props: IComponentProps) => {
             <Dropdown.Item
               className={`${item.className ?? ''}`}
               onClick={(event) => props.onChange(item.value)}
-              key={index}
+              key={`table-toggle-menu-dropdown-item-${index}`}
             >
               {item.icon ? <i className={`${item.icon} me-2`}></i> : null}
               {item.label}

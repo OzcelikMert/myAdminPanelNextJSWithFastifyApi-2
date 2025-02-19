@@ -30,8 +30,8 @@ const ComponentThemeToolTipFormFieldErrors = React.memo(
     const form = useFormContext();
 
     const errors: IFormFieldError[] = [];
-    
-    if(form.formState.submitCount > 0){
+
+    if (form.formState.submitCount > 0) {
       for (const key of props.keys) {
         const newError = ObjectUtil.getWithKey(form.formState.errors, key);
         if (newError) {

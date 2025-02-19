@@ -50,12 +50,14 @@ const ComponentToolSidebarChildren = React.memo((props: IComponentProps) => {
             {props.item.subPaths?.map((item, index) => {
               return item.subPaths ? (
                 <ComponentToolSidebarChildren
+                  key={`sidebar-children-${item.id}`}
                   {...props}
                   item={item}
                   index={index}
                 />
               ) : (
                 <ComponentToolSidebarChild
+                  key={`sidebar-child-${item.id}`}
                   {...props}
                   item={item}
                   index={index}

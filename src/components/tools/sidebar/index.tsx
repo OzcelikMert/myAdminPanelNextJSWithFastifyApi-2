@@ -54,17 +54,13 @@ const ComponentToolSidebar = React.memo(() => {
     return router.asPath.startsWith(path);
   };
 
-  const getKey = (id: string) => {
-    return `sidebarItem_${id}`;
-  }
-
   return (
     <nav className="sidebar sidebar-offcanvas" id="sidebar">
       <ul className="nav pt-5">
         {sidebarNavs.map((item, index) => {
           return item.subPaths ? (
             <ComponentToolSidebarChildren
-              key={getKey(item.id)}
+              key={`sidebar-children-${item.id}`}
               item={item}
               index={index}
               activeItems={activeItems}
@@ -73,7 +69,7 @@ const ComponentToolSidebar = React.memo(() => {
             />
           ) : (
             <ComponentToolSidebarChild
-              key={getKey(item.id)}
+              key={`sidebar-child-${item.id}`}
               item={item}
               index={index}
               checkPathActive={(path) => isPathActive(path)}

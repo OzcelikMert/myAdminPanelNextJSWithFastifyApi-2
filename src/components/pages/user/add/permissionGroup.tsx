@@ -33,7 +33,7 @@ const ComponentPageUserAddPermissionGroup = React.memo(
         <ComponentFieldSet legend={t(props.item.langKey)}>
           {foundPermissions.map((item, index) => (
             <ComponentPageUserAddPermission
-              key={`permission_${item.id}`}
+              key={`permission-${item.id}`}
               item={item}
               index={index}
             />

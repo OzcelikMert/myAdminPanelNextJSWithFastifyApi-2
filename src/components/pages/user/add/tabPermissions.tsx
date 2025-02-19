@@ -32,7 +32,7 @@ const ComponentPageUserAddTabPermissions = React.memo(
         </div>
         {props.permissionGroups.map((item, index) => (
           <ComponentPageUserAddPermissionGroup
-            key={`permission_group_${index}`}
+            key={`permission-group-${item.id}`}
             item={item}
             index={index}
             permissions={props.permissions}

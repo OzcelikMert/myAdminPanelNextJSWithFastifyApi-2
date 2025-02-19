@@ -17,7 +17,7 @@ const PermissionGroup = React.memo(
         <ComponentFieldSet legend={t(props.langKey)}>
           <div className="row">
             {props.permissions.map((permission) => (
-              <PermissionItem {...permission} />
+              <PermissionItem key={`permission-${permission.id}`} {...permission} />
             ))}
           </div>
         </ComponentFieldSet>
@@ -65,6 +65,7 @@ const ComponentThemeUserProfileCardPermissions = React.memo((props: IComponentPr
       <div className="row">
         {foundPermissionGroups.orderBy('rank', 'asc').map((group) => (
           <PermissionGroup
+            key={`permission-group-${group.id}`}
             {...group}
             permissions={foundPermissions.findMulti('groupId', group.id)}
           />

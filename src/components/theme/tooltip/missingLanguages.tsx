@@ -48,9 +48,7 @@ const ComponentThemeToolTipMissingLanguages = React.memo(
     const checkIsMissing = (langId: string) => {
       return !props.alternates.some((alternate) =>
         Array.isArray(alternate)
-          ? alternate.some(
-              (alternateSub) => langId == alternateSub.langId
-            )
+          ? alternate.some((alternateSub) => langId == alternateSub.langId)
           : langId == alternate.langId
       );
     };
@@ -82,7 +80,7 @@ const ComponentThemeToolTipMissingLanguages = React.memo(
         }
       >
         {props.div ? (
-          <div className={`${props.divClass ?? ""}`}>
+          <div className={`${props.divClass ?? ''}`}>
             <Icon />
           </div>
         ) : (

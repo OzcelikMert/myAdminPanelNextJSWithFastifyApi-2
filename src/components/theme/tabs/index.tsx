@@ -2,10 +2,18 @@ import React from 'react';
 import { Col, Nav, Row, Tab } from 'react-bootstrap';
 import { IComponentThemeTabProps } from './tab';
 
-type IChild = React.ReactElement<IComponentThemeTabProps> | null;
+type IChildProps = React.ReactElement<IComponentThemeTabProps> | null;
+
+const Child = React.memo((props: IChildProps & { showChildren: boolean }) => {
+  return (
+    <Tab.Pane eventKey={props.props.eventKey}>
+      {props.showChildren ? props.props.children : null}
+    </Tab.Pane>
+  );
+});
 
 type IComponentProps = {
-  children: IChild[];
+  children: IChildProps[];
   onSelect?: (eventKey: string) => void;
   activeKey?: string;
   defaultActiveKey?: string;
@@ -29,13 +37,13 @@ const ComponentThemeTabs = React.memo((props: IComponentProps) => {
           <Col sm="12" className="mt-4">
             <Tab.Content>
               {props.children.map(
-                (child) =>
-                  child && (
-                    <Tab.Pane eventKey={child.props.eventKey}>
-                      {props.activeKey != child.props.eventKey
-                        ? null
-                        : child.props.children}
-                    </Tab.Pane>
+                (item, index) =>
+                  item && (
+                    <Child
+                      {...item}
+                      key={item.key ?? `tab-content-item-${index}`}
+                      showChildren={props.activeKey == item.props.eventKey}
+                    />
                   )
               )}
             </Tab.Content>

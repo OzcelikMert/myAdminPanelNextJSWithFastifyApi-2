@@ -31,7 +31,7 @@ const schemaContactForm = object({
 
 const schemaSocialMedia = object({
   _id: string().optional(),
-  key: string().default(''),
+  key: string().min(1),
   title: string().default(''),
   url: string().default(''),
 });

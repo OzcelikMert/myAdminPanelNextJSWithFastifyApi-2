@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 type IComponentProps = {
   components?: IPagePostAddState['components'];
-  _id: string;
+  item: string;
   index: number;
   showEditButton?: boolean;
   onClickAddNew: () => void;
@@ -20,7 +20,7 @@ const ComponentPagePostAddComponentsItem = React.memo(
     const t = useAppSelector(selectTranslation);
 
     return (
-      <div className={`col-md-12 ${props.index > 0 ? 'mt-5' : ''}`}>
+      <div className={`col-md-12 ${props.index > 0 ? 'mt-3' : ''}`}>
         <div className="row">
           <div className="col-md-9">
             <ComponentThemeFormInputSelect
@@ -30,12 +30,12 @@ const ComponentPagePostAddComponentsItem = React.memo(
               watch
             />
           </div>
-          <div className="col-md-3 mt-2">
+          <div className="col-md-3 mt-2 mt-md-0 align-content-center">
             <div className="row">
               <div className="col-6">
                 {props.showEditButton ? (
                   <Link
-                    href={EndPoints.COMPONENT_WITH.EDIT(props._id)}
+                    href={EndPoints.COMPONENT_WITH.EDIT(props.item)}
                     target="_blank"
                     className="btn btn-gradient-warning btn-lg"
                     referrerPolicy="no-referrer"
@@ -48,7 +48,7 @@ const ComponentPagePostAddComponentsItem = React.memo(
                 <button
                   type="button"
                   className="btn btn-gradient-danger btn-lg"
-                  onClick={(event) => props.onClickDelete(props._id)}
+                  onClick={(event) => props.onClickDelete(props.item)}
                 >
                   <i className="mdi mdi-trash-can"></i>
                 </button>

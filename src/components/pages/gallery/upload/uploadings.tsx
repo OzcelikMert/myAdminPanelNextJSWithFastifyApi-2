@@ -31,7 +31,7 @@ const ComponentPageGalleryUploadUploadings = React.memo(
               <ComponentPageGalleryUploadUploadingItem
                 item={item}
                 index={index}
-                key={`gallery_uploading_item_${item.id}`}
+                key={`gallery-uploading-item-${item.id}`}
               />
             ))}
           </div>

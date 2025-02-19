@@ -4,6 +4,7 @@ import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentFieldSet from '@components/elements/fieldSet';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 import { ISettingSocialMediaModel } from 'types/models/setting.model';
+import ComponentThemeToolTipFormFieldErrors from '@components/theme/tooltip/formFieldErrors';
 
 type IComponentProps = {
   item: ISettingSocialMediaModel;
@@ -34,6 +35,12 @@ const ComponentPageSettingsSocialMediaItem = React.memo(
                     props.onDelete && props.onDelete(props.item._id)
                   }
                 ></i>
+                <ComponentThemeToolTipFormFieldErrors
+                  keys={[`socialMedia.${props.index}`]}
+                  iconFontSize='1'
+                  className='ms-2'
+                  hideFieldTitles
+                />
               </span>
             ) : undefined
           }
