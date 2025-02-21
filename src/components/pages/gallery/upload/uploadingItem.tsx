@@ -12,7 +12,7 @@ type IComponentProps = {
 const ComponentPageGalleryUploadUploadingItem = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
-        
+
     return (
       <div className="col-md-3 mt-1 mt-lg-2">
         <div className="row">

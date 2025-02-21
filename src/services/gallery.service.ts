@@ -35,7 +35,10 @@ const add = (
   }).post<(IGalleryModel & IGalleryImageProperties)[]>();
 };
 
-const deleteMany = (params: IGalleryDeleteManyParamService, signal?: AbortSignal) => {
+const deleteMany = (
+  params: IGalleryDeleteManyParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.GALLERY_WITH.DELETE_IMAGE,

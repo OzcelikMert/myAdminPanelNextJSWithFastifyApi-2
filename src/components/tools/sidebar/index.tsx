@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { ISidebarPath } from 'types/constants/sidebarNavs';
 import { sidebarNavs } from '@constants/sidebarNavs';
-import { RouteUtil } from '@utils/route.util';
-import { EndPoints } from '@constants/endPoints';
 import { useRouter } from 'next/router';
 import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import ComponentToolSidebarChildren from './children';

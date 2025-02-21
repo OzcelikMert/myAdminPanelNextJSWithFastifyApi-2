@@ -3,7 +3,7 @@ import React from 'react';
 
 const Input = React.memo(
   React.forwardRef((props: IComponentInputProps, ref: any) => {
-    const inputProps = omit(props, "titleElement", "hasAnError", "errorText");
+    const inputProps = omit(props, 'titleElement', 'hasAnError', 'errorText');
     switch (props.type) {
       case `textarea`:
         return (

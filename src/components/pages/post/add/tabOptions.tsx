@@ -44,11 +44,7 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
         </div>
       ) : null}
       <div className="col-md-7">
-        <ComponentThemeFormInput
-          title={t('rank')}
-          name="rank"
-          type="number"
-        />
+        <ComponentThemeFormInput title={t('rank')} name="rank" type="number" />
       </div>
       {props.showPageTypeSelect ? (
         <div className="col-md-7">
@@ -76,7 +72,10 @@ const ComponentPagePostAddTabOptions = React.memo((props: IComponentProps) => {
       </div>
       {props.showNoIndexCheckbox ? (
         <div className="col-md-7">
-          <ComponentThemeFormInputSwitch title={t('noIndex')} name="isNoIndex" />
+          <ComponentThemeFormInputSwitch
+            title={t('noIndex')}
+            name="isNoIndex"
+          />
         </div>
       ) : null}
     </div>

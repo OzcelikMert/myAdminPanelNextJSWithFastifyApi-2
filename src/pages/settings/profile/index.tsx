@@ -179,7 +179,7 @@ export default function PageSettingsProfile() {
   };
 
   const onSubmit = async (data: IPageProfileFormState) => {
-    let params = data;
+    const params = data;
     const serviceResult = await UserService.updateProfile(
       params,
       abortControllerRef.current.signal

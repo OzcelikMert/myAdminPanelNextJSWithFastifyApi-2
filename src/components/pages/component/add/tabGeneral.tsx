@@ -25,7 +25,11 @@ const ComponentPageComponentAddTabGeneral = React.memo(
           />
         </div>
         <div className="col-md-7">
-          <ComponentThemeFormInput title={`${t('key')}*`} name="key" type="text" />
+          <ComponentThemeFormInput
+            title={`${t('key')}*`}
+            name="key"
+            type="text"
+          />
         </div>
         <div className="col-md-7">
           <ComponentThemeFormInputSelect

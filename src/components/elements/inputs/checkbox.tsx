@@ -13,7 +13,7 @@ export type IComponentInputCheckboxProps = {
 const ComponentInputCheckbox = React.memo(
   React.forwardRef<any, IComponentInputCheckboxProps>((props, ref) => {
     const idRef = React.useRef<string>(String.createId());
-    const inputProps = omit(props, "hasAnError", "errorText");
+    const inputProps = omit(props, 'hasAnError', 'errorText');
 
     return (
       <div className="theme-input form-check form-check-primary d-inline-block">

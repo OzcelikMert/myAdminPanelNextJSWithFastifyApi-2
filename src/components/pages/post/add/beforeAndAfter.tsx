@@ -78,7 +78,12 @@ const ComponentPagePostAddBeforeAndAfter = React.memo(
               </div>
               <div className="col-md-12 mb-3">
                 <div className="row">
-                  {props.images?.map((image, index) => <GalleryItem key={`before-and-after-gallery-item-${index}`} image={image} />)}
+                  {props.images?.map((image, index) => (
+                    <GalleryItem
+                      key={`before-and-after-gallery-item-${index}`}
+                      image={image}
+                    />
+                  ))}
                 </div>
               </div>
             </div>

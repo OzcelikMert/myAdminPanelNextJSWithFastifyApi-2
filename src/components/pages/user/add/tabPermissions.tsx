@@ -19,14 +19,16 @@ const ComponentPageUserAddTabPermissions = React.memo(
     const t = useAppSelector(selectTranslation);
     const form = useFormContext<IPageFormState>();
 
-    const watchPermissions = form.watch("permissions");
+    const watchPermissions = form.watch('permissions');
 
     return (
       <div className="row">
         <div className="col-md-12 mb-3">
           <ComponentInputCheckbox
             title={t('selectAll')}
-            checked={props.permissions.length === props.selectedPermissions.length}
+            checked={
+              props.permissions.length === props.selectedPermissions.length
+            }
             onChange={(e) => props.onSelectAllPermissions()}
           />
         </div>

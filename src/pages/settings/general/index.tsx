@@ -200,7 +200,7 @@ export default function PageSettingsGeneral() {
   };
 
   const onSubmit = async (data: IPageFormState) => {
-    let params = data;
+    const params = data;
 
     const serviceResult = await SettingService.updateGeneral(
       params,
@@ -246,41 +246,35 @@ export default function PageSettingsGeneral() {
             <div className="grid-margin stretch-card">
               <div className="card">
                 <div className="card-body">
-                    <ComponentThemeTabs
-                      onSelect={(key: any) =>
-                        dispatch({
-                          type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
-                          payload: key,
-                        })
-                      }
-                      activeKey={state.mainTabActiveKey}
-                    >
-                      <ComponentThemeTab
-                        eventKey="general"
-                        title={t('general')}
-                      >
-                        <ComponentPageSettingsGeneralTabGeneral
-                          panelLanguages={state.panelLanguages}
-                          panelLangId={formValues.panelLangId}
-                          icon={formValues.icon}
-                          logo={formValues.logo}
-                          logoTwo={formValues.logoTwo}
-                        />
+                  <ComponentThemeTabs
+                    onSelect={(key: any) =>
+                      dispatch({
+                        type: ActionTypes.SET_MAIN_TAB_ACTIVE_KEY,
+                        payload: key,
+                      })
+                    }
+                    activeKey={state.mainTabActiveKey}
+                  >
+                    <ComponentThemeTab eventKey="general" title={t('general')}>
+                      <ComponentPageSettingsGeneralTabGeneral
+                        panelLanguages={state.panelLanguages}
+                        panelLangId={formValues.panelLangId}
+                        icon={formValues.icon}
+                        logo={formValues.logo}
+                        logoTwo={formValues.logoTwo}
+                      />
+                    </ComponentThemeTab>
+                    <ComponentThemeTab eventKey="contact" title={t('contact')}>
+                      <ComponentPageSettingsGeneralTabContact
+                        contact={formValues.contact}
+                      />
+                    </ComponentThemeTab>
+                    {isUserSuperAdmin ? (
+                      <ComponentThemeTab eventKey="tools" title={t('tools')}>
+                        <ComponentPageSettingsGeneralTabTools />
                       </ComponentThemeTab>
-                      <ComponentThemeTab
-                        eventKey="contact"
-                        title={t('contact')}
-                      >
-                        <ComponentPageSettingsGeneralTabContact
-                          contact={formValues.contact}
-                        />
-                      </ComponentThemeTab>
-                      {isUserSuperAdmin ? (
-                        <ComponentThemeTab eventKey="tools" title={t('tools')}>
-                          <ComponentPageSettingsGeneralTabTools />
-                        </ComponentThemeTab>
-                      ) : null}
-                    </ComponentThemeTabs>
+                    ) : null}
+                  </ComponentThemeTabs>
                 </div>
               </div>
             </div>

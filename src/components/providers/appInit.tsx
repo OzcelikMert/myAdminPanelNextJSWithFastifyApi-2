@@ -48,10 +48,9 @@ const ComponentProviderAppInit = (props: IComponentProps) => {
       abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
-      let foundDefaultLanguage = serviceResult.data.findSingle(
-        'isDefault',
-        true
-      ) ?? serviceResult.data[0];
+      const foundDefaultLanguage =
+        serviceResult.data.findSingle('isDefault', true) ??
+        serviceResult.data[0];
       appDispatch(setLanguagesState(serviceResult.data));
       appDispatch(setMainLangIdState(foundDefaultLanguage._id));
     }
@@ -74,7 +73,7 @@ const ComponentProviderAppInit = (props: IComponentProps) => {
   };
 
   const setPanelLanguage = async () => {
-    let panelLanguage = panelLanguages.findSingle(
+    const panelLanguage = panelLanguages.findSingle(
       'id',
       LocalStorageUtil.getLanguageId()
     );

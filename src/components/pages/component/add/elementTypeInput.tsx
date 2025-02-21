@@ -15,7 +15,9 @@ const ComponentThemeFormInputRichTextbox = dynamic(
 const TextArea = React.memo((props: { name: string }) => {
   const t = useAppSelector(selectTranslation);
 
-  return <ComponentThemeFormInput title={t('text')} type={'textarea'} {...props} />;
+  return (
+    <ComponentThemeFormInput title={t('text')} type={'textarea'} {...props} />
+  );
 });
 
 const RichText = React.memo((props: { name: string }) => {

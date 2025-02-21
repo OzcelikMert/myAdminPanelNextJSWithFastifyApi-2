@@ -37,8 +37,8 @@ const ComponentPageSettingsSocialMediaItem = React.memo(
                 ></i>
                 <ComponentThemeToolTipFormFieldErrors
                   keys={[`socialMedia.${props.index}`]}
-                  iconFontSize='1'
-                  className='ms-2'
+                  iconFontSize="1"
+                  className="ms-2"
                   hideFieldTitles
                 />
               </span>

@@ -10,22 +10,24 @@ type IComponentProps = {
   productTypeId?: ProductTypeId;
 };
 
-const ComponentPagePostAddECommerceTabOptions = React.memo((props: IComponentProps) => {
-  const t = useAppSelector(selectTranslation);
+const ComponentPagePostAddECommerceTabOptions = React.memo(
+  (props: IComponentProps) => {
+    const t = useAppSelector(selectTranslation);
 
-  return (
-    <div className="row">
-      <div className="col-md-7">
-        <ComponentThemeFormInputSelect
-          title={t('productType')}
-          name="eCommerce.typeId"
-          options={props.productTypes}
-          valueAsNumber
-          watch
-        />
+    return (
+      <div className="row">
+        <div className="col-md-7">
+          <ComponentThemeFormInputSelect
+            title={t('productType')}
+            name="eCommerce.typeId"
+            options={props.productTypes}
+            valueAsNumber
+            watch
+          />
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default ComponentPagePostAddECommerceTabOptions;

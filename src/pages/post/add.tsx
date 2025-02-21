@@ -1,4 +1,4 @@
-import React, { FormEvent, useReducer, useRef, useState } from 'react';
+import React, { useReducer, useRef, useState } from 'react';
 import { PostTermService } from '@services/postTerm.service';
 import { PostService } from '@services/post.service';
 import {
@@ -542,7 +542,7 @@ export default function PagePostAdd() {
 
         const formValues = form.getValues();
 
-        let newFormState: IPageFormState = {
+        const newFormState: IPageFormState = {
           ...formValues,
           ...(item as IPostUpdateWithIdParamService),
           contents: {

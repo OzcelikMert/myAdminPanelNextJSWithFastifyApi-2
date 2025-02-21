@@ -249,7 +249,7 @@ export default function PageNavigationAdd() {
       abortControllerRef.current.signal
     );
     if (serviceResult.status && serviceResult.data) {
-      let newItems: IPageNavigationAddState['items'] = [
+      const newItems: IPageNavigationAddState['items'] = [
         { value: '', label: t('notSelected') },
       ];
       for (const item of serviceResult.data) {
@@ -339,8 +339,8 @@ export default function PageNavigationAdd() {
     }
   };
 
-  const formValues = form.getValues();  
-  
+  const formValues = form.getValues();
+
   return isPageLoading ? null : (
     <div className="page-post">
       <div className="row mb-3">
@@ -373,7 +373,11 @@ export default function PageNavigationAdd() {
                     }
                     activeKey={state.mainTabActiveKey}
                   >
-                    <ComponentThemeTab eventKey="general" title={t('general')} formFieldErrorKeys={["contents.title", "contents.url"]}>
+                    <ComponentThemeTab
+                      eventKey="general"
+                      title={t('general')}
+                      formFieldErrorKeys={['contents.title', 'contents.url']}
+                    >
                       <ComponentPageNavigationAddTabGeneral
                         items={state.items}
                         parentId={formValues.parentId}

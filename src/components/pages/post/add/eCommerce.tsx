@@ -33,7 +33,10 @@ type IComponentProps = {
   onClickAddNewVariation?: () => void;
   onClickDeleteVariation?: (_id: string) => void;
   onChangeAttribute?: (attributeId: string, attributeTermId: string) => void;
-  onChangeAttributeVariationTerms?: (attributeId: string, variationTerms: string[]) => void;
+  onChangeAttributeVariationTerms?: (
+    attributeId: string,
+    variationTerms: string[]
+  ) => void;
   onChangeVariationOption?: (
     variationId: string,
     attributeId: string,
@@ -109,9 +112,15 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
                     ? props.onChangeAttribute(attributeId, attributeTermId)
                     : false
                 }
-                onChangeAttributeVariationTerms={(attributeId, variationTerms) =>
+                onChangeAttributeVariationTerms={(
+                  attributeId,
+                  variationTerms
+                ) =>
                   props.onChangeAttributeVariationTerms
-                    ? props.onChangeAttributeVariationTerms(attributeId, variationTerms)
+                    ? props.onChangeAttributeVariationTerms(
+                        attributeId,
+                        variationTerms
+                      )
                     : false
                 }
               />
@@ -120,8 +129,14 @@ const ComponentPagePostAddECommerce = React.memo((props: IComponentProps) => {
               <ComponentThemeTab
                 title={t('variations')}
                 eventKey="variations"
-                formFieldErrorKeys={['eCommerce.variations', 'eCommerce.defaultVariationOptions']}
-                disabled={Boolean(!props.eCommerce.attributes || props.eCommerce.attributes.length == 0)}
+                formFieldErrorKeys={[
+                  'eCommerce.variations',
+                  'eCommerce.defaultVariationOptions',
+                ]}
+                disabled={Boolean(
+                  !props.eCommerce.attributes ||
+                    props.eCommerce.attributes.length == 0
+                )}
               >
                 <ComponentPagePostAddECommerceTabVariations
                   variationTerms={props.variationTerms}

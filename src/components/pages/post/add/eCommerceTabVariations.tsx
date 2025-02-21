@@ -42,9 +42,9 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
   (props: IComponentProps) => {
     const t = useAppSelector(selectTranslation);
     const form = useFormContext<IPageFormState>();
-    
-    const watchDefaultOptions = form.watch("eCommerce.defaultVariationOptions");
-    
+
+    const watchDefaultOptions = form.watch('eCommerce.defaultVariationOptions');
+
     const [accordionKey, setAccordionKey] = React.useState(
       initialState.accordionKey
     );
@@ -77,28 +77,30 @@ const ComponentPagePostAddECommerceTabVariations = React.memo(
           <h4>{t('default')}</h4>
           <div className="row">
             {props.defaultVariationOptions?.map((item, index) => {
-                const attribute = props.selectedAttributes?.findSingle("_id", item.attributeId);
-                if(!attribute) return null;
+              const attribute = props.selectedAttributes?.findSingle(
+                '_id',
+                item.attributeId
+              );
+              if (!attribute) return null;
 
-                return (
-                  <div className="col-md-3">
-                    <ComponentThemeFormInputSelect
-                      key={item._id}
-                      name={`eCommerce.defaultVariationOptions.${index}.variationTermId`}
-                      title={
-                        props.attributeTerms?.findSingle(
-                          'value',
-                          attribute?.attributeTermId
-                        )?.label
-                      }
-                      options={props.variationTerms?.findMulti(
+              return (
+                <div className="col-md-3">
+                  <ComponentThemeFormInputSelect
+                    key={item._id}
+                    name={`eCommerce.defaultVariationOptions.${index}.variationTermId`}
+                    title={
+                      props.attributeTerms?.findSingle(
                         'value',
-                        attribute?.variationTerms
-                      )}
-                    />
-                  </div>
-                );
-              
+                        attribute?.attributeTermId
+                      )?.label
+                    }
+                    options={props.variationTerms?.findMulti(
+                      'value',
+                      attribute?.variationTerms
+                    )}
+                  />
+                </div>
+              );
             })}
           </div>
         </div>

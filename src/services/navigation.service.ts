@@ -25,7 +25,10 @@ const getWithId = (
   }).get<INavigationGetResultService>();
 };
 
-const getMany = (params: INavigationGetManyParamService, signal?: AbortSignal) => {
+const getMany = (
+  params: INavigationGetManyParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.NAVIGATION_WITH.GET,

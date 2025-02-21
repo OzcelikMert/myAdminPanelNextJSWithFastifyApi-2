@@ -10,7 +10,7 @@ import ComponentToolTip from '@components/elements/tooltip';
 import { useFormContext } from 'react-hook-form';
 
 type IComponentProps = {
-  item: (IPostECommerceAttributeModel & {id?: string});
+  item: IPostECommerceAttributeModel & { id?: string };
   index: number;
   attributeTerms?: IPagePostAddState['attributeTerms'];
   attributeTypes?: IPagePostAddState['attributeTypes'];
@@ -19,7 +19,10 @@ type IComponentProps = {
   onClickDelete: (_id: string) => void;
   onClickAccordionToggle: (id: string) => void;
   onChangeAttribute: (attributeId: string, attributeTermId: string) => void;
-  onChangeAttributeVariationTerms: (attributeId: string, variationTerms: string[]) => void;
+  onChangeAttributeVariationTerms: (
+    attributeId: string,
+    variationTerms: string[]
+  ) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
@@ -27,8 +30,12 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
     const t = useAppSelector(selectTranslation);
 
     const form = useFormContext<IPageFormState>();
-    const watchAttributeTermId = form.watch(`eCommerce.attributes.${props.index}.attributeTermId`);
-    const watchVariationTerms = form.watch(`eCommerce.attributes.${props.index}.variationTerms`);
+    const watchAttributeTermId = form.watch(
+      `eCommerce.attributes.${props.index}.attributeTermId`
+    );
+    const watchVariationTerms = form.watch(
+      `eCommerce.attributes.${props.index}.variationTerms`
+    );
 
     return (
       <Card>
@@ -42,10 +49,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                     name={`eCommerce.attributes.${props.index}.attributeTermId`}
                     options={props.attributeTerms}
                     onChange={(selectedItem, e) =>
-                      props.onChangeAttribute(
-                        props.item._id,
-                        selectedItem
-                      )
+                      props.onChangeAttribute(props.item._id, selectedItem)
                     }
                   />
                 </div>
@@ -111,7 +115,7 @@ const ComponentPagePostAddECommerceTabAttributesItem = React.memo(
                   onChange={(selectedItem, e) =>
                     props.onChangeAttributeVariationTerms(
                       props.item._id,
-                      selectedItem 
+                      selectedItem
                     )
                   }
                 />

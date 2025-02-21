@@ -26,11 +26,14 @@ const ComponentThemeFormInputCheckbox = React.memo((props: IComponentProps) => {
     const watch = form.watch(props.name);
   }
 
-  const getValue = (value: any, isSelected: boolean) => {    
+  const getValue = (value: any, isSelected: boolean) => {
     if (Array.isArray(value)) {
-      if(isSelected){
-        return [...value, (props.valueAsNumber ? Number(props.value) : props.value)];
-      }else {
+      if (isSelected) {
+        return [
+          ...value,
+          props.valueAsNumber ? Number(props.value) : props.value,
+        ];
+      } else {
         return value.filter((item) => item != props.value);
       }
     } else {
@@ -87,7 +90,13 @@ const ComponentThemeFormInputCheckbox = React.memo((props: IComponentProps) => {
               field.onChange(getValue(field.value, e.target.checked))
             }
             checked={getIsChecked(field.value)}
-            {...omit(props, "valueAsNumber", "valueAsBoolean", "control", "watch")}
+            {...omit(
+              props,
+              'valueAsNumber',
+              'valueAsBoolean',
+              'control',
+              'watch'
+            )}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

@@ -48,7 +48,7 @@ const ComponentThemeFormInputTags = React.memo((props: IComponentProps) => {
           <ComponentInputTags
             {...field}
             onChange={(value) => field.onChange(value)}
-            {...omit(props, "control")}
+            {...omit(props, 'control')}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

@@ -134,7 +134,7 @@ export default function PageSubscribers() {
       hideToast(loadingToast);
 
       if (serviceResult.status) {
-        let newItems = items.filter(
+        const newItems = items.filter(
           (item) => !selectedItemId.includes(item._id)
         );
         setItems(newItems);

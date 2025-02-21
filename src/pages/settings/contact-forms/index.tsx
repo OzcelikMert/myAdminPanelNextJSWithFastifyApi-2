@@ -148,7 +148,7 @@ export default function PageSettingsContactForms() {
   };
 
   const onSubmit = async (data: IPageFormState) => {
-    let params = data;
+    const params = data;
     const serviceResult = await SettingService.updateContactForm(
       params,
       abortControllerRef.current.signal
@@ -163,8 +163,8 @@ export default function PageSettingsContactForms() {
   };
 
   const onCreate = () => {
-    let _id = String.createId();
-    let newContactForms = form.getValues().contactForms;
+    const _id = String.createId();
+    const newContactForms = form.getValues().contactForms;
     newContactForms.push({
       _id: _id,
       title: '',
@@ -184,8 +184,8 @@ export default function PageSettingsContactForms() {
   };
 
   const onAccept = async (newItem: ISettingContactFormModel) => {
-    let newContactForms = form.getValues().contactForms;
-    let index = newContactForms.indexOfKey('_id', state.selectedItemId);
+    const newContactForms = form.getValues().contactForms;
+    const index = newContactForms.indexOfKey('_id', state.selectedItemId);
     if (index > -1) {
       form.setValue(`contactForms.${index}`, newItem);
       form.trigger(`contactForms.${index}`);

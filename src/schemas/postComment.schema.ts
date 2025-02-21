@@ -21,5 +21,5 @@ export type IPostCommentPutWithIdSchema = z.infer<typeof putWithIdSchema>;
 
 export const PostCommentSchema = {
   post: postSchema,
-  putWithId: putWithIdSchema
+  putWithId: putWithIdSchema,
 };

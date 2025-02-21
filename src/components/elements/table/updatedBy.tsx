@@ -8,11 +8,11 @@ type IComponentProps = {
 const ComponentTableUpdatedBy = React.memo((props: IComponentProps) => {
   return (
     <div className="text-center">
-      <b>{props.name ?? ""}</b>
+      <b>{props.name ?? ''}</b>
       <br />
       <small>({new Date(props.updatedAt).toLocaleDateString()})</small>
     </div>
   );
 });
 
-export default ComponentTableUpdatedBy
+export default ComponentTableUpdatedBy;

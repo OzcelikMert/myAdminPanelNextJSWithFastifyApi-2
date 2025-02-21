@@ -45,5 +45,5 @@ export const NavigationSchema = {
   post: postSchema,
   putWithId: putWithIdSchema,
   putStatusMany: putStatusManySchema,
-  putRankWithId: putRankWithIdSchema
+  putRankWithId: putRankWithIdSchema,
 };

@@ -7,7 +7,7 @@ export type IComponentThemeTabProps = {
   title: string;
   eventKey?: string;
   formFieldErrorKeys?: string[];
-  disabled?: boolean
+  disabled?: boolean;
 };
 
 const ComponentThemeTab = React.memo((props: IComponentThemeTabProps) => {
@@ -17,7 +17,9 @@ const ComponentThemeTab = React.memo((props: IComponentThemeTabProps) => {
         <ComponentThemeTabTitle
           title={props.title}
           keys={props.formFieldErrorKeys}
-          showFormFieldErrors={Boolean(props.formFieldErrorKeys && props.formFieldErrorKeys.length > 0)}
+          showFormFieldErrors={Boolean(
+            props.formFieldErrorKeys && props.formFieldErrorKeys.length > 0
+          )}
         />
       </Nav.Link>
     </Nav.Item>

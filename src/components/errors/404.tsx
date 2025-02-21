@@ -13,17 +13,20 @@ const ComponentError404 = React.memo(() => {
   return (
     <section className="error-404">
       <div className="container">
-        <h1 className='text-danger my-5'>404</h1>
+        <h1 className="text-danger my-5">404</h1>
         <Image
           src="/images/errors/404.gif"
-          alt='404'
-          className='img-fluid'
+          alt="404"
+          className="img-fluid"
           height={500}
           width={250}
         />
-        <h3 className='my-3 fs-4'>{t('looksLikeYouAreLost')} &#128546;</h3>
-        <p className='my-3 fs-5'>{t('404Error')}</p>
-        <Link href={EndPoints.DASHBOARD} className="btn btn-gradient-success btn-lg mt-4 py-3 px-5 fs-6">
+        <h3 className="my-3 fs-4">{t('looksLikeYouAreLost')} &#128546;</h3>
+        <p className="my-3 fs-5">{t('404Error')}</p>
+        <Link
+          href={EndPoints.DASHBOARD}
+          className="btn btn-gradient-success btn-lg mt-4 py-3 px-5 fs-6"
+        >
           <i className="mdi mdi-arrow-left-circle-outline"></i>{' '}
           {t('returnHomePage')}
         </Link>

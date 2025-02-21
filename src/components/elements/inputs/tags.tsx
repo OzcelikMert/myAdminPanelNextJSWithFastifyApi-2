@@ -34,7 +34,7 @@ export type IComponentInputTagsProps = {
   title?: string;
   placeHolder?: string;
   valueAsNumber?: boolean;
-  required?: boolean
+  required?: boolean;
   hasAnError?: boolean;
   errorText?: string;
 };

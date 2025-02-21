@@ -50,7 +50,7 @@ const ComponentPageComponentAddElement = React.memo(
             </div>
             {
               <ComponentThemeToolTipFormFieldErrors
-              className="col-md-1 align-content-center"
+                className="col-md-1 align-content-center"
                 keys={[`elements.${props.index}`]}
                 hideFieldTitles
               />

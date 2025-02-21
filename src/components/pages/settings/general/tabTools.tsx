@@ -3,8 +3,7 @@ import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import ComponentThemeFormInput from '@components/theme/form/inputs/input';
 
-type IComponentProps = {
-};
+type IComponentProps = {};
 
 const ComponentPageSettingsGeneralTabTools = React.memo(
   (props: IComponentProps) => {

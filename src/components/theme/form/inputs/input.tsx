@@ -61,7 +61,7 @@ const ComponentThemeFormInput = React.memo(
           return (
             <ComponentInput
               {...field}
-              {...omit(props, "valueAsNumber", "valueAsDate", "control")}
+              {...omit(props, 'valueAsNumber', 'valueAsDate', 'control')}
               onChange={(e) => field.onChange(getValue(e.target.value))}
               ref={(e) => field.ref(e)}
               hasAnError={hasAnError}

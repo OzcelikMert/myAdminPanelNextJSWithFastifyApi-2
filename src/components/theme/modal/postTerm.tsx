@@ -22,7 +22,7 @@ type IComponentProps = {
 const ComponentThemeModalPostTerm = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
 
-  const selectedTerm = postTermTypes.findSingle("id", props.termTypeId);
+  const selectedTerm = postTermTypes.findSingle('id', props.termTypeId);
 
   return (
     <Modal className="form-modal" size="xl" centered show={props.isShow}>
@@ -39,7 +39,9 @@ const ComponentThemeModalPostTerm = React.memo((props: IComponentProps) => {
       <Modal.Body className="m-0 p-0">
         <div className="card">
           <div className="card-body">
-            <h4 className="text-center">{t(selectedTerm?.langKey ?? "[noLangAdd]")}</h4>
+            <h4 className="text-center">
+              {t(selectedTerm?.langKey ?? '[noLangAdd]')}
+            </h4>
             <PagePostTermAdd
               _id={props._id}
               postTypeId={props.postTypeId}

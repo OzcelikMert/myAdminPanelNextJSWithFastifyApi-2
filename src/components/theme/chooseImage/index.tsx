@@ -36,7 +36,7 @@ const ComponentThemeChooseImage = React.memo(
 
     const onSelected = (images: string[]) => {
       onHide();
-      
+
       if (props.onChange) {
         props.onChange(images);
       }

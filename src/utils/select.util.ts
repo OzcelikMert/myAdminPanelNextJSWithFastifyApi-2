@@ -21,17 +21,16 @@ const getUserRoles = (roleId: UserRoleId[], t: ITranslationFunc) => {
 };
 
 const getPanelLanguages = (languageId?: PanelLanguageId[]) => {
-  const languages = languageId ? panelLanguages.findMulti('id', languageId) : panelLanguages;
+  const languages = languageId
+    ? panelLanguages.findMulti('id', languageId)
+    : panelLanguages;
   return languages.map((language) => ({
     label: language.title,
     value: language.id.toString(),
   }));
 };
 
-const getElementTypes = (
-  t: ITranslationFunc,
-  typeId?: ElementTypeId[]
-) => {
+const getElementTypes = (t: ITranslationFunc, typeId?: ElementTypeId[]) => {
   const types = typeId ? elementTypes.findMulti('id', typeId) : elementTypes;
   return types.map((type) => ({
     label: t(type.langKey),
@@ -39,11 +38,10 @@ const getElementTypes = (
   }));
 };
 
-const getComponentTypes = (
-  t: ITranslationFunc,
-  typeId?: ComponentTypeId[]
-) => {
-  const types = typeId ? componentTypes.findMulti('id', typeId) : componentTypes;
+const getComponentTypes = (t: ITranslationFunc, typeId?: ComponentTypeId[]) => {
+  const types = typeId
+    ? componentTypes.findMulti('id', typeId)
+    : componentTypes;
   return types.map((type) => ({
     label: t(type.langKey),
     value: type.id,
@@ -55,5 +53,5 @@ export const SelectUtil = {
   getUserRoles: getUserRoles,
   getPanelLanguages: getPanelLanguages,
   getElementTypes: getElementTypes,
-  getComponentTypes: getComponentTypes
+  getComponentTypes: getComponentTypes,
 };

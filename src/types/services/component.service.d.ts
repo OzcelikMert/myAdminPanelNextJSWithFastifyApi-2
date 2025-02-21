@@ -18,7 +18,7 @@ export type IComponentGetResultServiceElement = {
 export type IComponentGetResultService = {
   author?: IUserPopulateService;
   lastAuthor?: IUserPopulateService;
-  elements: IComponentGetResultServiceElement[]
+  elements: IComponentGetResultServiceElement[];
 } & Omit<IComponentModel, 'elements'>;
 
 export interface IComponentGetWithIdParamService {

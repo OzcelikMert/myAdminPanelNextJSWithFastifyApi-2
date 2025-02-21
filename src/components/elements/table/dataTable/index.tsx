@@ -185,14 +185,14 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
       (selectedItem) => !items.includes(selectedItem)
     );
 
-    if(!checkAllSelected()){
-      newSelectedItems =  [...newSelectedItems, ...items];
+    if (!checkAllSelected()) {
+      newSelectedItems = [...newSelectedItems, ...items];
     }
 
     if (props.onSelect) {
       props.onSelect(newSelectedItems);
     }
-    
+
     dispatch({
       type: ActionTypes.SET_SELECTED_ITEMS,
       payload: newSelectedItems,
@@ -236,7 +236,7 @@ const ComponentDataTable = React.memo(<T,>(props: IComponentProps<T>) => {
       const searchableColumns = props.columns.findMulti('isSearchable', true);
       if (searchableColumns) {
         searchedItems = state.items.filter((item) => {
-          let selectors: any[] = [];
+          const selectors: any[] = [];
 
           for (const column of searchableColumns) {
             if (column.selector) {

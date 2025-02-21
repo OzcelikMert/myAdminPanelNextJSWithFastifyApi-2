@@ -6,7 +6,7 @@ const getApiURL = () => {
 };
 
 const getWebsiteURL = (...paths: (number | string)[]) => {
-  if(paths && paths.length >0){
+  if (paths && paths.length > 0) {
     return createPath(website, ...paths).removeFirstChar();
   }
   return website;

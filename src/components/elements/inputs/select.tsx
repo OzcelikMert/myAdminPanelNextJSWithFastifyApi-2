@@ -30,7 +30,7 @@ const ComponentInputSelect = React.memo(
         } else {
           customNewValue = newValue.value;
         }
-        
+
         props.onChange(customNewValue, action);
       }
     };

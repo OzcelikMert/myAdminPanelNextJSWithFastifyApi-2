@@ -183,7 +183,7 @@ export default function PageSettingsSEO() {
   };
 
   const onSubmit = async (data: IPageFormState) => {
-    let params = data;
+    const params = data;
 
     const serviceResult = await SettingService.updateSeo(
       params,

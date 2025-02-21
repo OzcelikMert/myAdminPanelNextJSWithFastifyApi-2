@@ -16,7 +16,7 @@ type IComponentProps = {
 
 const ComponentPageUserAddTabOptions = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-  
+
   return (
     <div className="row">
       <div className="col-md-7">

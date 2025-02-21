@@ -164,7 +164,7 @@ export default function PageUserAdd() {
   }, [isPageLoaded]);
 
   useEffectAfterDidMount(() => {
-    if(prevRoleIdRef.current != form.getValues().roleId){
+    if (prevRoleIdRef.current != form.getValues().roleId) {
       getPermissionsForUserRoleId(form.getValues().roleId);
       form.setValue('permissions', []);
       form.trigger('permissions');

@@ -18,7 +18,10 @@ export interface ILanguageGetManyParamService {
   statusId?: StatusId;
 }
 
-export type ILanguageAddParamService = {} & Omit<ILanguageModel, '_id' | 'authorId' | 'lastAuthorId'>;
+export type ILanguageAddParamService = {} & Omit<
+  ILanguageModel,
+  '_id' | 'authorId' | 'lastAuthorId'
+>;
 
 export type ILanguageUpdateWithIdParamService = {
   _id: string;

@@ -36,10 +36,10 @@ const ComponentPageSettingsContactFormsItem = React.memo(
                     props.onDelete && props.onDelete(props.item._id)
                   }
                 ></i>
-                <ComponentThemeToolTipFormFieldErrors 
+                <ComponentThemeToolTipFormFieldErrors
                   keys={[`contactForms.${props.index}`]}
-                  iconFontSize='1'
-                  className='ms-2'
+                  iconFontSize="1"
+                  className="ms-2"
                   hideFieldTitles
                 />
               </span>

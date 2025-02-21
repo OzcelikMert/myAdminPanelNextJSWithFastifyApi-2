@@ -2,25 +2,28 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface IBreadCrumbData {
   title: string;
-  url?: string
+  url?: string;
 }
 
 export interface IBreadCrumbState {
-  data: IBreadCrumbData[]
+  data: IBreadCrumbData[];
 }
 
 const initialState: IBreadCrumbState = {
-  data: []
-}
+  data: [],
+};
 
 const breadCrumbSlice = createSlice({
   name: 'breadCrumbState',
   initialState,
   reducers: {
-    setBreadCrumbState: (state, action: PayloadAction<IBreadCrumbState["data"]>) => {
+    setBreadCrumbState: (
+      state,
+      action: PayloadAction<IBreadCrumbState['data']>
+    ) => {
       state.data = action.payload;
-    }
-  }
+    },
+  },
 });
 
 export const { setBreadCrumbState } = breadCrumbSlice.actions;

@@ -8,7 +8,7 @@ export interface ISessionState {
 
 const initialState: ISessionState = {
   auth: null,
-  isAuthChecked: false
+  isAuthChecked: false,
 };
 
 const sessionSlice = createSlice({
@@ -30,6 +30,7 @@ const sessionSlice = createSlice({
   },
 });
 
-export const { setSessionAuthState, setIsSessionAuthCheckedState } = sessionSlice.actions;
+export const { setSessionAuthState, setIsSessionAuthCheckedState } =
+  sessionSlice.actions;
 
 export const sessionReducer = sessionSlice.reducer;

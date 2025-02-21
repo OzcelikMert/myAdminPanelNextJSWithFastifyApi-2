@@ -163,8 +163,8 @@ export default function PageSettingsSocialMedia() {
   };
 
   const onCreate = () => {
-    let _id = String.createId();
-    let newSocialMedia = form.getValues().socialMedia;
+    const _id = String.createId();
+    const newSocialMedia = form.getValues().socialMedia;
     newSocialMedia.push({
       _id: String.createId(),
       key: '',
@@ -177,8 +177,8 @@ export default function PageSettingsSocialMedia() {
   };
 
   const onAccept = async (newItem: ISettingSocialMediaModel) => {
-    let newSocialMedia = form.getValues().socialMedia;
-    let index = newSocialMedia.indexOfKey('_id', state.selectedItemId);
+    const newSocialMedia = form.getValues().socialMedia;
+    const index = newSocialMedia.indexOfKey('_id', state.selectedItemId);
     if (index > -1) {
       form.setValue(`socialMedia.${index}`, newItem);
       form.trigger(`socialMedia.${index}`);

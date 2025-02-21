@@ -304,8 +304,8 @@ export default function PagePostTermList() {
     );
 
     if (serviceResult.status) {
-      let newItems = state.items;
-      let newItem = newItems.findSingle('_id', state.selectedItemId);
+      const newItems = state.items;
+      const newItem = newItems.findSingle('_id', state.selectedItemId);
       if (newItem) {
         newItem.rank = rank;
       }

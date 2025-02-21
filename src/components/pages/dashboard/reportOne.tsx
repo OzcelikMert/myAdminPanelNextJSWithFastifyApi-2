@@ -80,6 +80,7 @@ const ComponentPageDashboardReportOne = React.memo((props: IComponentProps) => {
                         target="_blank"
                         className="text-info fs-6 text-decoration-none"
                         href={props.googleAnalyticURL ?? 'javascript:void(0);'}
+                        rel="noreferrer"
                       >
                         {t('clickToSee')}
                       </a>

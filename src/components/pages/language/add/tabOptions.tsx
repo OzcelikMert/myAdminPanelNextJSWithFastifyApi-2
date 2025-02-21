@@ -11,7 +11,7 @@ import ComponentThemeFormInputSwitch from '@components/theme/form/inputs/switch'
 type IComponentProps = {
   status: IPageLanguageAddState['status'];
   statusId: StatusId;
-  disableIsDefault?: boolean
+  disableIsDefault?: boolean;
 };
 
 const ComponentPageLanguageAddTabOptions = React.memo(
@@ -36,7 +36,11 @@ const ComponentPageLanguageAddTabOptions = React.memo(
           />
         </div>
         <div className="col-md-7">
-          <ComponentThemeFormInputSwitch title={t('default')} name="isDefault" disabled={props.disableIsDefault}/>
+          <ComponentThemeFormInputSwitch
+            title={t('default')}
+            name="isDefault"
+            disabled={props.disableIsDefault}
+          />
         </div>
       </div>
     );

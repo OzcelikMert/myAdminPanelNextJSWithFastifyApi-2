@@ -155,5 +155,5 @@ export const PostSchema = {
   post: postSchema,
   postProduct: postProductSchema,
   putWithId: putWithIdSchema,
-  putProductWithId: putProductWithIdSchema
+  putProductWithId: putProductWithIdSchema,
 };

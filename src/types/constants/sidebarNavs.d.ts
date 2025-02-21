@@ -2,7 +2,7 @@ import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
 import { IEndPointPermission } from 'types/constants/endPoint.permissions';
 
 export interface ISidebarPath {
-  id: string,
+  id: string;
   path: string;
   maskPath?: string;
   title: IPanelLanguageKeys;

@@ -12,13 +12,14 @@ const pageSlice = createSlice({
   name: 'pageState',
   initialState,
   reducers: {
-    setIsPageLoadingState(state, action: PayloadAction<IPageState['isLoading']>) {
+    setIsPageLoadingState(
+      state,
+      action: PayloadAction<IPageState['isLoading']>
+    ) {
       state.isLoading = action.payload;
-    }
+    },
   },
 });
 
-export const {
-  setIsPageLoadingState
-} = pageSlice.actions;
+export const { setIsPageLoadingState } = pageSlice.actions;
 export const pageReducer = pageSlice.reducer;

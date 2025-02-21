@@ -24,17 +24,16 @@ const schema = object({
   elements: array(schemaElement).min(1),
 });
 
-const postSchema = schema
+const postSchema = schema;
 
 const putWithIdSchema = object({
   _id: string().min(1),
 }).merge(postSchema);
-
 
 export type IComponentPostSchema = z.infer<typeof postSchema>;
 export type IComponentPutWithIdSchema = z.infer<typeof putWithIdSchema>;
 
 export const ComponentSchema = {
   post: postSchema,
-  putWithId: putWithIdSchema
+  putWithId: putWithIdSchema,
 };

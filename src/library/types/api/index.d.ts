@@ -6,8 +6,8 @@ export interface IApiRequestParam {
   data?: object;
   processData?: boolean;
   contentType?: string | false;
-  onUploadProgress?: (e: AxiosProgressEvent, percent: number) => void;
   signal?: AbortSignal;
+  onUploadProgress?: (e: AxiosProgressEvent, percent: number) => void;
 }
 
 export type IApiRequestParamMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';

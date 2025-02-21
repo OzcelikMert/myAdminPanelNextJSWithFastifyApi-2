@@ -18,12 +18,13 @@ const ComponentPagePostAddECommerceTabInvertory = React.memo(
     const t = useAppSelector(selectTranslation);
     const form = useFormContext<IPageFormState>();
 
-    const watchIsStock = form.watch(
-      props.isECommerceVariation
-        ? `eCommerce.variations.${props.index ?? 0}.product.eCommerce.inventory.isManageStock`
-        : `eCommerce.inventory.isManageStock`
-    ) ?? false;
-    
+    const watchIsStock =
+      form.watch(
+        props.isECommerceVariation
+          ? `eCommerce.variations.${props.index ?? 0}.product.eCommerce.inventory.isManageStock`
+          : `eCommerce.inventory.isManageStock`
+      ) ?? false;
+
     return (
       <div className="row">
         <div className="col-md-7">

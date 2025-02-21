@@ -1,5 +1,5 @@
-import { BlogsWebsiteEndPoint } from "./blogs.website.endPoint";
-import { SitemapsWebsiteEndPoint } from "./sitemaps.website.endPoint";
+import { BlogsWebsiteEndPoint } from './blogs.website.endPoint';
+import { SitemapsWebsiteEndPoint } from './sitemaps.website.endPoint';
 
 export class WebsiteEndPoints {
   static get HOME() {

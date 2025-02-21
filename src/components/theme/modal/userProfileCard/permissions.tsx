@@ -17,7 +17,10 @@ const PermissionGroup = React.memo(
         <ComponentFieldSet legend={t(props.langKey)}>
           <div className="row">
             {props.permissions.map((permission) => (
-              <PermissionItem key={`permission-${permission.id}`} {...permission} />
+              <PermissionItem
+                key={`permission-${permission.id}`}
+                {...permission}
+              />
             ))}
           </div>
         </ComponentFieldSet>
@@ -42,37 +45,40 @@ type IComponentProps = {
   userInfo: IUserModel;
 };
 
-const ComponentThemeUserProfileCardPermissions = React.memo((props: IComponentProps) => {
-  const t = useAppSelector(selectTranslation);
+const ComponentThemeUserProfileCardPermissions = React.memo(
+  (props: IComponentProps) => {
+    const t = useAppSelector(selectTranslation);
 
-  const foundPermissions = permissions.findMulti(
-    'id',
-    props.userInfo.permissions
-  );
-  let foundPermissionGroups = permissionGroups.findMulti(
-    'id',
-    foundPermissions.map((permission) => permission.groupId)
-  );
-  foundPermissionGroups = foundPermissionGroups.filter(
-    (group, index) => foundPermissionGroups.indexOfKey('id', group.id) === index
-  );
+    const foundPermissions = permissions.findMulti(
+      'id',
+      props.userInfo.permissions
+    );
+    let foundPermissionGroups = permissionGroups.findMulti(
+      'id',
+      foundPermissions.map((permission) => permission.groupId)
+    );
+    foundPermissionGroups = foundPermissionGroups.filter(
+      (group, index) =>
+        foundPermissionGroups.indexOfKey('id', group.id) === index
+    );
 
-  return (
-    <div className="permissions">
-      <h6 className="pb-1 border-bottom fw-bold text-end">
-        {t('permissions')}
-      </h6>
-      <div className="row">
-        {foundPermissionGroups.orderBy('rank', 'asc').map((group) => (
-          <PermissionGroup
-            key={`permission-group-${group.id}`}
-            {...group}
-            permissions={foundPermissions.findMulti('groupId', group.id)}
-          />
-        ))}
+    return (
+      <div className="permissions">
+        <h6 className="pb-1 border-bottom fw-bold text-end">
+          {t('permissions')}
+        </h6>
+        <div className="row">
+          {foundPermissionGroups.orderBy('rank', 'asc').map((group) => (
+            <PermissionGroup
+              key={`permission-group-${group.id}`}
+              {...group}
+              permissions={foundPermissions.findMulti('groupId', group.id)}
+            />
+          ))}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default ComponentThemeUserProfileCardPermissions;

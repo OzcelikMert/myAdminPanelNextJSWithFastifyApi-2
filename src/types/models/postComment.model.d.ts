@@ -10,6 +10,6 @@ export interface IPostCommentModel {
   postTypeId: PostTypeId;
   message: string;
   likes: string[];
-  likeCount: number,
+  likeCount: number;
   statusId: StatusId;
 }

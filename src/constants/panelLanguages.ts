@@ -6,8 +6,8 @@ export enum PanelLanguageId {
 }
 
 export enum PanelLanguageCodes {
-  Turkish = "tr-tr",
-  EnglishUS = "en-us",
+  Turkish = 'tr-tr',
+  EnglishUS = 'en-us',
 }
 
 export const panelLanguages: Array<IPanelLanguage> = [

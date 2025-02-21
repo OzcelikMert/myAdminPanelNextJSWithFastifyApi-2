@@ -18,7 +18,10 @@ import { ApiRequest } from '@library/api/request';
 import { PathUtil } from '@utils/path.util';
 import { IPostModel } from 'types/models/post.model';
 
-const getWithId = (params: IPostGetWithIdParamService, signal?: AbortSignal) => {
+const getWithId = (
+  params: IPostGetWithIdParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.GET_WITH_ID(params._id),
@@ -54,7 +57,10 @@ const add = (params: IPostAddParamService, signal?: AbortSignal) => {
   }).post<IPostModel>();
 };
 
-const addProduct = (params: IPostAddProductParamService, signal?: AbortSignal) => {
+const addProduct = (
+  params: IPostAddProductParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.ADD_PRODUCT,
@@ -63,7 +69,10 @@ const addProduct = (params: IPostAddProductParamService, signal?: AbortSignal) =
   }).post<IPostModel>();
 };
 
-const updateWithId = (params: IPostUpdateWithIdParamService, signal?: AbortSignal) => {
+const updateWithId = (
+  params: IPostUpdateWithIdParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.UPDATE_WITH_ID(params._id),
@@ -108,7 +117,10 @@ const updateStatusMany = (
   }).put();
 };
 
-const deleteMany = (params: IPostDeleteManyParamService, signal?: AbortSignal) => {
+const deleteMany = (
+  params: IPostDeleteManyParamService,
+  signal?: AbortSignal
+) => {
   return new ApiRequest({
     apiUrl: PathUtil.getApiURL(),
     endPoint: ApiEndPoints.POST_WITH.DELETE,

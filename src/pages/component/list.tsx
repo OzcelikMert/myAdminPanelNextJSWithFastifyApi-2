@@ -203,7 +203,7 @@ export default function PageComponentList() {
         selector: (row) => new Date(row.updatedAt || '').toLocaleDateString(),
         cell: (row) => (
           <ComponentTableUpdatedBy
-            name={row.lastAuthor?.name ?? ""}
+            name={row.lastAuthor?.name ?? ''}
             updatedAt={row.updatedAt || ''}
           />
         ),
@@ -215,7 +215,7 @@ export default function PageComponentList() {
         sortFunction: (a, b) => SortUtil.sortByDate(a.createdAt, b.createdAt),
         cell: (row) => (
           <ComponentTableUpdatedBy
-            name={row.author?.name ?? ""}
+            name={row.author?.name ?? ''}
             updatedAt={row.createdAt || ''}
           />
         ),

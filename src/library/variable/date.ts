@@ -158,8 +158,8 @@ Date.prototype.getStringWithMask = function (mask, utc = false) {
       // @ts-ignore
       Z: utc
         ? 'UTC'
-        // @ts-ignore
-        : (String(date).match(timezone) || [''])
+        : // @ts-ignore
+          (String(date).match(timezone) || [''])
             .pop()
             .replace(timezoneClip, ''),
       o:

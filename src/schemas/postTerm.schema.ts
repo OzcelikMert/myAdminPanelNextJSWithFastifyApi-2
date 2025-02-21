@@ -41,5 +41,5 @@ export type IPostTermPutStatusManySchema = z.infer<typeof putStatusManySchema>;
 export const PostTermSchema = {
   post: postSchema,
   putWithId: putWithIdSchema,
-  putStatusMany: putStatusManySchema
+  putStatusMany: putStatusManySchema,
 };

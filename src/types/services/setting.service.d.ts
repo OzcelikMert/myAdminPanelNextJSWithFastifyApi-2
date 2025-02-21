@@ -13,7 +13,7 @@ export interface ISettingSeoContentAlternateService {
 }
 
 export type ISettingGetResultService = {
-  seoContentAlternates?: ISettingSeoContentAlternateService[]
+  seoContentAlternates?: ISettingSeoContentAlternateService[];
 } & ISettingModel;
 
 export type ISettingGetParamService = {

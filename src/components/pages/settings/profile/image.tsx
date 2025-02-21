@@ -6,17 +6,16 @@ import { IPageProfileState } from '@pages/settings/profile';
 import ComponentThemeChooseImage from '@components/theme/chooseImage';
 
 type IComponentProps = {
-  isLoading?: IPageProfileState["isImageChanging"];
-  image?: string
+  isLoading?: IPageProfileState['isImageChanging'];
+  image?: string;
   onChange: (image: string) => void;
 };
 
-const ComponentPageProfileImage = React.memo(
-  (props: IComponentProps) => {
-    const t = useAppSelector(selectTranslation);
+const ComponentPageProfileImage = React.memo((props: IComponentProps) => {
+  const t = useAppSelector(selectTranslation);
 
-    return (
-      <div className="grid-margin stretch-card">
+  return (
+    <div className="grid-margin stretch-card">
       <div className="card">
         <div className="card-body">
           <div className="d-flex flex-column align-items-center text-center">
@@ -34,8 +33,7 @@ const ComponentPageProfileImage = React.memo(
         </div>
       </div>
     </div>
-    );
-  }
-);
+  );
+});
 
 export default ComponentPageProfileImage;

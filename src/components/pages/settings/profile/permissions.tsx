@@ -16,7 +16,10 @@ const PermissionGroup = React.memo(
         <ComponentFieldSet legend={t(props.langKey)}>
           <div className="permission-items">
             {props.permissions.map((permission) => (
-              <PermissionItem key={`permission-${permission.id}`} {...permission} />
+              <PermissionItem
+                key={`permission-${permission.id}`}
+                {...permission}
+              />
             ))}
           </div>
         </ComponentFieldSet>

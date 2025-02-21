@@ -7,7 +7,7 @@ export interface IAppState {
 
 const initialState: IAppState = {
   isLoading: true,
-  isLock: false
+  isLock: false,
 };
 
 const appSlice = createSlice({
@@ -19,12 +19,9 @@ const appSlice = createSlice({
     },
     setIsLockState(state, action: PayloadAction<IAppState['isLock']>) {
       state.isLock = action.payload;
-    }
+    },
   },
 });
 
-export const {
-  setIsAppLoadingState,
-  setIsLockState
-} = appSlice.actions;
+export const { setIsAppLoadingState, setIsLockState } = appSlice.actions;
 export const appReducer = appSlice.reducer;

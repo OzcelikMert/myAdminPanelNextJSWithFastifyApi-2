@@ -5,7 +5,7 @@ const getUploadedImageSrc = (imageName?: string): string => {
   return imageName && !VariableLibrary.isEmpty(imageName)
     ? imageName.isUrl()
       ? imageName
-      : PathUtil.getImageURL(imageName) 
+      : PathUtil.getImageURL(imageName)
     : '/images/empty.png';
 };
 

@@ -339,8 +339,8 @@ export default function PageComponentAdd() {
   };
 
   const onAccept = async (newElement: IComponentElementModel) => {
-    let newElements = form.getValues().elements;
-    let foundIndex = newElements.indexOfKey('_id', state.selectedElementId);
+    const newElements = form.getValues().elements;
+    const foundIndex = newElements.indexOfKey('_id', state.selectedElementId);
     if (foundIndex > -1) {
       form.setValue(`elements.${foundIndex}`, newElement);
       form.trigger(`elements.${foundIndex}`);
@@ -435,7 +435,7 @@ export default function PageComponentAdd() {
                       <ComponentThemeTab
                         eventKey="general"
                         title={t('general')}
-                        formFieldErrorKeys={["title", "key"]}
+                        formFieldErrorKeys={['title', 'key']}
                       >
                         <ComponentPageComponentAddTabGeneral
                           componentTypes={state.componentTypes}
@@ -446,7 +446,7 @@ export default function PageComponentAdd() {
                     <ComponentThemeTab
                       eventKey="elements"
                       title={t('elements')}
-                      formFieldErrorKeys={["elements"]}
+                      formFieldErrorKeys={['elements']}
                     >
                       <ComponentPageComponentAddTabElements
                         elements={formValues.elements}

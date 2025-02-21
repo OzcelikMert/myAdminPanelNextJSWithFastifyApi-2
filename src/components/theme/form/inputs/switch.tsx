@@ -60,7 +60,7 @@ const ComponentThemeFormInputSwitch = React.memo((props: IComponentProps) => {
             {...field}
             onChange={(e) => field.onChange(Boolean(e.target.checked))}
             checked={Boolean(field.value)}
-            {...omit(props, "watch", "control")}
+            {...omit(props, 'watch', 'control')}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

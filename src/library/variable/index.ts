@@ -61,11 +61,11 @@ export class VariableLibrary {
 
   static getDataWithKey<T>(data: any, targetKey: string): T | undefined {
     let value = data;
-    const keys = targetKey.split(".");
-    for(const key of keys) {
-      if(value[key]){
+    const keys = targetKey.split('.');
+    for (const key of keys) {
+      if (value[key]) {
         value = value[key];
-      }else {
+      } else {
         return undefined;
       }
     }

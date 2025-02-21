@@ -23,7 +23,10 @@ type IComponentProps = {
   onClickAddNew: () => void;
   onClickDelete: (_id: string) => void;
   onChangeAttribute: (attributeId: string, attributeTermId: string) => void;
-  onChangeAttributeVariationTerms: (attributeId: string, variationTerms: string[]) => void;
+  onChangeAttributeVariationTerms: (
+    attributeId: string,
+    variationTerms: string[]
+  ) => void;
 };
 
 const ComponentPagePostAddECommerceTabAttributes = React.memo(
@@ -45,7 +48,7 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
     const findAttributeWithoutVariation = () => {
       for (const attribute of props.selectedAttributes ?? []) {
         if (attribute.variationTerms.length == 0) {
-          if(accordionKey != attribute._id){
+          if (accordionKey != attribute._id) {
             onClickAccordionToggle(attribute._id);
           }
           break;
@@ -81,8 +84,14 @@ const ComponentPagePostAddECommerceTabAttributes = React.memo(
                   onChangeAttribute={(attributeId, attributeTermId) =>
                     props.onChangeAttribute(attributeId, attributeTermId)
                   }
-                  onChangeAttributeVariationTerms={(attributeId, variationTerms) =>
-                    props.onChangeAttributeVariationTerms(attributeId, variationTerms)
+                  onChangeAttributeVariationTerms={(
+                    attributeId,
+                    variationTerms
+                  ) =>
+                    props.onChangeAttributeVariationTerms(
+                      attributeId,
+                      variationTerms
+                    )
                   }
                 />
               );

@@ -13,7 +13,7 @@ export type IComponentInputSwitchProps = {
 const ComponentInputSwitch = React.memo(
   React.forwardRef<any, IComponentInputSwitchProps>((props, ref) => {
     const idRef = React.useRef<string>(String.createId());
-    const inputProps = omit(props, "hasAnError", "errorText");
+    const inputProps = omit(props, 'hasAnError', 'errorText');
 
     return (
       <div className="theme-input form-switch">

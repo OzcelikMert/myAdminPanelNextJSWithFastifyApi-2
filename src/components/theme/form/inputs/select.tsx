@@ -41,7 +41,10 @@ const ComponentThemeFormInputSelect = React.memo((props: IComponentProps) => {
     }
   };
 
-  const getOptionValue = (options: IComponentInputSelectData<any>[], value: any) => {
+  const getOptionValue = (
+    options: IComponentInputSelectData<any>[],
+    value: any
+  ) => {
     let newValue;
     if (Array.isArray(value)) {
       newValue = options.findMulti('value', value);
@@ -88,8 +91,11 @@ const ComponentThemeFormInputSelect = React.memo((props: IComponentProps) => {
           <ComponentInputSelect
             {...field}
             onChange={(newValue, action) => field.onChange(getValue(newValue))}
-            {...omit(props, "valueAsNumber", "watch", "control")}
-            value={getOptionValue(props.options ?? [], field.value ?? props.value)}
+            {...omit(props, 'valueAsNumber', 'watch', 'control')}
+            value={getOptionValue(
+              props.options ?? [],
+              field.value ?? props.value
+            )}
             ref={(e) => field.ref(e)}
             hasAnError={hasAnError}
             errorText={hasAnError ? errorText : undefined}

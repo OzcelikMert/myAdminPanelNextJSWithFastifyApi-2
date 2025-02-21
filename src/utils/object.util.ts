@@ -1,7 +1,7 @@
 const getWithKey = <T = any>(object: any, key?: string): T | undefined => {
   let foundItem: any = undefined;
 
-  if (typeof object === "object" && key && key.length > 0) {
+  if (typeof object === 'object' && key && key.length > 0) {
     foundItem = object;
     for (const name of key.split('.')) {
       if (typeof foundItem !== 'undefined') {
