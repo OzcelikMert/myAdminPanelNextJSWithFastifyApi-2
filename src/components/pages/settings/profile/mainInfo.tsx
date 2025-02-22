@@ -11,7 +11,7 @@ type IComponentProps = {
 
 const ComponentPageProfileMainInfo = React.memo((props: IComponentProps) => {
   const t = useAppSelector(selectTranslation);
-
+  
   return (
     <div className="grid-margin stretch-card">
       <div className="card">
@@ -22,8 +22,8 @@ const ComponentPageProfileMainInfo = React.memo((props: IComponentProps) => {
           <div className="row">
             <div className="col-sm-12 pb-2 pt-2">
               <span className="mb-2 fw-bold">
-                {t('email')}:
-                <h6 className="d-inline-block ms-2">{props.item?.email}</h6>
+                {t('username')}:
+                <h6 className="d-inline-block ms-2">{props.item?.username}</h6>
               </span>
             </div>
             <div className="col-sm-12 pb-2 pt-2">

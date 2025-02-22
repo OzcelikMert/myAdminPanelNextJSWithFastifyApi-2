@@ -17,12 +17,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AuthSchema, IAuthPostSchema } from 'schemas/auth.schema';
 import ComponentPageLoginForm from '@components/pages/login/form';
-import { IAuthLoginParamService } from 'types/services/auth.service';
+import { IAuthLoginParamService, IAuthLoginResultService } from 'types/services/auth.service';
 import { IActionWithPayload } from 'types/hooks';
+import { ApiStatusCodes } from '@library/api/statusCodes';
+import { SessionUtil } from '@utils/session.util';
 
 export type IPageLoginState = {
   isWrong: boolean;
-  user?: IUserGetResultService;
+  item?: IAuthLoginResultService;
 };
 
 const initialState: IPageLoginState = {
@@ -31,12 +33,12 @@ const initialState: IPageLoginState = {
 
 enum AcitonTypes {
   SET_IS_WRONG,
-  SET_USER,
+  SET_ITEM,
 }
 
 type IAction =
   | IActionWithPayload<AcitonTypes.SET_IS_WRONG, IPageLoginState['isWrong']>
-  | IActionWithPayload<AcitonTypes.SET_USER, IPageLoginState['user']>;
+  | IActionWithPayload<AcitonTypes.SET_ITEM, IPageLoginState['item']>;
 
 const reducer = (state: IPageLoginState, action: IAction): IPageLoginState => {
   switch (action.type) {
@@ -45,10 +47,10 @@ const reducer = (state: IPageLoginState, action: IAction): IPageLoginState => {
         ...state,
         isWrong: action.payload,
       };
-    case AcitonTypes.SET_USER:
+    case AcitonTypes.SET_ITEM:
       return {
         ...state,
-        user: action.payload,
+        item: action.payload,
       };
     default:
       return state;
@@ -60,7 +62,7 @@ export type IPageFormState = {
 } & IAuthLoginParamService;
 
 const initialFormState: IPageFormState = {
-  email: '',
+  username: '',
   password: '',
   keepMe: false,
 };
@@ -120,19 +122,29 @@ export default function PageLogin() {
         );
 
         if (resultSession.status && resultSession.data) {
-          appDispatch(setSessionAuthState(resultSession.data));
+          appDispatch(
+            setSessionAuthState(
+              SessionUtil.getSessionAuthData(resultSession.data)
+            )
+          );
           if (data.keepMe) {
-            LocalStorageUtil.setKeepMeEmail(data.email);
-          } else if (LocalStorageUtil.getKeepMeEmail().length > 0) {
-            LocalStorageUtil.setKeepMeEmail('');
+            LocalStorageUtil.setKeepMe(data.username);
+          } else if (LocalStorageUtil.getKeepMe().length > 0) {
+            LocalStorageUtil.setKeepMe('');
           }
           await RouteUtil.change({ router, path: EndPoints.DASHBOARD });
         }
       } else {
-        if (serviceResult.data._id) {
-          dispatch({ type: AcitonTypes.SET_USER, payload: serviceResult.data });
-        } else {
-          dispatch({ type: AcitonTypes.SET_IS_WRONG, payload: true });
+        switch (serviceResult.statusCode) {
+          case ApiStatusCodes.forbidden:
+            dispatch({
+              type: AcitonTypes.SET_ITEM,
+              payload: serviceResult.data,
+            });
+            break;
+          default:
+            dispatch({ type: AcitonTypes.SET_IS_WRONG, payload: true });
+            break;
         }
       }
     } else {
@@ -160,7 +172,7 @@ export default function PageLogin() {
               >
                 <ComponentPageLoginForm
                   isWrong={state.isWrong}
-                  user={state.user}
+                  item={state.item}
                 />
               </ComponentThemeForm>
             </div>

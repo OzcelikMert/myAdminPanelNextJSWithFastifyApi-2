@@ -74,7 +74,7 @@ const getPostPermission = (
 const checkPermissionRoleRank = (
   targetRoleId: UserRoleId,
   minRoleId: UserRoleId,
-  checkOnlyGTE: boolean = false
+  checkAlsoEqual: boolean = true
 ): boolean => {
   const userRole = userRoles.findSingle('id', targetRoleId);
   const minRole = userRoles.findSingle('id', minRoleId);
@@ -82,8 +82,8 @@ const checkPermissionRoleRank = (
   return (
     (userRole &&
       minRole &&
-      ((checkOnlyGTE && userRole.rank > minRole.rank) ||
-        (!checkOnlyGTE && userRole.rank >= minRole.rank))) ||
+      ((!checkAlsoEqual && userRole.rank > minRole.rank) ||
+        (checkAlsoEqual && userRole.rank >= minRole.rank))) ||
     targetRoleId == UserRoleId.SuperAdmin
   );
 };

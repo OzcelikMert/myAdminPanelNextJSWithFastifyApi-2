@@ -1,4 +1,5 @@
 {
+  "allowedCharsWithVariable": "Allowed characters: ({{0}})",
   "looksLikeYouAreLost": "Looks like you're lost",
   "404Error": "The page you're looking for couldn't be found!",
   "returnHomePage": "Return Home Page",

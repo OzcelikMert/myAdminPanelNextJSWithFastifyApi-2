@@ -7,7 +7,7 @@ import { useAppSelector } from '@redux/hooks';
 import React from 'react';
 
 type IComponentProps = {
-  user: IPageLoginState['user'];
+  item: IPageLoginState['item'];
   isWrong: IPageLoginState['isWrong'];
 };
 
@@ -17,7 +17,7 @@ const ComponentPageLoginForm = React.memo((props: IComponentProps) => {
   return (
     <div className="row">
       <div className="col-md-12">
-        <ComponentThemeFormInput title={t('email')} type="email" name="email" />
+        <ComponentThemeFormInput title={t('username')} type="text" name="username" />
       </div>
       <div className="col-md-12">
         <ComponentThemeFormInput
@@ -33,27 +33,27 @@ const ComponentPageLoginForm = React.memo((props: IComponentProps) => {
         {props.isWrong ? (
           <p className="fw-bold text-danger">{t('wrongEmailOrPassword')}</p>
         ) : null}
-        {props.user?.statusId == StatusId.Banned && (
+        {props.item?.statusId == StatusId.Banned && (
           <div>
             <p className="fw-bold text-danger">{t('yourAccountIsBanned')}</p>
             <p className="fw-bold text-danger">
               {t('banDateEnd')}:
               <span className="text-muted ms-1">
-                {new Date(props.user?.banDateEnd || '').toLocaleDateString()}
+                {new Date(props.item?.banDateEnd || '').toLocaleDateString()}
               </span>
             </p>
             <p className="fw-bold text-danger">
               {t('banComment')}:
-              <span className="text-muted ms-1">{props.user?.banComment}</span>
+              <span className="text-muted ms-1">{props.item?.banComment}</span>
             </p>
           </div>
         )}
-        {props.user?.statusId == StatusId.Pending && (
+        {props.item?.statusId == StatusId.Pending && (
           <div>
             <p className="fw-bold text-danger">{t('yourAccountIsPending')}</p>
           </div>
         )}
-        {props.user?.statusId == StatusId.Disabled && (
+        {props.item?.statusId == StatusId.Disabled && (
           <div>
             <p className="fw-bold text-danger">{t('yourAccountIsDisabled')}</p>
           </div>

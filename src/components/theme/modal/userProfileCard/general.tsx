@@ -1,13 +1,13 @@
 import React from 'react';
-import { IUserModel } from 'types/models/user.model';
 import ComponentThemeBadgeStatus from '@components/theme/badge/status';
 import ComponentThemeBadgeUserRole from '@components/theme/badge/userRole';
 import { StatusId } from '@constants/status';
 import { useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
+import { IUserGetResultService } from 'types/services/user.service';
 
 type IComponentProps = {
-  userInfo: IUserModel;
+  userInfo: IUserGetResultService;
 };
 
 const ComponentThemeUserProfileCardGeneral = React.memo(
@@ -18,6 +18,16 @@ const ComponentThemeUserProfileCardGeneral = React.memo(
       <div className="general">
         <h6 className="pb-1 border-bottom fw-bold text-end">{t('general')}</h6>
         <div className="row">
+          {props.userInfo.username ? (
+            <div className="col-sm-12 mb-3">
+              <span className="fw-bold">
+                {t('username')}:
+                <h6 className="text-muted d-inline-block ms-1">
+                  {props.userInfo.username}
+                </h6>
+              </span>
+            </div>
+          ) : null}
           <div className="col-sm-12 mb-3">
             <span className="fw-bold">
               {t('email')}:

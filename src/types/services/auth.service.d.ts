@@ -3,6 +3,7 @@ import { UserRoleId } from '@constants/userRoles';
 export interface ISessionAuthUserResultService {
   userId: string;
   roleId: UserRoleId;
+  username: string;
   email: string;
   name: string;
   url: string;
@@ -14,12 +15,19 @@ export interface ISessionAuthUserResultService {
   refreshedAt?: Date;
 }
 
+export type IAuthLoginResultService = {
+  tokenId?: string;
+  statusId?: StatusId;
+  banDateEnd?: Date;
+  banComment?: string;
+} & ISessionAuthUserResultService;
+
 export interface ISessionAuthResultService {
   _id?: string;
   user: ISessionAuthUserResultService;
 }
 
 export interface IAuthLoginParamService {
-  email: string;
+  username: string;
   password: string;
 }

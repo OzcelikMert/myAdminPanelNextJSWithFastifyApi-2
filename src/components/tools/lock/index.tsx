@@ -52,7 +52,7 @@ const ComponentToolLock = React.memo(() => {
     const serviceResult = await AuthService.login(
       {
         password: params.password,
-        email: sessionAuth?.user.email ?? '',
+        username: sessionAuth?.user.username ?? '',
       },
       abortControllerRef.current.signal
     );

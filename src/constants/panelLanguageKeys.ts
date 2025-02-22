@@ -1,4 +1,5 @@
 export const panelLanguageKeys = [
+  'allowedCharsWithVariable',
   'looksLikeYouAreLost',
   'returnHomePage',
   '404Error',

@@ -1,7 +1,7 @@
 import { ApiEndPoints } from '@constants/apiEndPoints';
-import { IUserGetResultService } from 'types/services/user.service';
 import {
   IAuthLoginParamService,
+  IAuthLoginResultService,
   ISessionAuthResultService,
 } from 'types/services/auth.service';
 import { ApiRequest } from '@library/api/request';
@@ -21,7 +21,7 @@ const login = (params: IAuthLoginParamService, signal?: AbortSignal) => {
     endPoint: ApiEndPoints.AUTH_WITH.LOGIN,
     data: params,
     signal: signal,
-  }).post<IUserGetResultService>();
+  }).post<IAuthLoginResultService>();
 };
 
 const logOut = (signal?: AbortSignal) => {

@@ -21,6 +21,16 @@ const ComponentPageUserAddTabGeneral = React.memo((props: IComponentProps) => {
       </div>
       <div className="col-md-7">
         <ComponentThemeFormInput
+          title={`${t('username')}*`}
+          name="username"
+          type="text"
+          errorInfoText={t('allowedCharsWithVariable', [
+            "'a-z', '0-9', '_', '-'",
+          ])}
+        />
+      </div>
+      <div className="col-md-7">
+        <ComponentThemeFormInput
           title={`${t('email')}*`}
           name="email"
           type="email"

@@ -1,4 +1,4 @@
-import { object, string, array, z } from 'zod';
+import { object, string, array, z, ZodIssueCode } from 'zod';
 import { UserRoleId } from '@constants/userRoles';
 import { StatusId } from '@constants/status';
 import { PermissionId } from '@constants/permissions';
@@ -7,6 +7,10 @@ const schema = object({
   roleId: z.nativeEnum(UserRoleId),
   statusId: z.nativeEnum(StatusId),
   name: string().min(3),
+  username: string()
+    .min(2)
+    .toLowerCase()
+    .regex(/^[a-zA-Z0-9_-]+$/, ZodIssueCode.invalid_string),
   email: string().min(1).email(),
   password: string().min(1),
   permissions: array(z.nativeEnum(PermissionId)).optional().default([]),
@@ -22,6 +26,7 @@ const putWithIdSchema = object({
 
 const putProfileSchema = object({
   name: string().min(1),
+  email: string().min(1).email(),
   comment: string().optional(),
   phone: string().optional(),
   facebook: string().optional(),

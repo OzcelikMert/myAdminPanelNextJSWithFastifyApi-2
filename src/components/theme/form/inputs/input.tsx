@@ -16,7 +16,8 @@ export type IComponentFormInputProps = {
   valueAsDate?: boolean;
   name: string;
   control?: Control<any>;
-} & Omit<IComponentInputProps, 'name'>;
+  errorInfoText?: string;
+} & Omit<IComponentInputProps, 'name' | 'errorText'>;
 
 const ComponentThemeFormInput = React.memo(
   (props: IComponentFormInputProps) => {
@@ -55,6 +56,7 @@ const ComponentThemeFormInput = React.memo(
                     props.title ?? '',
                   ])
                 : (error.message?.toString() ?? '');
+              errorText = `${errorText}${props.errorInfoText ? ` (${props.errorInfoText})` : ''}`;
             }
           }
 

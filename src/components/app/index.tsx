@@ -33,6 +33,17 @@ const checkRouterAndCurrentPathIsEqual = (
   return jsonCurrentPath == jsonRouter;
 };
 
+type IComponentState = {
+  currentPath: ICurrentPath;
+};
+
+const initialState: IComponentState = {
+  currentPath: {
+    pathname: '',
+    query: {},
+  },
+};
+
 type IComponentProps = {
   children: React.ReactNode;
   statusCode?: number;
@@ -45,26 +56,30 @@ const ComponentApp = React.memo((props: IComponentProps) => {
   const breadCrumb = useAppSelector((state) => state.breadCrumbState.data);
   const isPageLoading = useAppSelector((state) => state.pageState.isLoading);
 
-  const currentPathRef = useRef<ICurrentPath>({
+  const [currentPath, setCurrentPath] = React.useState<
+    IComponentState['currentPath']
+  >({
+    ...initialState.currentPath,
     pathname: router.pathname,
     query: router.query,
   });
-  const isEqualRouterAndCurrentPath = checkRouterAndCurrentPathIsEqual(
-    router,
-    currentPathRef.current
-  );
 
   useEffectAfterDidMount(() => {
+    const isEqualRouterAndCurrentPath = checkRouterAndCurrentPathIsEqual(
+      router,
+      currentPath
+    );
+
     if (!isEqualRouterAndCurrentPath) {
       appDispatch(setIsPageLoadingState(true));
       window.scrollTo(0, 0);
       document.body.scrollTop = 0;
-      currentPathRef.current = {
+      setCurrentPath({
         pathname: router.pathname,
         query: router.query,
-      };
+      });
     }
-  }, [router.pathname, router.query]);
+  }, [router]);
 
   const getBreadcrumbTitle = () => {
     return breadCrumb.map((item) => item.title).join(' - ');
@@ -76,6 +91,8 @@ const ComponentApp = React.memo((props: IComponentProps) => {
     fullPageLayoutRoutes.includes(router.pathname) ||
     appState.isLock ||
     appState.isLoading;
+
+  const isPageChanged = !checkRouterAndCurrentPathIsEqual(router, currentPath);
 
   return (
     <div>
@@ -98,7 +115,7 @@ const ComponentApp = React.memo((props: IComponentProps) => {
                   <ComponentSpinnerDonut customClass="page-spinner" />
                 ) : null}
                 {!isFullPageLayout ? <ComponentToolHeader /> : null}
-                {isEqualRouterAndCurrentPath ? (
+                {!isPageChanged ? (
                   <ComponentProviderAuth>
                     <ComponentProviderRoute statusCode={props.statusCode}>
                       {props.children}

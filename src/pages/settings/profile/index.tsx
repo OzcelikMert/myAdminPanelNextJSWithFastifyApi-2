@@ -77,6 +77,7 @@ export type IPageProfileFormState = IUserUpdateProfileParamService;
 
 const initialFormState: IPageProfileFormState = {
   name: '',
+  email: '',
   comment: '',
   phone: '',
   facebook: '',
@@ -140,11 +141,13 @@ export default function PageSettingsProfile() {
       { _id: sessionAuth!.user.userId },
       abortControllerRef.current.signal
     );
+    
     if (serviceResult.status && serviceResult.data) {
       const user = serviceResult.data;
       dispatch({ type: ActionTypes.SET_ITEM, payload: user });
       form.reset({
         name: user.name,
+        email: user.email,
         comment: user.comment,
         phone: user.phone,
         facebook: user.facebook,

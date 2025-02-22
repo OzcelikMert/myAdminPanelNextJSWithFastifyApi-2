@@ -112,6 +112,7 @@ export type IPageFormState = IUserUpdateWithIdParamService;
 const initialFormState: IPageFormState = {
   _id: '',
   name: '',
+  username: '',
   email: '',
   password: '',
   roleId: UserRoleId.User,

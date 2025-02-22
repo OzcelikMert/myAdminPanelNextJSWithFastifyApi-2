@@ -9,6 +9,7 @@ export interface IUserModel {
   statusId: StatusId;
   authorId?: IUserPopulateService;
   lastAuthorId?: IUserPopulateService;
+  username: string;
   name: string;
   email: string;
   image: string;

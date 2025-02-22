@@ -6,16 +6,52 @@ import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import React, { useState } from 'react';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useRouter } from 'next/router';
-import { useDidMount } from '@library/react/hooks';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
+import { SessionUtil } from '@utils/session.util';
 
 type IComponentState = {
   isAuth: boolean;
   isLoading: boolean;
+  isChecked: boolean;
 };
 
 const initialState: IComponentState = {
   isAuth: false,
   isLoading: true,
+  isChecked: false,
+};
+
+enum ActionTypes {
+  SET_IS_AUTH,
+  SET_IS_LOADING,
+  SET_IS_CHECKED,
+}
+
+type IAction =
+  | { type: ActionTypes.SET_IS_AUTH; payload: IComponentState['isAuth'] }
+  | { type: ActionTypes.SET_IS_LOADING; payload: IComponentState['isLoading'] }
+  | { type: ActionTypes.SET_IS_CHECKED; payload: IComponentState['isChecked'] };
+
+const reducer = (state: IComponentState, action: IAction): IComponentState => {
+  switch (action.type) {
+    case ActionTypes.SET_IS_AUTH:
+      return {
+        ...state,
+        isAuth: action.payload,
+      };
+    case ActionTypes.SET_IS_LOADING:
+      return {
+        ...state,
+        isLoading: action.payload,
+      };
+    case ActionTypes.SET_IS_CHECKED:
+      return {
+        ...state,
+        isChecked: action.payload,
+      };
+    default:
+      return state;
+  }
 };
 
 type IComponentProps = {
@@ -30,8 +66,7 @@ const ComponentProviderAuth = (props: IComponentProps) => {
   const isAppLock = useAppSelector((state) => state.appState.isLock);
   const router = useRouter();
 
-  const [isAuth, setIsAuth] = useState(initialState.isAuth);
-  const [isLoading, setIsLoading] = useState(initialState.isLoading);
+  const [state, dispatch] = React.useReducer(reducer, initialState);
 
   useDidMount(() => {
     init();
@@ -40,15 +75,24 @@ const ComponentProviderAuth = (props: IComponentProps) => {
     };
   });
 
+  useEffectAfterDidMount(() => {
+    if (state.isChecked) {
+      dispatch({ type: ActionTypes.SET_IS_LOADING, payload: false });
+    }
+  }, [state.isChecked]);
+
   const init = async () => {
-    if (!isLoading) {
-      setIsLoading(true);
+    if (!state.isLoading) {
+      dispatch({ type: ActionTypes.SET_IS_LOADING, payload: true });
     }
     await checkSession();
-    setIsLoading(false);
   };
 
   const checkSession = async () => {
+    if (state.isChecked) {
+      dispatch({ type: ActionTypes.SET_IS_CHECKED, payload: false });
+    }
+
     const serviceResult = await AuthService.getSession(
       abortControllerRef.current.signal
     );
@@ -58,21 +102,37 @@ const ComponentProviderAuth = (props: IComponentProps) => {
       serviceResult.errorCode == ApiErrorCodes.success
     ) {
       if (serviceResult.data) {
-        setIsAuth(true);
-        if (JSON.stringify(serviceResult.data) != JSON.stringify(sessionAuth)) {
+        const newSessionAuth = SessionUtil.getSessionAuthData(
+          serviceResult.data
+        );
+        if (
+          !sessionAuth ||
+          JSON.stringify(newSessionAuth) != JSON.stringify(sessionAuth)
+        ) {
           appDispatch(setSessionAuthState(serviceResult.data));
         }
+        dispatch({ type: ActionTypes.SET_IS_AUTH, payload: true });
       }
     } else {
-      setIsAuth(false);
+      dispatch({ type: ActionTypes.SET_IS_AUTH, payload: false });
     }
+
+    dispatch({ type: ActionTypes.SET_IS_CHECKED, payload: true });
   };
 
-  if (isLoading || abortControllerRef.current.signal.aborted) {
+  if (!state.isChecked) {
     return null;
   }
 
-  if (!isAuth && !isAppLock && ![EndPoints.LOGIN].includes(router.pathname)) {
+  if (state.isLoading || abortControllerRef.current.signal.aborted) {
+    return null;
+  }
+
+  if (
+    !state.isAuth &&
+    !isAppLock &&
+    ![EndPoints.LOGIN].includes(router.pathname)
+  ) {
     RouteUtil.change({
       router,
       path: EndPoints.LOGIN,
@@ -80,7 +140,7 @@ const ComponentProviderAuth = (props: IComponentProps) => {
     return null;
   }
 
-  if (isAuth && [EndPoints.LOGIN].includes(router.pathname)) {
+  if (state.isAuth && [EndPoints.LOGIN].includes(router.pathname)) {
     RouteUtil.change({
       router,
       path: EndPoints.DASHBOARD,

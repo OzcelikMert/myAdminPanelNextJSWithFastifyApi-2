@@ -17,7 +17,8 @@ export type IUserGetResultService = {
   isOnline?: boolean;
   author?: IUserPopulateService;
   lastAuthor?: IUserPopulateService;
-} & IUserModel;
+  username?: string;
+} & Omit<IUserModel, 'username'>;
 
 export interface IUserGetWithIdParamService {
   _id: string;
@@ -27,22 +28,27 @@ export interface IUserGetWithIdParamService {
 export interface IUserGetManyParamService {
   _id?: string[];
   statusId?: StatusId;
-  email?: string;
+  url?: string;
   count?: number;
   page?: number;
   permissions?: PermissionId[];
 }
 
-export type IUserAddParamService = {
-  roleId: UserRoleId;
-  statusId: StatusId;
-  name: string;
-  email: string;
-  password: string;
-  permissions: PermissionId[];
-  banDateEnd?: string;
-  banComment?: string;
-};
+export type IUserAddParamService = {} & Omit<
+  IUserModel,
+  | '_id'
+  | 'authorId'
+  | 'lastAuthorId'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'url'
+  | 'comment'
+  | 'phone'
+  | 'facebook'
+  | 'instagram'
+  | 'twitter'
+  | 'image'
+>;
 
 export type IUserUpdateWithIdParamService = {
   _id: string;
@@ -51,6 +57,7 @@ export type IUserUpdateWithIdParamService = {
 
 export interface IUserUpdateProfileParamService {
   name: string;
+  email: string;
   comment?: string;
   phone?: string;
   facebook?: string;

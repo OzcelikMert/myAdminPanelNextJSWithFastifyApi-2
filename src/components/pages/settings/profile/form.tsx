@@ -35,6 +35,13 @@ const ComponentPageProfileForm = React.memo((props: IComponentProps) => {
                   </div>
                   <div className="col-md-12">
                     <ComponentThemeFormInput
+                      title={`${t('email')}*`}
+                      name="email"
+                      type="email"
+                    />
+                  </div>
+                  <div className="col-md-12">
+                    <ComponentThemeFormInput
                       title={t('comment')}
                       name="comment"
                       type="textarea"

@@ -61,7 +61,7 @@ const ComponentThemeUserProfileCard = React.memo((props: IComponentProps) => {
                 {PermissionUtil.checkPermissionRoleRank(
                   sessionAuth!.user.roleId,
                   props.userInfo.roleId,
-                  true
+                  false
                 ) ? (
                   <ComponentThemeUserProfileCardPermissions
                     userInfo={props.userInfo}

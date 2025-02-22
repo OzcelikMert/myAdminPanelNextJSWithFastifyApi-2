@@ -1,4 +1,5 @@
 {
+ "allowedCharsWithVariable": "İzin verilen karakterler: {{0}}",
   "looksLikeYouAreLost": "Görünüşe göre kayboldun",
   "returnHomePage": "Anasayfaya Dön",
   "404Error": "Aradığınız sayfa bulunamadı!",
