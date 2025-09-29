@@ -58,7 +58,7 @@ const reducer = (state: IPageLoginState, action: IAction): IPageLoginState => {
 };
 
 export type IPageFormState = {
-  keepMe: boolean;
+  keepMe?: boolean;
 } & IAuthLoginParamService;
 
 const initialFormState: IPageFormState = {

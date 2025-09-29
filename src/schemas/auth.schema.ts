@@ -4,7 +4,7 @@ const postSchema = object({
   username: string()
     .min(2)
     .toLowerCase()
-    .regex(/^[a-zA-Z0-9_-]+$/, ZodIssueCode.invalid_string),
+    .regex(/^[a-zA-Z0-9_-]+$/),
   password: string().min(1),
   keepMe: boolean().optional(),
 });

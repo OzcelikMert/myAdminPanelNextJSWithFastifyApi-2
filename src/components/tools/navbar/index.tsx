@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { AuthService } from '@services/auth.service';
 import { LocalStorageUtil } from '@utils/localStorage.util';
-import DarkModeToggle from 'react-dark-mode-toggle';
 import { ThemeUtil } from '@utils/theme.util';
 import Image from 'next/image';
 import { IThemeKeys } from 'types/constants/themeKeys';
@@ -11,27 +10,18 @@ import { useRouter } from 'next/router';
 import { setIsLockState } from '@redux/features/appSlice';
 import { setSessionAuthState } from '@redux/features/sessionSlice';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
-import { selectTranslation } from '@redux/features/translationSlice';
 import { useDidMount } from '@library/react/hooks';
 import ComponentToolNavbarProfile, {
   NavbarProfileDropdownItems,
 } from './profile';
 import { RouteUtil } from '@utils/route.util';
-
-type IComponentState = {
-  isDarkTheme: boolean;
-};
-
-const initialState: IComponentState = {
-  isDarkTheme: false,
-};
+import ComponentToolNavbarDarkModeToggle from './darkModeToggle';
+import { selectTranslation } from '@redux/features/translationSlice';
 
 const ComponentToolNavbar = React.memo(() => {
   const abortControllerRef = React.useRef(new AbortController());
-
   const router = useRouter();
   const appDispatch = useAppDispatch();
-  const sessionAuth = useAppSelector((state) => state.sessionState.auth);
   const t = useAppSelector(selectTranslation);
 
   const [isDarkTheme, setIsDarkTheme] = useState(
@@ -50,14 +40,11 @@ const ComponentToolNavbar = React.memo(() => {
     ).classList.toggle('active');
   };
 
-  const onChangeTheme = () => {
-    let theme: IThemeKeys = 'default';
-    setIsDarkTheme((state) => {
-      theme = !state ? 'dark' : 'default';
-      return !state;
-    });
+  const onChangeTheme = (isChecked: boolean) => {
+    let theme: IThemeKeys = isChecked ? 'dark' : 'default';
     LocalStorageUtil.setTheme(theme);
     ThemeUtil.changeTheme(theme);
+    setIsDarkTheme(isChecked);
   };
 
   const onClickProfileDropdownItem = async (
@@ -126,10 +113,10 @@ const ComponentToolNavbar = React.memo(() => {
       </div>
       <div className="navbar-menu-wrapper d-flex align-items-stretch">
         <ul className="navbar-nav navbar-nav-right">
-          <DarkModeToggle
-            onChange={() => onChangeTheme()}
+          <ComponentToolNavbarDarkModeToggle
+            onChange={(checked) => onChangeTheme(checked)}
             checked={isDarkTheme}
-            size={55}
+            title={isDarkTheme ? t("switchLightMode") : t('switchDarkMode')}
           />
           <li className="nav-item nav-profile">
             <ComponentToolNavbarProfile

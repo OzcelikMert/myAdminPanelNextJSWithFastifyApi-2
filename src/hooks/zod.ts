@@ -17,7 +17,7 @@ export const useZodValidationResolver = <T = any>(
       } else {
         return {
           values: {},
-          errors: validatedData.error.errors.reduce(
+          errors: validatedData.error.issues.reduce(
             (allErrors, currentError) => {
               return {
                 ...allErrors,

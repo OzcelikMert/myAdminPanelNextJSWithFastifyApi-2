@@ -41,7 +41,7 @@ const validationResolver =
     } else {
       return {
         values: {},
-        errors: validatedData.error.errors.reduce((allErrors, currentError) => {
+        errors: validatedData.error.issues.reduce((allErrors, currentError) => {
           return {
             ...allErrors,
             [currentError.path[0]]: {

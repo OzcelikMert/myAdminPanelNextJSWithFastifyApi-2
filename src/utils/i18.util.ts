@@ -1,5 +1,5 @@
 import { IPanelLanguageKeys } from 'types/constants/panelLanguageKeys';
-import { ZodIssueCode } from 'zod';
+import { ZodIssueCode } from 'zod/v3';
 
 const getFormInputErrorText = (errorCode?: any): IPanelLanguageKeys => {
   switch (errorCode as ZodIssueCode) {

@@ -1,4 +1,6 @@
 export const panelLanguageKeys = [
+  'switchDarkMode',
+  'switchLightMode',
   'allowedCharsWithVariable',
   'looksLikeYouAreLost',
   'returnHomePage',

@@ -10,7 +10,7 @@ const schema = object({
   username: string()
     .min(2)
     .toLowerCase()
-    .regex(/^[a-zA-Z0-9_-]+$/, ZodIssueCode.invalid_string),
+    .regex(/^[a-zA-Z0-9_-]+$/),
   email: string().min(1).email(),
   password: string().min(1),
   permissions: array(z.nativeEnum(PermissionId)).optional().default([]),
