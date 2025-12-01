@@ -17,7 +17,7 @@ import { PostSortTypeId } from '@constants/postSortTypes';
 import { ISettingGetResultService } from 'types/services/setting.service';
 import { SettingService } from '@services/setting.service';
 import { SettingProjectionKeys } from '@constants/settingProjections';
-import React, { useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@redux/hooks';
 import { selectTranslation } from '@redux/features/translationSlice';
 import { setIsPageLoadingState } from '@redux/features/pageSlice';
@@ -29,9 +29,12 @@ import ComponentPageDashboardReportOne from '@components/pages/dashboard/reportO
 import ComponentPageDashboardReportTwo from '@components/pages/dashboard/reportTwo';
 import ComponentThemeWebsiteLinkPost from '@components/theme/websiteLink/post';
 import { IActionWithPayload } from 'types/hooks';
+import { ApiEndPoints } from '@constants/apiEndPoints';
+import { ApiResult } from '@library/api/result';
 
 export type IPageDashboardState = {
   lastPosts: IPostGetManyResultService[];
+  liveVisitorCount: number;
   viewsWithNumber: IViewGetNumberResultService;
   viewsWithStatistics: IViewGetStatisticsResultService;
   worldMapSize: 'lg' | 'xl' | 'xxl';
@@ -40,8 +43,8 @@ export type IPageDashboardState = {
 
 const initialState: IPageDashboardState = {
   lastPosts: [],
+  liveVisitorCount: 0,
   viewsWithNumber: {
-    liveTotal: 0,
     averageTotal: 0,
     weeklyTotal: 0,
   },
@@ -55,6 +58,7 @@ const initialState: IPageDashboardState = {
 
 enum ActionTypes {
   SET_LAST_POSTS,
+  SET_LIVE_VISITOR_COUNT,
   SET_VIEWS_WITH_NUMBER,
   SET_VIEWS_WITH_STATISTICS,
   SET_WORLD_MAP_SIZE,
@@ -65,6 +69,10 @@ type IAction =
   | IActionWithPayload<
       ActionTypes.SET_LAST_POSTS,
       IPageDashboardState['lastPosts']
+    >
+  | IActionWithPayload<
+      ActionTypes.SET_LIVE_VISITOR_COUNT,
+      IPageDashboardState['liveVisitorCount']
     >
   | IActionWithPayload<
       ActionTypes.SET_VIEWS_WITH_NUMBER,
@@ -90,6 +98,8 @@ const reducer = (
   switch (action.type) {
     case ActionTypes.SET_LAST_POSTS:
       return { ...state, lastPosts: action.payload };
+    case ActionTypes.SET_LIVE_VISITOR_COUNT:
+      return { ...state, liveVisitorCount: action.payload };
     case ActionTypes.SET_VIEWS_WITH_NUMBER:
       return { ...state, viewsWithNumber: action.payload };
     case ActionTypes.SET_VIEWS_WITH_STATISTICS:
@@ -128,6 +138,17 @@ export default function PageDashboard() {
       appDispatch(setIsPageLoadingState(false));
     }
   }, [isPageLoaded]);
+
+  useEffect(() => {
+    const ws = ViewService.webSocketOnlineUsers((event) => {
+      const result: ApiResult<number> = JSON.parse(event.data);
+      dispatch({
+        type: ActionTypes.SET_LIVE_VISITOR_COUNT,
+        payload: Number(result.data),
+      });
+    });
+    return () => ws.close();
+  }, []);
 
   const init = async () => {
     if (isPageLoaded) {
@@ -324,6 +345,7 @@ export default function PageDashboard() {
     <div className="page-dashboard">
       <ComponentPageDashboardReportOne
         viewsWithNumber={state.viewsWithNumber}
+        liveTotal={state.liveVisitorCount}
         googleAnalyticURL={state.settings.googleAnalyticURL}
       />
       <ComponentPageDashboardReportTwo

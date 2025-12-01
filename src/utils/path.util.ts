@@ -1,11 +1,10 @@
-const api = `${process.env.API_PROTOCOL}://${process.env.API_HOST}${process.env.API_PORT ? `:${process.env.API_PORT}` : ''}`;
-const website = `${process.env.WEBSITE_PROTOCOL}://${process.env.WEBSITE_HOST}${process.env.WEBSITE_PORT ? `:${process.env.WEBSITE_PORT}` : ''}`;
-
-const getApiURL = () => {
-  return api;
+const getApiURL = (isWebsocket?: boolean) => {
+  return `${ isWebsocket ? process.env.API_WEBSOCKET_PROTOCOL : process.env.API_PROTOCOL}://${process.env.API_HOST}${process.env.API_PORT ? `:${process.env.API_PORT}` : ''}`;
 };
 
 const getWebsiteURL = (...paths: (number | string)[]) => {
+  let website = `${process.env.WEBSITE_PROTOCOL}://${process.env.WEBSITE_HOST}${process.env.WEBSITE_PORT ? `:${process.env.WEBSITE_PORT}` : ''}`;
+
   if (paths && paths.length > 0) {
     return createPath(website, ...paths).removeFirstChar();
   }

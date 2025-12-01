@@ -4,7 +4,6 @@ export type IViewGetTotalResultService = {
 };
 
 export type IViewGetNumberResultService = {
-  liveTotal: number;
   averageTotal: number;
   weeklyTotal: number;
 };

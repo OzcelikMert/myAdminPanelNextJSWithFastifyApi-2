@@ -5,6 +5,7 @@ declare global {
       WEBSITE_HOST: string;
       WEBSITE_PORT: string;
       API_PROTOCOL: 'http' | 'https';
+      API_WEBSOCKET_PROTOCOL: 'ws' | 'wss';
       API_HOST: string;
       API_PORT: string;
       RUN_TYPE: 'dev' | 'production';

@@ -5,6 +5,7 @@ import { IPageDashboardState } from '@pages/dashboard';
 
 type IComponentProps = {
   viewsWithNumber: IPageDashboardState['viewsWithNumber'];
+  liveTotal: number;
   googleAnalyticURL?: string;
 };
 
@@ -25,7 +26,7 @@ const ComponentPageDashboardReportOne = React.memo((props: IComponentProps) => {
                   </p>
                   <div className="fluid-container">
                     <h3 className="mb-0 font-weight-medium text-dark">
-                      {props.viewsWithNumber.liveTotal}
+                      {props.liveTotal}
                     </h3>
                   </div>
                 </div>

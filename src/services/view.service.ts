@@ -24,17 +24,17 @@ const getStatistics = (signal?: any) => {
   }).get<IViewGetStatisticsResultService>();
 };
 
-const add = (params: IViewAddParamService, signal?: AbortSignal) => {
-  return new ApiRequest({
-    apiUrl: PathUtil.getApiURL(),
-    endPoint: ApiEndPoints.VIEW_WITH.ADD,
-    data: params,
-    signal: signal,
-  }).post<IViewModel>();
-};
+const webSocketOnlineUsers = (onMessage?: (msg: MessageEvent<any>) => void) =>  {
+  const ws = new WebSocket(PathUtil.getApiURL(true) + ApiEndPoints.VIEW_WITH.WEBSOCKET_ONLINE_USERS);
+  console.log(PathUtil.getApiURL(true) + ApiEndPoints.VIEW_WITH.WEBSOCKET_ONLINE_USERS, ws);
+  if(onMessage){
+    ws.onmessage = onMessage;
+  }
+  return ws;
+}
 
 export const ViewService = {
   getNumber: getNumber,
   getStatistics: getStatistics,
-  add: add,
+  webSocketOnlineUsers
 };

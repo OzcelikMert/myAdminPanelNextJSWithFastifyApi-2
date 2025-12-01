@@ -14,7 +14,10 @@ export class ViewApiEndPoint {
   get GET_STATISTICS() {
     return PathUtil.createPath(this.mainPath, '/get/statistics');
   }
-  get ADD() {
-    return PathUtil.createPath(this.mainPath, '/add');
+  get WEBSOCKET_VISITOR_COUNT() {
+    return PathUtil.createPath(this.mainPath, '/ws/visitor-count');
+  }
+  get WEBSOCKET_ONLINE_USERS() {
+    return PathUtil.createPath(this.mainPath, '/ws/online-users');
   }
 }

@@ -5,6 +5,7 @@ const nextConfig = {
     WEBSITE_HOST: process.env.WEBSITE_HOST,
     WEBSITE_PORT: process.env.WEBSITE_PORT ?? undefined,
     API_PROTOCOL: process.env.API_PROTOCOL,
+    API_WEBSOCKET_PROTOCOL: process.env.API_WEBSOCKET_PROTOCOL,
     API_HOST: process.env.API_HOST,
     API_PORT: process.env.API_PORT ?? undefined,
     UPLOAD_FILE_SIZE: process.env.UPLOAD_FILE_SIZE,

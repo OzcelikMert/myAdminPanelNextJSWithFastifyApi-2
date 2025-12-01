@@ -1,4 +1,6 @@
-import { useDidMount } from '@library/react/hooks';
+import { ApiEndPoints } from '@constants/apiEndPoints';
+import { ViewApiEndPoint } from '@constants/apiEndPoints/view.api.endPoint';
+import { useDidMount, useEffectAfterDidMount } from '@library/react/hooks';
 import React, { Component, useEffect } from 'react';
 
 type IComponentState = {
