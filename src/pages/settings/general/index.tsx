@@ -29,6 +29,8 @@ import { IActionWithPayload } from 'types/hooks';
 import { useToast } from '@hooks/toast';
 import ComponentThemeTabs from '@components/theme/tabs';
 import ComponentThemeTab from '@components/theme/tabs/tab';
+import Swal from 'sweetalert2';
+import { CacheService } from '@services/cache.service';
 
 export type IPageSettingsGeneralState = {
   panelLanguages: IComponentInputSelectData[];
@@ -120,7 +122,7 @@ export default function PageSettingsGeneral() {
     },
     resolver: zodResolver(SettingSchema.putGeneral),
   });
-  const { showToast } = useToast();
+  const { showToast, hideToast } = useToast();
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   useDidMount(() => {
@@ -184,6 +186,12 @@ export default function PageSettingsGeneral() {
   };
 
   const getServerDetails = async () => {
+    if (!state.isServerInfoLoading) {
+      dispatch({
+        type: ActionTypes.SET_IS_SERVER_INFO_LOADING,
+        payload: true,
+      });
+    }
     const serviceResult = await ServerInfoService.get(
       abortControllerRef.current.signal
     );
@@ -223,6 +231,37 @@ export default function PageSettingsGeneral() {
     }
   };
 
+  const onClickClearCache = async () => {
+    const result = await Swal.fire({
+      title: t('clearCache'),
+      text: t('clearCacheQuestion'),
+      confirmButtonText: t('yes'),
+      cancelButtonText: t('no'),
+      icon: 'question',
+      showCancelButton: true,
+    });
+    if (result.isConfirmed) {
+      const loadingToast = showToast({
+        content: t('deleting'),
+        type: 'loading',
+      });
+
+      const serviceResult = await CacheService.deleteAll(
+        abortControllerRef.current.signal
+      );
+
+      hideToast(loadingToast);
+      if (serviceResult.status) {
+        showToast({
+          type: 'success',
+          title: t('successful'),
+          content: '',
+        });
+        await getServerDetails();
+      }
+    }
+  };
+
   const formValues = form.getValues();
   const isUserSuperAdmin = PermissionUtil.checkPermissionRoleRank(
     sessionAuth!.user.roleId,
@@ -232,6 +271,19 @@ export default function PageSettingsGeneral() {
   return isPageLoading ? null : (
     <div className="page-settings">
       <div className="row">
+        {PermissionUtil.checkPermissionRoleRank(
+          sessionAuth!.user.roleId,
+          UserRoleId.Admin
+        ) ? (
+          <div className="col-md-12 grid-margin d-flex justify-content-end mb-3">
+            <button
+              className="btn btn-gradient-danger btn-xs d-flex align-items-center"
+              onClick={() => onClickClearCache()}
+            >
+              <i className="mdi mdi-broom"></i> Clear Cache
+            </button>
+          </div>
+        ) : null}
         <ComponentPageSettingsGeneralServerInfo
           info={state.serverInfo}
           isLoading={state.isServerInfoLoading}

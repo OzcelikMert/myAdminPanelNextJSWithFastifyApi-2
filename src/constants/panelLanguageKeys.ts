@@ -6,6 +6,8 @@ export const panelLanguageKeys = [
   'returnHomePage',
   '404Error',
   'clear',
+  'clearCache',
+  'clearCacheQuestion',
   'loadingWithVariable',
   'warningAboutFormFieldError',
   'warningAboutFormFieldErrorsWithVariable',

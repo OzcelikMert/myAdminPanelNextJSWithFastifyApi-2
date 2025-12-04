@@ -12,6 +12,7 @@ import { SubscriberApiEndPoint } from '@constants/apiEndPoints/subscriber.api.en
 import { SitemapApiEndPoint } from '@constants/apiEndPoints/sitemap.api.endPoint';
 import { NavigationApiEndPoint } from '@constants/apiEndPoints/navigation.api.endPoint';
 import { ComponentApiEndPoint } from '@constants/apiEndPoints/component.api.endPoint';
+import { CacheApiEndPoint } from './cache.api.endPoint';
 
 export class ApiEndPoints {
   static get AUTH() {
@@ -110,5 +111,12 @@ export class ApiEndPoints {
   }
   static get COMPONENT_WITH() {
     return new ComponentApiEndPoint();
+  }
+
+  static get CACHE() {
+    return '/cache';
+  }
+  static get CACHE_WITH() {
+    return new CacheApiEndPoint();
   }
 }

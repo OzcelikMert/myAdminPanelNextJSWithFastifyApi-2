@@ -235,7 +235,9 @@ export default function PagePostList() {
           },
           abortControllerRef.current.signal
         );
+
         hideToast(loadingToast);
+        
         if (serviceResult.status) {
           const newItems = state.items.filter(
             (item) => !selectedItemId.includes(item._id)

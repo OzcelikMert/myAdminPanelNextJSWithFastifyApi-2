@@ -6,6 +6,8 @@
   "returnHomePage": "Anasayfaya Dön",
   "404Error": "Aradığınız sayfa bulunamadı!",
   "clear": "Temizle",
+  "clearCache": "Ön Belleği Temizle",
+  "clearCacheQuestion": "Tüm önbellekler silinecek, emin misiniz? Bu, web sitenizin hızını (geçici olarak) önemli ölçüde yavaşlatacaktır.",
   "loadingWithVariable": "'{{0}}' yükleniyor...",
   "eCommerceAttributeLengthError": "Lütfen en az 1 nitelik ekleyin!",
   "updateStatus": "Durum Güncelle",

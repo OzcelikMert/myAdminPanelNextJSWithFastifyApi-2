@@ -6,6 +6,8 @@
   "404Error": "The page you're looking for couldn't be found!",
   "returnHomePage": "Return Home Page",
   "clear": "Clear",
+  "clearCache": "Clear Cache",
+  "clearCacheQuestion": "All Caches are going to delete, Are you sure about that? It will slow down (temprory) your website significantly.",
   "loadingWithVariable": "'{{0}}' is loading...",
   "eCommerceAttributeLengthError": "Please add at least 1 attribute!",
   "updateStatus": "Update Status",
